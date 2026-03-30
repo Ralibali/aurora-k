@@ -40,6 +40,14 @@ export function DriverLayout({ children }: DriverLayoutProps) {
           <span className="text-xs mt-1">Uppdrag</span>
         </NavLink>
         <NavLink
+          to="/driver/time-report"
+          className="flex-1 flex flex-col items-center justify-center py-3 text-muted-foreground transition-colors touch-target"
+          activeClassName="text-primary"
+        >
+          <Clock className="h-5 w-5" />
+          <span className="text-xs mt-1">Tidrapport</span>
+        </NavLink>
+        <NavLink
           to="/driver/profile"
           className="flex-1 flex flex-col items-center justify-center py-3 text-muted-foreground transition-colors touch-target"
           activeClassName="text-primary"

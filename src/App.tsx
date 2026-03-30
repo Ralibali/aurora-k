@@ -58,6 +58,7 @@ const App = () => (
             {/* Driver routes */}
             <Route path="/driver" element={<ProtectedRoute requiredRole="driver"><DriverAssignments /></ProtectedRoute>} />
             <Route path="/driver/assignment/:id" element={<ProtectedRoute requiredRole="driver"><DriverAssignmentDetail /></ProtectedRoute>} />
+            <Route path="/driver/time-report" element={<ProtectedRoute requiredRole="driver"><DriverTimeReport /></ProtectedRoute>} />
             <Route path="/driver/profile" element={<ProtectedRoute requiredRole="driver"><DriverProfile /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
