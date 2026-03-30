@@ -1,8 +1,8 @@
-import { InvoiceStatus, invoiceStatusLabels } from '@/lib/types';
+import { invoiceStatusLabels } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
 interface InvoiceStatusBadgeProps {
-  status: InvoiceStatus;
+  status: string;
   className?: string;
 }
 
@@ -14,7 +14,7 @@ export function InvoiceStatusBadge({ status, className }: InvoiceStatusBadgeProp
       'bg-success/15 text-success': status === 'paid',
       'bg-destructive/15 text-destructive': status === 'overdue',
     }, className)}>
-      {invoiceStatusLabels[status]}
+      {invoiceStatusLabels[status as keyof typeof invoiceStatusLabels] || status}
     </span>
   );
 }

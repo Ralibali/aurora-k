@@ -1,8 +1,8 @@
-import { AssignmentStatus, statusLabels } from '@/lib/types';
+import { statusLabels } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
 interface StatusBadgeProps {
-  status: AssignmentStatus;
+  status: string;
   className?: string;
 }
 
@@ -13,7 +13,7 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
       'status-active': status === 'active',
       'status-completed': status === 'completed',
     }, className)}>
-      {statusLabels[status]}
+      {statusLabels[status as keyof typeof statusLabels] || status}
     </span>
   );
 }
