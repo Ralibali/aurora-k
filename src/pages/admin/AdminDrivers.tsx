@@ -57,8 +57,8 @@ export default function AdminDrivers() {
   };
 
   return (
-    <AdminLayout title="Chaufförshantering">
-      <div className="space-y-4 max-w-4xl">
+    <AdminLayout title="Chaufförshantering" description="Hantera chaufförskonton och prestationer">
+      <div className="space-y-5 max-w-5xl">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">Chaufförer</h2>
           <Dialog open={open} onOpenChange={setOpen}>
