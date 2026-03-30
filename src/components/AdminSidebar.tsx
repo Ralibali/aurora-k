@@ -29,6 +29,14 @@ const navItems = [
 export function AdminSidebar() {
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/');
+  };
+  const collapsed = state === 'collapsed';
 
   return (
     <Sidebar collapsible="icon">
