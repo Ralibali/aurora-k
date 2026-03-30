@@ -34,9 +34,9 @@ function ElapsedTimer({ since }: { since: string }) {
   }, [since]);
 
   return (
-    <div className="text-center py-4">
-      <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Förfluten tid</p>
-      <p className="text-4xl font-mono font-bold text-foreground tabular-nums">{elapsed}</p>
+    <div className="text-center py-5">
+      <p className="text-[11px] text-muted-foreground uppercase tracking-widest mb-1.5 font-medium">Förfluten tid</p>
+      <p className="text-4xl font-mono font-bold text-foreground tabular-nums tracking-tight">{elapsed}</p>
     </div>
   );
 }
