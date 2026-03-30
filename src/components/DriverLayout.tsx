@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { ClipboardList, User, LogOut } from 'lucide-react';
+import { ClipboardList, User, LogOut, Clock } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
@@ -38,6 +38,14 @@ export function DriverLayout({ children }: DriverLayoutProps) {
         >
           <ClipboardList className="h-5 w-5" />
           <span className="text-xs mt-1">Uppdrag</span>
+        </NavLink>
+        <NavLink
+          to="/driver/time-report"
+          className="flex-1 flex flex-col items-center justify-center py-3 text-muted-foreground transition-colors touch-target"
+          activeClassName="text-primary"
+        >
+          <Clock className="h-5 w-5" />
+          <span className="text-xs mt-1">Tidrapport</span>
         </NavLink>
         <NavLink
           to="/driver/profile"
