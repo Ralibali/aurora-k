@@ -34,7 +34,7 @@ export default function AdminCustomers() {
         </div>
 
         <div className="admin-table-card">
-          <CardContent className="p-0">
+          <div className="p-0">
             <Table>
               <TableHeader>
                 <TableRow>
