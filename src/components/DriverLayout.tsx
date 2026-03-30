@@ -1,6 +1,8 @@
 import { ReactNode } from 'react';
-import { ClipboardList, User } from 'lucide-react';
+import { ClipboardList, User, LogOut } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
+import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 interface DriverLayoutProps {
   children: ReactNode;
