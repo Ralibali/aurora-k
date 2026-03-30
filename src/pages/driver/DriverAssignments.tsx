@@ -1,6 +1,7 @@
 import { DriverLayout } from '@/components/DriverLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { StatusBadge } from '@/components/StatusBadge';
+import { PriorityBadge } from '@/components/PriorityBadge';
 import { mockAssignments } from '@/lib/mock-data';
 import { formatSwedishDateTime } from '@/lib/format';
 import { MapPin, Clock } from 'lucide-react';
