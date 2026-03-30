@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useData';
-import { User, Lock } from 'lucide-react';
+import { User, Lock, Mail, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
@@ -50,26 +50,36 @@ export default function DriverProfile() {
   return (
     <DriverLayout>
       <div className="p-4 space-y-4">
-        <Card>
-          <CardHeader className="items-center text-center">
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-2">
-              <User className="h-8 w-8 text-primary" />
+        {/* Profile card */}
+        <Card className="overflow-hidden">
+          <div className="h-20 bg-gradient-to-br from-primary/80 to-primary" />
+          <CardContent className="pt-0 -mt-10 text-center pb-6">
+            <div className="w-20 h-20 rounded-full bg-card border-4 border-card flex items-center justify-center mx-auto shadow-md">
+              <User className="h-9 w-9 text-primary" />
             </div>
             {isLoading ? (
-              <Skeleton className="h-6 w-32" />
+              <Skeleton className="h-6 w-32 mx-auto mt-3" />
             ) : (
-              <>
-                <CardTitle>{profile?.full_name || user?.email}</CardTitle>
-                <p className="text-sm text-muted-foreground">{profile?.email || user?.email}</p>
-              </>
+              <div className="mt-3 space-y-1">
+                <h2 className="text-lg font-semibold text-foreground">{profile?.full_name || user?.email}</h2>
+                <div className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground">
+                  <Mail className="h-3.5 w-3.5" />
+                  <span>{profile?.email || user?.email}</span>
+                </div>
+                <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground/70">
+                  <Shield className="h-3 w-3" />
+                  <span>Chaufför</span>
+                </div>
+              </div>
             )}
-          </CardHeader>
+          </CardContent>
         </Card>
 
+        {/* Change password */}
         <Card>
-          <CardHeader>
+          <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
-              <Lock className="h-4 w-4" /> Byt lösenord
+              <Lock className="h-4 w-4 text-muted-foreground" /> Byt lösenord
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -89,7 +99,7 @@ export default function DriverProfile() {
           </CardContent>
         </Card>
 
-        <Button variant="outline" className="w-full touch-target" onClick={handleLogout}>
+        <Button variant="outline" className="w-full touch-target text-destructive hover:text-destructive hover:bg-destructive/5" onClick={handleLogout}>
           Logga ut
         </Button>
       </div>

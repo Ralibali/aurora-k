@@ -1,7 +1,8 @@
-import { LayoutDashboard, ClipboardList, Users, Clock, LogOut, Building2, Receipt, BarChart3, Settings, Truck } from 'lucide-react';
+import { LayoutDashboard, ClipboardList, Users, Clock, LogOut, Building2, Receipt, BarChart3, Settings, Truck, Moon, Sun } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useTheme } from 'next-themes';
 import {
   Sidebar,
   SidebarContent,
@@ -70,11 +71,14 @@ export function AdminSidebar() {
   const collapsed = state === 'collapsed';
   const { signOut } = useAuth();
   const navigate = useNavigate();
+  const { theme, setTheme } = useTheme();
 
   const handleLogout = async () => {
     await signOut();
     navigate('/');
   };
+
+  const toggleTheme = () => setTheme(theme === 'dark' ? 'light' : 'dark');
 
   return (
     <Sidebar collapsible="icon">
@@ -99,6 +103,13 @@ export function AdminSidebar() {
       </SidebarContent>
       <SidebarFooter className="p-3">
         <Separator className="bg-sidebar-border mb-2" />
+        <button
+          onClick={toggleTheme}
+          className="flex items-center gap-3 px-3 py-2.5 text-sidebar-foreground/50 hover:text-sidebar-foreground transition-all duration-150 w-full rounded-lg hover:bg-sidebar-accent text-sm"
+        >
+          {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          {!collapsed && <span>{theme === 'dark' ? 'Ljust läge' : 'Mörkt läge'}</span>}
+        </button>
         <button
           onClick={handleLogout}
           className="flex items-center gap-3 px-3 py-2.5 text-sidebar-foreground/50 hover:text-sidebar-foreground transition-all duration-150 w-full rounded-lg hover:bg-sidebar-accent text-sm"

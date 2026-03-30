@@ -34,9 +34,9 @@ function ElapsedTimer({ since }: { since: string }) {
   }, [since]);
 
   return (
-    <div className="text-center py-4">
-      <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Förfluten tid</p>
-      <p className="text-4xl font-mono font-bold text-foreground tabular-nums">{elapsed}</p>
+    <div className="text-center py-5">
+      <p className="text-[11px] text-muted-foreground uppercase tracking-widest mb-1.5 font-medium">Förfluten tid</p>
+      <p className="text-4xl font-mono font-bold text-foreground tabular-nums tracking-tight">{elapsed}</p>
     </div>
   );
 }
@@ -104,7 +104,7 @@ export default function DriverAssignmentDetail() {
   return (
     <DriverLayout>
       <div className="p-4 space-y-4 no-pull-refresh">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-sm text-muted-foreground touch-target">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors touch-target">
           <ArrowLeft className="h-4 w-4" /> Tillbaka
         </button>
 
@@ -163,7 +163,7 @@ export default function DriverAssignmentDetail() {
         </Card>
 
         {assignment.status === 'pending' && (
-          <Button onClick={handleStart} disabled={updateAssignment.isPending} className="w-full touch-target text-lg bg-success hover:bg-success/90 text-success-foreground" size="lg">
+          <Button onClick={handleStart} disabled={updateAssignment.isPending} className="w-full touch-target text-lg bg-success hover:bg-success/90 text-success-foreground shadow-lg shadow-success/20" size="lg">
             <Play className="h-5 w-5 mr-2" /> Starta uppdrag
           </Button>
         )}
