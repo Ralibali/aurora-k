@@ -79,8 +79,8 @@ export default function AdminAssignments() {
           </div>
         )}
 
-        <div className="space-y-2">
-          {isLoading && [1, 2, 3].map(i => <Skeleton key={i} className="h-20 w-full rounded-lg" />)}
+        <div className="space-y-3">
+          {isLoading && [1, 2, 3].map(i => <Skeleton key={i} className="h-20 w-full rounded-xl" />)}
           {!isLoading && filtered.length > 0 && (
             <div className="flex items-center gap-2 px-2">
               <Checkbox checked={selected.length === filtered.length && filtered.length > 0} onCheckedChange={toggleAll} />
