@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useEffect } from 'react';
 
 // ─── CUSTOMERS ───────────────────────────────────────────
 export function useCustomers() {
@@ -109,8 +110,21 @@ export function useProfile(id: string | undefined) {
   });
 }
 
-// ─── ASSIGNMENTS ─────────────────────────────────────────
+// ─── ASSIGNMENTS (with realtime) ────────────────────────
 export function useAssignments() {
+  const qc = useQueryClient();
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('assignments-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'assignments' }, () => {
+        qc.invalidateQueries({ queryKey: ['assignments'] });
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [qc]);
+
   return useQuery({
     queryKey: ['assignments'],
     queryFn: async () => {
@@ -125,6 +139,20 @@ export function useAssignments() {
 }
 
 export function useAssignment(id: string | undefined) {
+  const qc = useQueryClient();
+
+  useEffect(() => {
+    if (!id) return;
+    const channel = supabase
+      .channel(`assignment-${id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'assignments', filter: `id=eq.${id}` }, () => {
+        qc.invalidateQueries({ queryKey: ['assignments', id] });
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [id, qc]);
+
   return useQuery({
     queryKey: ['assignments', id],
     queryFn: async () => {
@@ -142,6 +170,20 @@ export function useAssignment(id: string | undefined) {
 }
 
 export function useDriverAssignments(driverId: string | undefined) {
+  const qc = useQueryClient();
+
+  useEffect(() => {
+    if (!driverId) return;
+    const channel = supabase
+      .channel(`driver-assignments-${driverId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'assignments', filter: `assigned_driver_id=eq.${driverId}` }, () => {
+        qc.invalidateQueries({ queryKey: ['assignments', 'driver', driverId] });
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [driverId, qc]);
+
   return useQuery({
     queryKey: ['assignments', 'driver', driverId],
     queryFn: async () => {
@@ -276,7 +318,6 @@ export function useCreateInvoice() {
     }) => {
       const { data, error } = await supabase.from('invoices').insert(invoice).select().single();
       if (error) throw error;
-      // Mark assignments as invoiced
       await supabase.from('assignments').update({ invoiced: true }).in('id', invoice.assignment_ids);
       return data;
     },
