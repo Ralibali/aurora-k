@@ -43,8 +43,8 @@ export default function AdminAssignments() {
   };
 
   return (
-    <AdminLayout title="Uppdragshantering">
-      <div className="space-y-4 max-w-5xl">
+    <AdminLayout title="Uppdragshantering" description="Hantera och fördela uppdrag till chaufförer">
+      <div className="space-y-5 max-w-6xl">
         <div className="flex flex-wrap gap-3">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
