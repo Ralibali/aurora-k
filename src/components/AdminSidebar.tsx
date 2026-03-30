@@ -36,7 +36,6 @@ export function AdminSidebar() {
     await signOut();
     navigate('/');
   };
-  const collapsed = state === 'collapsed';
 
   return (
     <Sidebar collapsible="icon">
