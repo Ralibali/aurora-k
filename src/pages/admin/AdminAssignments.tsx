@@ -4,16 +4,23 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { StatusBadge } from '@/components/StatusBadge';
+import { PriorityBadge } from '@/components/PriorityBadge';
 import { mockAssignments, mockDrivers } from '@/lib/mock-data';
 import { formatSwedishDateTime } from '@/lib/format';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { toast } from 'sonner';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import type { Assignment } from '@/lib/types';
 
 export default function AdminAssignments() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [driverFilter, setDriverFilter] = useState<string>('all');
   const [search, setSearch] = useState('');
+  const [selected, setSelected] = useState<string[]>([]);
+  const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
 
   const filtered = mockAssignments.filter(a => {
     if (statusFilter !== 'all' && a.status !== statusFilter) return false;
@@ -22,24 +29,25 @@ export default function AdminAssignments() {
     return true;
   });
 
+  const toggleSelect = (id: string) => {
+    setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  };
+
+  const toggleAll = () => {
+    if (selected.length === filtered.length) setSelected([]);
+    else setSelected(filtered.map(a => a.id));
+  };
+
   return (
     <AdminLayout title="Uppdragshantering">
       <div className="space-y-4 max-w-5xl">
-        {/* Filters */}
         <div className="flex flex-wrap gap-3">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Sök uppdrag..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9"
-            />
+            <Input placeholder="Sök uppdrag..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[160px]">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
+            <SelectTrigger className="w-[160px]"><SelectValue placeholder="Status" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Alla statusar</SelectItem>
               <SelectItem value="pending">Ej startad</SelectItem>
@@ -48,51 +56,77 @@ export default function AdminAssignments() {
             </SelectContent>
           </Select>
           <Select value={driverFilter} onValueChange={setDriverFilter}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Chaufför" />
-            </SelectTrigger>
+            <SelectTrigger className="w-[180px]"><SelectValue placeholder="Chaufför" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Alla chaufförer</SelectItem>
-              {mockDrivers.map(d => (
-                <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>
-              ))}
+              {mockDrivers.map(d => <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>)}
             </SelectContent>
           </Select>
-          <Button asChild>
-            <Link to="/admin/assignments/new">
-              <Plus className="h-4 w-4 mr-1" /> Nytt uppdrag
-            </Link>
-          </Button>
+          <Button asChild><Link to="/admin/assignments/new"><Plus className="h-4 w-4 mr-1" /> Nytt uppdrag</Link></Button>
         </div>
+
+        {/* Bulk actions */}
+        {selected.length > 0 && (
+          <div className="flex items-center gap-3 bg-primary/5 border border-primary/20 rounded-lg px-4 py-2">
+            <span className="text-sm font-medium">{selected.length} valda</span>
+            <Button size="sm" variant="outline" onClick={() => setBulkDialogOpen(true)}>
+              <Users className="h-4 w-4 mr-1" /> Tilldela chaufför
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => setSelected([])}>Avmarkera</Button>
+          </div>
+        )}
 
         {/* List */}
         <div className="space-y-2">
-          {filtered.length === 0 && (
-            <p className="text-center text-muted-foreground py-8">Inga uppdrag hittades</p>
+          {filtered.length > 0 && (
+            <div className="flex items-center gap-2 px-2">
+              <Checkbox checked={selected.length === filtered.length && filtered.length > 0} onCheckedChange={toggleAll} />
+              <span className="text-xs text-muted-foreground">Markera alla</span>
+            </div>
           )}
+          {filtered.length === 0 && <p className="text-center text-muted-foreground py-8">Inga uppdrag hittades</p>}
           {filtered.map((a) => (
-            <Link key={a.id} to={`/admin/assignments/${a.id}`} className="block">
-              <Card className="hover:shadow-md transition-shadow cursor-pointer">
-                <CardContent className="py-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <p className="font-medium truncate">{a.title}</p>
-                        <StatusBadge status={a.status} />
+            <div key={a.id} className="flex items-center gap-2">
+              <Checkbox checked={selected.includes(a.id)} onCheckedChange={() => toggleSelect(a.id)} />
+              <Link to={`/admin/assignments/${a.id}`} className="block flex-1">
+                <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                  <CardContent className="py-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <p className="font-medium truncate">{a.title}</p>
+                          <StatusBadge status={a.status} />
+                          {a.priority !== 'normal' && <PriorityBadge priority={a.priority} />}
+                          {a.invoiced && <span className="status-badge bg-primary/10 text-primary">Fakturerad</span>}
+                        </div>
+                        <p className="text-sm text-muted-foreground">{a.customer?.name} · {a.address}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{formatSwedishDateTime(a.scheduled_start)} · {a.driver?.full_name}</p>
                       </div>
-                      <p className="text-sm text-muted-foreground">
-                        {a.customer?.name} · {a.address}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {formatSwedishDateTime(a.scheduled_start)} · {a.driver?.full_name}
-                      </p>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
+                  </CardContent>
+                </Card>
+              </Link>
+            </div>
           ))}
         </div>
+
+        {/* Bulk assign dialog */}
+        <Dialog open={bulkDialogOpen} onOpenChange={setBulkDialogOpen}>
+          <DialogContent>
+            <DialogHeader><DialogTitle>Tilldela chaufför till {selected.length} uppdrag</DialogTitle></DialogHeader>
+            <Select onValueChange={(v) => {
+              const driver = mockDrivers.find(d => d.id === v);
+              toast.success(`${selected.length} uppdrag tilldelade ${driver?.full_name}`);
+              setSelected([]);
+              setBulkDialogOpen(false);
+            }}>
+              <SelectTrigger><SelectValue placeholder="Välj chaufför" /></SelectTrigger>
+              <SelectContent>
+                {mockDrivers.map(d => <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </DialogContent>
+        </Dialog>
       </div>
     </AdminLayout>
   );
