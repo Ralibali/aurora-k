@@ -25,6 +25,7 @@ import AdminSettings from "./pages/admin/AdminSettings";
 import DriverAssignments from "./pages/driver/DriverAssignments";
 import DriverAssignmentDetail from "./pages/driver/DriverAssignmentDetail";
 import DriverProfile from "./pages/driver/DriverProfile";
+import DriverTimeReport from "./pages/driver/DriverTimeReport";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
