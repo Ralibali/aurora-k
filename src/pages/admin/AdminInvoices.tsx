@@ -115,6 +115,46 @@ export default function AdminInvoices() {
             </SelectContent>
           </Select>
           <div className="flex-1" />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                <FileSpreadsheet className="h-4 w-4 mr-1" /> Exportera
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => {
+                if (!settings) { toast.error('Företagsinställningar saknas'); return; }
+                const year = new Date().getFullYear();
+                const content = generateSieFile(filtered, settings, year);
+                downloadTextFile(content, `Bokföring-${year}.si`, 'text/plain');
+                toast.success('SIE-fil exporterad');
+              }}>
+                SIE-fil (.si)
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => {
+                const content = generateFortnoxCsv(filtered);
+                downloadTextFile(content, `Fortnox-export-${new Date().toISOString().split('T')[0]}.csv`, 'text/csv');
+                toast.success('Fortnox CSV exporterad');
+              }}>
+                Fortnox CSV
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => {
+                if (!settings) { toast.error('Företagsinställningar saknas'); return; }
+                const content = generateVismaCsv(filtered, settings);
+                downloadTextFile(content, `Visma-export-${new Date().toISOString().split('T')[0]}.csv`, 'text/csv');
+                toast.success('Visma CSV exporterad');
+              }}>
+                Visma-format
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => {
+                if (!settings) { toast.error('Företagsinställningar saknas'); return; }
+                generateAccountingExcel(filtered, settings);
+                toast.success('Excel exporterad');
+              }}>
+                Excel med konteringar
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button asChild>
             <Link to="/admin/invoices/new"><Plus className="h-4 w-4 mr-1" /> Skapa faktura</Link>
           </Button>
