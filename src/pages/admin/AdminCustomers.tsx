@@ -33,7 +33,7 @@ export default function AdminCustomers() {
           </Button>
         </div>
 
-        <Card>
+        <div className="admin-table-card">
           <CardContent className="p-0">
             <Table>
               <TableHeader>
