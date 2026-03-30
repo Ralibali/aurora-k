@@ -54,7 +54,7 @@ export default function AdminStatistics() {
   const deliveriesPerDay = dayNames.map((name, i) => ({ day: name, antal: daysMap[i] || 0 }));
 
   return (
-    <AdminLayout title="Statistik">
+    <AdminLayout title="Statistik" description="Analysera leveranser, körtider och intäkter">
       <div className="space-y-6 max-w-6xl">
         <div className="flex items-center gap-3">
           <input type="month" value={month} onChange={e => setMonth(e.target.value)}
