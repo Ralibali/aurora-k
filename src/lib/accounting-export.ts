@@ -1,8 +1,19 @@
-import { Invoice, Customer, CompanySettings } from './types';
+import { CompanySettings } from './types';
 import * as XLSX from 'xlsx';
 
-interface ExportInvoice extends Invoice {
-  customer?: Customer;
+interface ExportInvoice {
+  invoice_number: number;
+  invoice_date: string;
+  due_date: string;
+  total_ex_vat: number;
+  vat_amount: number;
+  total_inc_vat: number;
+  reference: string | null;
+  status: string;
+  customer?: {
+    name: string;
+    org_number?: string | null;
+  };
 }
 
 // ─── SIE FILE (Swedish Standard) ──────────────────────────
