@@ -92,8 +92,8 @@ export default function AdminDrivers() {
           </Dialog>
         </div>
 
-        <Card>
-          <CardContent className="p-0">
+        <div className="admin-table-card">
+          <div className="p-0">
             <Table>
               <TableHeader>
                 <TableRow>
