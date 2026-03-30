@@ -4,6 +4,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { PwaInstallPrompt } from "@/components/PwaInstallPrompt";
+import { AuthProvider } from "@/hooks/useAuth";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import LoginPage from "./pages/LoginPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminAssignments from "./pages/admin/AdminAssignments";
@@ -31,28 +33,30 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<LoginPage />} />
-          {/* Admin routes */}
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/assignments" element={<AdminAssignments />} />
-          <Route path="/admin/assignments/new" element={<AdminNewAssignment />} />
-          <Route path="/admin/assignments/:id" element={<AdminAssignmentDetail />} />
-          <Route path="/admin/customers" element={<AdminCustomers />} />
-          <Route path="/admin/customers/new" element={<AdminNewCustomer />} />
-          <Route path="/admin/customers/:id" element={<AdminCustomerDetail />} />
-          <Route path="/admin/drivers" element={<AdminDrivers />} />
-          <Route path="/admin/invoices" element={<AdminInvoices />} />
-          <Route path="/admin/invoices/new" element={<AdminNewInvoice />} />
-          <Route path="/admin/reports" element={<AdminReports />} />
-          <Route path="/admin/statistics" element={<AdminStatistics />} />
-          <Route path="/admin/settings" element={<AdminSettings />} />
-          {/* Driver routes */}
-          <Route path="/driver" element={<DriverAssignments />} />
-          <Route path="/driver/assignment/:id" element={<DriverAssignmentDetail />} />
-          <Route path="/driver/profile" element={<DriverProfile />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            <Route path="/" element={<LoginPage />} />
+            {/* Admin routes */}
+            <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminDashboard /></ProtectedRoute>} />
+            <Route path="/admin/assignments" element={<ProtectedRoute requiredRole="admin"><AdminAssignments /></ProtectedRoute>} />
+            <Route path="/admin/assignments/new" element={<ProtectedRoute requiredRole="admin"><AdminNewAssignment /></ProtectedRoute>} />
+            <Route path="/admin/assignments/:id" element={<ProtectedRoute requiredRole="admin"><AdminAssignmentDetail /></ProtectedRoute>} />
+            <Route path="/admin/customers" element={<ProtectedRoute requiredRole="admin"><AdminCustomers /></ProtectedRoute>} />
+            <Route path="/admin/customers/new" element={<ProtectedRoute requiredRole="admin"><AdminNewCustomer /></ProtectedRoute>} />
+            <Route path="/admin/customers/:id" element={<ProtectedRoute requiredRole="admin"><AdminCustomerDetail /></ProtectedRoute>} />
+            <Route path="/admin/drivers" element={<ProtectedRoute requiredRole="admin"><AdminDrivers /></ProtectedRoute>} />
+            <Route path="/admin/invoices" element={<ProtectedRoute requiredRole="admin"><AdminInvoices /></ProtectedRoute>} />
+            <Route path="/admin/invoices/new" element={<ProtectedRoute requiredRole="admin"><AdminNewInvoice /></ProtectedRoute>} />
+            <Route path="/admin/reports" element={<ProtectedRoute requiredRole="admin"><AdminReports /></ProtectedRoute>} />
+            <Route path="/admin/statistics" element={<ProtectedRoute requiredRole="admin"><AdminStatistics /></ProtectedRoute>} />
+            <Route path="/admin/settings" element={<ProtectedRoute requiredRole="admin"><AdminSettings /></ProtectedRoute>} />
+            {/* Driver routes */}
+            <Route path="/driver" element={<ProtectedRoute requiredRole="driver"><DriverAssignments /></ProtectedRoute>} />
+            <Route path="/driver/assignment/:id" element={<ProtectedRoute requiredRole="driver"><DriverAssignmentDetail /></ProtectedRoute>} />
+            <Route path="/driver/profile" element={<ProtectedRoute requiredRole="driver"><DriverProfile /></ProtectedRoute>} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
       <PwaInstallPrompt />
     </TooltipProvider>
