@@ -4,11 +4,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { InvoiceStatusBadge } from '@/components/InvoiceStatusBadge';
 import { useInvoices, useCustomers, useUpdateInvoiceStatus, useAssignments, useSettings } from '@/hooks/useData';
 import { generateInvoicePdf } from '@/lib/invoice-pdf';
+import { generateSieFile, generateFortnoxCsv, generateVismaCsv, generateAccountingExcel, downloadTextFile } from '@/lib/accounting-export';
 import { calculateDecimalHours } from '@/lib/format';
-import { Plus, Download } from 'lucide-react';
+import { Plus, Download, FileSpreadsheet } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
@@ -113,6 +115,46 @@ export default function AdminInvoices() {
             </SelectContent>
           </Select>
           <div className="flex-1" />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                <FileSpreadsheet className="h-4 w-4 mr-1" /> Exportera
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => {
+                if (!settings) { toast.error('Företagsinställningar saknas'); return; }
+                const year = new Date().getFullYear();
+                const content = generateSieFile(filtered, settings, year);
+                downloadTextFile(content, `Bokföring-${year}.si`, 'text/plain');
+                toast.success('SIE-fil exporterad');
+              }}>
+                SIE-fil (.si)
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => {
+                const content = generateFortnoxCsv(filtered);
+                downloadTextFile(content, `Fortnox-export-${new Date().toISOString().split('T')[0]}.csv`, 'text/csv');
+                toast.success('Fortnox CSV exporterad');
+              }}>
+                Fortnox CSV
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => {
+                if (!settings) { toast.error('Företagsinställningar saknas'); return; }
+                const content = generateVismaCsv(filtered, settings);
+                downloadTextFile(content, `Visma-export-${new Date().toISOString().split('T')[0]}.csv`, 'text/csv');
+                toast.success('Visma CSV exporterad');
+              }}>
+                Visma-format
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => {
+                if (!settings) { toast.error('Företagsinställningar saknas'); return; }
+                generateAccountingExcel(filtered, settings);
+                toast.success('Excel exporterad');
+              }}>
+                Excel med konteringar
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button asChild>
             <Link to="/admin/invoices/new"><Plus className="h-4 w-4 mr-1" /> Skapa faktura</Link>
           </Button>
