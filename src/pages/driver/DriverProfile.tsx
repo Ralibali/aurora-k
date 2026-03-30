@@ -1,14 +1,21 @@
 import { DriverLayout } from '@/components/DriverLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { mockDrivers } from '@/lib/mock-data';
-import { LogOut, User } from 'lucide-react';
-import { toast } from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
+import { useProfile } from '@/hooks/useData';
+import { User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function DriverProfile() {
   const navigate = useNavigate();
-  const driver = mockDrivers[0]; // Mock current driver
+  const { user, signOut } = useAuth();
+  const { data: profile, isLoading } = useProfile(user?.id);
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/');
+  };
 
   return (
     <DriverLayout>
@@ -18,19 +25,22 @@ export default function DriverProfile() {
             <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-2">
               <User className="h-8 w-8 text-primary" />
             </div>
-            <CardTitle>{driver.full_name}</CardTitle>
-            <p className="text-sm text-muted-foreground">{driver.email}</p>
+            {isLoading ? (
+              <Skeleton className="h-6 w-32" />
+            ) : (
+              <>
+                <CardTitle>{profile?.full_name || user?.email}</CardTitle>
+                <p className="text-sm text-muted-foreground">{profile?.email || user?.email}</p>
+              </>
+            )}
           </CardHeader>
           <CardContent>
             <Button
               variant="outline"
               className="w-full touch-target"
-              onClick={() => {
-                toast.success('Utloggad');
-                navigate('/');
-              }}
+              onClick={handleLogout}
             >
-              <LogOut className="h-4 w-4 mr-2" /> Logga ut
+              Logga ut
             </Button>
           </CardContent>
         </Card>

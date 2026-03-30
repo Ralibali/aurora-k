@@ -2,26 +2,27 @@ import { DriverLayout } from '@/components/DriverLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { StatusBadge } from '@/components/StatusBadge';
 import { PriorityBadge } from '@/components/PriorityBadge';
-import { mockAssignments } from '@/lib/mock-data';
+import { useDriverAssignments } from '@/hooks/useData';
+import { useAuth } from '@/hooks/useAuth';
 import { formatSwedishDateTime } from '@/lib/format';
 import { MapPin, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function DriverAssignments() {
-  // Mock: show assignments for driver d1
-  const myAssignments = mockAssignments
-    .filter(a => a.assigned_driver_id === 'd1')
-    .sort((a, b) => new Date(a.scheduled_start).getTime() - new Date(b.scheduled_start).getTime());
+  const { user } = useAuth();
+  const { data: assignments, isLoading } = useDriverAssignments(user?.id);
 
   return (
     <DriverLayout>
       <div className="p-4 space-y-3">
         <h2 className="text-lg font-semibold">Mina uppdrag</h2>
-        {myAssignments.length === 0 && (
+        {isLoading && [1, 2, 3].map(i => <Skeleton key={i} className="h-24 w-full rounded-lg" />)}
+        {!isLoading && (assignments ?? []).length === 0 && (
           <p className="text-center text-muted-foreground py-12">Inga uppdrag att visa</p>
         )}
-        {myAssignments.map((a, i) => (
+        {(assignments ?? []).map((a, i) => (
           <motion.div
             key={a.id}
             initial={{ opacity: 0, y: 12 }}

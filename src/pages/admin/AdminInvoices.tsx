@@ -2,21 +2,30 @@ import { useState } from 'react';
 import { AdminLayout } from '@/components/AdminLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { InvoiceStatusBadge } from '@/components/InvoiceStatusBadge';
-import { mockInvoices, mockCustomers } from '@/lib/mock-data';
-import { Plus, FileText, Search } from 'lucide-react';
+import { useInvoices, useCustomers, useUpdateInvoiceStatus } from '@/hooks/useData';
+import { Plus, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { toast } from 'sonner';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AdminInvoices() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [customerFilter, setCustomerFilter] = useState<string>('all');
 
-  const filtered = mockInvoices.filter(i => {
+  const { data: invoices, isLoading } = useInvoices();
+  const { data: customers } = useCustomers();
+  const updateStatus = useUpdateInvoiceStatus();
+
+  // Auto-flag overdue
+  const now = new Date().toISOString().split('T')[0];
+  const processedInvoices = (invoices ?? []).map(i => ({
+    ...i,
+    status: i.status === 'sent' && i.due_date < now ? 'overdue' : i.status,
+  }));
+
+  const filtered = processedInvoices.filter(i => {
     if (statusFilter !== 'all' && i.status !== statusFilter) return false;
     if (customerFilter !== 'all' && i.customer_id !== customerFilter) return false;
     return true;
@@ -40,7 +49,7 @@ export default function AdminInvoices() {
             <SelectTrigger className="w-[200px]"><SelectValue placeholder="Kund" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Alla kunder</SelectItem>
-              {mockCustomers.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+              {(customers ?? []).map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
             </SelectContent>
           </Select>
           <div className="flex-1" />
@@ -64,7 +73,10 @@ export default function AdminInvoices() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filtered.length === 0 && (
+                {isLoading && [1, 2].map(i => (
+                  <TableRow key={i}><TableCell colSpan={7}><Skeleton className="h-8 w-full" /></TableCell></TableRow>
+                ))}
+                {!isLoading && filtered.length === 0 && (
                   <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">Inga fakturor</TableCell></TableRow>
                 )}
                 {filtered.map(inv => (
@@ -78,9 +90,12 @@ export default function AdminInvoices() {
                     <TableCell>
                       <div className="flex gap-1">
                         <Button variant="ghost" size="icon" title="Visa PDF"><FileText className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="sm" onClick={() => toast.success('Status uppdaterad')}>
-                          {inv.status === 'sent' ? 'Betald' : inv.status === 'draft' ? 'Skicka' : ''}
-                        </Button>
+                        {inv.status === 'draft' && (
+                          <Button variant="ghost" size="sm" onClick={() => updateStatus.mutate({ id: inv.id, status: 'sent' })}>Skicka</Button>
+                        )}
+                        {(inv.status === 'sent' || inv.status === 'overdue') && (
+                          <Button variant="ghost" size="sm" onClick={() => updateStatus.mutate({ id: inv.id, status: 'paid' })}>Betald</Button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>

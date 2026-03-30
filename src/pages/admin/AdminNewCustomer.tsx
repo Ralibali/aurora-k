@@ -6,18 +6,44 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { useCreateCustomer } from '@/hooks/useData';
 import { pricingTypeLabels } from '@/lib/types';
 import { ArrowLeft } from 'lucide-react';
-import { toast } from 'sonner';
 
 export default function AdminNewCustomer() {
   const navigate = useNavigate();
+  const createCustomer = useCreateCustomer();
   const [pricingType, setPricingType] = useState<string>('manual');
+  const [name, setName] = useState('');
+  const [orgNumber, setOrgNumber] = useState('');
+  const [invoiceAddress, setInvoiceAddress] = useState('');
+  const [visitAddress, setVisitAddress] = useState('');
+  const [contactPerson, setContactPerson] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [paymentTerms, setPaymentTerms] = useState(30);
+  const [pricePerDelivery, setPricePerDelivery] = useState('');
+  const [pricePerHour, setPricePerHour] = useState('');
+  const [notes, setNotes] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success('Kund skapad!');
-    navigate('/admin/customers');
+    createCustomer.mutate({
+      name,
+      org_number: orgNumber || null,
+      invoice_address: invoiceAddress || null,
+      visit_address: visitAddress || null,
+      contact_person: contactPerson || null,
+      email: email || null,
+      phone: phone || null,
+      pricing_type: pricingType,
+      payment_terms_days: paymentTerms,
+      price_per_delivery: pricePerDelivery ? parseFloat(pricePerDelivery) : null,
+      price_per_hour: pricePerHour ? parseFloat(pricePerHour) : null,
+      notes: notes || null,
+    }, {
+      onSuccess: () => navigate('/admin/customers'),
+    });
   };
 
   return (
@@ -33,35 +59,35 @@ export default function AdminNewCustomer() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Företagsnamn *</Label>
-                  <Input required placeholder="AB Exempelföretag" />
+                  <Input required value={name} onChange={e => setName(e.target.value)} placeholder="AB Exempelföretag" />
                 </div>
                 <div className="space-y-2">
                   <Label>Organisationsnummer</Label>
-                  <Input placeholder="556000-0000" />
+                  <Input value={orgNumber} onChange={e => setOrgNumber(e.target.value)} placeholder="556000-0000" />
                 </div>
                 <div className="space-y-2">
                   <Label>Fakturaadress</Label>
-                  <Input placeholder="Box 123, 111 22 Stockholm" />
+                  <Input value={invoiceAddress} onChange={e => setInvoiceAddress(e.target.value)} placeholder="Box 123, 111 22 Stockholm" />
                 </div>
                 <div className="space-y-2">
                   <Label>Besöksadress</Label>
-                  <Input placeholder="Gatan 1, Stockholm" />
+                  <Input value={visitAddress} onChange={e => setVisitAddress(e.target.value)} placeholder="Gatan 1, Stockholm" />
                 </div>
                 <div className="space-y-2">
                   <Label>Kontaktperson</Label>
-                  <Input placeholder="Förnamn Efternamn" />
+                  <Input value={contactPerson} onChange={e => setContactPerson(e.target.value)} placeholder="Förnamn Efternamn" />
                 </div>
                 <div className="space-y-2">
                   <Label>E-post</Label>
-                  <Input type="email" placeholder="namn@foretag.se" />
+                  <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="namn@foretag.se" />
                 </div>
                 <div className="space-y-2">
                   <Label>Telefon</Label>
-                  <Input placeholder="08-123 45 67" />
+                  <Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="08-123 45 67" />
                 </div>
                 <div className="space-y-2">
                   <Label>Betalningsvillkor (dagar)</Label>
-                  <Input type="number" defaultValue={30} />
+                  <Input type="number" value={paymentTerms} onChange={e => setPaymentTerms(parseInt(e.target.value) || 30)} />
                 </div>
               </div>
 
@@ -76,20 +102,22 @@ export default function AdminNewCustomer() {
                   ))}
                 </div>
                 {pricingType === 'per_delivery' && (
-                  <div className="space-y-2"><Label>Pris per leverans (kr)</Label><Input type="number" placeholder="0" /></div>
+                  <div className="space-y-2"><Label>Pris per leverans (kr)</Label><Input type="number" value={pricePerDelivery} onChange={e => setPricePerDelivery(e.target.value)} placeholder="0" /></div>
                 )}
                 {pricingType === 'per_hour' && (
-                  <div className="space-y-2"><Label>Timpris (kr)</Label><Input type="number" placeholder="0" /></div>
+                  <div className="space-y-2"><Label>Timpris (kr)</Label><Input type="number" value={pricePerHour} onChange={e => setPricePerHour(e.target.value)} placeholder="0" /></div>
                 )}
               </div>
 
               <div className="space-y-2">
                 <Label>Anteckningar</Label>
-                <Textarea placeholder="Övriga noteringar..." />
+                <Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Övriga noteringar..." />
               </div>
 
               <div className="flex gap-2 pt-2">
-                <Button type="submit">Skapa kund</Button>
+                <Button type="submit" disabled={createCustomer.isPending}>
+                  {createCustomer.isPending ? 'Skapar...' : 'Skapa kund'}
+                </Button>
                 <Button type="button" variant="outline" onClick={() => navigate(-1)}>Avbryt</Button>
               </div>
             </form>

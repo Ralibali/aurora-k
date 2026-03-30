@@ -1,8 +1,8 @@
-import { Priority, priorityLabels } from '@/lib/types';
+import { priorityLabels } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
 interface PriorityBadgeProps {
-  priority: Priority;
+  priority: string;
   className?: string;
 }
 
@@ -13,7 +13,7 @@ export function PriorityBadge({ priority, className }: PriorityBadgeProps) {
       'bg-primary/10 text-primary': priority === 'normal',
       'bg-destructive/15 text-destructive': priority === 'urgent',
     }, className)}>
-      {priorityLabels[priority]}
+      {priorityLabels[priority as keyof typeof priorityLabels] || priority}
     </span>
   );
 }

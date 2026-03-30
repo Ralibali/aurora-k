@@ -9,19 +9,28 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { mockCustomers, mockAssignments } from '@/lib/mock-data';
+import { useCustomers, useAssignments, useNextInvoiceNumber, useCreateInvoice, useSettings } from '@/hooks/useData';
 import { formatSwedishDate, calculateDecimalHours } from '@/lib/format';
 import { ArrowLeft, FileText } from 'lucide-react';
-import { toast } from 'sonner';
 
 export default function AdminNewInvoice() {
   const navigate = useNavigate();
   const [customerId, setCustomerId] = useState<string>('');
   const [selectedAssignments, setSelectedAssignments] = useState<string[]>([]);
   const [step, setStep] = useState(1);
+  const [reference, setReference] = useState('');
+  const [message, setMessage] = useState('');
+  const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().split('T')[0]);
 
-  const customer = mockCustomers.find(c => c.id === customerId);
-  const uninvoiced = mockAssignments.filter(a =>
+  const { data: customers } = useCustomers();
+  const { data: allAssignments } = useAssignments();
+  const { data: nextNumber } = useNextInvoiceNumber();
+  const { data: settings } = useSettings();
+  const createInvoice = useCreateInvoice();
+  const [invoiceNumber, setInvoiceNumber] = useState<number | null>(null);
+
+  const customer = (customers ?? []).find(c => c.id === customerId);
+  const uninvoiced = (allAssignments ?? []).filter(a =>
     a.customer_id === customerId && a.status === 'completed' && !a.invoiced
   );
 
@@ -30,7 +39,7 @@ export default function AdminNewInvoice() {
   };
 
   const selectedItems = uninvoiced.filter(a => selectedAssignments.includes(a.id));
-  const calculateAmount = (a: typeof mockAssignments[0]) => {
+  const calculateAmount = (a: typeof uninvoiced[0]) => {
     if (!customer) return 0;
     if (customer.pricing_type === 'per_delivery') return customer.price_per_delivery || 0;
     if (customer.pricing_type === 'per_hour' && a.actual_start && a.actual_stop) {
@@ -47,6 +56,27 @@ export default function AdminNewInvoice() {
   const dueDate = customer
     ? new Date(Date.now() + customer.payment_terms_days * 86400000).toISOString().split('T')[0]
     : today;
+  const [dueDateState, setDueDateState] = useState('');
+  const finalDueDate = dueDateState || dueDate;
+  const finalInvoiceNumber = invoiceNumber ?? nextNumber ?? 1001;
+
+  const handleCreate = () => {
+    createInvoice.mutate({
+      invoice_number: finalInvoiceNumber,
+      customer_id: customerId,
+      assignment_ids: selectedAssignments,
+      status: 'draft',
+      invoice_date: invoiceDate,
+      due_date: finalDueDate,
+      total_ex_vat: totalExVat,
+      vat_amount: vatAmount,
+      total_inc_vat: totalIncVat,
+      reference: reference || null,
+      message: message || null,
+    }, {
+      onSuccess: () => navigate('/admin/invoices'),
+    });
+  };
 
   return (
     <AdminLayout title="Skapa faktura">
@@ -55,7 +85,6 @@ export default function AdminNewInvoice() {
           <ArrowLeft className="h-4 w-4 mr-1" /> {step > 1 ? 'Föregående steg' : 'Tillbaka'}
         </Button>
 
-        {/* Step indicator */}
         <div className="flex gap-2 mb-4">
           {[1, 2, 3, 4].map(s => (
             <div key={s} className={`h-1.5 flex-1 rounded-full ${s <= step ? 'bg-primary' : 'bg-muted'}`} />
@@ -69,7 +98,7 @@ export default function AdminNewInvoice() {
               <Select value={customerId} onValueChange={(v) => { setCustomerId(v); setSelectedAssignments([]); }}>
                 <SelectTrigger><SelectValue placeholder="Välj kund" /></SelectTrigger>
                 <SelectContent>
-                  {mockCustomers.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                  {(customers ?? []).map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
                 </SelectContent>
               </Select>
               {customer && (
@@ -138,24 +167,24 @@ export default function AdminNewInvoice() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Fakturanummer</Label>
-                  <Input type="number" defaultValue={1002} />
+                  <Input type="number" value={finalInvoiceNumber} onChange={e => setInvoiceNumber(parseInt(e.target.value))} />
                 </div>
                 <div className="space-y-2">
                   <Label>Fakturadatum</Label>
-                  <Input type="date" defaultValue={today} />
+                  <Input type="date" value={invoiceDate} onChange={e => setInvoiceDate(e.target.value)} />
                 </div>
                 <div className="space-y-2">
                   <Label>Förfallodatum</Label>
-                  <Input type="date" defaultValue={dueDate} />
+                  <Input type="date" value={finalDueDate} onChange={e => setDueDateState(e.target.value)} />
                 </div>
                 <div className="space-y-2">
                   <Label>Er referens</Label>
-                  <Input placeholder="Referensperson" />
+                  <Input value={reference} onChange={e => setReference(e.target.value)} placeholder="Referensperson" />
                 </div>
               </div>
               <div className="space-y-2">
                 <Label>Meddelande på faktura</Label>
-                <Textarea placeholder="Valfritt meddelande..." />
+                <Textarea value={message} onChange={e => setMessage(e.target.value)} placeholder="Valfritt meddelande..." />
               </div>
               <Button onClick={() => setStep(4)}>Förhandsgranska</Button>
             </CardContent>
@@ -169,15 +198,15 @@ export default function AdminNewInvoice() {
               <div className="border rounded-lg p-6 bg-card space-y-6">
                 <div className="flex justify-between">
                   <div>
-                    <p className="font-bold text-lg">Aurora Medias Transport AB</p>
-                    <p className="text-sm text-muted-foreground">Transportgatan 5, 111 22 Stockholm</p>
-                    <p className="text-sm text-muted-foreground">Org.nr: 559000-1234</p>
+                    <p className="font-bold text-lg">{settings?.company_name || 'Aurora Medias Transport AB'}</p>
+                    <p className="text-sm text-muted-foreground">{settings?.address}, {settings?.zip_city}</p>
+                    <p className="text-sm text-muted-foreground">Org.nr: {settings?.org_number}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-2xl font-bold text-primary">FAKTURA</p>
-                    <p className="text-sm">Nr: 1002</p>
-                    <p className="text-sm">Datum: {today}</p>
-                    <p className="text-sm">Förfaller: {dueDate}</p>
+                    <p className="text-sm">Nr: {finalInvoiceNumber}</p>
+                    <p className="text-sm">Datum: {invoiceDate}</p>
+                    <p className="text-sm">Förfaller: {finalDueDate}</p>
                   </div>
                 </div>
 
@@ -225,10 +254,26 @@ export default function AdminNewInvoice() {
               </div>
 
               <div className="flex gap-2">
-                <Button onClick={() => { toast.success('PDF exporterad!'); }}>
-                  <FileText className="h-4 w-4 mr-1" /> Exportera PDF
+                <Button onClick={handleCreate} disabled={createInvoice.isPending}>
+                  <FileText className="h-4 w-4 mr-1" /> {createInvoice.isPending ? 'Skapar...' : 'Spara faktura'}
                 </Button>
-                <Button variant="outline" onClick={() => { toast.success('Faktura markerad som skickad'); navigate('/admin/invoices'); }}>
+                <Button variant="outline" onClick={() => {
+                  createInvoice.mutate({
+                    invoice_number: finalInvoiceNumber,
+                    customer_id: customerId,
+                    assignment_ids: selectedAssignments,
+                    status: 'sent',
+                    invoice_date: invoiceDate,
+                    due_date: finalDueDate,
+                    total_ex_vat: totalExVat,
+                    vat_amount: vatAmount,
+                    total_inc_vat: totalIncVat,
+                    reference: reference || null,
+                    message: message || null,
+                  }, {
+                    onSuccess: () => navigate('/admin/invoices'),
+                  });
+                }}>
                   Markera som skickad
                 </Button>
               </div>

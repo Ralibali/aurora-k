@@ -7,13 +7,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { StatusBadge } from '@/components/StatusBadge';
 import { PriorityBadge } from '@/components/PriorityBadge';
-import { mockAssignments, mockDrivers } from '@/lib/mock-data';
+import { useAssignments, useDrivers, useBulkAssignDriver } from '@/hooks/useData';
 import { formatSwedishDateTime } from '@/lib/format';
 import { Plus, Search, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import type { Assignment } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AdminAssignments() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -22,10 +22,14 @@ export default function AdminAssignments() {
   const [selected, setSelected] = useState<string[]>([]);
   const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
 
-  const filtered = mockAssignments.filter(a => {
+  const { data: assignments, isLoading } = useAssignments();
+  const { data: drivers } = useDrivers();
+  const bulkAssign = useBulkAssignDriver();
+
+  const filtered = (assignments ?? []).filter(a => {
     if (statusFilter !== 'all' && a.status !== statusFilter) return false;
     if (driverFilter !== 'all' && a.assigned_driver_id !== driverFilter) return false;
-    if (search && !a.title.toLowerCase().includes(search.toLowerCase()) && !a.customer?.name.toLowerCase().includes(search.toLowerCase())) return false;
+    if (search && !a.title.toLowerCase().includes(search.toLowerCase()) && !a.customer?.name?.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
 
@@ -59,13 +63,12 @@ export default function AdminAssignments() {
             <SelectTrigger className="w-[180px]"><SelectValue placeholder="Chaufför" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Alla chaufförer</SelectItem>
-              {mockDrivers.map(d => <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>)}
+              {(drivers ?? []).map(d => <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>)}
             </SelectContent>
           </Select>
           <Button asChild><Link to="/admin/assignments/new"><Plus className="h-4 w-4 mr-1" /> Nytt uppdrag</Link></Button>
         </div>
 
-        {/* Bulk actions */}
         {selected.length > 0 && (
           <div className="flex items-center gap-3 bg-primary/5 border border-primary/20 rounded-lg px-4 py-2">
             <span className="text-sm font-medium">{selected.length} valda</span>
@@ -76,15 +79,15 @@ export default function AdminAssignments() {
           </div>
         )}
 
-        {/* List */}
         <div className="space-y-2">
-          {filtered.length > 0 && (
+          {isLoading && [1, 2, 3].map(i => <Skeleton key={i} className="h-20 w-full rounded-lg" />)}
+          {!isLoading && filtered.length > 0 && (
             <div className="flex items-center gap-2 px-2">
               <Checkbox checked={selected.length === filtered.length && filtered.length > 0} onCheckedChange={toggleAll} />
               <span className="text-xs text-muted-foreground">Markera alla</span>
             </div>
           )}
-          {filtered.length === 0 && <p className="text-center text-muted-foreground py-8">Inga uppdrag hittades</p>}
+          {!isLoading && filtered.length === 0 && <p className="text-center text-muted-foreground py-8">Inga uppdrag hittades</p>}
           {filtered.map((a) => (
             <div key={a.id} className="flex items-center gap-2">
               <Checkbox checked={selected.includes(a.id)} onCheckedChange={() => toggleSelect(a.id)} />
@@ -110,19 +113,22 @@ export default function AdminAssignments() {
           ))}
         </div>
 
-        {/* Bulk assign dialog */}
         <Dialog open={bulkDialogOpen} onOpenChange={setBulkDialogOpen}>
           <DialogContent>
             <DialogHeader><DialogTitle>Tilldela chaufför till {selected.length} uppdrag</DialogTitle></DialogHeader>
             <Select onValueChange={(v) => {
-              const driver = mockDrivers.find(d => d.id === v);
-              toast.success(`${selected.length} uppdrag tilldelade ${driver?.full_name}`);
-              setSelected([]);
-              setBulkDialogOpen(false);
+              const driver = (drivers ?? []).find(d => d.id === v);
+              bulkAssign.mutate({ assignmentIds: selected, driverId: v }, {
+                onSuccess: () => {
+                  toast.success(`${selected.length} uppdrag tilldelade ${driver?.full_name}`);
+                  setSelected([]);
+                  setBulkDialogOpen(false);
+                }
+              });
             }}>
               <SelectTrigger><SelectValue placeholder="Välj chaufför" /></SelectTrigger>
               <SelectContent>
-                {mockDrivers.map(d => <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>)}
+                {(drivers ?? []).map(d => <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>)}
               </SelectContent>
             </Select>
           </DialogContent>
