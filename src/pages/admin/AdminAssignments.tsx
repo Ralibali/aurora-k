@@ -92,7 +92,7 @@ export default function AdminAssignments() {
             <div key={a.id} className="flex items-center gap-2">
               <Checkbox checked={selected.includes(a.id)} onCheckedChange={() => toggleSelect(a.id)} />
               <Link to={`/admin/assignments/${a.id}`} className="block flex-1">
-                <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                <Card className="hover:shadow-md hover:border-primary/20 transition-all duration-150 cursor-pointer">
                   <CardContent className="py-4">
                     <div className="flex items-center justify-between gap-3">
                       <div className="min-w-0 flex-1">
