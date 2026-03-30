@@ -7,6 +7,8 @@ import { PwaInstallPrompt } from "@/components/PwaInstallPrompt";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import LoginPage from "./pages/LoginPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminAssignments from "./pages/admin/AdminAssignments";
 import AdminAssignmentDetail from "./pages/admin/AdminAssignmentDetail";
@@ -36,6 +38,8 @@ const App = () => (
         <AuthProvider>
           <Routes>
             <Route path="/" element={<LoginPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
             {/* Admin routes */}
             <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/assignments" element={<ProtectedRoute requiredRole="admin"><AdminAssignments /></ProtectedRoute>} />

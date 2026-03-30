@@ -9,6 +9,8 @@ import { useDrivers, useAssignments } from '@/hooks/useData';
 import { Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
+import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   Dialog,
   DialogContent,
@@ -19,11 +21,40 @@ import {
 
 export default function AdminDrivers() {
   const [open, setOpen] = useState(false);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [creating, setCreating] = useState(false);
   const { data: drivers, isLoading } = useDrivers();
   const { data: assignments } = useAssignments();
+  const qc = useQueryClient();
 
   const getCompletedCount = (driverId: string) =>
     (assignments ?? []).filter(a => a.assigned_driver_id === driverId && a.status === 'completed').length;
+
+  const handleCreateDriver = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCreating(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await supabase.functions.invoke('create-driver', {
+        body: { email, full_name: name, password },
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      });
+      if (res.error) throw new Error(res.error.message);
+      if (res.data?.error) throw new Error(res.data.error);
+      toast.success(`Chaufför ${name} skapad!`);
+      qc.invalidateQueries({ queryKey: ['drivers'] });
+      setName('');
+      setEmail('');
+      setPassword('');
+      setOpen(false);
+    } catch (err: any) {
+      toast.error('Kunde inte skapa chaufför: ' + err.message);
+    } finally {
+      setCreating(false);
+    }
+  };
 
   return (
     <AdminLayout title="Chaufförshantering">
@@ -40,20 +71,22 @@ export default function AdminDrivers() {
               <DialogHeader>
                 <DialogTitle>Lägg till ny chaufför</DialogTitle>
               </DialogHeader>
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                toast.info('Skapa chaufförskonto kräver admin-registrering – kontakta support');
-                setOpen(false);
-              }} className="space-y-4">
+              <form onSubmit={handleCreateDriver} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="driverName">Namn</Label>
-                  <Input id="driverName" placeholder="Förnamn Efternamn" required />
+                  <Input id="driverName" placeholder="Förnamn Efternamn" value={name} onChange={e => setName(e.target.value)} required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="driverEmail">E-post</Label>
-                  <Input id="driverEmail" type="email" placeholder="namn@exempel.se" required />
+                  <Input id="driverEmail" type="email" placeholder="namn@exempel.se" value={email} onChange={e => setEmail(e.target.value)} required />
                 </div>
-                <Button type="submit" className="w-full">Skicka inbjudan</Button>
+                <div className="space-y-2">
+                  <Label htmlFor="driverPassword">Lösenord</Label>
+                  <Input id="driverPassword" type="password" placeholder="Minst 6 tecken" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} />
+                </div>
+                <Button type="submit" className="w-full" disabled={creating}>
+                  {creating ? 'Skapar...' : 'Skapa chaufförskonto'}
+                </Button>
               </form>
             </DialogContent>
           </Dialog>
