@@ -61,7 +61,7 @@ export default function DriverAssignmentDetail() {
 
   return (
     <DriverLayout>
-      <div className="p-4 space-y-4">
+      <div className="p-4 space-y-4 no-pull-refresh">
         <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-sm text-muted-foreground touch-target">
           <ArrowLeft className="h-4 w-4" /> Tillbaka
         </button>

@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { PwaInstallPrompt } from "@/components/PwaInstallPrompt";
 import LoginPage from "./pages/LoginPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminAssignments from "./pages/admin/AdminAssignments";
@@ -53,6 +54,7 @@ const App = () => (
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
+      <PwaInstallPrompt />
     </TooltipProvider>
   </QueryClientProvider>
 );

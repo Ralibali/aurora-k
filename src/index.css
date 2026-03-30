@@ -113,4 +113,26 @@
   .touch-target {
     @apply min-h-[48px] min-w-[48px];
   }
+
+  /* Safe area padding for standalone PWA */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+}
+
+/* Standalone PWA adjustments */
+@media all and (display-mode: standalone) {
+  body {
+    /* Prevent overscroll/pull-to-refresh in standalone */
+    overscroll-behavior-y: contain;
+  }
+}
+
+/* Prevent pull-to-refresh on specific views */
+.no-pull-refresh {
+  overscroll-behavior-y: contain;
+  touch-action: pan-x pinch-zoom;
 }
