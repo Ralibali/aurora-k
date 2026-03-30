@@ -31,9 +31,12 @@ export default function DriverAssignments() {
             <Link to={`/driver/assignment/${a.id}`}>
               <Card className="active:scale-[0.98] transition-transform touch-target">
                 <CardContent className="py-4 space-y-2">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <p className="font-semibold text-base">{a.customer?.name}</p>
-                    <StatusBadge status={a.status} />
+                    <div className="flex gap-1.5">
+                      {a.priority !== 'normal' && <PriorityBadge priority={a.priority} />}
+                      <StatusBadge status={a.status} />
+                    </div>
                   </div>
                   <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                     <MapPin className="h-3.5 w-3.5 shrink-0" />
