@@ -69,7 +69,7 @@ export function AdminSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="p-3">
-        <button className="flex items-center gap-3 px-3 py-2 text-sidebar-foreground/60 hover:text-sidebar-foreground transition-colors w-full rounded-md hover:bg-sidebar-accent text-sm">
+        <button onClick={handleLogout} className="flex items-center gap-3 px-3 py-2 text-sidebar-foreground/60 hover:text-sidebar-foreground transition-colors w-full rounded-md hover:bg-sidebar-accent text-sm">
           <LogOut className="h-4 w-4" />
           {!collapsed && <span>Logga ut</span>}
         </button>
