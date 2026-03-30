@@ -5,10 +5,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/StatusBadge';
 import { PriorityBadge } from '@/components/PriorityBadge';
-import { mockAssignments } from '@/lib/mock-data';
+import { useAssignment, useUpdateAssignment } from '@/hooks/useData';
 import { formatSwedishDateTime, calculateDuration } from '@/lib/format';
 import { ArrowLeft, Play, Camera, CheckCircle2, MapPin, Clock, FileText, Info } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { Skeleton } from '@/components/ui/skeleton';
 
 function ElapsedTimer({ since }: { since: string }) {
   const [elapsed, setElapsed] = useState('');
@@ -36,15 +38,23 @@ function ElapsedTimer({ since }: { since: string }) {
 export default function DriverAssignmentDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [assignment, setAssignment] = useState(() => mockAssignments.find(a => a.id === id));
+  const { data: assignment, isLoading } = useAssignment(id);
+  const updateAssignment = useUpdateAssignment();
+
+  if (isLoading) {
+    return <DriverLayout><div className="p-4 space-y-4"><Skeleton className="h-8 w-32" /><Skeleton className="h-64 w-full" /></div></DriverLayout>;
+  }
 
   if (!assignment) {
     return <DriverLayout><div className="text-center py-12 text-muted-foreground">Uppdraget hittades inte</div></DriverLayout>;
   }
 
   const handleStart = () => {
-    setAssignment({ ...assignment, status: 'active', actual_start: new Date().toISOString() });
-    toast.success('Uppdraget har startats');
+    updateAssignment.mutate({
+      id: assignment.id,
+      status: 'active',
+      actual_start: new Date().toISOString(),
+    });
   };
 
   const handleComplete = () => {
@@ -52,9 +62,25 @@ export default function DriverAssignmentDetail() {
     input.type = 'file';
     input.accept = 'image/*';
     input.capture = 'environment';
-    input.onchange = () => {
-      setAssignment({ ...assignment, status: 'completed', actual_stop: new Date().toISOString(), consignment_photo_url: '/placeholder.svg' });
-      toast.success('Uppdraget är slutfört');
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      let photoUrl: string | null = null;
+
+      if (file) {
+        const path = `${assignment.id}/${Date.now()}.${file.name.split('.').pop()}`;
+        const { error } = await supabase.storage.from('consignment-notes').upload(path, file);
+        if (!error) {
+          const { data } = supabase.storage.from('consignment-notes').getPublicUrl(path);
+          photoUrl = data.publicUrl;
+        }
+      }
+
+      updateAssignment.mutate({
+        id: assignment.id,
+        status: 'completed',
+        actual_stop: new Date().toISOString(),
+        consignment_photo_url: photoUrl,
+      });
     };
     input.click();
   };
@@ -112,7 +138,7 @@ export default function DriverAssignmentDetail() {
         </Card>
 
         {assignment.status === 'pending' && (
-          <Button onClick={handleStart} className="w-full touch-target text-lg bg-success hover:bg-success/90 text-success-foreground" size="lg">
+          <Button onClick={handleStart} disabled={updateAssignment.isPending} className="w-full touch-target text-lg bg-success hover:bg-success/90 text-success-foreground" size="lg">
             <Play className="h-5 w-5 mr-2" /> Starta uppdrag
           </Button>
         )}
@@ -120,7 +146,7 @@ export default function DriverAssignmentDetail() {
         {assignment.status === 'active' && assignment.actual_start && (
           <>
             <ElapsedTimer since={assignment.actual_start} />
-            <Button onClick={handleComplete} className="w-full touch-target text-lg" size="lg">
+            <Button onClick={handleComplete} disabled={updateAssignment.isPending} className="w-full touch-target text-lg" size="lg">
               <Camera className="h-5 w-5 mr-2" /> Slutför och fotografera fraktsedel
             </Button>
           </>
