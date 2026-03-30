@@ -65,42 +65,42 @@ export default function AdminStatistics() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card><CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><ClipboardList className="h-5 w-5 text-primary" /></div>
+          <div className="stat-card">
+            <div className="flex items-center gap-4">
+              <div className="stat-card-icon bg-primary/10 text-primary"><ClipboardList className="h-5 w-5" /></div>
               <div>
-                {loadingA ? <Skeleton className="h-8 w-12" /> : <p className="text-2xl font-bold">{completed.length}</p>}
-                <p className="text-sm text-muted-foreground">Leveranser</p>
+                {loadingA ? <Skeleton className="h-8 w-12" /> : <p className="stat-card-value">{completed.length}</p>}
+                <p className="stat-card-label">Leveranser</p>
               </div>
             </div>
-          </CardContent></Card>
-          <Card><CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-success/10 flex items-center justify-center"><Clock className="h-5 w-5 text-success" /></div>
+          </div>
+          <div className="stat-card">
+            <div className="flex items-center gap-4">
+              <div className="stat-card-icon bg-success/10 text-success"><Clock className="h-5 w-5" /></div>
               <div>
-                {loadingA ? <Skeleton className="h-8 w-12" /> : <p className="text-2xl font-bold">{totalHours.toFixed(1)}</p>}
-                <p className="text-sm text-muted-foreground">Körtimmar</p>
+                {loadingA ? <Skeleton className="h-8 w-12" /> : <p className="stat-card-value">{totalHours.toFixed(1)}</p>}
+                <p className="stat-card-label">Körtimmar</p>
               </div>
             </div>
-          </CardContent></Card>
-          <Card><CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-warning/10 flex items-center justify-center"><Building2 className="h-5 w-5 text-warning" /></div>
+          </div>
+          <div className="stat-card">
+            <div className="flex items-center gap-4">
+              <div className="stat-card-icon bg-warning/10 text-warning"><Building2 className="h-5 w-5" /></div>
               <div>
-                {loadingA ? <Skeleton className="h-8 w-12" /> : <p className="text-2xl font-bold">{activeCustomers}</p>}
-                <p className="text-sm text-muted-foreground">Aktiva kunder</p>
+                {loadingA ? <Skeleton className="h-8 w-12" /> : <p className="stat-card-value">{activeCustomers}</p>}
+                <p className="stat-card-label">Aktiva kunder</p>
               </div>
             </div>
-          </CardContent></Card>
-          <Card><CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><Receipt className="h-5 w-5 text-primary" /></div>
+          </div>
+          <div className="stat-card">
+            <div className="flex items-center gap-4">
+              <div className="stat-card-icon bg-info/10 text-info"><Receipt className="h-5 w-5" /></div>
               <div>
-                {loadingA ? <Skeleton className="h-8 w-12" /> : <p className="text-2xl font-bold">{invoicedAmount.toFixed(0)}</p>}
-                <p className="text-sm text-muted-foreground">Fakturerat (kr)</p>
+                {loadingA ? <Skeleton className="h-8 w-12" /> : <p className="stat-card-value">{invoicedAmount.toFixed(0)}</p>}
+                <p className="stat-card-label">Fakturerat (kr)</p>
               </div>
             </div>
-          </CardContent></Card>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
