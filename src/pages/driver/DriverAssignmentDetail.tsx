@@ -7,10 +7,16 @@ import { StatusBadge } from '@/components/StatusBadge';
 import { PriorityBadge } from '@/components/PriorityBadge';
 import { useAssignment, useUpdateAssignment } from '@/hooks/useData';
 import { formatSwedishDateTime, calculateDuration } from '@/lib/format';
-import { ArrowLeft, Play, Camera, CheckCircle2, MapPin, Clock, FileText, Info } from 'lucide-react';
+import { ArrowLeft, Play, Camera, CheckCircle2, MapPin, Clock, FileText, Info, Navigation, SkipForward } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
+
+function openMaps(address: string) {
+  const encoded = encodeURIComponent(address);
+  const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  window.open(isIos ? `maps://maps.apple.com/?q=${encoded}` : `https://www.google.com/maps/search/?api=1&query=${encoded}`, '_blank');
+}
 
 function ElapsedTimer({ since }: { since: string }) {
   const [elapsed, setElapsed] = useState('');
@@ -57,7 +63,7 @@ export default function DriverAssignmentDetail() {
     });
   };
 
-  const handleComplete = () => {
+  const handleCompleteWithPhoto = () => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
@@ -81,8 +87,18 @@ export default function DriverAssignmentDetail() {
         actual_stop: new Date().toISOString(),
         consignment_photo_url: photoUrl,
       });
+      toast.success('Uppdraget slutfört!');
     };
     input.click();
+  };
+
+  const handleCompleteWithoutPhoto = () => {
+    updateAssignment.mutate({
+      id: assignment.id,
+      status: 'completed',
+      actual_stop: new Date().toISOString(),
+    });
+    toast.success('Uppdraget slutfört utan foto');
   };
 
   return (
@@ -109,7 +125,16 @@ export default function DriverAssignmentDetail() {
               </div>
               <div className="flex items-start gap-2">
                 <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                <div><p className="text-muted-foreground">Adress</p><p className="font-medium">{assignment.address}</p></div>
+                <div className="flex-1">
+                  <p className="text-muted-foreground">Adress</p>
+                  <button
+                    onClick={() => openMaps(assignment.address)}
+                    className="font-medium text-primary hover:underline flex items-center gap-1 text-left"
+                  >
+                    {assignment.address}
+                    <Navigation className="h-3.5 w-3.5 shrink-0" />
+                  </button>
+                </div>
               </div>
               <div className="flex items-start gap-2">
                 <Clock className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
@@ -146,9 +171,14 @@ export default function DriverAssignmentDetail() {
         {assignment.status === 'active' && assignment.actual_start && (
           <>
             <ElapsedTimer since={assignment.actual_start} />
-            <Button onClick={handleComplete} disabled={updateAssignment.isPending} className="w-full touch-target text-lg" size="lg">
-              <Camera className="h-5 w-5 mr-2" /> Slutför och fotografera fraktsedel
-            </Button>
+            <div className="space-y-2">
+              <Button onClick={handleCompleteWithPhoto} disabled={updateAssignment.isPending} className="w-full touch-target text-lg" size="lg">
+                <Camera className="h-5 w-5 mr-2" /> Slutför med fraktsedelfoto
+              </Button>
+              <Button onClick={handleCompleteWithoutPhoto} disabled={updateAssignment.isPending} variant="outline" className="w-full touch-target" size="lg">
+                <SkipForward className="h-5 w-5 mr-2" /> Slutför utan foto
+              </Button>
+            </div>
           </>
         )}
 
