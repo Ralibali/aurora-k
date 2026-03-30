@@ -4,15 +4,18 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { mockCustomers } from '@/lib/mock-data';
+import { useCustomers } from '@/hooks/useData';
 import { pricingTypeLabels } from '@/lib/types';
 import { Plus, Search } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AdminCustomers() {
   const [search, setSearch] = useState('');
+  const navigate = useNavigate();
+  const { data: customers, isLoading } = useCustomers();
 
-  const filtered = mockCustomers.filter(c =>
+  const filtered = (customers ?? []).filter(c =>
     !search || c.name.toLowerCase().includes(search.toLowerCase()) ||
     c.org_number?.toLowerCase().includes(search.toLowerCase())
   );
@@ -44,17 +47,20 @@ export default function AdminCustomers() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filtered.map(c => (
-                  <TableRow key={c.id} className="cursor-pointer hover:bg-muted/50" onClick={() => window.location.href = `/admin/customers/${c.id}`}>
+                {isLoading && [1, 2, 3].map(i => (
+                  <TableRow key={i}><TableCell colSpan={6}><Skeleton className="h-8 w-full" /></TableCell></TableRow>
+                ))}
+                {!isLoading && filtered.map(c => (
+                  <TableRow key={c.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/admin/customers/${c.id}`)}>
                     <TableCell className="font-medium">{c.name}</TableCell>
                     <TableCell className="hidden md:table-cell text-muted-foreground">{c.org_number || '–'}</TableCell>
                     <TableCell className="hidden md:table-cell">{c.contact_person || '–'}</TableCell>
                     <TableCell className="hidden sm:table-cell text-muted-foreground">{c.email || '–'}</TableCell>
                     <TableCell className="hidden sm:table-cell text-muted-foreground">{c.phone || '–'}</TableCell>
-                    <TableCell><span className="status-badge status-pending">{pricingTypeLabels[c.pricing_type]}</span></TableCell>
+                    <TableCell><span className="status-badge status-pending">{pricingTypeLabels[c.pricing_type as keyof typeof pricingTypeLabels] || c.pricing_type}</span></TableCell>
                   </TableRow>
                 ))}
-                {filtered.length === 0 && (
+                {!isLoading && filtered.length === 0 && (
                   <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Inga kunder hittades</TableCell></TableRow>
                 )}
               </TableBody>

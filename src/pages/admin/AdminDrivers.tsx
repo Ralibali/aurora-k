@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { AdminLayout } from '@/components/AdminLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { mockDrivers, mockAssignments } from '@/lib/mock-data';
-import { toast } from 'sonner';
+import { useDrivers, useAssignments } from '@/hooks/useData';
 import { Plus, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Dialog,
   DialogContent,
@@ -18,9 +19,11 @@ import {
 
 export default function AdminDrivers() {
   const [open, setOpen] = useState(false);
+  const { data: drivers, isLoading } = useDrivers();
+  const { data: assignments } = useAssignments();
 
   const getCompletedCount = (driverId: string) =>
-    mockAssignments.filter(a => a.assigned_driver_id === driverId && a.status === 'completed').length;
+    (assignments ?? []).filter(a => a.assigned_driver_id === driverId && a.status === 'completed').length;
 
   return (
     <AdminLayout title="Chaufförshantering">
@@ -39,7 +42,7 @@ export default function AdminDrivers() {
               </DialogHeader>
               <form onSubmit={(e) => {
                 e.preventDefault();
-                toast.success('Inbjudan skickad!');
+                toast.info('Skapa chaufförskonto kräver admin-registrering – kontakta support');
                 setOpen(false);
               }} className="space-y-4">
                 <div className="space-y-2">
@@ -68,7 +71,10 @@ export default function AdminDrivers() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {mockDrivers.map(driver => (
+                {isLoading && [1, 2].map(i => (
+                  <TableRow key={i}><TableCell colSpan={4}><Skeleton className="h-8 w-full" /></TableCell></TableRow>
+                ))}
+                {(drivers ?? []).map(driver => (
                   <TableRow key={driver.id}>
                     <TableCell className="font-medium">{driver.full_name}</TableCell>
                     <TableCell className="text-muted-foreground">{driver.email}</TableCell>
@@ -78,13 +84,16 @@ export default function AdminDrivers() {
                         variant="ghost"
                         size="icon"
                         className="text-destructive hover:text-destructive"
-                        onClick={() => toast.success('Chaufför borttagen')}
+                        onClick={() => toast.info('Ta bort chaufför kräver admin-åtkomst')}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </TableCell>
                   </TableRow>
                 ))}
+                {!isLoading && (drivers ?? []).length === 0 && (
+                  <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-8">Inga chaufförer</TableCell></TableRow>
+                )}
               </TableBody>
             </Table>
           </CardContent>

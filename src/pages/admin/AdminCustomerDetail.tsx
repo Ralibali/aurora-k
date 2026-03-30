@@ -10,23 +10,40 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { StatusBadge } from '@/components/StatusBadge';
 import { InvoiceStatusBadge } from '@/components/InvoiceStatusBadge';
-import { mockCustomers, mockAssignments, mockInvoices } from '@/lib/mock-data';
+import { useCustomer, useUpdateCustomer, useAssignments, useInvoices } from '@/hooks/useData';
 import { pricingTypeLabels } from '@/lib/types';
-import { formatSwedishDate, formatSwedishTime, calculateDecimalHours } from '@/lib/format';
+import { formatSwedishDate, calculateDecimalHours } from '@/lib/format';
 import { ArrowLeft, Save } from 'lucide-react';
-import { toast } from 'sonner';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AdminCustomerDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const customer = mockCustomers.find(c => c.id === id);
+  const { data: customer, isLoading } = useCustomer(id);
+  const { data: allAssignments } = useAssignments();
+  const { data: allInvoices } = useInvoices();
+  const updateCustomer = useUpdateCustomer();
+
+  const [form, setForm] = useState<Record<string, any> | null>(null);
+
+  if (isLoading) {
+    return <AdminLayout title="Kund"><div className="max-w-4xl space-y-4"><Skeleton className="h-8 w-32" /><Skeleton className="h-96 w-full" /></div></AdminLayout>;
+  }
 
   if (!customer) {
     return <AdminLayout title="Kund"><div className="text-center py-12 text-muted-foreground">Kunden hittades inte</div></AdminLayout>;
   }
 
-  const customerAssignments = mockAssignments.filter(a => a.customer_id === id && a.status === 'completed');
-  const customerInvoices = mockInvoices.filter(i => i.customer_id === id);
+  const f = form || customer;
+  const setField = (key: string, value: any) => setForm(prev => ({ ...(prev || customer), [key]: value }));
+
+  const customerAssignments = (allAssignments ?? []).filter(a => a.customer_id === id && a.status === 'completed');
+  const customerInvoices = (allInvoices ?? []).filter(i => i.customer_id === id);
+
+  const handleSave = () => {
+    if (!form) return;
+    updateCustomer.mutate({ id: customer.id, ...form });
+  };
 
   return (
     <AdminLayout title={customer.name}>
@@ -48,35 +65,35 @@ export default function AdminCustomerDetail() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Företagsnamn</Label>
-                    <Input defaultValue={customer.name} />
+                    <Input value={f.name} onChange={e => setField('name', e.target.value)} />
                   </div>
                   <div className="space-y-2">
                     <Label>Organisationsnummer</Label>
-                    <Input defaultValue={customer.org_number || ''} />
+                    <Input value={f.org_number || ''} onChange={e => setField('org_number', e.target.value || null)} />
                   </div>
                   <div className="space-y-2">
                     <Label>Fakturaadress</Label>
-                    <Input defaultValue={customer.invoice_address || ''} />
+                    <Input value={f.invoice_address || ''} onChange={e => setField('invoice_address', e.target.value || null)} />
                   </div>
                   <div className="space-y-2">
                     <Label>Besöksadress</Label>
-                    <Input defaultValue={customer.visit_address || ''} />
+                    <Input value={f.visit_address || ''} onChange={e => setField('visit_address', e.target.value || null)} />
                   </div>
                   <div className="space-y-2">
                     <Label>Kontaktperson</Label>
-                    <Input defaultValue={customer.contact_person || ''} />
+                    <Input value={f.contact_person || ''} onChange={e => setField('contact_person', e.target.value || null)} />
                   </div>
                   <div className="space-y-2">
                     <Label>E-post</Label>
-                    <Input defaultValue={customer.email || ''} />
+                    <Input value={f.email || ''} onChange={e => setField('email', e.target.value || null)} />
                   </div>
                   <div className="space-y-2">
                     <Label>Telefon</Label>
-                    <Input defaultValue={customer.phone || ''} />
+                    <Input value={f.phone || ''} onChange={e => setField('phone', e.target.value || null)} />
                   </div>
                   <div className="space-y-2">
                     <Label>Betalningsvillkor (dagar)</Label>
-                    <Input type="number" defaultValue={customer.payment_terms_days} />
+                    <Input type="number" value={f.payment_terms_days} onChange={e => setField('payment_terms_days', parseInt(e.target.value) || 30)} />
                   </div>
                 </div>
 
@@ -84,8 +101,8 @@ export default function AdminCustomerDetail() {
                   <Label className="text-base font-semibold mb-3 block">Prissättning</Label>
                   <div className="flex gap-3 mb-3">
                     {(['per_delivery', 'per_hour', 'manual'] as const).map(t => (
-                      <label key={t} className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer ${customer.pricing_type === t ? 'border-primary bg-primary/5' : 'border-border'}`}>
-                        <input type="radio" name="pricing" defaultChecked={customer.pricing_type === t} className="accent-primary" />
+                      <label key={t} className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer ${f.pricing_type === t ? 'border-primary bg-primary/5' : 'border-border'}`}>
+                        <input type="radio" name="pricing" checked={f.pricing_type === t} onChange={() => setField('pricing_type', t)} className="accent-primary" />
                         <span className="text-sm">{pricingTypeLabels[t]}</span>
                       </label>
                     ))}
@@ -93,21 +110,23 @@ export default function AdminCustomerDetail() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Pris per leverans (kr)</Label>
-                      <Input type="number" defaultValue={customer.price_per_delivery || ''} />
+                      <Input type="number" value={f.price_per_delivery ?? ''} onChange={e => setField('price_per_delivery', e.target.value ? parseFloat(e.target.value) : null)} />
                     </div>
                     <div className="space-y-2">
                       <Label>Timpris (kr)</Label>
-                      <Input type="number" defaultValue={customer.price_per_hour || ''} />
+                      <Input type="number" value={f.price_per_hour ?? ''} onChange={e => setField('price_per_hour', e.target.value ? parseFloat(e.target.value) : null)} />
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <Label>Anteckningar</Label>
-                  <Textarea defaultValue={customer.notes || ''} />
+                  <Textarea value={f.notes || ''} onChange={e => setField('notes', e.target.value || null)} />
                 </div>
 
-                <Button onClick={() => toast.success('Kund sparad!')}><Save className="h-4 w-4 mr-1" /> Spara</Button>
+                <Button onClick={handleSave} disabled={updateCustomer.isPending}>
+                  <Save className="h-4 w-4 mr-1" /> {updateCustomer.isPending ? 'Sparar...' : 'Spara'}
+                </Button>
               </CardContent>
             </Card>
           </TabsContent>

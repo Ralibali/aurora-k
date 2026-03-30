@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AdminLayout } from '@/components/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,19 +7,29 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { StatusBadge } from '@/components/StatusBadge';
 import { PriorityBadge } from '@/components/PriorityBadge';
-import { mockAssignments } from '@/lib/mock-data';
+import { useAssignment, useUpdateAssignment, useDeleteAssignment } from '@/hooks/useData';
 import { formatSwedishDateTime, calculateDuration } from '@/lib/format';
-import { ArrowLeft, Trash2, Edit, Copy } from 'lucide-react';
+import { ArrowLeft, Trash2, Copy } from 'lucide-react';
 import { toast } from 'sonner';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AdminAssignmentDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const assignment = mockAssignments.find(a => a.id === id);
+  const { data: assignment, isLoading } = useAssignment(id);
+  const updateAssignment = useUpdateAssignment();
+  const deleteAssignment = useDeleteAssignment();
+  const [comment, setComment] = useState<string | null>(null);
+
+  if (isLoading) {
+    return <AdminLayout title="Uppdragsdetaljer"><div className="max-w-2xl space-y-4"><Skeleton className="h-8 w-32" /><Skeleton className="h-64 w-full" /></div></AdminLayout>;
+  }
 
   if (!assignment) {
     return <AdminLayout title="Uppdrag"><div className="text-center py-12 text-muted-foreground">Uppdraget hittades inte</div></AdminLayout>;
   }
+
+  const currentComment = comment !== null ? comment : (assignment.admin_comment || '');
 
   return (
     <AdminLayout title="Uppdragsdetaljer">
@@ -92,26 +103,24 @@ export default function AdminAssignmentDetail() {
               </div>
             )}
 
-            {/* Admin comment */}
             <div className="border-t pt-4 space-y-2">
               <Label>Intern kommentar (visas för chauffören)</Label>
-              <Textarea defaultValue={assignment.admin_comment || ''} placeholder="Skriv kommentar till chauffören..." />
-              <Button size="sm" variant="outline" onClick={() => toast.success('Kommentar sparad')}>Spara kommentar</Button>
+              <Textarea value={currentComment} onChange={(e) => setComment(e.target.value)} placeholder="Skriv kommentar till chauffören..." />
+              <Button size="sm" variant="outline" onClick={() => {
+                updateAssignment.mutate({ id: assignment.id, admin_comment: currentComment || null });
+              }}>Spara kommentar</Button>
             </div>
 
             <div className="flex gap-2 pt-2 flex-wrap">
-              <Button variant="outline" size="sm">
-                <Edit className="h-4 w-4 mr-1" /> Redigera
-              </Button>
               <Button variant="outline" size="sm" onClick={() => {
-                toast.success('Uppdraget kopierat – fyll i nytt datum');
-                navigate('/admin/assignments/new');
+                navigate('/admin/assignments/new', { state: { copy: assignment } });
               }}>
                 <Copy className="h-4 w-4 mr-1" /> Kopiera uppdrag
               </Button>
               <Button variant="destructive" size="sm" onClick={() => {
-                toast.success('Uppdraget borttaget');
-                navigate('/admin/assignments');
+                deleteAssignment.mutate(assignment.id, {
+                  onSuccess: () => navigate('/admin/assignments'),
+                });
               }}>
                 <Trash2 className="h-4 w-4 mr-1" /> Ta bort
               </Button>

@@ -6,16 +6,21 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { mockAssignments, mockDrivers, mockCustomers } from '@/lib/mock-data';
+import { useAssignments, useDrivers, useCustomers } from '@/hooks/useData';
 import { formatSwedishDate, formatSwedishTime, calculateDecimalHours } from '@/lib/format';
 import { FileText, FileSpreadsheet, Receipt } from 'lucide-react';
 import { toast } from 'sonner';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AdminReports() {
   const [driverFilter, setDriverFilter] = useState<string>('all');
   const [customerFilter, setCustomerFilter] = useState<string>('all');
 
-  const completedAssignments = mockAssignments.filter(a => {
+  const { data: assignments, isLoading } = useAssignments();
+  const { data: drivers } = useDrivers();
+  const { data: customers } = useCustomers();
+
+  const completedAssignments = (assignments ?? []).filter(a => {
     if (a.status !== 'completed' || !a.actual_start || !a.actual_stop) return false;
     if (driverFilter !== 'all' && a.assigned_driver_id !== driverFilter) return false;
     if (customerFilter !== 'all' && a.customer_id !== customerFilter) return false;
@@ -27,48 +32,27 @@ export default function AdminReports() {
     return sum + calculateDecimalHours(a.actual_start, a.actual_stop);
   }, 0);
 
-  const handleExportPDF = () => {
-    toast.info('PDF-export kommer att kopplas till backend');
-  };
-
-  const handleExportExcel = () => {
-    toast.info('Excel-export kommer att kopplas till backend');
-  };
-
-  const handleExportInvoice = () => {
-    toast.info('Faktureringsunderlag kommer att kopplas till backend');
-  };
-
   return (
     <AdminLayout title="Tidrapporter & Export">
       <div className="space-y-4 max-w-5xl">
-        {/* Filters */}
         <div className="flex flex-wrap gap-3">
           <div className="space-y-1">
             <Label className="text-xs text-muted-foreground">Chaufför</Label>
             <Select value={driverFilter} onValueChange={setDriverFilter}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Alla" />
-              </SelectTrigger>
+              <SelectTrigger className="w-[180px]"><SelectValue placeholder="Alla" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Alla chaufförer</SelectItem>
-                {mockDrivers.map(d => (
-                  <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>
-                ))}
+                {(drivers ?? []).map(d => <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-1">
             <Label className="text-xs text-muted-foreground">Kund</Label>
             <Select value={customerFilter} onValueChange={setCustomerFilter}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Alla" />
-              </SelectTrigger>
+              <SelectTrigger className="w-[180px]"><SelectValue placeholder="Alla" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Alla kunder</SelectItem>
-                {mockCustomers.map(c => (
-                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                ))}
+                {(customers ?? []).map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
@@ -82,20 +66,18 @@ export default function AdminReports() {
           </div>
         </div>
 
-        {/* Export buttons */}
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" onClick={handleExportPDF}>
+          <Button variant="outline" size="sm" onClick={() => toast.info('PDF-export kommer snart')}>
             <FileText className="h-4 w-4 mr-1" /> Exportera PDF
           </Button>
-          <Button variant="outline" size="sm" onClick={handleExportExcel}>
+          <Button variant="outline" size="sm" onClick={() => toast.info('Excel-export kommer snart')}>
             <FileSpreadsheet className="h-4 w-4 mr-1" /> Exportera Excel
           </Button>
-          <Button variant="outline" size="sm" onClick={handleExportInvoice}>
+          <Button variant="outline" size="sm" onClick={() => toast.info('Faktureringsunderlag kommer snart')}>
             <Receipt className="h-4 w-4 mr-1" /> Faktureringsunderlag
           </Button>
         </div>
 
-        {/* Table */}
         <Card>
           <CardContent className="p-0">
             <Table>
@@ -111,7 +93,10 @@ export default function AdminReports() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {completedAssignments.length === 0 && (
+                {isLoading && [1, 2, 3].map(i => (
+                  <TableRow key={i}><TableCell colSpan={7}><Skeleton className="h-8 w-full" /></TableCell></TableRow>
+                ))}
+                {!isLoading && completedAssignments.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                       Inga slutförda uppdrag för vald period

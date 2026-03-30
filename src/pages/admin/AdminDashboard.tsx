@@ -1,21 +1,26 @@
 import { AdminLayout } from '@/components/AdminLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { StatusBadge } from '@/components/StatusBadge';
-import { mockAssignments } from '@/lib/mock-data';
+import { useAssignments } from '@/hooks/useData';
 import { formatSwedishDateTime } from '@/lib/format';
 import { ClipboardList, CheckCircle2, Loader2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AdminDashboard() {
-  const today = mockAssignments;
-  const completed = today.filter(a => a.status === 'completed').length;
-  const active = today.filter(a => a.status === 'active').length;
+  const { data: assignments, isLoading } = useAssignments();
+
+  const today = new Date().toISOString().split('T')[0];
+  const todayAssignments = (assignments ?? []).filter(a =>
+    a.scheduled_start.startsWith(today)
+  );
+  const completed = todayAssignments.filter(a => a.status === 'completed').length;
+  const active = todayAssignments.filter(a => a.status === 'active').length;
 
   return (
     <AdminLayout title="Dashboard">
       <div className="space-y-6 max-w-5xl">
-        {/* Summary cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Card>
             <CardContent className="pt-6">
@@ -24,7 +29,7 @@ export default function AdminDashboard() {
                   <ClipboardList className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{today.length}</p>
+                  {isLoading ? <Skeleton className="h-8 w-12" /> : <p className="text-2xl font-bold">{todayAssignments.length}</p>}
                   <p className="text-sm text-muted-foreground">Dagens uppdrag</p>
                 </div>
               </div>
@@ -37,7 +42,7 @@ export default function AdminDashboard() {
                   <CheckCircle2 className="h-5 w-5 text-success" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{completed}</p>
+                  {isLoading ? <Skeleton className="h-8 w-12" /> : <p className="text-2xl font-bold">{completed}</p>}
                   <p className="text-sm text-muted-foreground">Slutförda idag</p>
                 </div>
               </div>
@@ -50,7 +55,7 @@ export default function AdminDashboard() {
                   <Loader2 className="h-5 w-5 text-warning" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{active}</p>
+                  {isLoading ? <Skeleton className="h-8 w-12" /> : <p className="text-2xl font-bold">{active}</p>}
                   <p className="text-sm text-muted-foreground">Aktiva just nu</p>
                 </div>
               </div>
@@ -58,7 +63,6 @@ export default function AdminDashboard() {
           </Card>
         </div>
 
-        {/* Actions */}
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">Dagens uppdrag</h2>
           <Button asChild size="sm">
@@ -68,9 +72,12 @@ export default function AdminDashboard() {
           </Button>
         </div>
 
-        {/* Assignment list */}
         <div className="space-y-2">
-          {today.map((a) => (
+          {isLoading && [1, 2, 3].map(i => <Skeleton key={i} className="h-20 w-full rounded-lg" />)}
+          {!isLoading && todayAssignments.length === 0 && (
+            <p className="text-center text-muted-foreground py-8">Inga uppdrag idag</p>
+          )}
+          {todayAssignments.map((a) => (
             <Link key={a.id} to={`/admin/assignments/${a.id}`} className="block">
               <Card className="hover:shadow-md transition-shadow cursor-pointer">
                 <CardContent className="py-4 flex items-center justify-between gap-3">
