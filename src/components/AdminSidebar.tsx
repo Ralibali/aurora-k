@@ -1,6 +1,7 @@
 import { LayoutDashboard, ClipboardList, Users, Clock, LogOut, Building2, Receipt, BarChart3, Settings } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
-import { useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 import {
   Sidebar,
   SidebarContent,
