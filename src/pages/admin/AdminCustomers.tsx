@@ -21,8 +21,8 @@ export default function AdminCustomers() {
   );
 
   return (
-    <AdminLayout title="Kundregister">
-      <div className="space-y-4 max-w-6xl">
+    <AdminLayout title="Kundregister" description="Hantera kunder och prissättning">
+      <div className="space-y-5 max-w-6xl">
         <div className="flex flex-wrap gap-3">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -33,8 +33,8 @@ export default function AdminCustomers() {
           </Button>
         </div>
 
-        <Card>
-          <CardContent className="p-0">
+        <div className="admin-table-card">
+          <div className="p-0">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -65,8 +65,8 @@ export default function AdminCustomers() {
                 )}
               </TableBody>
             </Table>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </AdminLayout>
   );

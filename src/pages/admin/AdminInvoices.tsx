@@ -94,8 +94,8 @@ export default function AdminInvoices() {
   };
 
   return (
-    <AdminLayout title="Fakturering">
-      <div className="space-y-4 max-w-6xl">
+    <AdminLayout title="Fakturering" description="Skapa, exportera och hantera fakturor">
+      <div className="space-y-5 max-w-6xl">
         <div className="flex flex-wrap gap-3">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-[160px]"><SelectValue placeholder="Status" /></SelectTrigger>
@@ -160,8 +160,8 @@ export default function AdminInvoices() {
           </Button>
         </div>
 
-        <Card>
-          <CardContent className="p-0">
+        <div className="admin-table-card">
+          <div className="p-0">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -206,8 +206,8 @@ export default function AdminInvoices() {
                 ))}
               </TableBody>
             </Table>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </AdminLayout>
   );

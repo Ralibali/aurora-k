@@ -43,8 +43,8 @@ export default function AdminAssignments() {
   };
 
   return (
-    <AdminLayout title="Uppdragshantering">
-      <div className="space-y-4 max-w-5xl">
+    <AdminLayout title="Uppdragshantering" description="Hantera och fördela uppdrag till chaufförer">
+      <div className="space-y-5 max-w-6xl">
         <div className="flex flex-wrap gap-3">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -79,8 +79,8 @@ export default function AdminAssignments() {
           </div>
         )}
 
-        <div className="space-y-2">
-          {isLoading && [1, 2, 3].map(i => <Skeleton key={i} className="h-20 w-full rounded-lg" />)}
+        <div className="space-y-3">
+          {isLoading && [1, 2, 3].map(i => <Skeleton key={i} className="h-20 w-full rounded-xl" />)}
           {!isLoading && filtered.length > 0 && (
             <div className="flex items-center gap-2 px-2">
               <Checkbox checked={selected.length === filtered.length && filtered.length > 0} onCheckedChange={toggleAll} />
@@ -92,7 +92,7 @@ export default function AdminAssignments() {
             <div key={a.id} className="flex items-center gap-2">
               <Checkbox checked={selected.includes(a.id)} onCheckedChange={() => toggleSelect(a.id)} />
               <Link to={`/admin/assignments/${a.id}`} className="block flex-1">
-                <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                <Card className="hover:shadow-md hover:border-primary/20 transition-all duration-150 cursor-pointer">
                   <CardContent className="py-4">
                     <div className="flex items-center justify-between gap-3">
                       <div className="min-w-0 flex-1">
