@@ -163,7 +163,7 @@ export default function DriverAssignmentDetail() {
         </Card>
 
         {assignment.status === 'pending' && (
-          <Button onClick={handleStart} disabled={updateAssignment.isPending} className="w-full touch-target text-lg bg-success hover:bg-success/90 text-success-foreground" size="lg">
+          <Button onClick={handleStart} disabled={updateAssignment.isPending} className="w-full touch-target text-lg bg-success hover:bg-success/90 text-success-foreground shadow-lg shadow-success/20" size="lg">
             <Play className="h-5 w-5 mr-2" /> Starta uppdrag
           </Button>
         )}
