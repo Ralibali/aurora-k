@@ -1,4 +1,4 @@
-import { LayoutDashboard, ClipboardList, Users, Clock, LogOut } from 'lucide-react';
+import { LayoutDashboard, ClipboardList, Users, Clock, LogOut, Building2, Receipt, BarChart3, Settings } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
 import {
@@ -17,14 +17,17 @@ import {
 const navItems = [
   { title: 'Dashboard', url: '/admin', icon: LayoutDashboard },
   { title: 'Uppdrag', url: '/admin/assignments', icon: ClipboardList },
+  { title: 'Kunder', url: '/admin/customers', icon: Building2 },
   { title: 'Chaufförer', url: '/admin/drivers', icon: Users },
+  { title: 'Fakturering', url: '/admin/invoices', icon: Receipt },
   { title: 'Tidrapporter', url: '/admin/reports', icon: Clock },
+  { title: 'Statistik', url: '/admin/statistics', icon: BarChart3 },
+  { title: 'Inställningar', url: '/admin/settings', icon: Settings },
 ];
 
 export function AdminSidebar() {
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
-  const location = useLocation();
 
   return (
     <Sidebar collapsible="icon">

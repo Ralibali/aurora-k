@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { mockCustomers, mockDrivers } from '@/lib/mock-data';
+import { priorityLabels } from '@/lib/types';
 import { toast } from 'sonner';
 import { ArrowLeft, Plus } from 'lucide-react';
 
@@ -15,6 +16,7 @@ export default function AdminNewAssignment() {
   const navigate = useNavigate();
   const [showNewCustomer, setShowNewCustomer] = useState(false);
   const [newCustomerName, setNewCustomerName] = useState('');
+  const [priority, setPriority] = useState('normal');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,9 +32,7 @@ export default function AdminNewAssignment() {
         </Button>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Skapa nytt uppdrag</CardTitle>
-          </CardHeader>
+          <CardHeader><CardTitle>Skapa nytt uppdrag</CardTitle></CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
@@ -45,13 +45,9 @@ export default function AdminNewAssignment() {
                 {!showNewCustomer ? (
                   <div className="flex gap-2">
                     <Select required>
-                      <SelectTrigger className="flex-1">
-                        <SelectValue placeholder="Välj kund" />
-                      </SelectTrigger>
+                      <SelectTrigger className="flex-1"><SelectValue placeholder="Välj kund" /></SelectTrigger>
                       <SelectContent>
-                        {mockCustomers.map(c => (
-                          <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                        ))}
+                        {mockCustomers.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
                       </SelectContent>
                     </Select>
                     <Button type="button" variant="outline" size="icon" onClick={() => setShowNewCustomer(true)}>
@@ -60,23 +56,11 @@ export default function AdminNewAssignment() {
                   </div>
                 ) : (
                   <div className="flex gap-2">
-                    <Input
-                      placeholder="Ny kund namn"
-                      value={newCustomerName}
-                      onChange={(e) => setNewCustomerName(e.target.value)}
-                    />
+                    <Input placeholder="Ny kund namn" value={newCustomerName} onChange={(e) => setNewCustomerName(e.target.value)} />
                     <Button type="button" variant="outline" size="sm" onClick={() => {
-                      if (newCustomerName.trim()) {
-                        toast.success(`Kund "${newCustomerName}" skapad`);
-                        setShowNewCustomer(false);
-                        setNewCustomerName('');
-                      }
-                    }}>
-                      Lägg till
-                    </Button>
-                    <Button type="button" variant="ghost" size="sm" onClick={() => setShowNewCustomer(false)}>
-                      Avbryt
-                    </Button>
+                      if (newCustomerName.trim()) { toast.success(`Kund "${newCustomerName}" skapad`); setShowNewCustomer(false); setNewCustomerName(''); }
+                    }}>Lägg till</Button>
+                    <Button type="button" variant="ghost" size="sm" onClick={() => setShowNewCustomer(false)}>Avbryt</Button>
                   </div>
                 )}
               </div>
@@ -89,6 +73,18 @@ export default function AdminNewAssignment() {
               <div className="space-y-2">
                 <Label htmlFor="instructions">Instruktioner (valfritt)</Label>
                 <Textarea id="instructions" placeholder="Särskilda instruktioner..." />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Prioritet</Label>
+                <div className="flex gap-2">
+                  {(['low', 'normal', 'urgent'] as const).map(p => (
+                    <label key={p} className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer text-sm ${priority === p ? (p === 'urgent' ? 'border-destructive bg-destructive/5' : 'border-primary bg-primary/5') : 'border-border'}`}>
+                      <input type="radio" name="priority" checked={priority === p} onChange={() => setPriority(p)} className="accent-primary" />
+                      {priorityLabels[p]}
+                    </label>
+                  ))}
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -105,15 +101,16 @@ export default function AdminNewAssignment() {
               <div className="space-y-2">
                 <Label>Tilldela chaufför</Label>
                 <Select required>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Välj chaufför" />
-                  </SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder="Välj chaufför" /></SelectTrigger>
                   <SelectContent>
-                    {mockDrivers.map(d => (
-                      <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>
-                    ))}
+                    {mockDrivers.map(d => <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>)}
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="comment">Intern kommentar (valfritt)</Label>
+                <Textarea id="comment" placeholder="Meddelande till chauffören..." />
               </div>
 
               <div className="flex gap-2 pt-2">

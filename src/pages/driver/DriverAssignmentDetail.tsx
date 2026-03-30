@@ -4,14 +4,14 @@ import { DriverLayout } from '@/components/DriverLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/StatusBadge';
+import { PriorityBadge } from '@/components/PriorityBadge';
 import { mockAssignments } from '@/lib/mock-data';
 import { formatSwedishDateTime, calculateDuration } from '@/lib/format';
-import { ArrowLeft, Play, Camera, CheckCircle2, MapPin, Clock, FileText } from 'lucide-react';
+import { ArrowLeft, Play, Camera, CheckCircle2, MapPin, Clock, FileText, Info } from 'lucide-react';
 import { toast } from 'sonner';
 
 function ElapsedTimer({ since }: { since: string }) {
   const [elapsed, setElapsed] = useState('');
-
   useEffect(() => {
     const update = () => {
       const ms = Date.now() - new Date(since).getTime();
@@ -39,11 +39,7 @@ export default function DriverAssignmentDetail() {
   const [assignment, setAssignment] = useState(() => mockAssignments.find(a => a.id === id));
 
   if (!assignment) {
-    return (
-      <DriverLayout>
-        <div className="text-center py-12 text-muted-foreground">Uppdraget hittades inte</div>
-      </DriverLayout>
-    );
+    return <DriverLayout><div className="text-center py-12 text-muted-foreground">Uppdraget hittades inte</div></DriverLayout>;
   }
 
   const handleStart = () => {
@@ -52,18 +48,12 @@ export default function DriverAssignmentDetail() {
   };
 
   const handleComplete = () => {
-    // In real app: open camera, upload photo, then complete
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
     input.capture = 'environment';
     input.onchange = () => {
-      setAssignment({
-        ...assignment,
-        status: 'completed',
-        actual_stop: new Date().toISOString(),
-        consignment_photo_url: '/placeholder.svg',
-      });
+      setAssignment({ ...assignment, status: 'completed', actual_stop: new Date().toISOString(), consignment_photo_url: '/placeholder.svg' });
       toast.success('Uppdraget är slutfört');
     };
     input.click();
@@ -78,34 +68,28 @@ export default function DriverAssignmentDetail() {
 
         <Card>
           <CardContent className="py-5 space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <h2 className="text-lg font-semibold">{assignment.title}</h2>
-              <StatusBadge status={assignment.status} />
+              <div className="flex gap-2">
+                <StatusBadge status={assignment.status} />
+                {assignment.priority !== 'normal' && <PriorityBadge priority={assignment.priority} />}
+              </div>
             </div>
 
             <div className="space-y-3 text-sm">
               <div className="flex items-start gap-2">
                 <FileText className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-muted-foreground">Kund</p>
-                  <p className="font-medium">{assignment.customer?.name}</p>
-                </div>
+                <div><p className="text-muted-foreground">Kund</p><p className="font-medium">{assignment.customer?.name}</p></div>
               </div>
               <div className="flex items-start gap-2">
                 <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-muted-foreground">Adress</p>
-                  <p className="font-medium">{assignment.address}</p>
-                </div>
+                <div><p className="text-muted-foreground">Adress</p><p className="font-medium">{assignment.address}</p></div>
               </div>
               <div className="flex items-start gap-2">
                 <Clock className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
                 <div>
                   <p className="text-muted-foreground">Schemalagd tid</p>
-                  <p className="font-medium">
-                    {formatSwedishDateTime(assignment.scheduled_start)}
-                    {assignment.scheduled_end && ` – ${formatSwedishDateTime(assignment.scheduled_end)}`}
-                  </p>
+                  <p className="font-medium">{formatSwedishDateTime(assignment.scheduled_start)}{assignment.scheduled_end && ` – ${formatSwedishDateTime(assignment.scheduled_end)}`}</p>
                 </div>
               </div>
               {assignment.instructions && (
@@ -114,17 +98,21 @@ export default function DriverAssignmentDetail() {
                   <p className="text-sm">{assignment.instructions}</p>
                 </div>
               )}
+              {assignment.admin_comment && (
+                <div className="bg-primary/5 border border-primary/20 p-3 rounded-lg flex gap-2">
+                  <Info className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-xs text-primary font-medium mb-1">Meddelande från admin</p>
+                    <p className="text-sm">{assignment.admin_comment}</p>
+                  </div>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
 
-        {/* Action area */}
         {assignment.status === 'pending' && (
-          <Button
-            onClick={handleStart}
-            className="w-full touch-target text-lg bg-success hover:bg-success/90 text-success-foreground"
-            size="lg"
-          >
+          <Button onClick={handleStart} className="w-full touch-target text-lg bg-success hover:bg-success/90 text-success-foreground" size="lg">
             <Play className="h-5 w-5 mr-2" /> Starta uppdrag
           </Button>
         )}
@@ -132,11 +120,7 @@ export default function DriverAssignmentDetail() {
         {assignment.status === 'active' && assignment.actual_start && (
           <>
             <ElapsedTimer since={assignment.actual_start} />
-            <Button
-              onClick={handleComplete}
-              className="w-full touch-target text-lg"
-              size="lg"
-            >
+            <Button onClick={handleComplete} className="w-full touch-target text-lg" size="lg">
               <Camera className="h-5 w-5 mr-2" /> Slutför och fotografera fraktsedel
             </Button>
           </>
@@ -151,17 +135,11 @@ export default function DriverAssignmentDetail() {
                 <div className="text-sm text-muted-foreground space-y-1">
                   <p>Start: {formatSwedishDateTime(assignment.actual_start)}</p>
                   <p>Stopp: {formatSwedishDateTime(assignment.actual_stop)}</p>
-                  <p className="font-medium text-foreground">
-                    Varaktighet: {calculateDuration(assignment.actual_start, assignment.actual_stop)}
-                  </p>
+                  <p className="font-medium text-foreground">Varaktighet: {calculateDuration(assignment.actual_start, assignment.actual_stop)}</p>
                 </div>
               )}
               {assignment.consignment_photo_url && (
-                <img
-                  src={assignment.consignment_photo_url}
-                  alt="Fraktsedel"
-                  className="w-full max-w-[200px] mx-auto rounded-lg border mt-3"
-                />
+                <img src={assignment.consignment_photo_url} alt="Fraktsedel" className="w-full max-w-[200px] mx-auto rounded-lg border mt-3" />
               )}
             </CardContent>
           </Card>
