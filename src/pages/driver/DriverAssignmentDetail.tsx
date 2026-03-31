@@ -128,10 +128,14 @@ export default function DriverAssignmentDetail() {
   const navigate = useNavigate();
   const { data: assignment, isLoading } = useAssignment(id);
   const updateAssignment = useUpdateAssignment();
+  const { data: driverSettings } = useDriverSettings();
   const [driverComment, setDriverComment] = useState('');
   const [savingComment, setSavingComment] = useState(false);
   const [completionStep, setCompletionStep] = useState<'signature' | 'photo' | null>(null);
   const [signatureUrl, setSignatureUrl] = useState<string | null>(null);
+
+  const requireSignature = driverSettings?.require_signature ?? true;
+  const requirePhoto = driverSettings?.require_photo ?? true;
 
   useEffect(() => {
     if (assignment?.driver_comment) {
