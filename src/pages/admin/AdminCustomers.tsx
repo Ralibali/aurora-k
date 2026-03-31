@@ -37,6 +37,15 @@ export default function AdminCustomers() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input placeholder="Sök kund..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
           </div>
+          <Select value={pricingFilter} onValueChange={setPricingFilter}>
+            <SelectTrigger className="w-[170px]"><SelectValue placeholder="Prissättning" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Alla pristyper</SelectItem>
+              <SelectItem value="per_delivery">Per leverans</SelectItem>
+              <SelectItem value="per_hour">Per timme</SelectItem>
+              <SelectItem value="manual">Manuellt</SelectItem>
+            </SelectContent>
+          </Select>
           <Button asChild>
             <Link to="/admin/customers/new"><Plus className="h-4 w-4 mr-1" /> Ny kund</Link>
           </Button>

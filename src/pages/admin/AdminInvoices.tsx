@@ -10,7 +10,8 @@ import { useInvoices, useCustomers, useUpdateInvoiceStatus, useAssignments, useS
 import { generateInvoicePdf } from '@/lib/invoice-pdf';
 import { generateSieFile, generateFortnoxCsv, generateVismaCsv, generateAccountingExcel, downloadTextFile } from '@/lib/accounting-export';
 import { calculateDecimalHours } from '@/lib/format';
-import { Plus, Download, FileSpreadsheet } from 'lucide-react';
+import { Plus, Download, FileSpreadsheet, Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { Link } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
