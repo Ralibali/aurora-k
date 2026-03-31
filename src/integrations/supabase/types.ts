@@ -24,6 +24,7 @@ export type Database = {
           consignment_photo_url: string | null
           created_at: string
           customer_id: string
+          driver_comment: string | null
           id: string
           instructions: string | null
           invoiced: boolean
@@ -42,6 +43,7 @@ export type Database = {
           consignment_photo_url?: string | null
           created_at?: string
           customer_id: string
+          driver_comment?: string | null
           id?: string
           instructions?: string | null
           invoiced?: boolean
@@ -60,6 +62,7 @@ export type Database = {
           consignment_photo_url?: string | null
           created_at?: string
           customer_id?: string
+          driver_comment?: string | null
           id?: string
           instructions?: string | null
           invoiced?: boolean
@@ -199,6 +202,7 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          is_available: boolean
           role: string
         }
         Insert: {
@@ -206,6 +210,7 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          is_available?: boolean
           role?: string
         }
         Update: {
@@ -213,6 +218,7 @@ export type Database = {
           email?: string
           full_name?: string
           id?: string
+          is_available?: boolean
           role?: string
         }
         Relationships: []

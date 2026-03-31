@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { DriverLayout } from '@/components/DriverLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -7,10 +7,12 @@ import { PriorityBadge } from '@/components/PriorityBadge';
 import { useDriverAssignments } from '@/hooks/useData';
 import { useAuth } from '@/hooks/useAuth';
 import { formatSwedishDateTime } from '@/lib/format';
-import { MapPin, Clock, Navigation, ClipboardList } from 'lucide-react';
+import { MapPin, Clock, Navigation, ClipboardList, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 function openMaps(address: string) {
   const encoded = encodeURIComponent(address);
@@ -65,13 +67,60 @@ export default function DriverAssignments() {
   const { user } = useAuth();
   const { data: assignments, isLoading } = useDriverAssignments(user?.id);
   const [tab, setTab] = useState('active');
+  const queryClient = useQueryClient();
+
+  // Pull-to-refresh state
+  const [pulling, setPulling] = useState(false);
+  const [pullY, setPullY] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
+  const startY = useRef(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (scrollRef.current && scrollRef.current.scrollTop === 0) {
+      startY.current = e.touches[0].clientY;
+      setPulling(true);
+    }
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!pulling) return;
+    const diff = e.touches[0].clientY - startY.current;
+    if (diff > 0) {
+      setPullY(Math.min(diff * 0.5, 80));
+    }
+  }, [pulling]);
+
+  const handleTouchEnd = useCallback(async () => {
+    if (pullY > 50 && !refreshing) {
+      setRefreshing(true);
+      await queryClient.invalidateQueries({ queryKey: ['assignments', 'driver', user?.id] });
+      toast.success('Uppdaterat!');
+      setRefreshing(false);
+    }
+    setPulling(false);
+    setPullY(0);
+  }, [pullY, refreshing, queryClient, user?.id]);
 
   const active = (assignments ?? []).filter(a => a.status !== 'completed');
   const completed = (assignments ?? []).filter(a => a.status === 'completed');
 
   return (
     <DriverLayout>
-      <div className="p-4 space-y-4">
+      <div
+        ref={scrollRef}
+        className="p-4 space-y-4"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        {/* Pull-to-refresh indicator */}
+        {(pullY > 0 || refreshing) && (
+          <div className="flex items-center justify-center py-2" style={{ height: pullY > 0 ? pullY : 40 }}>
+            <RefreshCw className={`h-5 w-5 text-primary ${refreshing ? 'animate-spin' : ''} ${pullY > 50 ? 'text-success' : ''}`} />
+          </div>
+        )}
+
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="w-full h-11">
             <TabsTrigger value="active" className="flex-1 text-sm">Aktuella ({active.length})</TabsTrigger>

@@ -4,9 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useData';
-import { User, Lock, Mail, Shield } from 'lucide-react';
+import { User, Lock, Mail, Shield, CircleDot } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
@@ -19,6 +20,9 @@ export default function DriverProfile() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [changingPw, setChangingPw] = useState(false);
+  const [togglingAvailability, setTogglingAvailability] = useState(false);
+
+  const isAvailable = (profile as any)?.is_available ?? true;
 
   const handleLogout = async () => {
     await signOut();
@@ -27,24 +31,22 @@ export default function DriverProfile() {
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newPassword.length < 6) {
-      toast.error('Lösenordet måste vara minst 6 tecken');
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      toast.error('Lösenorden matchar inte');
-      return;
-    }
+    if (newPassword.length < 6) { toast.error('Lösenordet måste vara minst 6 tecken'); return; }
+    if (newPassword !== confirmPassword) { toast.error('Lösenorden matchar inte'); return; }
     setChangingPw(true);
     const { error } = await supabase.auth.updateUser({ password: newPassword });
-    if (error) {
-      toast.error('Kunde inte ändra lösenord: ' + error.message);
-    } else {
-      toast.success('Lösenordet har ändrats!');
-      setNewPassword('');
-      setConfirmPassword('');
-    }
+    if (error) { toast.error('Kunde inte ändra lösenord: ' + error.message); }
+    else { toast.success('Lösenordet har ändrats!'); setNewPassword(''); setConfirmPassword(''); }
     setChangingPw(false);
+  };
+
+  const handleToggleAvailability = async () => {
+    if (!user?.id) return;
+    setTogglingAvailability(true);
+    const { error } = await supabase.from('profiles').update({ is_available: !isAvailable }).eq('id', user.id);
+    if (error) { toast.error('Kunde inte uppdatera status'); }
+    else { toast.success(!isAvailable ? 'Du är nu tillgänglig' : 'Du är nu otillgänglig'); }
+    setTogglingAvailability(false);
   };
 
   return (
@@ -72,6 +74,26 @@ export default function DriverProfile() {
                 </div>
               </div>
             )}
+          </CardContent>
+        </Card>
+
+        {/* Availability toggle */}
+        <Card>
+          <CardContent className="py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <CircleDot className={`h-5 w-5 ${isAvailable ? 'text-success' : 'text-muted-foreground'}`} />
+                <div>
+                  <p className="text-sm font-medium text-foreground">Tillgänglighetsstatus</p>
+                  <p className="text-xs text-muted-foreground">{isAvailable ? 'Ledig för uppdrag' : 'Inte tillgänglig'}</p>
+                </div>
+              </div>
+              <Switch
+                checked={isAvailable}
+                onCheckedChange={handleToggleAvailability}
+                disabled={togglingAvailability || isLoading}
+              />
+            </div>
           </CardContent>
         </Card>
 

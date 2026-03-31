@@ -3,11 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { DriverLayout } from '@/components/DriverLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { StatusBadge } from '@/components/StatusBadge';
 import { PriorityBadge } from '@/components/PriorityBadge';
 import { useAssignment, useUpdateAssignment } from '@/hooks/useData';
 import { formatSwedishDateTime, calculateDuration } from '@/lib/format';
-import { ArrowLeft, Play, Camera, CheckCircle2, MapPin, Clock, FileText, Info, Navigation, SkipForward } from 'lucide-react';
+import { ArrowLeft, Play, Camera, CheckCircle2, MapPin, Clock, FileText, Info, Navigation, SkipForward, MessageSquare, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -46,6 +47,14 @@ export default function DriverAssignmentDetail() {
   const navigate = useNavigate();
   const { data: assignment, isLoading } = useAssignment(id);
   const updateAssignment = useUpdateAssignment();
+  const [driverComment, setDriverComment] = useState('');
+  const [savingComment, setSavingComment] = useState(false);
+
+  useEffect(() => {
+    if (assignment?.driver_comment) {
+      setDriverComment(assignment.driver_comment as string);
+    }
+  }, [assignment]);
 
   if (isLoading) {
     return <DriverLayout><div className="p-4 space-y-4"><Skeleton className="h-8 w-32" /><Skeleton className="h-64 w-full" /></div></DriverLayout>;
@@ -101,6 +110,17 @@ export default function DriverAssignmentDetail() {
     toast.success('Uppdraget slutfört utan foto');
   };
 
+  const handleSaveComment = async () => {
+    setSavingComment(true);
+    updateAssignment.mutate(
+      { id: assignment.id, driver_comment: driverComment || null },
+      {
+        onSuccess: () => { toast.success('Kommentar sparad'); setSavingComment(false); },
+        onError: () => setSavingComment(false),
+      }
+    );
+  };
+
   return (
     <DriverLayout>
       <div className="p-4 space-y-4 no-pull-refresh">
@@ -127,10 +147,7 @@ export default function DriverAssignmentDetail() {
                 <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
                 <div className="flex-1">
                   <p className="text-muted-foreground">Adress</p>
-                  <button
-                    onClick={() => openMaps(assignment.address)}
-                    className="font-medium text-primary hover:underline flex items-center gap-1 text-left"
-                  >
+                  <button onClick={() => openMaps(assignment.address)} className="font-medium text-primary hover:underline flex items-center gap-1 text-left">
                     {assignment.address}
                     <Navigation className="h-3.5 w-3.5 shrink-0" />
                   </button>
@@ -159,6 +176,32 @@ export default function DriverAssignmentDetail() {
                 </div>
               )}
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Driver comment */}
+        <Card>
+          <CardContent className="py-4 space-y-3">
+            <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+              <MessageSquare className="h-4 w-4 text-muted-foreground" />
+              Förarkommentar
+            </div>
+            <Textarea
+              placeholder="Lämna en anteckning, t.ex. 'porten var låst'..."
+              value={driverComment}
+              onChange={(e) => setDriverComment(e.target.value)}
+              rows={3}
+              className="resize-none text-sm"
+            />
+            <Button
+              size="sm"
+              onClick={handleSaveComment}
+              disabled={savingComment || driverComment === (assignment.driver_comment ?? '')}
+              className="w-full"
+            >
+              <Send className="h-3.5 w-3.5 mr-1.5" />
+              {savingComment ? 'Sparar...' : 'Spara kommentar'}
+            </Button>
           </CardContent>
         </Card>
 

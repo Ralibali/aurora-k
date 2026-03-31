@@ -9,6 +9,7 @@ export interface Profile {
   full_name: string;
   email: string;
   role: UserRole;
+  is_available: boolean;
   created_at: string;
 }
 
@@ -44,6 +45,7 @@ export interface Assignment {
   consignment_photo_url: string | null;
   priority: Priority;
   admin_comment: string | null;
+  driver_comment: string | null;
   invoiced: boolean;
   created_at: string;
   // Joined fields
