@@ -180,7 +180,11 @@ export default function DriverAssignmentDetail() {
 
   const handleSignatureSkip = () => {
     setSignatureUrl(null);
-    setCompletionStep('photo');
+    if (requirePhoto) {
+      setCompletionStep('photo');
+    } else {
+      handlePhotoComplete(null);
+    }
   };
 
   const handlePhotoComplete = (photoUrl: string | null) => {
