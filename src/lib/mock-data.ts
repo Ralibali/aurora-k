@@ -64,5 +64,5 @@ export const mockSettings: CompanySettings = {
 };
 
 export const mockCurrentUser: Profile = {
-  id: 'admin1', full_name: 'Maria Andersson', email: 'maria@aurora.se', role: 'admin', created_at: '2024-01-01T00:00:00Z',
+  id: 'admin1', full_name: 'Maria Andersson', email: 'maria@aurora.se', role: 'admin', is_available: true, created_at: '2024-01-01T00:00:00Z',
 };
