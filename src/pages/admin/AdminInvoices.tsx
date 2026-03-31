@@ -104,6 +104,10 @@ export default function AdminInvoices() {
     <AdminLayout title="Fakturering" description="Skapa, exportera och hantera fakturor">
       <div className="space-y-5 max-w-6xl">
         <div className="flex flex-wrap gap-3">
+          <div className="relative flex-1 min-w-[200px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input placeholder="Sök fakturanr eller kund..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+          </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-[160px]"><SelectValue placeholder="Status" /></SelectTrigger>
             <SelectContent>
@@ -121,7 +125,6 @@ export default function AdminInvoices() {
               {(customers ?? []).map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
             </SelectContent>
           </Select>
-          <div className="flex-1" />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline">
