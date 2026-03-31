@@ -23,6 +23,7 @@ import AdminNewInvoice from "./pages/admin/AdminNewInvoice";
 import AdminReports from "./pages/admin/AdminReports";
 import AdminStatistics from "./pages/admin/AdminStatistics";
 import AdminSettings from "./pages/admin/AdminSettings";
+import AdminDriverSettings from "./pages/admin/AdminDriverSettings";
 import DriverAssignments from "./pages/driver/DriverAssignments";
 import DriverAssignmentDetail from "./pages/driver/DriverAssignmentDetail";
 import DriverProfile from "./pages/driver/DriverProfile";
