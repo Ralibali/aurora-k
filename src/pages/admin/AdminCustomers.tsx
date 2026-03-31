@@ -3,6 +3,7 @@ import { AdminLayout } from '@/components/AdminLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useCustomers } from '@/hooks/useData';
 import { pricingTypeLabels } from '@/lib/types';
@@ -12,13 +13,21 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AdminCustomers() {
   const [search, setSearch] = useState('');
+  const [pricingFilter, setPricingFilter] = useState<string>('all');
   const navigate = useNavigate();
   const { data: customers, isLoading } = useCustomers();
 
-  const filtered = (customers ?? []).filter(c =>
-    !search || c.name.toLowerCase().includes(search.toLowerCase()) ||
-    c.org_number?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = (customers ?? []).filter(c => {
+    if (pricingFilter !== 'all' && c.pricing_type !== pricingFilter) return false;
+    if (search) {
+      const q = search.toLowerCase();
+      return c.name.toLowerCase().includes(q) ||
+        c.org_number?.toLowerCase().includes(q) ||
+        c.contact_person?.toLowerCase().includes(q) ||
+        c.email?.toLowerCase().includes(q);
+    }
+    return true;
+  });
 
   return (
     <AdminLayout title="Kundregister" description="Hantera kunder och prissättning">
@@ -28,6 +37,15 @@ export default function AdminCustomers() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input placeholder="Sök kund..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
           </div>
+          <Select value={pricingFilter} onValueChange={setPricingFilter}>
+            <SelectTrigger className="w-[170px]"><SelectValue placeholder="Prissättning" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Alla pristyper</SelectItem>
+              <SelectItem value="per_delivery">Per leverans</SelectItem>
+              <SelectItem value="per_hour">Per timme</SelectItem>
+              <SelectItem value="manual">Manuellt</SelectItem>
+            </SelectContent>
+          </Select>
           <Button asChild>
             <Link to="/admin/customers/new"><Plus className="h-4 w-4 mr-1" /> Ny kund</Link>
           </Button>

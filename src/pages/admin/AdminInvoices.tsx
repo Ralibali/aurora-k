@@ -10,7 +10,8 @@ import { useInvoices, useCustomers, useUpdateInvoiceStatus, useAssignments, useS
 import { generateInvoicePdf } from '@/lib/invoice-pdf';
 import { generateSieFile, generateFortnoxCsv, generateVismaCsv, generateAccountingExcel, downloadTextFile } from '@/lib/accounting-export';
 import { calculateDecimalHours } from '@/lib/format';
-import { Plus, Download, FileSpreadsheet } from 'lucide-react';
+import { Plus, Download, FileSpreadsheet, Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { Link } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
@@ -18,6 +19,7 @@ import { toast } from 'sonner';
 export default function AdminInvoices() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [customerFilter, setCustomerFilter] = useState<string>('all');
+  const [search, setSearch] = useState('');
 
   const { data: invoices, isLoading } = useInvoices();
   const { data: customers } = useCustomers();
@@ -34,6 +36,12 @@ export default function AdminInvoices() {
   const filtered = processedInvoices.filter(i => {
     if (statusFilter !== 'all' && i.status !== statusFilter) return false;
     if (customerFilter !== 'all' && i.customer_id !== customerFilter) return false;
+    if (search) {
+      const q = search.toLowerCase();
+      const matchNum = String(i.invoice_number).includes(q);
+      const matchCustomer = i.customer?.name?.toLowerCase().includes(q);
+      if (!matchNum && !matchCustomer) return false;
+    }
     return true;
   });
 
@@ -97,6 +105,10 @@ export default function AdminInvoices() {
     <AdminLayout title="Fakturering" description="Skapa, exportera och hantera fakturor">
       <div className="space-y-5 max-w-6xl">
         <div className="flex flex-wrap gap-3">
+          <div className="relative flex-1 min-w-[200px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input placeholder="Sök fakturanr eller kund..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+          </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-[160px]"><SelectValue placeholder="Status" /></SelectTrigger>
             <SelectContent>
@@ -114,7 +126,6 @@ export default function AdminInvoices() {
               {(customers ?? []).map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
             </SelectContent>
           </Select>
-          <div className="flex-1" />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline">
