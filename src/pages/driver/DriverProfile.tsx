@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useDriverSettings } from '@/hooks/useDriverSettings';
 
 export default function DriverProfile() {
   const navigate = useNavigate();
@@ -21,6 +22,8 @@ export default function DriverProfile() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [changingPw, setChangingPw] = useState(false);
   const [togglingAvailability, setTogglingAvailability] = useState(false);
+  const { data: driverSettings } = useDriverSettings();
+  const showAvailability = driverSettings?.show_availability_toggle ?? true;
 
   const isAvailable = (profile as any)?.is_available ?? true;
 
@@ -78,24 +81,26 @@ export default function DriverProfile() {
         </Card>
 
         {/* Availability toggle */}
-        <Card>
-          <CardContent className="py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <CircleDot className={`h-5 w-5 ${isAvailable ? 'text-success' : 'text-muted-foreground'}`} />
-                <div>
-                  <p className="text-sm font-medium text-foreground">Tillgänglighetsstatus</p>
-                  <p className="text-xs text-muted-foreground">{isAvailable ? 'Ledig för uppdrag' : 'Inte tillgänglig'}</p>
+        {showAvailability && (
+          <Card>
+            <CardContent className="py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <CircleDot className={`h-5 w-5 ${isAvailable ? 'text-success' : 'text-muted-foreground'}`} />
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Tillgänglighetsstatus</p>
+                    <p className="text-xs text-muted-foreground">{isAvailable ? 'Ledig för uppdrag' : 'Inte tillgänglig'}</p>
+                  </div>
                 </div>
+                <Switch
+                  checked={isAvailable}
+                  onCheckedChange={handleToggleAvailability}
+                  disabled={togglingAvailability || isLoading}
+                />
               </div>
-              <Switch
-                checked={isAvailable}
-                onCheckedChange={handleToggleAvailability}
-                disabled={togglingAvailability || isLoading}
-              />
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Change password */}
         <Card>

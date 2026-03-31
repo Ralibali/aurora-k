@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useDriverSettings } from '@/hooks/useDriverSettings';
 import { DriverLayout } from '@/components/DriverLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -127,10 +128,14 @@ export default function DriverAssignmentDetail() {
   const navigate = useNavigate();
   const { data: assignment, isLoading } = useAssignment(id);
   const updateAssignment = useUpdateAssignment();
+  const { data: driverSettings } = useDriverSettings();
   const [driverComment, setDriverComment] = useState('');
   const [savingComment, setSavingComment] = useState(false);
   const [completionStep, setCompletionStep] = useState<'signature' | 'photo' | null>(null);
   const [signatureUrl, setSignatureUrl] = useState<string | null>(null);
+
+  const requireSignature = driverSettings?.require_signature ?? true;
+  const requirePhoto = driverSettings?.require_photo ?? true;
 
   useEffect(() => {
     if (assignment?.driver_comment) {
@@ -169,13 +174,29 @@ export default function DriverAssignmentDetail() {
     const url = await uploadSignature(blob);
     if (url) {
       setSignatureUrl(url);
-      setCompletionStep('photo');
+      if (requirePhoto) {
+        setCompletionStep('photo');
+      } else {
+        // Skip photo step - complete directly
+        updateAssignment.mutate({
+          id: assignment!.id,
+          status: 'completed',
+          actual_stop: new Date().toISOString(),
+          signature_url: url,
+        });
+        toast.success('Uppdraget slutfört!');
+        setCompletionStep(null);
+      }
     }
   };
 
   const handleSignatureSkip = () => {
     setSignatureUrl(null);
-    setCompletionStep('photo');
+    if (requirePhoto) {
+      setCompletionStep('photo');
+    } else {
+      handlePhotoComplete(null);
+    }
   };
 
   const handlePhotoComplete = (photoUrl: string | null) => {
@@ -316,7 +337,15 @@ export default function DriverAssignmentDetail() {
           <>
             <ElapsedTimer since={assignment.actual_start} />
             {completionStep === null && (
-              <Button onClick={() => setCompletionStep('signature')} disabled={updateAssignment.isPending} className="w-full touch-target text-lg" size="lg">
+              <Button onClick={() => {
+                if (requireSignature) {
+                  setCompletionStep('signature');
+                } else if (requirePhoto) {
+                  setCompletionStep('photo');
+                } else {
+                  handlePhotoComplete(null);
+                }
+              }} disabled={updateAssignment.isPending} className="w-full touch-target text-lg" size="lg">
                 <CheckCircle2 className="h-5 w-5 mr-2" /> Slutför uppdrag
               </Button>
             )}

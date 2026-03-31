@@ -143,6 +143,33 @@ export type Database = {
         }
         Relationships: []
       }
+      driver_settings: {
+        Row: {
+          id: string
+          require_photo: boolean
+          require_signature: boolean
+          show_availability_toggle: boolean
+          show_time_report: boolean
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          require_photo?: boolean
+          require_signature?: boolean
+          show_availability_toggle?: boolean
+          show_time_report?: boolean
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          require_photo?: boolean
+          require_signature?: boolean
+          show_availability_toggle?: boolean
+          show_time_report?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       invoices: {
         Row: {
           assignment_ids: string[]
