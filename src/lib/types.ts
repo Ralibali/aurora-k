@@ -43,6 +43,7 @@ export interface Assignment {
   actual_start: string | null;
   actual_stop: string | null;
   consignment_photo_url: string | null;
+  signature_url: string | null;
   priority: Priority;
   admin_comment: string | null;
   driver_comment: string | null;

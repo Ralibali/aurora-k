@@ -31,6 +31,7 @@ export type Database = {
           priority: string
           scheduled_end: string | null
           scheduled_start: string
+          signature_url: string | null
           status: string
           title: string
         }
@@ -50,6 +51,7 @@ export type Database = {
           priority?: string
           scheduled_end?: string | null
           scheduled_start: string
+          signature_url?: string | null
           status?: string
           title: string
         }
@@ -69,6 +71,7 @@ export type Database = {
           priority?: string
           scheduled_end?: string | null
           scheduled_start?: string
+          signature_url?: string | null
           status?: string
           title?: string
         }
