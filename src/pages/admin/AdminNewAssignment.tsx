@@ -7,9 +7,23 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { useCustomers, useDrivers, useCreateAssignment } from '@/hooks/useData';
 import { priorityLabels } from '@/lib/types';
 import { ArrowLeft } from 'lucide-react';
+import { toast } from 'sonner';
+
+type RecurrenceFrequency = 'weekly' | 'biweekly' | 'monthly';
+
+function addInterval(date: Date, freq: RecurrenceFrequency): Date {
+  const d = new Date(date);
+  switch (freq) {
+    case 'weekly': d.setDate(d.getDate() + 7); break;
+    case 'biweekly': d.setDate(d.getDate() + 14); break;
+    case 'monthly': d.setMonth(d.getMonth() + 1); break;
+  }
+  return d;
+}
 
 export default function AdminNewAssignment() {
   const navigate = useNavigate();
@@ -30,21 +44,60 @@ export default function AdminNewAssignment() {
   const [driverId, setDriverId] = useState(copyFrom?.assigned_driver_id || '');
   const [adminComment, setAdminComment] = useState(copyFrom?.admin_comment || '');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Recurrence
+  const [recurrenceEnabled, setRecurrenceEnabled] = useState(false);
+  const [recurrenceFrequency, setRecurrenceFrequency] = useState<RecurrenceFrequency>('weekly');
+  const [recurrenceEndDate, setRecurrenceEndDate] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    createAssignment.mutate({
-      title,
-      customer_id: customerId,
-      address,
-      instructions: instructions || null,
-      scheduled_start: new Date(scheduledStart).toISOString(),
-      scheduled_end: scheduledEnd ? new Date(scheduledEnd).toISOString() : null,
-      assigned_driver_id: driverId,
-      priority,
-      admin_comment: adminComment || null,
-    }, {
-      onSuccess: () => navigate('/admin/assignments'),
-    });
+    setIsSubmitting(true);
+
+    const baseStart = new Date(scheduledStart);
+    const baseEnd = scheduledEnd ? new Date(scheduledEnd) : null;
+    const durationMs = baseEnd ? baseEnd.getTime() - baseStart.getTime() : 0;
+
+    const dates: { start: Date; end: Date | null }[] = [{ start: baseStart, end: baseEnd }];
+
+    if (recurrenceEnabled && recurrenceEndDate) {
+      const endLimit = new Date(recurrenceEndDate + 'T23:59:59');
+      let nextStart = addInterval(baseStart, recurrenceFrequency);
+      while (nextStart <= endLimit) {
+        dates.push({
+          start: nextStart,
+          end: baseEnd ? new Date(nextStart.getTime() + durationMs) : null,
+        });
+        nextStart = addInterval(nextStart, recurrenceFrequency);
+      }
+    }
+
+    try {
+      for (const d of dates) {
+        await new Promise<void>((resolve, reject) => {
+          createAssignment.mutate({
+            title,
+            customer_id: customerId,
+            address,
+            instructions: instructions || null,
+            scheduled_start: d.start.toISOString(),
+            scheduled_end: d.end ? d.end.toISOString() : null,
+            assigned_driver_id: driverId,
+            priority,
+            admin_comment: adminComment || null,
+          }, {
+            onSuccess: () => resolve(),
+            onError: (err) => reject(err),
+          });
+        });
+      }
+      if (dates.length > 1) {
+        toast.success(`Skapade ${dates.length} uppdrag`);
+      }
+      navigate('/admin/assignments');
+    } catch {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -121,9 +174,36 @@ export default function AdminNewAssignment() {
                 <Textarea id="comment" value={adminComment} onChange={e => setAdminComment(e.target.value)} placeholder="Meddelande till chauffören..." />
               </div>
 
+              {/* Recurrence */}
+              <div className="border rounded-lg p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label>Upprepning</Label>
+                  <Switch checked={recurrenceEnabled} onCheckedChange={setRecurrenceEnabled} />
+                </div>
+                {recurrenceEnabled && (
+                  <div className="space-y-3">
+                    <div className="space-y-2">
+                      <Label>Frekvens</Label>
+                      <Select value={recurrenceFrequency} onValueChange={(v) => setRecurrenceFrequency(v as RecurrenceFrequency)}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="weekly">Varje vecka</SelectItem>
+                          <SelectItem value="biweekly">Varannan vecka</SelectItem>
+                          <SelectItem value="monthly">Varje månad</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="recurrence-end">Upprepa till och med</Label>
+                      <Input id="recurrence-end" type="date" value={recurrenceEndDate} onChange={e => setRecurrenceEndDate(e.target.value)} required={recurrenceEnabled} />
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div className="flex gap-2 pt-2">
-                <Button type="submit" disabled={createAssignment.isPending}>
-                  {createAssignment.isPending ? 'Skapar...' : 'Skapa uppdrag'}
+                <Button type="submit" disabled={isSubmitting || createAssignment.isPending}>
+                  {isSubmitting ? 'Skapar...' : 'Skapa uppdrag'}
                 </Button>
                 <Button type="button" variant="outline" onClick={() => navigate(-1)}>Avbryt</Button>
               </div>

@@ -3,12 +3,13 @@ import { AdminLayout } from '@/components/AdminLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useAssignments, useDrivers, useCustomers, useInvoices } from '@/hooks/useData';
+import { useAssignments, useDrivers, useCustomers, useInvoices, useSettings } from '@/hooks/useData';
 import { calculateDecimalHours } from '@/lib/format';
 import { ClipboardList, Clock, Building2, Receipt, FileText } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
-import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const COLORS = ['hsl(213, 52%, 25%)', 'hsl(142, 71%, 45%)', 'hsl(32, 95%, 55%)', 'hsl(0, 72%, 51%)'];
 
@@ -22,25 +23,33 @@ export default function AdminStatistics() {
   const { data: drivers } = useDrivers();
   const { data: customers } = useCustomers();
   const { data: invoices } = useInvoices();
+  const { data: settings } = useSettings();
 
-  const completed = (assignments ?? []).filter(a => a.status === 'completed');
+  // Filter by selected month
+  const monthAssignments = (assignments ?? []).filter(a => a.scheduled_start.startsWith(month));
+  const completed = monthAssignments.filter(a => a.status === 'completed');
   const totalHours = completed.reduce((sum, a) => {
     if (!a.actual_start || !a.actual_stop) return sum;
     return sum + calculateDecimalHours(a.actual_start, a.actual_stop);
   }, 0);
   const activeCustomers = new Set(completed.map(a => a.customer_id)).size;
-  const invoicedAmount = (invoices ?? []).reduce((sum, i) => sum + i.total_inc_vat, 0);
+
+  const monthInvoices = (invoices ?? []).filter(i => i.invoice_date.startsWith(month));
+  const invoicedAmount = monthInvoices.reduce((sum, i) => sum + i.total_inc_vat, 0);
 
   const hoursPerDriver = (drivers ?? []).map(d => ({
     name: d.full_name.split(' ')[0],
+    fullName: d.full_name,
     timmar: +(completed.filter(a => a.assigned_driver_id === d.id).reduce((sum, a) => {
       if (!a.actual_start || !a.actual_stop) return sum;
       return sum + calculateDecimalHours(a.actual_start, a.actual_stop);
     }, 0)).toFixed(1),
+    deliveries: completed.filter(a => a.assigned_driver_id === d.id).length,
   }));
 
   const deliveriesPerCustomer = (customers ?? []).map(c => ({
     name: c.name.length > 15 ? c.name.substring(0, 15) + '…' : c.name,
+    fullName: c.name,
     value: completed.filter(a => a.customer_id === c.id).length,
   })).filter(c => c.value > 0);
 
@@ -53,13 +62,55 @@ export default function AdminStatistics() {
   const dayNames = ['Sön', 'Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör'];
   const deliveriesPerDay = dayNames.map((name, i) => ({ day: name, antal: daysMap[i] || 0 }));
 
+  const handleExportPdf = () => {
+    const doc = new jsPDF();
+    const monthLabel = month;
+    const companyName = settings?.company_name || 'Företag';
+
+    doc.setFontSize(18);
+    doc.text(`Månadsrapport ${monthLabel}`, 14, 20);
+    doc.setFontSize(11);
+    doc.text(companyName, 14, 28);
+
+    // Driver table
+    doc.setFontSize(13);
+    doc.text('Per chaufför', 14, 40);
+    autoTable(doc, {
+      startY: 44,
+      head: [['Chaufför', 'Leveranser', 'Timmar', 'Snittid']],
+      body: hoursPerDriver.filter(d => d.deliveries > 0).map(d => [
+        d.fullName ?? d.name,
+        String(d.deliveries),
+        `${d.timmar}h`,
+        d.deliveries > 0 ? `${(d.timmar / d.deliveries).toFixed(1)}h` : '-',
+      ]),
+    });
+
+    // Customer table
+    const afterFirst = (doc as any).lastAutoTable?.finalY ?? 80;
+    doc.setFontSize(13);
+    doc.text('Per kund', 14, afterFirst + 10);
+    autoTable(doc, {
+      startY: afterFirst + 14,
+      head: [['Kund', 'Leveranser']],
+      body: deliveriesPerCustomer.map(c => [c.fullName ?? c.name, String(c.value)]),
+    });
+
+    // Footer
+    const afterSecond = (doc as any).lastAutoTable?.finalY ?? 140;
+    doc.setFontSize(12);
+    doc.text(`Totalt fakturerat: ${invoicedAmount.toFixed(0)} kr`, 14, afterSecond + 14);
+
+    doc.save(`manadsrapport-${month}.pdf`);
+  };
+
   return (
     <AdminLayout title="Statistik" description="Analysera leveranser, körtider och intäkter">
       <div className="space-y-6 max-w-6xl">
         <div className="flex items-center gap-3">
           <input type="month" value={month} onChange={e => setMonth(e.target.value)}
             className="border rounded-md px-3 py-2 text-sm bg-card" />
-          <Button variant="outline" size="sm" onClick={() => toast.info('Månadsrapport-export kommer snart')}>
+          <Button variant="outline" size="sm" onClick={handleExportPdf}>
             <FileText className="h-4 w-4 mr-1" /> Exportera månadsrapport
           </Button>
         </div>

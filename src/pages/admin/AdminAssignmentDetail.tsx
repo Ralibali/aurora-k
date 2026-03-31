@@ -96,10 +96,24 @@ export default function AdminAssignmentDetail() {
               )}
             </div>
 
+            {(assignment as any).signature_url && (
+              <div>
+                <p className="text-sm text-muted-foreground mb-2">Mottagarens signatur</p>
+                <img src={(assignment as any).signature_url} alt="Signatur" className="w-full max-w-xs rounded-lg border bg-white p-2" />
+              </div>
+            )}
+
             {assignment.consignment_photo_url && (
               <div>
                 <p className="text-sm text-muted-foreground mb-2">Fraktsedel</p>
                 <img src={assignment.consignment_photo_url} alt="Fraktsedel" className="w-full max-w-xs rounded-lg border" />
+              </div>
+            )}
+
+            {(assignment as any).driver_comment && (
+              <div className="bg-muted p-3 rounded-lg">
+                <p className="text-xs text-muted-foreground mb-1">Förarkommentar</p>
+                <p className="text-sm">{(assignment as any).driver_comment}</p>
               </div>
             )}
 

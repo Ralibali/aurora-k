@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { DriverLayout } from '@/components/DriverLayout';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,7 +8,7 @@ import { StatusBadge } from '@/components/StatusBadge';
 import { PriorityBadge } from '@/components/PriorityBadge';
 import { useAssignment, useUpdateAssignment } from '@/hooks/useData';
 import { formatSwedishDateTime, calculateDuration } from '@/lib/format';
-import { ArrowLeft, Play, Camera, CheckCircle2, MapPin, Clock, FileText, Info, Navigation, SkipForward, MessageSquare, Send } from 'lucide-react';
+import { ArrowLeft, Play, Camera, CheckCircle2, MapPin, Clock, FileText, Info, Navigation, SkipForward, MessageSquare, Send, Eraser, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -42,6 +42,86 @@ function ElapsedTimer({ since }: { since: string }) {
   );
 }
 
+function SignatureCanvas({ onComplete, onSkip }: { onComplete: (blob: Blob) => void; onSkip: () => void }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [hasStrokes, setHasStrokes] = useState(false);
+  const isDrawing = useRef(false);
+
+  const getPos = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    const rect = canvasRef.current!.getBoundingClientRect();
+    return {
+      x: (e.clientX - rect.left) * (canvasRef.current!.width / rect.width),
+      y: (e.clientY - rect.top) * (canvasRef.current!.height / rect.height),
+    };
+  };
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    isDrawing.current = true;
+    const ctx = canvasRef.current!.getContext('2d')!;
+    const pos = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+    canvasRef.current!.setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (!isDrawing.current) return;
+    const ctx = canvasRef.current!.getContext('2d')!;
+    const pos = getPos(e);
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#000';
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+    setHasStrokes(true);
+  };
+
+  const handlePointerUp = () => {
+    isDrawing.current = false;
+  };
+
+  const clearCanvas = () => {
+    const ctx = canvasRef.current!.getContext('2d')!;
+    ctx.clearRect(0, 0, canvasRef.current!.width, canvasRef.current!.height);
+    setHasStrokes(false);
+  };
+
+  const handleContinue = () => {
+    canvasRef.current!.toBlob((blob) => {
+      if (blob) onComplete(blob);
+    }, 'image/png');
+  };
+
+  return (
+    <Card>
+      <CardContent className="py-4 space-y-3">
+        <p className="text-sm font-medium text-foreground">Mottagarens signatur</p>
+        <canvas
+          ref={canvasRef}
+          width={600}
+          height={200}
+          className="w-full h-[200px] border rounded-lg bg-white touch-none"
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerLeave={handlePointerUp}
+        />
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={clearCanvas} className="flex-1">
+            <Eraser className="h-4 w-4 mr-1" /> Rensa
+          </Button>
+          <Button size="sm" onClick={handleContinue} disabled={!hasStrokes} className="flex-1">
+            Fortsätt till foto <ArrowRight className="h-4 w-4 ml-1" />
+          </Button>
+        </div>
+        <button onClick={onSkip} className="text-xs text-muted-foreground underline w-full text-center">
+          Hoppa över signatur
+        </button>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function DriverAssignmentDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -49,6 +129,8 @@ export default function DriverAssignmentDetail() {
   const updateAssignment = useUpdateAssignment();
   const [driverComment, setDriverComment] = useState('');
   const [savingComment, setSavingComment] = useState(false);
+  const [completionStep, setCompletionStep] = useState<'signature' | 'photo' | null>(null);
+  const [signatureUrl, setSignatureUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (assignment?.driver_comment) {
@@ -72,7 +154,43 @@ export default function DriverAssignmentDetail() {
     });
   };
 
-  const handleCompleteWithPhoto = () => {
+  const uploadSignature = async (blob: Blob): Promise<string | null> => {
+    const path = `${assignment.id}/signature.png`;
+    const { error } = await supabase.storage.from('signatures').upload(path, blob, { upsert: true });
+    if (error) {
+      toast.error('Kunde inte ladda upp signatur');
+      return null;
+    }
+    const { data } = supabase.storage.from('signatures').getPublicUrl(path);
+    return data.publicUrl;
+  };
+
+  const handleSignatureComplete = async (blob: Blob) => {
+    const url = await uploadSignature(blob);
+    if (url) {
+      setSignatureUrl(url);
+      setCompletionStep('photo');
+    }
+  };
+
+  const handleSignatureSkip = () => {
+    setSignatureUrl(null);
+    setCompletionStep('photo');
+  };
+
+  const handlePhotoComplete = (photoUrl: string | null) => {
+    updateAssignment.mutate({
+      id: assignment.id,
+      status: 'completed',
+      actual_stop: new Date().toISOString(),
+      consignment_photo_url: photoUrl,
+      ...(signatureUrl ? { signature_url: signatureUrl } : {}),
+    });
+    toast.success('Uppdraget slutfört!');
+    setCompletionStep(null);
+  };
+
+  const handleTakePhoto = () => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
@@ -80,7 +198,6 @@ export default function DriverAssignmentDetail() {
     input.onchange = async () => {
       const file = input.files?.[0];
       let photoUrl: string | null = null;
-
       if (file) {
         const path = `${assignment.id}/${Date.now()}.${file.name.split('.').pop()}`;
         const { error } = await supabase.storage.from('consignment-notes').upload(path, file);
@@ -89,25 +206,9 @@ export default function DriverAssignmentDetail() {
           photoUrl = data.publicUrl;
         }
       }
-
-      updateAssignment.mutate({
-        id: assignment.id,
-        status: 'completed',
-        actual_stop: new Date().toISOString(),
-        consignment_photo_url: photoUrl,
-      });
-      toast.success('Uppdraget slutfört!');
+      handlePhotoComplete(photoUrl);
     };
     input.click();
-  };
-
-  const handleCompleteWithoutPhoto = () => {
-    updateAssignment.mutate({
-      id: assignment.id,
-      status: 'completed',
-      actual_stop: new Date().toISOString(),
-    });
-    toast.success('Uppdraget slutfört utan foto');
   };
 
   const handleSaveComment = async () => {
@@ -214,14 +315,29 @@ export default function DriverAssignmentDetail() {
         {assignment.status === 'active' && assignment.actual_start && (
           <>
             <ElapsedTimer since={assignment.actual_start} />
-            <div className="space-y-2">
-              <Button onClick={handleCompleteWithPhoto} disabled={updateAssignment.isPending} className="w-full touch-target text-lg" size="lg">
-                <Camera className="h-5 w-5 mr-2" /> Slutför med fraktsedelfoto
+            {completionStep === null && (
+              <Button onClick={() => setCompletionStep('signature')} disabled={updateAssignment.isPending} className="w-full touch-target text-lg" size="lg">
+                <CheckCircle2 className="h-5 w-5 mr-2" /> Slutför uppdrag
               </Button>
-              <Button onClick={handleCompleteWithoutPhoto} disabled={updateAssignment.isPending} variant="outline" className="w-full touch-target" size="lg">
-                <SkipForward className="h-5 w-5 mr-2" /> Slutför utan foto
-              </Button>
-            </div>
+            )}
+            {completionStep === 'signature' && (
+              <SignatureCanvas onComplete={handleSignatureComplete} onSkip={handleSignatureSkip} />
+            )}
+            {completionStep === 'photo' && (
+              <Card>
+                <CardContent className="py-4 space-y-3">
+                  <p className="text-sm font-medium text-foreground">Fraktsedelfoto</p>
+                  <div className="space-y-2">
+                    <Button onClick={handleTakePhoto} disabled={updateAssignment.isPending} className="w-full touch-target" size="lg">
+                      <Camera className="h-5 w-5 mr-2" /> Ta foto av fraktsedel
+                    </Button>
+                    <Button onClick={() => handlePhotoComplete(null)} disabled={updateAssignment.isPending} variant="outline" className="w-full touch-target" size="lg">
+                      <SkipForward className="h-5 w-5 mr-2" /> Hoppa över foto
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </>
         )}
 
@@ -235,6 +351,12 @@ export default function DriverAssignmentDetail() {
                   <p>Start: {formatSwedishDateTime(assignment.actual_start)}</p>
                   <p>Stopp: {formatSwedishDateTime(assignment.actual_stop)}</p>
                   <p className="font-medium text-foreground">Varaktighet: {calculateDuration(assignment.actual_start, assignment.actual_stop)}</p>
+                </div>
+              )}
+              {(assignment as any).signature_url && (
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Mottagarens signatur</p>
+                  <img src={(assignment as any).signature_url} alt="Signatur" className="w-full max-w-[200px] mx-auto rounded-lg border bg-white" />
                 </div>
               )}
               {assignment.consignment_photo_url && (
