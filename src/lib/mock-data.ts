@@ -4,9 +4,9 @@ const today = new Date();
 const todayStr = today.toISOString().split('T')[0];
 
 export const mockDrivers: Profile[] = [
-  { id: 'd1', full_name: 'Erik Svensson', email: 'erik@aurora.se', role: 'driver', created_at: '2024-01-01T00:00:00Z' },
-  { id: 'd2', full_name: 'Anna Lindström', email: 'anna@aurora.se', role: 'driver', created_at: '2024-01-15T00:00:00Z' },
-  { id: 'd3', full_name: 'Johan Karlsson', email: 'johan@aurora.se', role: 'driver', created_at: '2024-02-01T00:00:00Z' },
+  { id: 'd1', full_name: 'Erik Svensson', email: 'erik@aurora.se', role: 'driver', is_available: true, created_at: '2024-01-01T00:00:00Z' },
+  { id: 'd2', full_name: 'Anna Lindström', email: 'anna@aurora.se', role: 'driver', is_available: true, created_at: '2024-01-15T00:00:00Z' },
+  { id: 'd3', full_name: 'Johan Karlsson', email: 'johan@aurora.se', role: 'driver', is_available: false, created_at: '2024-02-01T00:00:00Z' },
 ];
 
 export const mockCustomers: Customer[] = [
