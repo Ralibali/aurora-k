@@ -34,7 +34,7 @@ export const mockAssignments: Assignment[] = [
     id: 'a3', title: 'Express-leverans dokument', customer_id: 'c3', address: 'Schenker Terminal, Arlanda',
     instructions: 'Lämna vid godsmottagningen', scheduled_start: `${todayStr}T14:00:00Z`, scheduled_end: null,
     assigned_driver_id: 'd1', status: 'pending', actual_start: null, actual_stop: null,
-    consignment_photo_url: null, priority: 'low', admin_comment: null, invoiced: false, created_at: '2024-03-20T00:00:00Z',
+    consignment_photo_url: null, priority: 'low', admin_comment: null, driver_comment: null, invoiced: false, created_at: '2024-03-20T00:00:00Z',
     customer: mockCustomers[2], driver: mockDrivers[0],
   },
   {
