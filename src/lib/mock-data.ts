@@ -27,7 +27,7 @@ export const mockAssignments: Assignment[] = [
     id: 'a2', title: 'Hämtning reservdelar', customer_id: 'c2', address: 'Volvo Center, Göteborg',
     instructions: null, scheduled_start: `${todayStr}T10:30:00Z`, scheduled_end: `${todayStr}T12:00:00Z`,
     assigned_driver_id: 'd2', status: 'active', actual_start: `${todayStr}T10:35:00Z`, actual_stop: null,
-    consignment_photo_url: null, priority: 'urgent', admin_comment: 'Prioritera denna, kunden väntar!', invoiced: false, created_at: '2024-03-20T00:00:00Z',
+    consignment_photo_url: null, priority: 'urgent', admin_comment: 'Prioritera denna, kunden väntar!', driver_comment: null, invoiced: false, created_at: '2024-03-20T00:00:00Z',
     customer: mockCustomers[1], driver: mockDrivers[1],
   },
   {
