@@ -41,7 +41,7 @@ export const mockAssignments: Assignment[] = [
     id: 'a4', title: 'Pallgods till lager', customer_id: 'c1', address: 'Lagervägen 15, Södertälje',
     instructions: null, scheduled_start: `${todayStr}T15:30:00Z`, scheduled_end: `${todayStr}T17:00:00Z`,
     assigned_driver_id: 'd3', status: 'pending', actual_start: null, actual_stop: null,
-    consignment_photo_url: null, priority: 'normal', admin_comment: null, invoiced: false, created_at: '2024-03-20T00:00:00Z',
+    consignment_photo_url: null, priority: 'normal', admin_comment: null, driver_comment: null, invoiced: false, created_at: '2024-03-20T00:00:00Z',
     customer: mockCustomers[0], driver: mockDrivers[2],
   },
 ];
