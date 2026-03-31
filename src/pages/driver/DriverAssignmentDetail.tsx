@@ -337,7 +337,15 @@ export default function DriverAssignmentDetail() {
           <>
             <ElapsedTimer since={assignment.actual_start} />
             {completionStep === null && (
-              <Button onClick={() => setCompletionStep('signature')} disabled={updateAssignment.isPending} className="w-full touch-target text-lg" size="lg">
+              <Button onClick={() => {
+                if (requireSignature) {
+                  setCompletionStep('signature');
+                } else if (requirePhoto) {
+                  setCompletionStep('photo');
+                } else {
+                  handlePhotoComplete(null);
+                }
+              }} disabled={updateAssignment.isPending} className="w-full touch-target text-lg" size="lg">
                 <CheckCircle2 className="h-5 w-5 mr-2" /> Slutför uppdrag
               </Button>
             )}
