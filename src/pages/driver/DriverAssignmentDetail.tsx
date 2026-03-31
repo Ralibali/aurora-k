@@ -174,7 +174,19 @@ export default function DriverAssignmentDetail() {
     const url = await uploadSignature(blob);
     if (url) {
       setSignatureUrl(url);
-      setCompletionStep('photo');
+      if (requirePhoto) {
+        setCompletionStep('photo');
+      } else {
+        // Skip photo step - complete directly
+        updateAssignment.mutate({
+          id: assignment!.id,
+          status: 'completed',
+          actual_stop: new Date().toISOString(),
+          signature_url: url,
+        });
+        toast.success('Uppdraget slutfört!');
+        setCompletionStep(null);
+      }
     }
   };
 
