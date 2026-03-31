@@ -3,8 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Truck } from 'lucide-react';
+import { Truck, Mail, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -40,50 +39,84 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader className="text-center space-y-3">
-          <div className="mx-auto w-14 h-14 rounded-2xl bg-primary flex items-center justify-center">
-            <Truck className="h-7 w-7 text-primary-foreground" />
+    <div className="min-h-screen flex items-center justify-center bg-sidebar p-4 relative overflow-hidden">
+      {/* Decorative background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-1/2 -right-1/4 w-[600px] h-[600px] rounded-full bg-primary/5 blur-3xl" />
+        <div className="absolute -bottom-1/4 -left-1/4 w-[400px] h-[400px] rounded-full bg-success/5 blur-3xl" />
+      </div>
+
+      <div className="w-full max-w-sm relative z-10">
+        {/* Logo / Branding */}
+        <div className="text-center mb-8">
+          <div className="mx-auto w-16 h-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30 mb-4">
+            <Truck className="h-8 w-8 text-primary-foreground" />
           </div>
-          <CardTitle className="text-xl">Aurora Medias Transport</CardTitle>
-          <p className="text-sm text-muted-foreground">Logga in för att fortsätta</p>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
+          <h1 className="text-2xl font-bold text-sidebar-foreground">Aurora Medias Transport</h1>
+          <p className="text-sm text-sidebar-foreground/60 mt-1">Logga in för att fortsätta</p>
+        </div>
+
+        {/* Login Card */}
+        <div className="rounded-2xl border border-sidebar-border bg-sidebar-accent/50 backdrop-blur-sm p-6 shadow-xl">
+          <form onSubmit={handleLogin} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="email">E-post</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="namn@aurora.se"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+              <Label htmlFor="email" className="text-sidebar-foreground/80 text-sm font-medium">
+                E-post
+              </Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-sidebar-foreground/40" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="namn@aurora.se"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="pl-10 bg-sidebar border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/30 focus-visible:ring-primary h-11"
+                />
+              </div>
             </div>
+
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Lösenord</Label>
-                <Link to="/forgot-password" className="text-xs text-muted-foreground hover:text-primary transition-colors">
+                <Label htmlFor="password" className="text-sidebar-foreground/80 text-sm font-medium">
+                  Lösenord
+                </Label>
+                <Link
+                  to="/forgot-password"
+                  className="text-xs text-primary hover:text-primary/80 transition-colors"
+                >
                   Glömt lösenord?
                 </Link>
               </div>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-sidebar-foreground/40" />
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="pl-10 bg-sidebar border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/30 focus-visible:ring-primary h-11"
+                />
+              </div>
             </div>
-            <Button type="submit" className="w-full touch-target" disabled={submitting}>
+
+            <Button
+              type="submit"
+              className="w-full h-12 text-sm font-semibold rounded-xl shadow-lg shadow-primary/20"
+              disabled={submitting}
+            >
               {submitting ? 'Loggar in...' : 'Logga in'}
             </Button>
           </form>
-        </CardContent>
-      </Card>
+        </div>
+
+        <p className="text-center text-xs text-sidebar-foreground/40 mt-6">
+          © {new Date().getFullYear()} Aurora Medias Transport
+        </p>
+      </div>
     </div>
   );
 }
