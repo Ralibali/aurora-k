@@ -33,6 +33,7 @@ const financeNav = [
 
 const systemNav = [
   { title: 'Inställningar', url: '/admin/settings', icon: Settings },
+  { title: 'Förarapp', url: '/admin/driver-settings', icon: Smartphone },
 ];
 
 function NavGroup({ label, items, collapsed }: { label: string; items: typeof mainNav; collapsed: boolean }) {
