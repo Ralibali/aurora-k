@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 export default function AdminInvoices() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [customerFilter, setCustomerFilter] = useState<string>('all');
+  const [search, setSearch] = useState('');
 
   const { data: invoices, isLoading } = useInvoices();
   const { data: customers } = useCustomers();
@@ -34,6 +35,12 @@ export default function AdminInvoices() {
   const filtered = processedInvoices.filter(i => {
     if (statusFilter !== 'all' && i.status !== statusFilter) return false;
     if (customerFilter !== 'all' && i.customer_id !== customerFilter) return false;
+    if (search) {
+      const q = search.toLowerCase();
+      const matchNum = String(i.invoice_number).includes(q);
+      const matchCustomer = i.customer?.name?.toLowerCase().includes(q);
+      if (!matchNum && !matchCustomer) return false;
+    }
     return true;
   });
 
