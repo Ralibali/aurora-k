@@ -81,24 +81,26 @@ export default function DriverProfile() {
         </Card>
 
         {/* Availability toggle */}
-        <Card>
-          <CardContent className="py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <CircleDot className={`h-5 w-5 ${isAvailable ? 'text-success' : 'text-muted-foreground'}`} />
-                <div>
-                  <p className="text-sm font-medium text-foreground">Tillgänglighetsstatus</p>
-                  <p className="text-xs text-muted-foreground">{isAvailable ? 'Ledig för uppdrag' : 'Inte tillgänglig'}</p>
+        {showAvailability && (
+          <Card>
+            <CardContent className="py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <CircleDot className={`h-5 w-5 ${isAvailable ? 'text-success' : 'text-muted-foreground'}`} />
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Tillgänglighetsstatus</p>
+                    <p className="text-xs text-muted-foreground">{isAvailable ? 'Ledig för uppdrag' : 'Inte tillgänglig'}</p>
+                  </div>
                 </div>
+                <Switch
+                  checked={isAvailable}
+                  onCheckedChange={handleToggleAvailability}
+                  disabled={togglingAvailability || isLoading}
+                />
               </div>
-              <Switch
-                checked={isAvailable}
-                onCheckedChange={handleToggleAvailability}
-                disabled={togglingAvailability || isLoading}
-              />
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Change password */}
         <Card>
