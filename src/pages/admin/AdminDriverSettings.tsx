@@ -43,7 +43,7 @@ export default function AdminDriverSettings() {
   };
 
   return (
-    <AdminLayout>
+    <AdminLayout title="Förarinställningar" description="Anpassa förarens app">
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Förarinställningar</h1>
