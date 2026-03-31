@@ -44,6 +44,7 @@ export interface Assignment {
   consignment_photo_url: string | null;
   priority: Priority;
   admin_comment: string | null;
+  driver_comment: string | null;
   invoiced: boolean;
   created_at: string;
   // Joined fields
