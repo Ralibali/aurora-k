@@ -12,13 +12,21 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AdminCustomers() {
   const [search, setSearch] = useState('');
+  const [pricingFilter, setPricingFilter] = useState<string>('all');
   const navigate = useNavigate();
   const { data: customers, isLoading } = useCustomers();
 
-  const filtered = (customers ?? []).filter(c =>
-    !search || c.name.toLowerCase().includes(search.toLowerCase()) ||
-    c.org_number?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = (customers ?? []).filter(c => {
+    if (pricingFilter !== 'all' && c.pricing_type !== pricingFilter) return false;
+    if (search) {
+      const q = search.toLowerCase();
+      return c.name.toLowerCase().includes(q) ||
+        c.org_number?.toLowerCase().includes(q) ||
+        c.contact_person?.toLowerCase().includes(q) ||
+        c.email?.toLowerCase().includes(q);
+    }
+    return true;
+  });
 
   return (
     <AdminLayout title="Kundregister" description="Hantera kunder och prissättning">
