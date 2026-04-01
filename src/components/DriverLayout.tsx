@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import { PageTransition } from '@/components/PageTransition';
 import { ClipboardList, User, LogOut, Clock, Truck } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/hooks/useAuth';
