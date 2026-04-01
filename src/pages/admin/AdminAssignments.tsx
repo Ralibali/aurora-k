@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AdminLayout } from '@/components/AdminLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { StatusBadge } from '@/components/StatusBadge';
 import { PriorityBadge } from '@/components/PriorityBadge';
-import { useAssignments, useDrivers, useBulkAssignDriver } from '@/hooks/useData';
+import { useAssignments, useDrivers, useBulkAssignDriver, useUpdateAssignment } from '@/hooks/useData';
 import { formatSwedishDateTime } from '@/lib/format';
 import { Plus, Search, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -16,6 +17,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AdminAssignments() {
+  const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [driverFilter, setDriverFilter] = useState<string>('all');
   const [search, setSearch] = useState('');
@@ -25,6 +27,7 @@ export default function AdminAssignments() {
   const { data: assignments, isLoading } = useAssignments();
   const { data: drivers } = useDrivers();
   const bulkAssign = useBulkAssignDriver();
+  const updateAssignment = useUpdateAssignment();
 
   const filtered = (assignments ?? []).filter(a => {
     if (statusFilter !== 'all' && a.status !== statusFilter) return false;
@@ -91,24 +94,45 @@ export default function AdminAssignments() {
           {filtered.map((a) => (
             <div key={a.id} className="flex items-center gap-2">
               <Checkbox checked={selected.includes(a.id)} onCheckedChange={() => toggleSelect(a.id)} />
-              <Link to={`/admin/assignments/${a.id}`} className="block flex-1">
-                <Card className="hover:shadow-md hover:border-primary/20 transition-all duration-150 cursor-pointer">
-                  <CardContent className="py-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <p className="font-medium truncate">{a.title}</p>
-                          <StatusBadge status={a.status} />
-                          {a.priority !== 'normal' && <PriorityBadge priority={a.priority} />}
-                          {a.invoiced && <span className="status-badge bg-primary/10 text-primary">Fakturerad</span>}
+              <Card
+                className="flex-1 hover:shadow-md hover:border-primary/20 transition-all duration-150 cursor-pointer"
+                onClick={() => navigate(`/admin/assignments/${a.id}`)}
+              >
+                <CardContent className="py-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <p className="font-medium truncate">{a.title}</p>
+                        <StatusBadge status={a.status} />
+                        {a.priority !== 'normal' && <PriorityBadge priority={a.priority} />}
+                        {a.invoiced && <span className="status-badge bg-primary/10 text-primary">Fakturerad</span>}
+                      </div>
+                      <p className="text-sm text-muted-foreground">{a.customer?.name} · {a.address}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <p className="text-xs text-muted-foreground">{formatSwedishDateTime(a.scheduled_start)}</p>
+                        <span className="text-xs text-muted-foreground">·</span>
+                        <div onClick={(e) => e.stopPropagation()}>
+                          <Select
+                            value={a.assigned_driver_id}
+                            onValueChange={(driverId) => {
+                              updateAssignment.mutate({ id: a.id, assigned_driver_id: driverId });
+                            }}
+                          >
+                            <SelectTrigger className="h-6 text-xs border-none bg-transparent p-0 w-auto gap-1 shadow-none focus:ring-0">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {(drivers ?? []).map(d => (
+                                <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
-                        <p className="text-sm text-muted-foreground">{a.customer?.name} · {a.address}</p>
-                        <p className="text-xs text-muted-foreground mt-1">{formatSwedishDateTime(a.scheduled_start)} · {a.driver?.full_name}</p>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              </Link>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           ))}
         </div>

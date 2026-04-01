@@ -28,6 +28,7 @@ import DriverAssignments from "./pages/driver/DriverAssignments";
 import DriverAssignmentDetail from "./pages/driver/DriverAssignmentDetail";
 import DriverProfile from "./pages/driver/DriverProfile";
 import DriverTimeReport from "./pages/driver/DriverTimeReport";
+import DriverInvoices from "./pages/driver/DriverInvoices";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -63,6 +64,7 @@ const App = () => (
               <Route path="/driver" element={<ProtectedRoute requiredRole="driver"><DriverAssignments /></ProtectedRoute>} />
               <Route path="/driver/assignment/:id" element={<ProtectedRoute requiredRole="driver"><DriverAssignmentDetail /></ProtectedRoute>} />
               <Route path="/driver/time-report" element={<ProtectedRoute requiredRole="driver"><DriverTimeReport /></ProtectedRoute>} />
+              <Route path="/driver/invoices" element={<ProtectedRoute requiredRole="driver"><DriverInvoices /></ProtectedRoute>} />
               <Route path="/driver/profile" element={<ProtectedRoute requiredRole="driver"><DriverProfile /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>

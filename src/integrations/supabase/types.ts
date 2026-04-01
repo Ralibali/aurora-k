@@ -354,6 +354,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      driver_has_invoice_assignments: {
+        Args: { _assignment_ids: string[]; _user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
