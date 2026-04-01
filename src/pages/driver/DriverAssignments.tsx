@@ -21,6 +21,12 @@ function openMaps(address: string) {
 }
 
 function AssignmentCard({ a, i }: { a: any; i: number }) {
+  const borderColor = a.status === 'active'
+    ? 'border-l-4 border-l-warning'
+    : a.status === 'completed'
+      ? 'border-l-4 border-l-success'
+      : 'border-l-4 border-l-muted-foreground/30';
+
   return (
     <motion.div
       key={a.id}
@@ -29,10 +35,10 @@ function AssignmentCard({ a, i }: { a: any; i: number }) {
       transition={{ delay: i * 0.04, duration: 0.25 }}
     >
       <Link to={`/driver/assignment/${a.id}`}>
-        <Card className="active:scale-[0.98] transition-all duration-150 hover:shadow-md hover:border-primary/20">
+        <Card className={`active:scale-[0.98] transition-all duration-150 hover:shadow-md hover:border-primary/20 ${borderColor}`}>
           <CardContent className="py-4 px-4 space-y-2.5">
             <div className="flex items-center justify-between gap-2">
-              <p className="font-semibold text-[15px] text-foreground truncate">{a.customer?.name || a.title}</p>
+              <p className="font-semibold text-[16px] text-foreground truncate">{a.customer?.name || a.title}</p>
               <div className="flex gap-1.5 shrink-0">
                 {a.priority !== 'normal' && <PriorityBadge priority={a.priority} />}
                 <StatusBadge status={a.status} />
@@ -51,7 +57,7 @@ function AssignmentCard({ a, i }: { a: any; i: number }) {
                 </button>
               )}
             </div>
-            <div className="flex items-center gap-2 text-[13px] text-muted-foreground/80">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground/80">
               <Clock className="h-3.5 w-3.5 shrink-0" />
               <span>{formatSwedishDateTime(a.scheduled_start)}</span>
               {a.scheduled_end && <span>– {formatSwedishDateTime(a.scheduled_end)}</span>}
