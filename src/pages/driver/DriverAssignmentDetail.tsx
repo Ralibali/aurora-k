@@ -127,9 +127,10 @@ function SignatureCanvas({ onComplete, onSkip }: { onComplete: (blob: Blob) => v
 export default function DriverAssignmentDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { data: assignment, isLoading } = useAssignment(id);
   const updateAssignment = useUpdateAssignment();
-  const { data: driverSettings } = useDriverSettings();
+  const { data: driverSettings } = useEffectiveDriverSettings(user?.id);
   const [driverComment, setDriverComment] = useState('');
   const [savingComment, setSavingComment] = useState(false);
   const [completionStep, setCompletionStep] = useState<'signature' | 'photo' | null>(null);
