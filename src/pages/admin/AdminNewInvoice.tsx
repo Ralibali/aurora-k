@@ -13,6 +13,13 @@ import { useCustomers, useAssignments, useNextInvoiceNumber, useCreateInvoice, u
 import { formatSwedishDate, calculateDecimalHours } from '@/lib/format';
 import { ArrowLeft, FileText } from 'lucide-react';
 
+const VAT_OPTIONS = [
+  { value: '0', label: '0% (momsfritt)' },
+  { value: '6', label: '6%' },
+  { value: '12', label: '12%' },
+  { value: '25', label: '25%' },
+];
+
 export default function AdminNewInvoice() {
   const navigate = useNavigate();
   const [customerId, setCustomerId] = useState<string>('');
@@ -21,6 +28,7 @@ export default function AdminNewInvoice() {
   const [reference, setReference] = useState('');
   const [message, setMessage] = useState('');
   const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().split('T')[0]);
+  const [vatRate, setVatRate] = useState('0');
 
   const { data: customers } = useCustomers();
   const { data: allAssignments } = useAssignments();
@@ -48,8 +56,9 @@ export default function AdminNewInvoice() {
     return 0;
   };
 
+  const vatDecimal = parseFloat(vatRate) / 100;
   const totalExVat = selectedItems.reduce((sum, a) => sum + calculateAmount(a), 0);
-  const vatAmount = totalExVat * 0.25;
+  const vatAmount = totalExVat * vatDecimal;
   const totalIncVat = totalExVat + vatAmount;
 
   const today = new Date().toISOString().split('T')[0];
@@ -60,12 +69,12 @@ export default function AdminNewInvoice() {
   const finalDueDate = dueDateState || dueDate;
   const finalInvoiceNumber = invoiceNumber ?? nextNumber ?? 1001;
 
-  const handleCreate = () => {
+  const handleCreate = (status: string = 'draft') => {
     createInvoice.mutate({
       invoice_number: finalInvoiceNumber,
       customer_id: customerId,
       assignment_ids: selectedAssignments,
-      status: 'draft',
+      status,
       invoice_date: invoiceDate,
       due_date: finalDueDate,
       total_ex_vat: totalExVat,
@@ -152,7 +161,7 @@ export default function AdminNewInvoice() {
               )}
               <div className="border-t pt-3 text-sm space-y-1">
                 <div className="flex justify-between"><span>Netto ex. moms</span><span>{totalExVat.toFixed(0)} kr</span></div>
-                <div className="flex justify-between text-muted-foreground"><span>Moms 25%</span><span>{vatAmount.toFixed(0)} kr</span></div>
+                <div className="flex justify-between text-muted-foreground"><span>Moms {vatRate}%</span><span>{vatAmount.toFixed(0)} kr</span></div>
                 <div className="flex justify-between font-semibold text-base"><span>Totalt inkl. moms</span><span>{totalIncVat.toFixed(0)} kr</span></div>
               </div>
               <Button disabled={selectedAssignments.length === 0} onClick={() => setStep(3)}>Nästa</Button>
@@ -176,6 +185,15 @@ export default function AdminNewInvoice() {
                 <div className="space-y-2">
                   <Label>Förfallodatum</Label>
                   <Input type="date" value={finalDueDate} onChange={e => setDueDateState(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Momssats</Label>
+                  <Select value={vatRate} onValueChange={setVatRate}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {VAT_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Er referens</Label>
@@ -248,32 +266,21 @@ export default function AdminNewInvoice() {
 
                 <div className="text-right space-y-1 border-t pt-3">
                   <p>Netto ex. moms: <span className="font-medium">{totalExVat.toFixed(0)} kr</span></p>
-                  <p>Moms 25%: <span className="font-medium">{vatAmount.toFixed(0)} kr</span></p>
+                  {vatDecimal > 0 && (
+                    <p>Moms {vatRate}%: <span className="font-medium">{vatAmount.toFixed(0)} kr</span></p>
+                  )}
+                  {vatDecimal === 0 && (
+                    <p className="text-muted-foreground text-sm">Momsfri faktura</p>
+                  )}
                   <p className="text-lg font-bold">Att betala: {totalIncVat.toFixed(0)} kr</p>
                 </div>
               </div>
 
               <div className="flex gap-2">
-                <Button onClick={handleCreate} disabled={createInvoice.isPending}>
+                <Button onClick={() => handleCreate('draft')} disabled={createInvoice.isPending}>
                   <FileText className="h-4 w-4 mr-1" /> {createInvoice.isPending ? 'Skapar...' : 'Spara faktura'}
                 </Button>
-                <Button variant="outline" onClick={() => {
-                  createInvoice.mutate({
-                    invoice_number: finalInvoiceNumber,
-                    customer_id: customerId,
-                    assignment_ids: selectedAssignments,
-                    status: 'sent',
-                    invoice_date: invoiceDate,
-                    due_date: finalDueDate,
-                    total_ex_vat: totalExVat,
-                    vat_amount: vatAmount,
-                    total_inc_vat: totalIncVat,
-                    reference: reference || null,
-                    message: message || null,
-                  }, {
-                    onSuccess: () => navigate('/admin/invoices'),
-                  });
-                }}>
+                <Button variant="outline" onClick={() => handleCreate('sent')}>
                   Markera som skickad
                 </Button>
               </div>

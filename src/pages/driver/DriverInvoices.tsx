@@ -1,19 +1,69 @@
 import { DriverLayout } from '@/components/DriverLayout';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { InvoiceStatusBadge } from '@/components/InvoiceStatusBadge';
-import { useInvoices } from '@/hooks/useData';
-import { FileText } from 'lucide-react';
+import { useInvoices, useAssignments, useSettings } from '@/hooks/useData';
+import { generateInvoicePdf } from '@/lib/invoice-pdf';
+import { calculateDecimalHours } from '@/lib/format';
+import { FileText, Download } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 
 export default function DriverInvoices() {
   const { data: invoices, isLoading } = useInvoices();
+  const { data: allAssignments } = useAssignments();
+  const { data: settings } = useSettings();
 
   const now = new Date().toISOString().split('T')[0];
   const processed = (invoices ?? []).map(i => ({
     ...i,
     status: i.status === 'sent' && i.due_date < now ? 'overdue' : i.status,
   }));
+
+  const handleDownload = (inv: typeof processed[0]) => {
+    const customer = inv.customer;
+    if (!customer || !settings) {
+      toast.error('Kan inte generera PDF just nu');
+      return;
+    }
+
+    const invoiceAssignments = (allAssignments ?? []).filter(a =>
+      inv.assignment_ids.includes(a.id)
+    );
+
+    const lines = invoiceAssignments.map(a => {
+      const hours = a.actual_start && a.actual_stop ? calculateDecimalHours(a.actual_start, a.actual_stop) : 0;
+      const unitPrice = customer.pricing_type === 'per_delivery' ? (customer.price_per_delivery || 0) : (customer.price_per_hour || 0);
+      const amount = customer.pricing_type === 'per_delivery' ? unitPrice : hours * unitPrice;
+      return { date: a.actual_start, description: a.title, driver: a.driver?.full_name || '', hours, unitPrice, amount };
+    });
+
+    const vatRate = inv.total_ex_vat > 0 ? Math.round((inv.vat_amount / inv.total_ex_vat) * 100) : 0;
+
+    const doc = generateInvoicePdf({
+      invoiceNumber: inv.invoice_number,
+      invoiceDate: inv.invoice_date,
+      dueDate: inv.due_date,
+      reference: inv.reference,
+      message: inv.message,
+      customer: { name: customer.name, org_number: customer.org_number, invoice_address: customer.invoice_address },
+      company: {
+        company_name: settings.company_name, org_number: settings.org_number,
+        address: settings.address, zip_city: settings.zip_city,
+        email: settings.email, phone: settings.phone,
+        bankgiro: settings.bankgiro, plusgiro: settings.plusgiro, vat_number: settings.vat_number,
+      },
+      lines,
+      totalExVat: inv.total_ex_vat,
+      vatAmount: inv.vat_amount,
+      totalIncVat: inv.total_inc_vat,
+      vatRate,
+    });
+
+    doc.save(`Faktura-${inv.invoice_number}.pdf`);
+    toast.success('PDF nedladdad');
+  };
 
   return (
     <DriverLayout>
@@ -44,9 +94,14 @@ export default function DriverInvoices() {
                   <InvoiceStatusBadge status={inv.status} />
                 </div>
                 <p className="text-sm text-muted-foreground">{inv.customer?.name}</p>
-                <div className="flex items-center justify-between mt-2 text-sm">
-                  <span className="text-muted-foreground">Förfaller: {inv.due_date}</span>
-                  <span className="font-medium">{inv.total_inc_vat.toFixed(0)} kr</span>
+                <div className="flex items-center justify-between mt-2">
+                  <div className="text-sm">
+                    <span className="text-muted-foreground">Förfaller: {inv.due_date}</span>
+                    <span className="font-medium ml-3">{inv.total_inc_vat.toFixed(0)} kr</span>
+                  </div>
+                  <Button variant="ghost" size="icon" onClick={() => handleDownload(inv)} title="Ladda ner PDF">
+                    <Download className="h-4 w-4" />
+                  </Button>
                 </div>
               </CardContent>
             </Card>
