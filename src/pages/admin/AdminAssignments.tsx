@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { StatusBadge } from '@/components/StatusBadge';
 import { PriorityBadge } from '@/components/PriorityBadge';
-import { useAssignments, useDrivers, useBulkAssignDriver } from '@/hooks/useData';
+import { useAssignments, useDrivers, useBulkAssignDriver, useUpdateAssignment } from '@/hooks/useData';
 import { formatSwedishDateTime } from '@/lib/format';
 import { Plus, Search, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
