@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      assignment_logs: {
+        Row: {
+          action: string
+          assignment_id: string
+          created_at: string
+          id: string
+          new_value: string | null
+          old_value: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          assignment_id: string
+          created_at?: string
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          assignment_id?: string
+          created_at?: string
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignment_logs_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assignments: {
         Row: {
           actual_start: string | null
@@ -354,10 +392,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      driver_has_invoice_assignments: {
-        Args: { _assignment_ids: string[]; _user_id: string }
-        Returns: boolean
-      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
