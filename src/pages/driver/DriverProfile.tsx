@@ -12,7 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { useDriverSettings } from '@/hooks/useDriverSettings';
+import { useEffectiveDriverSettings } from '@/hooks/useDriverSettings';
 
 export default function DriverProfile() {
   const navigate = useNavigate();
@@ -22,7 +22,7 @@ export default function DriverProfile() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [changingPw, setChangingPw] = useState(false);
   const [togglingAvailability, setTogglingAvailability] = useState(false);
-  const { data: driverSettings } = useDriverSettings();
+  const { data: driverSettings } = useEffectiveDriverSettings(user?.id);
   const showAvailability = driverSettings?.show_availability_toggle ?? true;
 
   const isAvailable = (profile as any)?.is_available ?? true;

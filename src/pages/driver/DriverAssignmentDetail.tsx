@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useDriverSettings } from '@/hooks/useDriverSettings';
+import { useEffectiveDriverSettings } from '@/hooks/useDriverSettings';
+import { useAuth } from '@/hooks/useAuth';
 import { DriverLayout } from '@/components/DriverLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -126,9 +127,10 @@ function SignatureCanvas({ onComplete, onSkip }: { onComplete: (blob: Blob) => v
 export default function DriverAssignmentDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { data: assignment, isLoading } = useAssignment(id);
   const updateAssignment = useUpdateAssignment();
-  const { data: driverSettings } = useDriverSettings();
+  const { data: driverSettings } = useEffectiveDriverSettings(user?.id);
   const [driverComment, setDriverComment] = useState('');
   const [savingComment, setSavingComment] = useState(false);
   const [completionStep, setCompletionStep] = useState<'signature' | 'photo' | null>(null);

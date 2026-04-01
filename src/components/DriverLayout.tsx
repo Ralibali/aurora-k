@@ -3,16 +3,16 @@ import { ClipboardList, User, LogOut, Clock, Truck } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import { useDriverSettings } from '@/hooks/useDriverSettings';
+import { useEffectiveDriverSettings } from '@/hooks/useDriverSettings';
 
 interface DriverLayoutProps {
   children: ReactNode;
 }
 
 export function DriverLayout({ children }: DriverLayoutProps) {
-  const { signOut } = useAuth();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const { data: driverSettings } = useDriverSettings();
+  const { data: driverSettings } = useEffectiveDriverSettings(user?.id);
   const showTimeReport = driverSettings?.show_time_report ?? true;
 
   const handleLogout = async () => {
