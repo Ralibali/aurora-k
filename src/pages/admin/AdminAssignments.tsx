@@ -25,6 +25,7 @@ export default function AdminAssignments() {
   const { data: assignments, isLoading } = useAssignments();
   const { data: drivers } = useDrivers();
   const bulkAssign = useBulkAssignDriver();
+  const updateAssignment = useUpdateAssignment();
 
   const filtered = (assignments ?? []).filter(a => {
     if (statusFilter !== 'all' && a.status !== statusFilter) return false;
