@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import { PageTransition } from '@/components/PageTransition';
 import { ClipboardList, User, LogOut, Clock, Truck } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/hooks/useAuth';
@@ -34,7 +35,7 @@ export function DriverLayout({ children }: DriverLayoutProps) {
         </button>
       </header>
       <main className="flex-1 overflow-auto pb-24">
-        {children}
+        <PageTransition>{children}</PageTransition>
       </main>
       <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t flex z-50 pb-safe">
         <NavLink
