@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { StatusBadge } from '@/components/StatusBadge';
 import { PriorityBadge } from '@/components/PriorityBadge';
-import { useAssignment, useUpdateAssignment } from '@/hooks/useData';
+import { useAssignment, useDriverUpdateAssignment } from '@/hooks/useData';
 import { formatSwedishDateTime, calculateDuration } from '@/lib/format';
 import { ArrowLeft, Play, Camera, CheckCircle2, MapPin, Clock, FileText, Info, Navigation, SkipForward, MessageSquare, Send, Eraser, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
@@ -129,7 +129,7 @@ export default function DriverAssignmentDetail() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { data: assignment, isLoading } = useAssignment(id);
-  const updateAssignment = useUpdateAssignment();
+  const updateAssignment = useDriverUpdateAssignment();
   const { data: driverSettings } = useEffectiveDriverSettings(user?.id);
   const [driverComment, setDriverComment] = useState('');
   const [savingComment, setSavingComment] = useState(false);
