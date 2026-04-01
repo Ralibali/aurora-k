@@ -384,10 +384,10 @@ export default function DriverAssignmentDetail() {
                   <p className="font-medium text-foreground">Varaktighet: {calculateDuration(assignment.actual_start, assignment.actual_stop)}</p>
                 </div>
               )}
-              {(assignment as any).signature_url && (
+              {assignment.signature_url && (
                 <div>
                   <p className="text-xs text-muted-foreground mb-1">Mottagarens signatur</p>
-                  <img src={(assignment as any).signature_url} alt="Signatur" className="w-full max-w-[200px] mx-auto rounded-lg border bg-white" />
+                  <img src={assignment.signature_url} alt="Signatur" className="w-full max-w-[200px] mx-auto rounded-lg border bg-white" />
                 </div>
               )}
               {assignment.consignment_photo_url && (

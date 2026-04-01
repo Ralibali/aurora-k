@@ -34,7 +34,7 @@ export default function AdminNewAssignment() {
   const { data: drivers } = useDrivers();
   const createAssignment = useCreateAssignment();
 
-  const [title, setTitle] = useState(copyFrom ? `${copyFrom.title} (kopia)` : '');
+  const [title, setTitle] = useState(copyFrom ? copyFrom.title : '');
   const [customerId, setCustomerId] = useState(copyFrom?.customer_id || '');
   const [address, setAddress] = useState(copyFrom?.address || '');
   const [instructions, setInstructions] = useState(copyFrom?.instructions || '');
