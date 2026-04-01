@@ -170,6 +170,36 @@ export type Database = {
         }
         Relationships: []
       }
+      driver_settings_overrides: {
+        Row: {
+          driver_id: string
+          id: string
+          require_photo: boolean | null
+          require_signature: boolean | null
+          show_availability_toggle: boolean | null
+          show_time_report: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          driver_id: string
+          id?: string
+          require_photo?: boolean | null
+          require_signature?: boolean | null
+          show_availability_toggle?: boolean | null
+          show_time_report?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          driver_id?: string
+          id?: string
+          require_photo?: boolean | null
+          require_signature?: boolean | null
+          show_availability_toggle?: boolean | null
+          show_time_report?: boolean | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       invoices: {
         Row: {
           assignment_ids: string[]
