@@ -129,7 +129,7 @@ export default function DriverAssignmentDetail() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { data: assignment, isLoading } = useAssignment(id);
-  const updateAssignment = useUpdateAssignment();
+  const updateAssignment = useDriverUpdateAssignment();
   const { data: driverSettings } = useEffectiveDriverSettings(user?.id);
   const [driverComment, setDriverComment] = useState('');
   const [savingComment, setSavingComment] = useState(false);
