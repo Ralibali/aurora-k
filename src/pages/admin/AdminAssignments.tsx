@@ -104,7 +104,28 @@ export default function AdminAssignments() {
                           {a.invoiced && <span className="status-badge bg-primary/10 text-primary">Fakturerad</span>}
                         </div>
                         <p className="text-sm text-muted-foreground">{a.customer?.name} · {a.address}</p>
-                        <p className="text-xs text-muted-foreground mt-1">{formatSwedishDateTime(a.scheduled_start)} · {a.driver?.full_name}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <p className="text-xs text-muted-foreground">{formatSwedishDateTime(a.scheduled_start)}</p>
+                          <span className="text-xs text-muted-foreground">·</span>
+                          <Select
+                            value={a.assigned_driver_id}
+                            onValueChange={(driverId) => {
+                              updateAssignment.mutate({ id: a.id, assigned_driver_id: driverId });
+                            }}
+                          >
+                            <SelectTrigger
+                              className="h-6 text-xs border-none bg-transparent p-0 w-auto gap-1 shadow-none focus:ring-0"
+                              onClick={(e) => e.preventDefault()}
+                            >
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {(drivers ?? []).map(d => (
+                                <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
                     </div>
                   </CardContent>
