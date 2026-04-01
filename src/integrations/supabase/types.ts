@@ -392,6 +392,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      driver_update_assignment: {
+        Args: {
+          _actual_start?: string
+          _actual_stop?: string
+          _consignment_photo_url?: string
+          _driver_comment?: string
+          _id: string
+          _signature_url?: string
+          _status?: string
+        }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
