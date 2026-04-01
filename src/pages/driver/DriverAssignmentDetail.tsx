@@ -222,11 +222,11 @@ export default function DriverAssignmentDetail() {
       const file = input.files?.[0];
       let photoUrl: string | null = null;
       if (file) {
-        const path = `${assignment.id}/${Date.now()}.${file.name.split('.').pop()}`;
+        const path = `${user!.id}/${assignment.id}/${Date.now()}.${file.name.split('.').pop()}`;
         const { error } = await supabase.storage.from('consignment-notes').upload(path, file);
         if (!error) {
-          const { data } = supabase.storage.from('consignment-notes').getPublicUrl(path);
-          photoUrl = data.publicUrl;
+          const { data } = await supabase.storage.from('consignment-notes').createSignedUrl(path, 60 * 60 * 24 * 365);
+          photoUrl = data?.signedUrl ?? null;
         }
       }
       handlePhotoComplete(photoUrl);
