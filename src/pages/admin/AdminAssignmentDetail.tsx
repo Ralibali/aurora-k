@@ -5,20 +5,33 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { StatusBadge } from '@/components/StatusBadge';
 import { PriorityBadge } from '@/components/PriorityBadge';
-import { useAssignment, useUpdateAssignment, useDeleteAssignment } from '@/hooks/useData';
+import { useAssignment, useUpdateAssignment, useDeleteAssignment, useDrivers, useAssignmentLogs, useCreateAssignmentLog } from '@/hooks/useData';
+import { useAuth } from '@/hooks/useAuth';
 import { formatSwedishDateTime, calculateDuration } from '@/lib/format';
-import { ArrowLeft, Trash2, Copy } from 'lucide-react';
+import { ArrowLeft, Trash2, Copy, History } from 'lucide-react';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
+
+const ACTION_LABELS: Record<string, string> = {
+  driver_changed: 'Chaufför ändrad',
+  status_changed: 'Status ändrad',
+  comment_updated: 'Kommentar uppdaterad',
+  created: 'Uppdrag skapat',
+};
 
 export default function AdminAssignmentDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { data: assignment, isLoading } = useAssignment(id);
+  const { data: drivers } = useDrivers();
+  const { data: logs } = useAssignmentLogs(id);
   const updateAssignment = useUpdateAssignment();
   const deleteAssignment = useDeleteAssignment();
+  const createLog = useCreateAssignmentLog();
   const [comment, setComment] = useState<string | null>(null);
 
   if (isLoading) {
@@ -30,6 +43,42 @@ export default function AdminAssignmentDetail() {
   }
 
   const currentComment = comment !== null ? comment : (assignment.admin_comment || '');
+
+  const handleDriverChange = (driverId: string) => {
+    const oldDriver = assignment.driver?.full_name || 'Ingen';
+    const newDriver = (drivers ?? []).find(d => d.id === driverId)?.full_name || 'Okänd';
+
+    updateAssignment.mutate({ id: assignment.id, assigned_driver_id: driverId }, {
+      onSuccess: () => {
+        if (user) {
+          createLog.mutate({
+            assignment_id: assignment.id,
+            user_id: user.id,
+            action: 'driver_changed',
+            old_value: oldDriver,
+            new_value: newDriver,
+          });
+        }
+      },
+    });
+  };
+
+  const handleSaveComment = () => {
+    const oldComment = assignment.admin_comment || '(tom)';
+    updateAssignment.mutate({ id: assignment.id, admin_comment: currentComment || null }, {
+      onSuccess: () => {
+        if (user) {
+          createLog.mutate({
+            assignment_id: assignment.id,
+            user_id: user.id,
+            action: 'comment_updated',
+            old_value: oldComment,
+            new_value: currentComment || '(tom)',
+          });
+        }
+      },
+    });
+  };
 
   return (
     <AdminLayout title="Uppdragsdetaljer">
@@ -56,8 +105,17 @@ export default function AdminAssignmentDetail() {
                 <p className="font-medium">{assignment.customer?.name}</p>
               </div>
               <div>
-                <p className="text-muted-foreground">Chaufför</p>
-                <p className="font-medium">{assignment.driver?.full_name}</p>
+                <p className="text-muted-foreground mb-1">Chaufför</p>
+                <Select value={assignment.assigned_driver_id} onValueChange={handleDriverChange}>
+                  <SelectTrigger className="h-8 w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(drivers ?? []).map(d => (
+                      <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <p className="text-muted-foreground">Adress</p>
@@ -120,9 +178,7 @@ export default function AdminAssignmentDetail() {
             <div className="border-t pt-4 space-y-2">
               <Label>Intern kommentar (visas för chauffören)</Label>
               <Textarea value={currentComment} onChange={(e) => setComment(e.target.value)} placeholder="Skriv kommentar till chauffören..." />
-              <Button size="sm" variant="outline" onClick={() => {
-                updateAssignment.mutate({ id: assignment.id, admin_comment: currentComment || null });
-              }}>Spara kommentar</Button>
+              <Button size="sm" variant="outline" onClick={handleSaveComment}>Spara kommentar</Button>
             </div>
 
             <div className="flex gap-2 pt-2 flex-wrap">
@@ -139,6 +195,39 @@ export default function AdminAssignmentDetail() {
                 <Trash2 className="h-4 w-4 mr-1" /> Ta bort
               </Button>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* History Log */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <History className="h-4 w-4" /> Ändringshistorik
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {(!logs || logs.length === 0) ? (
+              <p className="text-sm text-muted-foreground">Ingen historik ännu</p>
+            ) : (
+              <div className="space-y-3">
+                {logs.map(log => (
+                  <div key={log.id} className="flex gap-3 text-sm">
+                    <div className="w-2 h-2 rounded-full bg-primary mt-1.5 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="font-medium">{ACTION_LABELS[log.action] || log.action}</p>
+                      {log.old_value && log.new_value && (
+                        <p className="text-muted-foreground text-xs">
+                          {log.old_value} → {log.new_value}
+                        </p>
+                      )}
+                      <p className="text-xs text-muted-foreground/70 mt-0.5">
+                        {formatSwedishDateTime(log.created_at)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
