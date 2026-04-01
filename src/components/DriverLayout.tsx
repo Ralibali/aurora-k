@@ -57,6 +57,14 @@ export function DriverLayout({ children }: DriverLayoutProps) {
           </NavLink>
         )}
         <NavLink
+          to="/driver/invoices"
+          className="flex-1 flex flex-col items-center justify-center py-3 text-muted-foreground transition-all duration-150 touch-target"
+          activeClassName="text-primary"
+        >
+          <FileText className="h-5 w-5" />
+          <span className="text-[11px] mt-1 font-medium">Fakturor</span>
+        </NavLink>
+        <NavLink
           to="/driver/profile"
           className="flex-1 flex flex-col items-center justify-center py-3 text-muted-foreground transition-all duration-150 touch-target"
           activeClassName="text-primary"
