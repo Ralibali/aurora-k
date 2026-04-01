@@ -7,7 +7,7 @@ import { PriorityBadge } from '@/components/PriorityBadge';
 import { useDriverAssignments } from '@/hooks/useData';
 import { useAuth } from '@/hooks/useAuth';
 import { formatSwedishDateTime } from '@/lib/format';
-import { MapPin, Clock, Navigation, ClipboardList, RefreshCw } from 'lucide-react';
+import { MapPin, Clock, Navigation, CheckCircle2, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
