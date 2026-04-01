@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import { PageTransition } from '@/components/PageTransition';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AdminSidebar } from '@/components/AdminSidebar';
 import { Separator } from '@/components/ui/separator';
