@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { StatusBadge } from '@/components/StatusBadge';
 import { PriorityBadge } from '@/components/PriorityBadge';
-import { useAssignment, useUpdateAssignment } from '@/hooks/useData';
+import { useAssignment, useDriverUpdateAssignment } from '@/hooks/useData';
 import { formatSwedishDateTime, calculateDuration } from '@/lib/format';
 import { ArrowLeft, Play, Camera, CheckCircle2, MapPin, Clock, FileText, Info, Navigation, SkipForward, MessageSquare, Send, Eraser, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
