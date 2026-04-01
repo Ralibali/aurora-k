@@ -12,7 +12,7 @@ interface DriverLayoutProps {
 export function DriverLayout({ children }: DriverLayoutProps) {
   const { signOut } = useAuth();
   const navigate = useNavigate();
-  const { data: driverSettings } = useDriverSettings();
+  const { data: driverSettings } = useEffectiveDriverSettings(undefined);
   const showTimeReport = driverSettings?.show_time_report ?? true;
 
   const handleLogout = async () => {
