@@ -154,10 +154,10 @@ export default function AdminAssignmentDetail() {
               )}
             </div>
 
-            {(assignment as any).signature_url && (
+            {assignment.signature_url && (
               <div>
                 <p className="text-sm text-muted-foreground mb-2">Mottagarens signatur</p>
-                <img src={(assignment as any).signature_url} alt="Signatur" className="w-full max-w-xs rounded-lg border bg-white p-2" />
+                <img src={assignment.signature_url} alt="Signatur" className="w-full max-w-xs rounded-lg border bg-white p-2" />
               </div>
             )}
 

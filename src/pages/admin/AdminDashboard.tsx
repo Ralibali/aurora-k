@@ -58,10 +58,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     const channel = supabase
       .channel('dashboard-realtime')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'assignments' }, () => {
-        queryClient.invalidateQueries({ queryKey: ['assignments'] });
-      })
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'assignments' }, () => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'assignments' }, () => {
         queryClient.invalidateQueries({ queryKey: ['assignments'] });
       })
       .subscribe((status) => {

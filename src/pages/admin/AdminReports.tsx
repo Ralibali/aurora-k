@@ -11,10 +11,15 @@ import { formatSwedishDate, formatSwedishTime, calculateDecimalHours } from '@/l
 import { FileText, FileSpreadsheet, Receipt } from 'lucide-react';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
 
 export default function AdminReports() {
   const [driverFilter, setDriverFilter] = useState<string>('all');
   const [customerFilter, setCustomerFilter] = useState<string>('all');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
 
   const { data: assignments, isLoading } = useAssignments();
   const { data: drivers } = useDrivers();
@@ -24,6 +29,8 @@ export default function AdminReports() {
     if (a.status !== 'completed' || !a.actual_start || !a.actual_stop) return false;
     if (driverFilter !== 'all' && a.assigned_driver_id !== driverFilter) return false;
     if (customerFilter !== 'all' && a.customer_id !== customerFilter) return false;
+    if (fromDate && a.actual_start < fromDate) return false;
+    if (toDate && a.actual_start > toDate + 'T23:59:59') return false;
     return true;
   });
 
@@ -31,6 +38,107 @@ export default function AdminReports() {
     if (!a.actual_start || !a.actual_stop) return sum;
     return sum + calculateDecimalHours(a.actual_start, a.actual_stop);
   }, 0);
+
+  const buildRows = (items: typeof completedAssignments) =>
+    items.map(a => ({
+      driver: a.driver?.full_name || '',
+      date: formatSwedishDate(a.actual_start!),
+      customer: a.customer?.name || '',
+      title: a.title,
+      start: formatSwedishTime(a.actual_start!),
+      stop: formatSwedishTime(a.actual_stop!),
+      hours: calculateDecimalHours(a.actual_start!, a.actual_stop!),
+    }));
+
+  const dateStr = () => new Date().toISOString().split('T')[0];
+
+  const dateRangeLabel = () => {
+    if (fromDate && toDate) return `${fromDate} – ${toDate}`;
+    if (fromDate) return `från ${fromDate}`;
+    if (toDate) return `till ${toDate}`;
+    return 'Alla datum';
+  };
+
+  const handleExportPdf = () => {
+    const rows = buildRows(completedAssignments);
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Tidrapport', 20, 20);
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    let y = 28;
+    doc.text(dateRangeLabel(), 20, y);
+    if (driverFilter !== 'all') {
+      const driverName = (drivers ?? []).find(d => d.id === driverFilter)?.full_name || '';
+      y += 5;
+      doc.text(`Chaufför: ${driverName}`, 20, y);
+    }
+
+    autoTable(doc, {
+      startY: y + 8,
+      head: [['Chaufför', 'Datum', 'Kund', 'Uppdrag', 'Start', 'Stopp', 'Timmar']],
+      body: rows.map(r => [r.driver, r.date, r.customer, r.title, r.start, r.stop, `${r.hours}h`]),
+      foot: [['', '', '', '', '', 'Totalt', `${totalHours}h`]],
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [30, 58, 95] },
+      footStyles: { fillColor: [245, 247, 250], textColor: [30, 30, 30], fontStyle: 'bold' },
+    });
+
+    doc.save(`tidrapport_${dateStr()}.pdf`);
+    toast.success('PDF exporterad');
+  };
+
+  const handleExportExcel = () => {
+    const rows = buildRows(completedAssignments);
+    const wsData = [
+      ['Chaufför', 'Datum', 'Kund', 'Uppdrag', 'Start', 'Stopp', 'Timmar'],
+      ...rows.map(r => [r.driver, r.date, r.customer, r.title, r.start, r.stop, r.hours]),
+      ['', '', '', '', '', 'Totalt', totalHours],
+    ];
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Tidrapport');
+    XLSX.writeFile(wb, `tidrapport_${dateStr()}.xlsx`);
+    toast.success('Excel exporterad');
+  };
+
+  const handleInvoiceBasis = () => {
+    if (customerFilter === 'all') {
+      toast.error('Välj en kund först för att skapa faktureringsunderlag');
+      return;
+    }
+    const customer = (customers ?? []).find(c => c.id === customerFilter);
+    if (!customer) return;
+
+    const rows = buildRows(completedAssignments);
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Faktureringsunderlag', 20, 20);
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(customer.name, 20, 28);
+    doc.text(dateRangeLabel(), 20, 33);
+
+    autoTable(doc, {
+      startY: 40,
+      head: [['Chaufför', 'Datum', 'Kund', 'Uppdrag', 'Start', 'Stopp', 'Timmar']],
+      body: rows.map(r => [r.driver, r.date, r.customer, r.title, r.start, r.stop, `${r.hours}h`]),
+      foot: [['', '', '', '', '', 'Totalt', `${totalHours}h`]],
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [30, 58, 95] },
+      footStyles: { fillColor: [245, 247, 250], textColor: [30, 30, 30], fontStyle: 'bold' },
+    });
+
+    const safeName = customer.name.replace(/[^a-zA-Z0-9åäöÅÄÖ]/g, '_');
+    doc.save(`faktureringsunderlag_${safeName}_${dateStr()}.pdf`);
+    toast.success('Faktureringsunderlag exporterat');
+  };
 
   return (
     <AdminLayout title="Tidrapporter & Export">
@@ -58,22 +166,22 @@ export default function AdminReports() {
           </div>
           <div className="space-y-1">
             <Label className="text-xs text-muted-foreground">Från</Label>
-            <Input type="date" className="w-[160px]" />
+            <Input type="date" className="w-[160px]" value={fromDate} onChange={e => setFromDate(e.target.value)} />
           </div>
           <div className="space-y-1">
             <Label className="text-xs text-muted-foreground">Till</Label>
-            <Input type="date" className="w-[160px]" />
+            <Input type="date" className="w-[160px]" value={toDate} onChange={e => setToDate(e.target.value)} />
           </div>
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" onClick={() => toast.info('PDF-export kommer snart')}>
+          <Button variant="outline" size="sm" onClick={handleExportPdf}>
             <FileText className="h-4 w-4 mr-1" /> Exportera PDF
           </Button>
-          <Button variant="outline" size="sm" onClick={() => toast.info('Excel-export kommer snart')}>
+          <Button variant="outline" size="sm" onClick={handleExportExcel}>
             <FileSpreadsheet className="h-4 w-4 mr-1" /> Exportera Excel
           </Button>
-          <Button variant="outline" size="sm" onClick={() => toast.info('Faktureringsunderlag kommer snart')}>
+          <Button variant="outline" size="sm" onClick={handleInvoiceBasis}>
             <Receipt className="h-4 w-4 mr-1" /> Faktureringsunderlag
           </Button>
         </div>
