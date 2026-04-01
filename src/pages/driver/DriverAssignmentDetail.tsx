@@ -162,14 +162,14 @@ export default function DriverAssignmentDetail() {
   };
 
   const uploadSignature = async (blob: Blob): Promise<string | null> => {
-    const path = `${assignment.id}/signature.png`;
+    const path = `${user!.id}/${assignment.id}/signature.png`;
     const { error } = await supabase.storage.from('signatures').upload(path, blob, { upsert: true });
     if (error) {
       toast.error('Kunde inte ladda upp signatur');
       return null;
     }
-    const { data } = supabase.storage.from('signatures').getPublicUrl(path);
-    return data.publicUrl;
+    const { data } = await supabase.storage.from('signatures').createSignedUrl(path, 60 * 60 * 24 * 365);
+    return data?.signedUrl ?? null;
   };
 
   const handleSignatureComplete = async (blob: Blob) => {
