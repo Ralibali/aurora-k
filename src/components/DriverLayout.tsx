@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { ClipboardList, User, LogOut, Clock, Truck, FileText } from 'lucide-react';
+import { ClipboardList, User, LogOut, Clock, Truck } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
