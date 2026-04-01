@@ -274,6 +274,43 @@ export function useBulkAssignDriver() {
   });
 }
 
+// ─── ASSIGNMENT LOGS ────────────────────────────────────
+export function useAssignmentLogs(assignmentId: string | undefined) {
+  return useQuery({
+    queryKey: ['assignment_logs', assignmentId],
+    queryFn: async () => {
+      if (!assignmentId) throw new Error('No ID');
+      const { data, error } = await supabase
+        .from('assignment_logs')
+        .select('*')
+        .eq('assignment_id', assignmentId)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!assignmentId,
+  });
+}
+
+export function useCreateAssignmentLog() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (log: {
+      assignment_id: string;
+      user_id: string;
+      action: string;
+      old_value?: string | null;
+      new_value?: string | null;
+    }) => {
+      const { error } = await supabase.from('assignment_logs').insert(log);
+      if (error) throw error;
+    },
+    onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: ['assignment_logs', variables.assignment_id] });
+    },
+  });
+}
+
 // ─── INVOICES ────────────────────────────────────────────
 export function useInvoices() {
   return useQuery({
