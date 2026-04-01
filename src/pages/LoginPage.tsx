@@ -52,8 +52,8 @@ export default function LoginPage() {
           <div className="mx-auto w-16 h-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30 mb-4">
             <Truck className="h-8 w-8 text-primary-foreground" />
           </div>
-          <h1 className="text-2xl font-bold text-sidebar-foreground">Aurora Medias Transport</h1>
-          <p className="text-sm text-sidebar-foreground/60 mt-1">Logga in för att fortsätta</p>
+          <h1 className="text-2xl font-bold text-sidebar-foreground">Dispatch</h1>
+          <p className="text-sm text-sidebar-foreground/60 mt-1">Uppdragshantering för chaufförer</p>
         </div>
 
         {/* Login Card */}

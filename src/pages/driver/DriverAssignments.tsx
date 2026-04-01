@@ -136,9 +136,11 @@ export default function DriverAssignments() {
             {isLoading && [1, 2, 3].map(i => <Skeleton key={i} className="h-[100px] w-full rounded-xl" />)}
             {!isLoading && active.length === 0 && (
               <div className="text-center py-16">
-                <ClipboardList className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
-                <p className="text-muted-foreground font-medium">Inga aktuella uppdrag</p>
-                <p className="text-sm text-muted-foreground/70 mt-1">Nya uppdrag visas här automatiskt</p>
+                <CheckCircle2 className="h-12 w-12 text-success mx-auto mb-3" />
+                <p className="text-foreground font-semibold text-lg">Allt klart för idag!</p>
+                <p className="text-sm text-muted-foreground mt-1.5 max-w-[260px] mx-auto leading-relaxed">
+                  Inga fler uppdrag just nu. Nya uppdrag dyker upp här direkt när de tilldelas.
+                </p>
               </div>
             )}
             {active.map((a, i) => <AssignmentCard key={a.id} a={a} i={i} />)}
@@ -147,7 +149,8 @@ export default function DriverAssignments() {
             {isLoading && [1, 2].map(i => <Skeleton key={i} className="h-[100px] w-full rounded-xl" />)}
             {!isLoading && completed.length === 0 && (
               <div className="text-center py-16">
-                <p className="text-muted-foreground">Inga avklarade uppdrag</p>
+                <Clock className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
+                <p className="text-muted-foreground font-medium">Inga slutförda uppdrag ännu</p>
               </div>
             )}
             {completed.map((a, i) => <AssignmentCard key={a.id} a={a} i={i} />)}
