@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { formatSwedishDate, calculateDecimalHours } from '@/lib/format';
+import { formatSwedishDate } from '@/lib/format';
 
 interface InvoicePdfData {
   invoiceNumber: number;
@@ -35,6 +35,7 @@ interface InvoicePdfData {
   totalExVat: number;
   vatAmount: number;
   totalIncVat: number;
+  vatRate?: number; // percentage, e.g. 0, 6, 12, 25
 }
 
 export function generateInvoicePdf(data: InvoicePdfData): jsPDF {
@@ -43,9 +44,10 @@ export function generateInvoicePdf(data: InvoicePdfData): jsPDF {
   const pageHeight = doc.internal.pageSize.getHeight();
   const margin = 20;
   const rightCol = pageWidth - margin;
+  const vatPct = data.vatRate ?? (data.vatAmount > 0 ? Math.round((data.vatAmount / data.totalExVat) * 100) : 0);
 
   // ─── Brand color bar at top ──────────────────────────
-  doc.setFillColor(30, 58, 95); // primary dark blue
+  doc.setFillColor(30, 58, 95);
   doc.rect(0, 0, pageWidth, 4, 'F');
 
   // ─── Company name ────────────────────────────────────
@@ -54,7 +56,6 @@ export function generateInvoicePdf(data: InvoicePdfData): jsPDF {
   doc.setTextColor(30, 58, 95);
   doc.text(data.company.company_name, margin, 20);
 
-  // Company details (left column)
   doc.setFontSize(8.5);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(100, 100, 100);
@@ -74,7 +75,6 @@ export function generateInvoicePdf(data: InvoicePdfData): jsPDF {
   doc.setTextColor(30, 58, 95);
   doc.text('FAKTURA', rightCol, 20, { align: 'right' });
 
-  // Invoice meta (right column)
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(80, 80, 80);
@@ -173,9 +173,9 @@ export function generateInvoicePdf(data: InvoicePdfData): jsPDF {
   const totalsWidth = 75;
   const totalsX = rightCol - totalsWidth;
 
-  // Background for totals
+  const totalsHeight = vatPct > 0 ? 30 : 22;
   doc.setFillColor(245, 247, 250);
-  doc.roundedRect(totalsX - 4, finalY - 2, totalsWidth + 4, 30, 2, 2, 'F');
+  doc.roundedRect(totalsX - 4, finalY - 2, totalsWidth + 4, totalsHeight, 2, 2, 'F');
 
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
@@ -185,25 +185,38 @@ export function generateInvoicePdf(data: InvoicePdfData): jsPDF {
   doc.setTextColor(50, 50, 50);
   doc.text(`${data.totalExVat.toLocaleString('sv-SE')} kr`, rightCol, finalY + 4, { align: 'right' });
 
-  doc.setTextColor(100, 100, 100);
-  doc.text('Moms 25%', totalsX, finalY + 10);
-  doc.setTextColor(50, 50, 50);
-  doc.text(`${data.vatAmount.toLocaleString('sv-SE')} kr`, rightCol, finalY + 10, { align: 'right' });
+  let totalLineY = finalY + 4;
+
+  if (vatPct > 0) {
+    totalLineY += 6;
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Moms ${vatPct}%`, totalsX, totalLineY);
+    doc.setTextColor(50, 50, 50);
+    doc.text(`${data.vatAmount.toLocaleString('sv-SE')} kr`, rightCol, totalLineY, { align: 'right' });
+  } else {
+    totalLineY += 6;
+    doc.setFontSize(8);
+    doc.setTextColor(130, 130, 130);
+    doc.text('Momsfri faktura', totalsX, totalLineY);
+    doc.setFontSize(9);
+  }
 
   // Divider
+  totalLineY += 4;
   doc.setDrawColor(200, 200, 200);
-  doc.line(totalsX, finalY + 14, rightCol, finalY + 14);
+  doc.line(totalsX, totalLineY, rightCol, totalLineY);
 
   // Total
+  totalLineY += 8;
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(30, 58, 95);
-  doc.text('Att betala', totalsX, finalY + 22);
-  doc.text(`${data.totalIncVat.toLocaleString('sv-SE')} kr`, rightCol, finalY + 22, { align: 'right' });
+  doc.text('Att betala', totalsX, totalLineY);
+  doc.text(`${data.totalIncVat.toLocaleString('sv-SE')} kr`, rightCol, totalLineY, { align: 'right' });
 
   // ─── Message ─────────────────────────────────────────
   if (data.message) {
-    const msgY = finalY + 36;
+    const msgY = totalLineY + 14;
     doc.setFontSize(8);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(130, 130, 130);
@@ -216,7 +229,6 @@ export function generateInvoicePdf(data: InvoicePdfData): jsPDF {
   // ─── Footer ──────────────────────────────────────────
   const footerY = pageHeight - 18;
 
-  // Footer bar
   doc.setFillColor(245, 247, 250);
   doc.rect(0, footerY - 6, pageWidth, 24, 'F');
   doc.setDrawColor(220, 220, 220);
