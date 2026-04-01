@@ -118,7 +118,7 @@ export default function DriverAssignments() {
     <DriverLayout>
       <div
         ref={scrollRef}
-        className="p-4 space-y-4"
+        className="p-4 space-y-4 overflow-auto flex-1"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
