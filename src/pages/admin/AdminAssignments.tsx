@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { format, isToday, isTomorrow, isPast, parseISO } from 'date-fns';
+import { sv } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
 import { AdminLayout } from '@/components/AdminLayout';
 import { Card, CardContent } from '@/components/ui/card';
@@ -15,6 +17,94 @@ import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
+
+function getDateLabel(dateStr: string): string {
+  const date = parseISO(dateStr);
+  if (isToday(date)) return `Idag – ${format(date, 'EEEE d MMMM', { locale: sv })}`;
+  if (isTomorrow(date)) return `Imorgon – ${format(date, 'EEEE d MMMM', { locale: sv })}`;
+  if (isPast(date)) return `Tidigare – ${format(date, 'EEEE d MMMM', { locale: sv })}`;
+  return format(date, 'EEEE d MMMM', { locale: sv });
+}
+
+function DateGroupedAssignments({ filtered, isLoading, selected, toggleSelect, toggleAll, drivers, navigate, updateAssignment }: any) {
+  const groups = useMemo(() => {
+    const map = new Map<string, any[]>();
+    for (const a of filtered) {
+      const dayKey = a.scheduled_start.split('T')[0];
+      if (!map.has(dayKey)) map.set(dayKey, []);
+      map.get(dayKey)!.push(a);
+    }
+    return Array.from(map.entries()).sort((a, b) => b[0].localeCompare(a[0]));
+  }, [filtered]);
+
+  if (isLoading) return <div className="space-y-3">{[1,2,3].map(i => <Skeleton key={i} className="h-20 w-full rounded-xl" />)}</div>;
+
+  if (filtered.length === 0) return <p className="text-center text-muted-foreground py-8">Inga uppdrag hittades</p>;
+
+  return (
+    <div className="space-y-1">
+      {filtered.length > 0 && (
+        <div className="flex items-center gap-2 px-2 mb-2">
+          <Checkbox checked={selected.length === filtered.length} onCheckedChange={toggleAll} />
+          <span className="text-xs text-muted-foreground">Markera alla</span>
+        </div>
+      )}
+      {groups.map(([dayKey, items]) => (
+        <div key={dayKey}>
+          <div className="sticky top-0 bg-background/95 backdrop-blur-sm py-2 px-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border/50 z-10 mb-2">
+            {getDateLabel(dayKey)}
+          </div>
+          <div className="space-y-2 mb-4">
+            {items.map((a: any) => (
+              <div key={a.id} className="flex items-center gap-2">
+                <Checkbox checked={selected.includes(a.id)} onCheckedChange={() => toggleSelect(a.id)} />
+                <Card
+                  className="flex-1 hover:shadow-md hover:border-primary/20 transition-all duration-150 cursor-pointer"
+                  onClick={() => navigate(`/admin/assignments/${a.id}`)}
+                >
+                  <CardContent className="py-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <p className="font-medium truncate">{a.title}</p>
+                          <StatusBadge status={a.status} />
+                          {a.priority !== 'normal' && <PriorityBadge priority={a.priority} />}
+                          {a.invoiced && <span className="status-badge bg-primary/10 text-primary">Fakturerad</span>}
+                        </div>
+                        <p className="text-sm text-muted-foreground">{a.customer?.name} · {a.address}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <p className="text-xs text-muted-foreground">{formatSwedishDateTime(a.scheduled_start)}</p>
+                          <span className="text-xs text-muted-foreground">·</span>
+                          <div onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+                            <Select
+                              value={a.assigned_driver_id}
+                              onValueChange={(driverId: string) => {
+                                updateAssignment.mutate({ id: a.id, assigned_driver_id: driverId });
+                              }}
+                            >
+                              <SelectTrigger className="h-6 text-xs border-none bg-transparent p-0 w-auto gap-1 shadow-none focus:ring-0">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {drivers.map((d: any) => (
+                                  <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function AdminAssignments() {
   const navigate = useNavigate();
@@ -82,60 +172,16 @@ export default function AdminAssignments() {
           </div>
         )}
 
-        <div className="space-y-3">
-          {isLoading && [1, 2, 3].map(i => <Skeleton key={i} className="h-20 w-full rounded-xl" />)}
-          {!isLoading && filtered.length > 0 && (
-            <div className="flex items-center gap-2 px-2">
-              <Checkbox checked={selected.length === filtered.length && filtered.length > 0} onCheckedChange={toggleAll} />
-              <span className="text-xs text-muted-foreground">Markera alla</span>
-            </div>
-          )}
-          {!isLoading && filtered.length === 0 && <p className="text-center text-muted-foreground py-8">Inga uppdrag hittades</p>}
-          {filtered.map((a) => (
-            <div key={a.id} className="flex items-center gap-2">
-              <Checkbox checked={selected.includes(a.id)} onCheckedChange={() => toggleSelect(a.id)} />
-              <Card
-                className="flex-1 hover:shadow-md hover:border-primary/20 transition-all duration-150 cursor-pointer"
-                onClick={() => navigate(`/admin/assignments/${a.id}`)}
-              >
-                <CardContent className="py-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <p className="font-medium truncate">{a.title}</p>
-                        <StatusBadge status={a.status} />
-                        {a.priority !== 'normal' && <PriorityBadge priority={a.priority} />}
-                        {a.invoiced && <span className="status-badge bg-primary/10 text-primary">Fakturerad</span>}
-                      </div>
-                      <p className="text-sm text-muted-foreground">{a.customer?.name} · {a.address}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <p className="text-xs text-muted-foreground">{formatSwedishDateTime(a.scheduled_start)}</p>
-                        <span className="text-xs text-muted-foreground">·</span>
-                        <div onClick={(e) => e.stopPropagation()}>
-                          <Select
-                            value={a.assigned_driver_id}
-                            onValueChange={(driverId) => {
-                              updateAssignment.mutate({ id: a.id, assigned_driver_id: driverId });
-                            }}
-                          >
-                            <SelectTrigger className="h-6 text-xs border-none bg-transparent p-0 w-auto gap-1 shadow-none focus:ring-0">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {(drivers ?? []).map(d => (
-                                <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          ))}
-        </div>
+        <DateGroupedAssignments
+          filtered={filtered}
+          isLoading={isLoading}
+          selected={selected}
+          toggleSelect={toggleSelect}
+          toggleAll={toggleAll}
+          drivers={drivers ?? []}
+          navigate={navigate}
+          updateAssignment={updateAssignment}
+        />
 
         <Dialog open={bulkDialogOpen} onOpenChange={setBulkDialogOpen}>
           <DialogContent>

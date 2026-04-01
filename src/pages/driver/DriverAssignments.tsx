@@ -7,7 +7,7 @@ import { PriorityBadge } from '@/components/PriorityBadge';
 import { useDriverAssignments } from '@/hooks/useData';
 import { useAuth } from '@/hooks/useAuth';
 import { formatSwedishDateTime } from '@/lib/format';
-import { MapPin, Clock, Navigation, ClipboardList, RefreshCw } from 'lucide-react';
+import { MapPin, Clock, Navigation, CheckCircle2, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -21,6 +21,12 @@ function openMaps(address: string) {
 }
 
 function AssignmentCard({ a, i }: { a: any; i: number }) {
+  const borderColor = a.status === 'active'
+    ? 'border-l-4 border-l-warning'
+    : a.status === 'completed'
+      ? 'border-l-4 border-l-success'
+      : 'border-l-4 border-l-muted-foreground/30';
+
   return (
     <motion.div
       key={a.id}
@@ -29,10 +35,10 @@ function AssignmentCard({ a, i }: { a: any; i: number }) {
       transition={{ delay: i * 0.04, duration: 0.25 }}
     >
       <Link to={`/driver/assignment/${a.id}`}>
-        <Card className="active:scale-[0.98] transition-all duration-150 hover:shadow-md hover:border-primary/20">
+        <Card className={`active:scale-[0.98] transition-all duration-150 hover:shadow-md hover:border-primary/20 ${borderColor}`}>
           <CardContent className="py-4 px-4 space-y-2.5">
             <div className="flex items-center justify-between gap-2">
-              <p className="font-semibold text-[15px] text-foreground truncate">{a.customer?.name || a.title}</p>
+              <p className="font-semibold text-[16px] text-foreground truncate">{a.customer?.name || a.title}</p>
               <div className="flex gap-1.5 shrink-0">
                 {a.priority !== 'normal' && <PriorityBadge priority={a.priority} />}
                 <StatusBadge status={a.status} />
@@ -51,7 +57,7 @@ function AssignmentCard({ a, i }: { a: any; i: number }) {
                 </button>
               )}
             </div>
-            <div className="flex items-center gap-2 text-[13px] text-muted-foreground/80">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground/80">
               <Clock className="h-3.5 w-3.5 shrink-0" />
               <span>{formatSwedishDateTime(a.scheduled_start)}</span>
               {a.scheduled_end && <span>– {formatSwedishDateTime(a.scheduled_end)}</span>}
@@ -130,9 +136,11 @@ export default function DriverAssignments() {
             {isLoading && [1, 2, 3].map(i => <Skeleton key={i} className="h-[100px] w-full rounded-xl" />)}
             {!isLoading && active.length === 0 && (
               <div className="text-center py-16">
-                <ClipboardList className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
-                <p className="text-muted-foreground font-medium">Inga aktuella uppdrag</p>
-                <p className="text-sm text-muted-foreground/70 mt-1">Nya uppdrag visas här automatiskt</p>
+                <CheckCircle2 className="h-12 w-12 text-success mx-auto mb-3" />
+                <p className="text-foreground font-semibold text-lg">Allt klart för idag!</p>
+                <p className="text-sm text-muted-foreground mt-1.5 max-w-[260px] mx-auto leading-relaxed">
+                  Inga fler uppdrag just nu. Nya uppdrag dyker upp här direkt när de tilldelas.
+                </p>
               </div>
             )}
             {active.map((a, i) => <AssignmentCard key={a.id} a={a} i={i} />)}
@@ -141,7 +149,8 @@ export default function DriverAssignments() {
             {isLoading && [1, 2].map(i => <Skeleton key={i} className="h-[100px] w-full rounded-xl" />)}
             {!isLoading && completed.length === 0 && (
               <div className="text-center py-16">
-                <p className="text-muted-foreground">Inga avklarade uppdrag</p>
+                <Clock className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
+                <p className="text-muted-foreground font-medium">Inga slutförda uppdrag ännu</p>
               </div>
             )}
             {completed.map((a, i) => <AssignmentCard key={a.id} a={a} i={i} />)}

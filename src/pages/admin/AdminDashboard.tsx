@@ -136,7 +136,8 @@ export default function AdminDashboard() {
             <h2 className="text-lg font-semibold mb-3">Senaste aktivitet</h2>
             <div className="space-y-1">
               {recentActivity.map(item => (
-                <div key={item.key} className="flex items-center gap-2 text-sm py-1.5 px-3 rounded-lg hover:bg-muted/50 animate-in fade-in duration-300">
+                <div key={item.key} className="flex items-center gap-2.5 text-sm py-1.5 px-3 rounded-lg hover:bg-muted/50 animate-in fade-in duration-300">
+                  <span className={`h-2 w-2 rounded-full shrink-0 ${item.action.includes('slutförde') ? 'bg-success' : 'bg-warning'}`} />
                   <span className="font-medium">{item.driver}</span>
                   <span className="text-muted-foreground">{item.action}</span>
                   <span className="truncate">{item.title}</span>
