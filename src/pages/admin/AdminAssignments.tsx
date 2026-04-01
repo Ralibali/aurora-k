@@ -94,31 +94,31 @@ export default function AdminAssignments() {
           {filtered.map((a) => (
             <div key={a.id} className="flex items-center gap-2">
               <Checkbox checked={selected.includes(a.id)} onCheckedChange={() => toggleSelect(a.id)} />
-              <Link to={`/admin/assignments/${a.id}`} className="block flex-1">
-                <Card className="hover:shadow-md hover:border-primary/20 transition-all duration-150 cursor-pointer">
-                  <CardContent className="py-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <p className="font-medium truncate">{a.title}</p>
-                          <StatusBadge status={a.status} />
-                          {a.priority !== 'normal' && <PriorityBadge priority={a.priority} />}
-                          {a.invoiced && <span className="status-badge bg-primary/10 text-primary">Fakturerad</span>}
-                        </div>
-                        <p className="text-sm text-muted-foreground">{a.customer?.name} · {a.address}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <p className="text-xs text-muted-foreground">{formatSwedishDateTime(a.scheduled_start)}</p>
-                          <span className="text-xs text-muted-foreground">·</span>
+              <Card
+                className="flex-1 hover:shadow-md hover:border-primary/20 transition-all duration-150 cursor-pointer"
+                onClick={() => navigate(`/admin/assignments/${a.id}`)}
+              >
+                <CardContent className="py-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <p className="font-medium truncate">{a.title}</p>
+                        <StatusBadge status={a.status} />
+                        {a.priority !== 'normal' && <PriorityBadge priority={a.priority} />}
+                        {a.invoiced && <span className="status-badge bg-primary/10 text-primary">Fakturerad</span>}
+                      </div>
+                      <p className="text-sm text-muted-foreground">{a.customer?.name} · {a.address}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <p className="text-xs text-muted-foreground">{formatSwedishDateTime(a.scheduled_start)}</p>
+                        <span className="text-xs text-muted-foreground">·</span>
+                        <div onClick={(e) => e.stopPropagation()}>
                           <Select
                             value={a.assigned_driver_id}
                             onValueChange={(driverId) => {
                               updateAssignment.mutate({ id: a.id, assigned_driver_id: driverId });
                             }}
                           >
-                            <SelectTrigger
-                              className="h-6 text-xs border-none bg-transparent p-0 w-auto gap-1 shadow-none focus:ring-0"
-                              onClick={(e) => e.preventDefault()}
-                            >
+                            <SelectTrigger className="h-6 text-xs border-none bg-transparent p-0 w-auto gap-1 shadow-none focus:ring-0">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -130,9 +130,9 @@ export default function AdminAssignments() {
                         </div>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              </Link>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           ))}
         </div>
