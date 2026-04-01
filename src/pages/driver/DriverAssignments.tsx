@@ -83,17 +83,20 @@ export default function DriverAssignments() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    if (scrollRef.current && scrollRef.current.scrollTop === 0) {
-      startY.current = e.touches[0].clientY;
-      setPulling(true);
-    }
+    startY.current = e.touches[0].clientY;
+    setPulling(false);
+    setPullY(0);
   }, []);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (!pulling) return;
     const diff = e.touches[0].clientY - startY.current;
-    if (diff > 0) {
-      setPullY(Math.min(diff * 0.5, 80));
+    // Only activate pull-to-refresh when scrolled to top and pulling down
+    if (scrollRef.current && scrollRef.current.scrollTop <= 0 && diff > 10) {
+      setPulling(true);
+      setPullY(Math.min((diff - 10) * 0.5, 80));
+    } else if (!pulling) {
+      // Allow normal scrolling
+      return;
     }
   }, [pulling]);
 
@@ -115,7 +118,7 @@ export default function DriverAssignments() {
     <DriverLayout>
       <div
         ref={scrollRef}
-        className="p-4 space-y-4"
+        className="p-4 space-y-4 overflow-auto flex-1"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
