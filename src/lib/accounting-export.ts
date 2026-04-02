@@ -159,12 +159,37 @@ export function generateAccountingExcel(invoices: ExportInvoice[], settings: Com
 }
 
 // ─── DOWNLOAD HELPER ─────────────────────────────────────
-export function downloadTextFile(content: string, filename: string, mimeType = 'text/plain') {
-  const blob = new Blob([content], { type: `${mimeType};charset=utf-8` });
+export function downloadTextFile(content: string, filename: string, mimeType = 'text/plain', encoding: 'utf-8' | 'cp437' = 'utf-8') {
+  let blobData: BlobPart;
+  if (encoding === 'cp437') {
+    blobData = encodeCP437(content);
+  } else {
+    blobData = content;
+  }
+  const blob = new Blob([blobData], { type: `${mimeType};charset=${encoding === 'cp437' ? 'x-cp437' : 'utf-8'}` });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
   a.download = filename;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+// CP437 encoding map for Swedish characters
+function encodeCP437(str: string): Uint8Array {
+  const cp437Map: Record<string, number> = {
+    'Ä': 142, 'ä': 132, 'Å': 143, 'å': 134, 'Ö': 153, 'ö': 148,
+    'É': 144, 'é': 130, 'Ü': 154, 'ü': 129,
+  };
+  const bytes: number[] = [];
+  for (let i = 0; i < str.length; i++) {
+    const ch = str[i];
+    if (cp437Map[ch] !== undefined) {
+      bytes.push(cp437Map[ch]);
+    } else {
+      const code = ch.charCodeAt(0);
+      bytes.push(code < 128 ? code : 63); // '?' for unmapped
+    }
+  }
+  return new Uint8Array(bytes);
 }
