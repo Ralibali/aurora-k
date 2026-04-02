@@ -65,6 +65,7 @@ function ElapsedSince({ since }: { since: string }) {
 }
 
 export default function AdminDashboard() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data: assignments, isLoading } = useAssignments();
   const [isLive, setIsLive] = useState(false);
