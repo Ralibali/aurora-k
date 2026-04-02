@@ -119,7 +119,7 @@ export default function AdminLiveMap() {
   const positions: [number, number][] = locations.map((l) => [l.latitude, l.longitude]);
 
   return (
-    <AdminLayout>
+    <AdminLayout title="Live-karta" description="Realtidsposition för chaufförer med aktiva uppdrag">
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
