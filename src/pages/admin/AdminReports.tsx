@@ -198,7 +198,7 @@ export default function AdminReports() {
     toast.success('Lönerapport exporterad');
   };
 
-
+  return (
     <AdminLayout title="Tidrapporter & Export">
       <div className="space-y-4 max-w-5xl">
         <div className="flex flex-wrap gap-3">
