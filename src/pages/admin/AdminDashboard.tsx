@@ -164,7 +164,22 @@ export default function AdminDashboard() {
         ) : null}
 
         {/* Active assignments */}
-        {activeAssignments.length > 0 && (
+        {isLoading ? (
+          <div>
+            <Skeleton className="h-6 w-36 mb-3" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {[1, 2].map(i => (
+                <Card key={i}><CardContent className="py-3 px-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Skeleton className="h-4 w-28" />
+                    <Skeleton className="h-3 w-16" />
+                  </div>
+                  <Skeleton className="h-3 w-40" />
+                </CardContent></Card>
+              ))}
+            </div>
+          </div>
+        ) : activeAssignments.length > 0 ? (
           <div>
             <h2 className="text-lg font-semibold mb-3">Aktiva just nu</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -183,7 +198,7 @@ export default function AdminDashboard() {
               ))}
             </div>
           </div>
-        )}
+        ) : null}
 
         {/* Section header */}
         <div className="flex items-center justify-between">
