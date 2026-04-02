@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffectiveDriverSettings } from '@/hooks/useDriverSettings';
 import { useAuth } from '@/hooks/useAuth';
+import { useDriverLocationTracker } from '@/hooks/useDriverLocationTracker';
 import { DriverLayout } from '@/components/DriverLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
