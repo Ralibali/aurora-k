@@ -147,7 +147,7 @@ export default function AdminLiveMap() {
                 >
                   <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
                   />
                   {positions.length > 0 && <FitBounds positions={positions} />}
                   {locations.map((loc) => (
