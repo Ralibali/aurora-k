@@ -1,4 +1,14 @@
 @tailwind base;
+
+/* Override browser autofill yellow background */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px hsl(var(--sidebar)) inset !important;
+  -webkit-text-fill-color: hsl(var(--sidebar-foreground)) !important;
+  caret-color: hsl(var(--sidebar-foreground)) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
 @tailwind components;
 @tailwind utilities;
 
