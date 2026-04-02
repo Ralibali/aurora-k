@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
@@ -7,31 +8,41 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { PwaInstallPrompt } from "@/components/PwaInstallPrompt";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import LandingPage from "./pages/LandingPage";
-import LoginPage from "./pages/LoginPage";
-import ForgotPasswordPage from "./pages/ForgotPasswordPage";
-import ResetPasswordPage from "./pages/ResetPasswordPage";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminAssignments from "./pages/admin/AdminAssignments";
-import AdminAssignmentDetail from "./pages/admin/AdminAssignmentDetail";
-import AdminNewAssignment from "./pages/admin/AdminNewAssignment";
-import AdminCustomers from "./pages/admin/AdminCustomers";
-import AdminCustomerDetail from "./pages/admin/AdminCustomerDetail";
-import AdminNewCustomer from "./pages/admin/AdminNewCustomer";
-import AdminDrivers from "./pages/admin/AdminDrivers";
-import AdminInvoices from "./pages/admin/AdminInvoices";
-import AdminNewInvoice from "./pages/admin/AdminNewInvoice";
-import AdminReports from "./pages/admin/AdminReports";
-import AdminStatistics from "./pages/admin/AdminStatistics";
-import AdminSettings from "./pages/admin/AdminSettings";
-import AdminDriverSettings from "./pages/admin/AdminDriverSettings";
-import DriverAssignments from "./pages/driver/DriverAssignments";
-import DriverAssignmentDetail from "./pages/driver/DriverAssignmentDetail";
-import DriverProfile from "./pages/driver/DriverProfile";
-import DriverTimeReport from "./pages/driver/DriverTimeReport";
-import NotFound from "./pages/NotFound";
+
+// Lazy-load all pages for faster initial load
+const LandingPage = lazy(() => import("./pages/LandingPage"));
+const LoginPage = lazy(() => import("./pages/LoginPage"));
+const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage"));
+const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage"));
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const AdminAssignments = lazy(() => import("./pages/admin/AdminAssignments"));
+const AdminAssignmentDetail = lazy(() => import("./pages/admin/AdminAssignmentDetail"));
+const AdminNewAssignment = lazy(() => import("./pages/admin/AdminNewAssignment"));
+const AdminCustomers = lazy(() => import("./pages/admin/AdminCustomers"));
+const AdminCustomerDetail = lazy(() => import("./pages/admin/AdminCustomerDetail"));
+const AdminNewCustomer = lazy(() => import("./pages/admin/AdminNewCustomer"));
+const AdminDrivers = lazy(() => import("./pages/admin/AdminDrivers"));
+const AdminInvoices = lazy(() => import("./pages/admin/AdminInvoices"));
+const AdminNewInvoice = lazy(() => import("./pages/admin/AdminNewInvoice"));
+const AdminReports = lazy(() => import("./pages/admin/AdminReports"));
+const AdminStatistics = lazy(() => import("./pages/admin/AdminStatistics"));
+const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
+const AdminDriverSettings = lazy(() => import("./pages/admin/AdminDriverSettings"));
+const DriverAssignments = lazy(() => import("./pages/driver/DriverAssignments"));
+const DriverAssignmentDetail = lazy(() => import("./pages/driver/DriverAssignmentDetail"));
+const DriverProfile = lazy(() => import("./pages/driver/DriverProfile"));
+const DriverTimeReport = lazy(() => import("./pages/driver/DriverTimeReport"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
+
+function PageLoader() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+    </div>
+  );
+}
 
 const App = () => (
   <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
@@ -41,34 +52,35 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AuthProvider>
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-              <Route path="/reset-password" element={<ResetPasswordPage />} />
-              {/* Admin routes */}
-              <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminDashboard /></ProtectedRoute>} />
-              <Route path="/admin/assignments" element={<ProtectedRoute requiredRole="admin"><AdminAssignments /></ProtectedRoute>} />
-              <Route path="/admin/assignments/new" element={<ProtectedRoute requiredRole="admin"><AdminNewAssignment /></ProtectedRoute>} />
-              <Route path="/admin/assignments/:id" element={<ProtectedRoute requiredRole="admin"><AdminAssignmentDetail /></ProtectedRoute>} />
-              <Route path="/admin/customers" element={<ProtectedRoute requiredRole="admin"><AdminCustomers /></ProtectedRoute>} />
-              <Route path="/admin/customers/new" element={<ProtectedRoute requiredRole="admin"><AdminNewCustomer /></ProtectedRoute>} />
-              <Route path="/admin/customers/:id" element={<ProtectedRoute requiredRole="admin"><AdminCustomerDetail /></ProtectedRoute>} />
-              <Route path="/admin/drivers" element={<ProtectedRoute requiredRole="admin"><AdminDrivers /></ProtectedRoute>} />
-              <Route path="/admin/invoices" element={<ProtectedRoute requiredRole="admin"><AdminInvoices /></ProtectedRoute>} />
-              <Route path="/admin/invoices/new" element={<ProtectedRoute requiredRole="admin"><AdminNewInvoice /></ProtectedRoute>} />
-              <Route path="/admin/reports" element={<ProtectedRoute requiredRole="admin"><AdminReports /></ProtectedRoute>} />
-              <Route path="/admin/statistics" element={<ProtectedRoute requiredRole="admin"><AdminStatistics /></ProtectedRoute>} />
-              <Route path="/admin/settings" element={<ProtectedRoute requiredRole="admin"><AdminSettings /></ProtectedRoute>} />
-              <Route path="/admin/driver-settings" element={<ProtectedRoute requiredRole="admin"><AdminDriverSettings /></ProtectedRoute>} />
-              {/* Driver routes */}
-              <Route path="/driver" element={<ProtectedRoute requiredRole="driver"><DriverAssignments /></ProtectedRoute>} />
-              <Route path="/driver/assignment/:id" element={<ProtectedRoute requiredRole="driver"><DriverAssignmentDetail /></ProtectedRoute>} />
-              <Route path="/driver/time-report" element={<ProtectedRoute requiredRole="driver"><DriverTimeReport /></ProtectedRoute>} />
-              <Route path="/driver/profile" element={<ProtectedRoute requiredRole="driver"><DriverProfile /></ProtectedRoute>} />
-              <Route path="/driver/profile" element={<ProtectedRoute requiredRole="driver"><DriverProfile /></ProtectedRoute>} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
+                {/* Admin routes */}
+                <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminDashboard /></ProtectedRoute>} />
+                <Route path="/admin/assignments" element={<ProtectedRoute requiredRole="admin"><AdminAssignments /></ProtectedRoute>} />
+                <Route path="/admin/assignments/new" element={<ProtectedRoute requiredRole="admin"><AdminNewAssignment /></ProtectedRoute>} />
+                <Route path="/admin/assignments/:id" element={<ProtectedRoute requiredRole="admin"><AdminAssignmentDetail /></ProtectedRoute>} />
+                <Route path="/admin/customers" element={<ProtectedRoute requiredRole="admin"><AdminCustomers /></ProtectedRoute>} />
+                <Route path="/admin/customers/new" element={<ProtectedRoute requiredRole="admin"><AdminNewCustomer /></ProtectedRoute>} />
+                <Route path="/admin/customers/:id" element={<ProtectedRoute requiredRole="admin"><AdminCustomerDetail /></ProtectedRoute>} />
+                <Route path="/admin/drivers" element={<ProtectedRoute requiredRole="admin"><AdminDrivers /></ProtectedRoute>} />
+                <Route path="/admin/invoices" element={<ProtectedRoute requiredRole="admin"><AdminInvoices /></ProtectedRoute>} />
+                <Route path="/admin/invoices/new" element={<ProtectedRoute requiredRole="admin"><AdminNewInvoice /></ProtectedRoute>} />
+                <Route path="/admin/reports" element={<ProtectedRoute requiredRole="admin"><AdminReports /></ProtectedRoute>} />
+                <Route path="/admin/statistics" element={<ProtectedRoute requiredRole="admin"><AdminStatistics /></ProtectedRoute>} />
+                <Route path="/admin/settings" element={<ProtectedRoute requiredRole="admin"><AdminSettings /></ProtectedRoute>} />
+                <Route path="/admin/driver-settings" element={<ProtectedRoute requiredRole="admin"><AdminDriverSettings /></ProtectedRoute>} />
+                {/* Driver routes */}
+                <Route path="/driver" element={<ProtectedRoute requiredRole="driver"><DriverAssignments /></ProtectedRoute>} />
+                <Route path="/driver/assignment/:id" element={<ProtectedRoute requiredRole="driver"><DriverAssignmentDetail /></ProtectedRoute>} />
+                <Route path="/driver/time-report" element={<ProtectedRoute requiredRole="driver"><DriverTimeReport /></ProtectedRoute>} />
+                <Route path="/driver/profile" element={<ProtectedRoute requiredRole="driver"><DriverProfile /></ProtectedRoute>} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
           </AuthProvider>
         </BrowserRouter>
         <PwaInstallPrompt />
