@@ -359,6 +359,7 @@ export function useInvoices() {
       if (error) throw error;
       return data;
     },
+    staleTime: 60 * 1000,
   });
 }
 
