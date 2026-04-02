@@ -272,7 +272,17 @@ export default function AdminDashboard() {
                     {driverLocations.map((loc) => (
                       <Marker key={loc.id} position={[loc.latitude, loc.longitude]}>
                         <Popup>
-                          <span className="font-medium text-sm">{loc.driver?.full_name ?? 'Okänd'}</span>
+                          <div className="space-y-1">
+                            <span className="font-medium text-sm">{loc.driver?.full_name ?? 'Okänd'}</span>
+                            {loc.assignment_id && (
+                              <button
+                                onClick={() => navigate(`/admin/assignments/${loc.assignment_id}`)}
+                                className="block w-full text-xs font-medium text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/20 rounded px-2 py-1 transition-colors text-center"
+                              >
+                                Visa uppdrag →
+                              </button>
+                            )}
+                          </div>
                         </Popup>
                       </Marker>
                     ))}
