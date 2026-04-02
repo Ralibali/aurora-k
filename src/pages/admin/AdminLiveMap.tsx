@@ -120,22 +120,14 @@ export default function AdminLiveMap() {
 
   return (
     <AdminLayout title="Live-karta" description="Realtidsposition för chaufförer med aktiva uppdrag">
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">Live-karta</h1>
-            <p className="text-sm text-muted-foreground">
-              Realtidsposition för chaufförer med aktiva uppdrag
-            </p>
-          </div>
-          <Badge variant="outline" className="gap-1.5">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
-            </span>
-            {locations.length} aktiv{locations.length !== 1 ? 'a' : ''}
-          </Badge>
-        </div>
+      <div className="space-y-4">
+        <Badge variant="outline" className="gap-1.5">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
+          </span>
+          {locations.length} aktiv{locations.length !== 1 ? 'a' : ''}
+        </Badge>
 
         <Card className="overflow-hidden">
           <CardContent className="p-0">

@@ -23,6 +23,7 @@ const mainNav = [
   { title: 'Uppdrag', url: '/admin/assignments', icon: ClipboardList },
   { title: 'Kunder', url: '/admin/customers', icon: Building2 },
   { title: 'Chaufförer', url: '/admin/drivers', icon: Users },
+  { title: 'Live-karta', url: '/admin/live-map', icon: MapPin },
 ];
 
 const financeNav = [
