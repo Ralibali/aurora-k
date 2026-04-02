@@ -7,7 +7,7 @@ import { useAssignments } from '@/hooks/useData';
 import { formatSwedishDateTime, formatSwedishTime } from '@/lib/format';
 import { ClipboardList, CheckCircle2, Loader2, Plus, TrendingUp, ArrowRight, Wifi, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
