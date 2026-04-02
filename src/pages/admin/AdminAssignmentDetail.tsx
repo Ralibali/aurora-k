@@ -12,6 +12,7 @@ import { useAssignment, useUpdateAssignment, useDeleteAssignment, useDrivers, us
 import { useAuth } from '@/hooks/useAuth';
 import { formatSwedishDateTime, calculateDuration } from '@/lib/format';
 import { ArrowLeft, Trash2, Copy, History } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 
