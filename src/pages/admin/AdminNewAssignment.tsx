@@ -43,6 +43,8 @@ export default function AdminNewAssignment() {
   const [scheduledEnd, setScheduledEnd] = useState('');
   const [driverId, setDriverId] = useState(copyFrom?.assigned_driver_id || '');
   const [adminComment, setAdminComment] = useState(copyFrom?.admin_comment || '');
+  const [requireSignature, setRequireSignature] = useState(copyFrom?.require_signature ?? false);
+  const [requirePhoto, setRequirePhoto] = useState(copyFrom?.require_photo ?? false);
 
   // Recurrence
   const [recurrenceEnabled, setRecurrenceEnabled] = useState(false);
