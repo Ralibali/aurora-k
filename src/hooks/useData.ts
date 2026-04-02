@@ -502,7 +502,7 @@ export function useUpsertDriverCompensation() {
   return useMutation({
     mutationFn: async (comp: {
       driver_id: string;
-      compensation_type: string;
+      compensation_type: 'hourly' | 'per_assignment' | 'monthly';
       hourly_rate?: number;
       per_assignment_rate?: number;
       monthly_salary?: number;
@@ -511,7 +511,7 @@ export function useUpsertDriverCompensation() {
     }) => {
       const { data, error } = await supabase
         .from('driver_compensation')
-        .upsert(comp, { onConflict: 'driver_id' })
+        .upsert([comp], { onConflict: 'driver_id' })
         .select()
         .single();
       if (error) throw error;
