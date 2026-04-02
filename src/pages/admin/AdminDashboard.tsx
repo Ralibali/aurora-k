@@ -243,6 +243,63 @@ export default function AdminDashboard() {
           </div>
         ) : null}
 
+        {/* Mini-map widget */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              <MapPin className="h-5 w-5 text-primary" />
+              Förare på kartan
+            </h2>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/admin/live-map" className="text-primary">
+                Öppna fullskärm <ArrowRight className="h-4 w-4 ml-1" />
+              </Link>
+            </Button>
+          </div>
+          <Card className="overflow-hidden">
+            <CardContent className="p-0 relative">
+              <div className="h-[250px]">
+                {driverLocations.length > 0 ? (
+                  <MapContainer
+                    center={[driverLocations[0].latitude, driverLocations[0].longitude]}
+                    zoom={10}
+                    className="h-full w-full z-0"
+                    style={{ background: 'hsl(var(--muted))' }}
+                    zoomControl={false}
+                    attributionControl={false}
+                  >
+                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                    {driverLocations.map((loc) => (
+                      <Marker key={loc.id} position={[loc.latitude, loc.longitude]}>
+                        <Popup>
+                          <span className="font-medium text-sm">{loc.driver?.full_name ?? 'Okänd'}</span>
+                        </Popup>
+                      </Marker>
+                    ))}
+                  </MapContainer>
+                ) : (
+                  <div className="h-full flex flex-col items-center justify-center text-muted-foreground">
+                    <MapPin className="h-8 w-8 mb-2 opacity-30" />
+                    <p className="text-sm font-medium">Inga aktiva förare</p>
+                    <p className="text-xs">Positioner visas vid startade uppdrag</p>
+                  </div>
+                )}
+              </div>
+              {driverLocations.length > 0 && (
+                <div className="absolute top-3 left-3 z-[1000] bg-card/90 backdrop-blur-sm rounded-lg px-3 py-1.5 shadow-sm border text-sm font-medium">
+                  <span className="relative flex items-center gap-2">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
+                    </span>
+                    {driverLocations.length} aktiv{driverLocations.length !== 1 ? 'a' : ''} förare
+                  </span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Section header */}
         <div className="flex items-center justify-between">
           <div>
