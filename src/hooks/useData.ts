@@ -217,6 +217,8 @@ export function useCreateAssignment() {
       assigned_driver_id: string;
       priority?: string;
       admin_comment?: string | null;
+      require_signature?: boolean;
+      require_photo?: boolean;
     }) => {
       const { data, error } = await supabase.from('assignments').insert(assignment).select().single();
       if (error) throw error;
