@@ -149,7 +149,7 @@ export default function AdminInvoices() {
                 if (!settings) { toast.error('Företagsinställningar saknas'); return; }
                 const year = new Date().getFullYear();
                 const content = generateSieFile(filtered, settings, year);
-                downloadTextFile(content, `Bokföring-${year}.si`, 'text/plain');
+                downloadTextFile(content, `Bokföring-${year}.si`, 'text/plain', 'cp437');
                 toast.success('SIE-fil exporterad');
               }}>SIE-fil (.si)</DropdownMenuItem>
               <DropdownMenuItem onClick={() => {
