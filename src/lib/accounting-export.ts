@@ -162,7 +162,7 @@ export function generateAccountingExcel(invoices: ExportInvoice[], settings: Com
 export function downloadTextFile(content: string, filename: string, mimeType = 'text/plain', encoding: 'utf-8' | 'cp437' = 'utf-8') {
   let blobData: BlobPart;
   if (encoding === 'cp437') {
-    blobData = encodeCP437(content);
+    blobData = encodeCP437(content) as unknown as BlobPart;
   } else {
     blobData = content;
   }
