@@ -137,6 +137,7 @@ export function useAssignments() {
       if (error) throw error;
       return data;
     },
+    staleTime: 30 * 1000,
   });
 }
 
