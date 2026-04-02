@@ -222,7 +222,16 @@ export default function AdminDashboard() {
 
         {/* Assignment list */}
         <div className="space-y-3">
-          {isLoading && [1, 2, 3].map(i => <Skeleton key={i} className="h-[84px] w-full rounded-xl" />)}
+          {isLoading && [1, 2, 3].map(i => (
+            <Card key={i}><CardContent className="py-4 px-5 flex items-center justify-between gap-4">
+              <div className="min-w-0 flex-1 space-y-2">
+                <Skeleton className="h-5 w-44" />
+                <Skeleton className="h-4 w-56" />
+                <Skeleton className="h-3 w-32" />
+              </div>
+              <Skeleton className="h-6 w-20 rounded-full" />
+            </CardContent></Card>
+          ))}
           {!isLoading && todayAssignments.length === 0 && (
             <Card className="border-dashed">
               <CardContent className="py-12 text-center">
