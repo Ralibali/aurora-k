@@ -87,6 +87,8 @@ export default function AdminNewAssignment() {
             assigned_driver_id: driverId,
             priority,
             admin_comment: adminComment || null,
+            require_signature: requireSignature,
+            require_photo: requirePhoto,
           }, {
             onSuccess: () => resolve(),
             onError: (err) => reject(err),
