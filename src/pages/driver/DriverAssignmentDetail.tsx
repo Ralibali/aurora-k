@@ -140,6 +140,10 @@ export default function DriverAssignmentDetail() {
   const requireSignature = driverSettings?.require_signature ?? true;
   const requirePhoto = driverSettings?.require_photo ?? true;
 
+  // Track GPS position when assignment is active
+  const activeAssignmentId = assignment?.status === 'active' ? assignment.id : undefined;
+  useDriverLocationTracker(user?.id, activeAssignmentId);
+
   useEffect(() => {
     if (assignment?.driver_comment) {
       setDriverComment(assignment.driver_comment as string);
