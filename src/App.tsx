@@ -28,6 +28,7 @@ const AdminReports = lazy(() => import("./pages/admin/AdminReports"));
 const AdminStatistics = lazy(() => import("./pages/admin/AdminStatistics"));
 const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
 const AdminDriverSettings = lazy(() => import("./pages/admin/AdminDriverSettings"));
+const AdminLiveMap = lazy(() => import("./pages/admin/AdminLiveMap"));
 const DriverAssignments = lazy(() => import("./pages/driver/DriverAssignments"));
 const DriverAssignmentDetail = lazy(() => import("./pages/driver/DriverAssignmentDetail"));
 const DriverProfile = lazy(() => import("./pages/driver/DriverProfile"));
