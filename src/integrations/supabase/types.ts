@@ -181,6 +181,45 @@ export type Database = {
         }
         Relationships: []
       }
+      driver_compensation: {
+        Row: {
+          compensation_type: Database["public"]["Enums"]["compensation_type"]
+          created_at: string
+          driver_id: string
+          hourly_rate: number | null
+          id: string
+          monthly_salary: number | null
+          notes: string | null
+          per_assignment_rate: number | null
+          tax_table: string | null
+          updated_at: string
+        }
+        Insert: {
+          compensation_type?: Database["public"]["Enums"]["compensation_type"]
+          created_at?: string
+          driver_id: string
+          hourly_rate?: number | null
+          id?: string
+          monthly_salary?: number | null
+          notes?: string | null
+          per_assignment_rate?: number | null
+          tax_table?: string | null
+          updated_at?: string
+        }
+        Update: {
+          compensation_type?: Database["public"]["Enums"]["compensation_type"]
+          created_at?: string
+          driver_id?: string
+          hourly_rate?: number | null
+          id?: string
+          monthly_salary?: number | null
+          notes?: string | null
+          per_assignment_rate?: number | null
+          tax_table?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       driver_locations: {
         Row: {
           assignment_id: string | null
@@ -456,6 +495,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "driver"
+      compensation_type: "hourly" | "per_assignment" | "monthly"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -584,6 +624,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "driver"],
+      compensation_type: ["hourly", "per_assignment", "monthly"],
     },
   },
 } as const
