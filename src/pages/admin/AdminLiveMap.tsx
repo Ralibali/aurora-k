@@ -55,6 +55,7 @@ function FitBounds({ positions }: { positions: [number, number][] }) {
 }
 
 export default function AdminLiveMap() {
+  const navigate = useNavigate();
   const [locations, setLocations] = useState<DriverLocation[]>([]);
   const [loading, setLoading] = useState(true);
 
