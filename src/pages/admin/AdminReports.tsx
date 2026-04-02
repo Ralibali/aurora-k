@@ -6,9 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useAssignments, useDrivers, useCustomers } from '@/hooks/useData';
+import { useAssignments, useDrivers, useCustomers, useDriverCompensations } from '@/hooks/useData';
 import { formatSwedishDate, formatSwedishTime, calculateDecimalHours } from '@/lib/format';
-import { FileText, FileSpreadsheet, Receipt } from 'lucide-react';
+import { FileText, FileSpreadsheet, Receipt, Banknote } from 'lucide-react';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import jsPDF from 'jspdf';
@@ -24,6 +24,7 @@ export default function AdminReports() {
   const { data: assignments, isLoading } = useAssignments();
   const { data: drivers } = useDrivers();
   const { data: customers } = useCustomers();
+  const { data: compensations } = useDriverCompensations();
 
   const completedAssignments = (assignments ?? []).filter(a => {
     if (a.status !== 'completed' || !a.actual_start || !a.actual_stop) return false;
@@ -140,6 +141,63 @@ export default function AdminReports() {
     toast.success('Faktureringsunderlag exporterat');
   };
 
+  const handleSalaryReport = () => {
+    const compMap = Object.fromEntries((compensations ?? []).map(c => [c.driver_id, c]));
+    const driverIds = [...new Set(completedAssignments.map(a => a.assigned_driver_id))];
+
+    const salaryRows = driverIds.map(dId => {
+      const driver = (drivers ?? []).find(d => d.id === dId);
+      const comp = compMap[dId];
+      const driverAssignments = completedAssignments.filter(a => a.assigned_driver_id === dId);
+      const totalH = driverAssignments.reduce((sum, a) => sum + calculateDecimalHours(a.actual_start!, a.actual_stop!), 0);
+      const count = driverAssignments.length;
+
+      let grossPay = 0;
+      let payType = 'Ej angiven';
+      if (comp) {
+        switch (comp.compensation_type) {
+          case 'hourly':
+            grossPay = totalH * Number(comp.hourly_rate);
+            payType = `${Number(comp.hourly_rate).toFixed(0)} kr/h`;
+            break;
+          case 'per_assignment':
+            grossPay = count * Number(comp.per_assignment_rate);
+            payType = `${Number(comp.per_assignment_rate).toFixed(0)} kr/uppdrag`;
+            break;
+          case 'monthly':
+            grossPay = Number(comp.monthly_salary);
+            payType = `${Number(comp.monthly_salary).toFixed(0)} kr/mån`;
+            break;
+        }
+      }
+
+      return {
+        name: driver?.full_name ?? 'Okänd',
+        type: payType,
+        hours: totalH,
+        assignments: count,
+        grossPay,
+        taxTable: comp?.tax_table ?? '',
+      };
+    });
+
+    // Export as Excel
+    const wsData = [
+      ['Lönerapport', dateRangeLabel()],
+      [],
+      ['Chaufför', 'Ersättningstyp', 'Timmar', 'Uppdrag', 'Bruttolön (kr)', 'Skattetabell'],
+      ...salaryRows.map(r => [r.name, r.type, r.hours.toFixed(1), r.assignments, r.grossPay.toFixed(0), r.taxTable]),
+      [],
+      ['', '', '', 'Totalt', salaryRows.reduce((s, r) => s + r.grossPay, 0).toFixed(0), ''],
+    ];
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    ws['!cols'] = [{ wch: 25 }, { wch: 18 }, { wch: 10 }, { wch: 10 }, { wch: 15 }, { wch: 18 }];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Lönerapport');
+    XLSX.writeFile(wb, `lonerapport_${dateStr()}.xlsx`);
+    toast.success('Lönerapport exporterad');
+  };
+
   return (
     <AdminLayout title="Tidrapporter & Export">
       <div className="space-y-4 max-w-5xl">
@@ -183,6 +241,9 @@ export default function AdminReports() {
           </Button>
           <Button variant="outline" size="sm" onClick={handleInvoiceBasis}>
             <Receipt className="h-4 w-4 mr-1" /> Faktureringsunderlag
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleSalaryReport}>
+            <Banknote className="h-4 w-4 mr-1" /> Lönerapport
           </Button>
         </div>
 
