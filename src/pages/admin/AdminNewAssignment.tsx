@@ -190,7 +190,6 @@ export default function AdminNewAssignment() {
                   <Switch id="req-photo" checked={requirePhoto} onCheckedChange={setRequirePhoto} />
                 </div>
               </div>
-              </div>
 
               {/* Recurrence */}
               <div className="border rounded-lg p-4 space-y-3">
