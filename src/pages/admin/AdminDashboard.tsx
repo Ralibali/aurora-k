@@ -5,12 +5,26 @@ import { StatusBadge } from '@/components/StatusBadge';
 import { PriorityBadge } from '@/components/PriorityBadge';
 import { useAssignments } from '@/hooks/useData';
 import { formatSwedishDateTime, formatSwedishTime } from '@/lib/format';
-import { ClipboardList, CheckCircle2, Loader2, Plus, TrendingUp, ArrowRight, Wifi } from 'lucide-react';
+import { ClipboardList, CheckCircle2, Loader2, Plus, TrendingUp, ArrowRight, Wifi, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
 
 function StatCard({ icon: Icon, value, label, color, isLoading }: {
   icon: typeof ClipboardList;
@@ -54,10 +68,12 @@ export default function AdminDashboard() {
   const queryClient = useQueryClient();
   const { data: assignments, isLoading } = useAssignments();
   const [isLive, setIsLive] = useState(false);
+  const [driverLocations, setDriverLocations] = useState<any[]>([]);
 
   useEffect(() => {
+    const channelName = `dashboard-realtime-${Math.random().toString(36).slice(2)}`;
     const channel = supabase
-      .channel('dashboard-realtime')
+      .channel(channelName)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'assignments' }, () => {
         queryClient.invalidateQueries({ queryKey: ['assignments'] });
       })
@@ -67,6 +83,33 @@ export default function AdminDashboard() {
 
     return () => { supabase.removeChannel(channel); };
   }, [queryClient]);
+
+  // Fetch driver locations for mini-map
+  useEffect(() => {
+    const fetchLocations = async () => {
+      const { data } = await supabase.from('driver_locations').select('*');
+      if (data && data.length > 0) {
+        const driverIds = [...new Set(data.map(d => d.driver_id))];
+        const { data: profiles } = await supabase.from('profiles').select('id, full_name').in('id', driverIds);
+        const profileMap = Object.fromEntries((profiles ?? []).map(p => [p.id, p]));
+        setDriverLocations(data.map(loc => ({ ...loc, driver: profileMap[loc.driver_id] })));
+      } else {
+        setDriverLocations([]);
+      }
+    };
+
+    fetchLocations();
+
+    const channelName = `dashboard-locations-${Math.random().toString(36).slice(2)}`;
+    const locChannel = supabase
+      .channel(channelName)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'driver_locations' }, () => {
+        fetchLocations();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(locChannel); };
+  }, []);
 
   const today = new Date().toISOString().split('T')[0];
   const todayAssignments = (assignments ?? []).filter(a =>
@@ -199,6 +242,63 @@ export default function AdminDashboard() {
             </div>
           </div>
         ) : null}
+
+        {/* Mini-map widget */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              <MapPin className="h-5 w-5 text-primary" />
+              Förare på kartan
+            </h2>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/admin/live-map" className="text-primary">
+                Öppna fullskärm <ArrowRight className="h-4 w-4 ml-1" />
+              </Link>
+            </Button>
+          </div>
+          <Card className="overflow-hidden">
+            <CardContent className="p-0 relative">
+              <div className="h-[250px]">
+                {driverLocations.length > 0 ? (
+                  <MapContainer
+                    center={[driverLocations[0].latitude, driverLocations[0].longitude]}
+                    zoom={10}
+                    className="h-full w-full z-0"
+                    style={{ background: 'hsl(var(--muted))' }}
+                    zoomControl={false}
+                    attributionControl={false}
+                  >
+                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                    {driverLocations.map((loc) => (
+                      <Marker key={loc.id} position={[loc.latitude, loc.longitude]}>
+                        <Popup>
+                          <span className="font-medium text-sm">{loc.driver?.full_name ?? 'Okänd'}</span>
+                        </Popup>
+                      </Marker>
+                    ))}
+                  </MapContainer>
+                ) : (
+                  <div className="h-full flex flex-col items-center justify-center text-muted-foreground">
+                    <MapPin className="h-8 w-8 mb-2 opacity-30" />
+                    <p className="text-sm font-medium">Inga aktiva förare</p>
+                    <p className="text-xs">Positioner visas vid startade uppdrag</p>
+                  </div>
+                )}
+              </div>
+              {driverLocations.length > 0 && (
+                <div className="absolute top-3 left-3 z-[1000] bg-card/90 backdrop-blur-sm rounded-lg px-3 py-1.5 shadow-sm border text-sm font-medium">
+                  <span className="relative flex items-center gap-2">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
+                    </span>
+                    {driverLocations.length} aktiv{driverLocations.length !== 1 ? 'a' : ''} förare
+                  </span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Section header */}
         <div className="flex items-center justify-between">
