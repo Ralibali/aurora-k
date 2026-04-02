@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AdminLayout } from '@/components/AdminLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -54,6 +55,7 @@ function FitBounds({ positions }: { positions: [number, number][] }) {
 }
 
 export default function AdminLiveMap() {
+  const navigate = useNavigate();
   const [locations, setLocations] = useState<DriverLocation[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -172,6 +174,14 @@ export default function AdminLiveMap() {
                             <Clock className="h-3 w-3" />
                             Uppdaterad {timeAgo(loc.updated_at)}
                           </div>
+                          {loc.assignment_id && (
+                            <button
+                              onClick={() => navigate(`/admin/assignments/${loc.assignment_id}`)}
+                              className="mt-1 w-full text-xs font-medium text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/20 rounded px-2 py-1.5 transition-colors text-center"
+                            >
+                              Visa uppdrag →
+                            </button>
+                          )}
                         </div>
                       </Popup>
                     </Marker>

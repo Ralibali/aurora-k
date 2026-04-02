@@ -7,7 +7,7 @@ import { useAssignments } from '@/hooks/useData';
 import { formatSwedishDateTime, formatSwedishTime } from '@/lib/format';
 import { ClipboardList, CheckCircle2, Loader2, Plus, TrendingUp, ArrowRight, Wifi, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
@@ -65,6 +65,7 @@ function ElapsedSince({ since }: { since: string }) {
 }
 
 export default function AdminDashboard() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data: assignments, isLoading } = useAssignments();
   const [isLive, setIsLive] = useState(false);
@@ -272,7 +273,17 @@ export default function AdminDashboard() {
                     {driverLocations.map((loc) => (
                       <Marker key={loc.id} position={[loc.latitude, loc.longitude]}>
                         <Popup>
-                          <span className="font-medium text-sm">{loc.driver?.full_name ?? 'Okänd'}</span>
+                          <div className="space-y-1">
+                            <span className="font-medium text-sm">{loc.driver?.full_name ?? 'Okänd'}</span>
+                            {loc.assignment_id && (
+                              <button
+                                onClick={() => navigate(`/admin/assignments/${loc.assignment_id}`)}
+                                className="block w-full text-xs font-medium text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/20 rounded px-2 py-1 transition-colors text-center"
+                              >
+                                Visa uppdrag →
+                              </button>
+                            )}
+                          </div>
                         </Popup>
                       </Marker>
                     ))}
