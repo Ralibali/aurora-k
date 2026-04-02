@@ -242,6 +242,9 @@ export default function AdminReports() {
           <Button variant="outline" size="sm" onClick={handleInvoiceBasis}>
             <Receipt className="h-4 w-4 mr-1" /> Faktureringsunderlag
           </Button>
+          <Button variant="outline" size="sm" onClick={handleSalaryReport}>
+            <Banknote className="h-4 w-4 mr-1" /> Lönerapport
+          </Button>
         </div>
 
         <Card>
