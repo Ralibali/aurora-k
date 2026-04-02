@@ -67,6 +67,8 @@ export type Database = {
           instructions: string | null
           invoiced: boolean
           priority: string
+          require_photo: boolean
+          require_signature: boolean
           scheduled_end: string | null
           scheduled_start: string
           signature_url: string | null
@@ -87,6 +89,8 @@ export type Database = {
           instructions?: string | null
           invoiced?: boolean
           priority?: string
+          require_photo?: boolean
+          require_signature?: boolean
           scheduled_end?: string | null
           scheduled_start: string
           signature_url?: string | null
@@ -107,6 +111,8 @@ export type Database = {
           instructions?: string | null
           invoiced?: boolean
           priority?: string
+          require_photo?: boolean
+          require_signature?: boolean
           scheduled_end?: string | null
           scheduled_start?: string
           signature_url?: string | null

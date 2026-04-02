@@ -12,6 +12,7 @@ import { useAssignment, useUpdateAssignment, useDeleteAssignment, useDrivers, us
 import { useAuth } from '@/hooks/useAuth';
 import { formatSwedishDateTime, calculateDuration } from '@/lib/format';
 import { ArrowLeft, Trash2, Copy, History } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -154,6 +155,12 @@ export default function AdminAssignmentDetail() {
               )}
             </div>
 
+            {((assignment as any).require_signature || (assignment as any).require_photo) && (
+              <div className="flex gap-2 flex-wrap">
+                {(assignment as any).require_signature && <Badge variant="outline">Signatur krävs</Badge>}
+                {(assignment as any).require_photo && <Badge variant="outline">Foto krävs</Badge>}
+              </div>
+            )}
             {assignment.signature_url && (
               <div>
                 <p className="text-sm text-muted-foreground mb-2">Mottagarens signatur</p>

@@ -137,8 +137,8 @@ export default function DriverAssignmentDetail() {
   const [completionStep, setCompletionStep] = useState<'signature' | 'photo' | null>(null);
   const [signatureUrl, setSignatureUrl] = useState<string | null>(null);
 
-  const requireSignature = driverSettings?.require_signature ?? true;
-  const requirePhoto = driverSettings?.require_photo ?? true;
+  const requireSignature = (assignment as any)?.require_signature ?? false;
+  const requirePhoto = (assignment as any)?.require_photo ?? false;
 
   // Track GPS position when assignment is active
   const activeAssignmentId = assignment?.status === 'active' ? assignment.id : undefined;
