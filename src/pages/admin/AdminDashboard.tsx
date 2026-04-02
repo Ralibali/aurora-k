@@ -68,10 +68,12 @@ export default function AdminDashboard() {
   const queryClient = useQueryClient();
   const { data: assignments, isLoading } = useAssignments();
   const [isLive, setIsLive] = useState(false);
+  const [driverLocations, setDriverLocations] = useState<any[]>([]);
 
   useEffect(() => {
+    const channelName = `dashboard-realtime-${Math.random().toString(36).slice(2)}`;
     const channel = supabase
-      .channel('dashboard-realtime')
+      .channel(channelName)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'assignments' }, () => {
         queryClient.invalidateQueries({ queryKey: ['assignments'] });
       })
@@ -81,6 +83,33 @@ export default function AdminDashboard() {
 
     return () => { supabase.removeChannel(channel); };
   }, [queryClient]);
+
+  // Fetch driver locations for mini-map
+  useEffect(() => {
+    const fetchLocations = async () => {
+      const { data } = await supabase.from('driver_locations').select('*');
+      if (data && data.length > 0) {
+        const driverIds = [...new Set(data.map(d => d.driver_id))];
+        const { data: profiles } = await supabase.from('profiles').select('id, full_name').in('id', driverIds);
+        const profileMap = Object.fromEntries((profiles ?? []).map(p => [p.id, p]));
+        setDriverLocations(data.map(loc => ({ ...loc, driver: profileMap[loc.driver_id] })));
+      } else {
+        setDriverLocations([]);
+      }
+    };
+
+    fetchLocations();
+
+    const channelName = `dashboard-locations-${Math.random().toString(36).slice(2)}`;
+    const locChannel = supabase
+      .channel(channelName)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'driver_locations' }, () => {
+        fetchLocations();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(locChannel); };
+  }, []);
 
   const today = new Date().toISOString().split('T')[0];
   const todayAssignments = (assignments ?? []).filter(a =>
