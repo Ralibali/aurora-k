@@ -175,7 +175,21 @@ export default function AdminNewAssignment() {
 
               <div className="space-y-2">
                 <Label htmlFor="comment">Intern kommentar (valfritt)</Label>
-                <Textarea id="comment" value={adminComment} onChange={e => setAdminComment(e.target.value)} placeholder="Meddelande till chauffören..." />
+              <Textarea id="comment" value={adminComment} onChange={e => setAdminComment(e.target.value)} placeholder="Meddelande till chauffören..." />
+              </div>
+
+              {/* Signatur & Foto krav */}
+              <div className="border rounded-lg p-4 space-y-3">
+                <p className="text-sm font-medium">Krav vid slutförande</p>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="req-sig" className="cursor-pointer">Kräv mottagarsignatur</Label>
+                  <Switch id="req-sig" checked={requireSignature} onCheckedChange={setRequireSignature} />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="req-photo" className="cursor-pointer">Kräv fraktsedelfoto</Label>
+                  <Switch id="req-photo" checked={requirePhoto} onCheckedChange={setRequirePhoto} />
+                </div>
+              </div>
               </div>
 
               {/* Recurrence */}
