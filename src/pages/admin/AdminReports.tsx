@@ -24,6 +24,7 @@ export default function AdminReports() {
   const { data: assignments, isLoading } = useAssignments();
   const { data: drivers } = useDrivers();
   const { data: customers } = useCustomers();
+  const { data: compensations } = useDriverCompensations();
 
   const completedAssignments = (assignments ?? []).filter(a => {
     if (a.status !== 'completed' || !a.actual_start || !a.actual_stop) return false;
