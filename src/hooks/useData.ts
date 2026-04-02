@@ -464,3 +464,62 @@ export function useCreateSettings() {
     },
   });
 }
+
+// ─── DRIVER COMPENSATION ────────────────────────────────
+export function useDriverCompensations() {
+  return useQuery({
+    queryKey: ['driver_compensations'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('driver_compensation')
+        .select('*');
+      if (error) throw error;
+      return data;
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function useDriverCompensation(driverId: string | undefined) {
+  return useQuery({
+    queryKey: ['driver_compensation', driverId],
+    queryFn: async () => {
+      if (!driverId) throw new Error('No ID');
+      const { data, error } = await supabase
+        .from('driver_compensation')
+        .select('*')
+        .eq('driver_id', driverId)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!driverId,
+  });
+}
+
+export function useUpsertDriverCompensation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (comp: {
+      driver_id: string;
+      compensation_type: string;
+      hourly_rate?: number;
+      per_assignment_rate?: number;
+      monthly_salary?: number;
+      tax_table?: string | null;
+      notes?: string | null;
+    }) => {
+      const { data, error } = await supabase
+        .from('driver_compensation')
+        .upsert(comp, { onConflict: 'driver_id' })
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['driver_compensations'] });
+      qc.invalidateQueries({ queryKey: ['driver_compensation'] });
+    },
+  });
+}
