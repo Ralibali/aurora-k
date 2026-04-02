@@ -9,7 +9,8 @@ interface ProtectedRouteProps {
 export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
   const { session, role, loading } = useAuth();
 
-  if (loading) {
+  // Still loading auth state, or session exists but role hasn't resolved yet
+  if (loading || (session && !role)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
