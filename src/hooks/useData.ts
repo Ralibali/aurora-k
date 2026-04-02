@@ -117,8 +117,9 @@ export function useAssignments() {
   const qc = useQueryClient();
 
   useEffect(() => {
+    const channelName = `assignments-realtime-${Math.random().toString(36).slice(2)}`;
     const channel = supabase
-      .channel('assignments-realtime')
+      .channel(channelName)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'assignments' }, () => {
         qc.invalidateQueries({ queryKey: ['assignments'] });
       })
