@@ -23,6 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<'admin' | 'driver' | null>(null);
   const [loading, setLoading] = useState(true);
   const roleCache = useRef<Record<string, 'admin' | 'driver'>>({});
+  const initialized = useRef(false);
 
   const fetchRole = useCallback(async (userId: string) => {
     if (roleCache.current[userId]) {
@@ -38,48 +39,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return r;
   }, []);
 
-  useEffect(() => {
-    let mounted = true;
+  const handleSession = useCallback(async (newSession: Session | null) => {
+    setSession(newSession);
+    if (newSession?.user) {
+      const r = await fetchRole(newSession.user.id);
+      setRole(r);
+    } else {
+      setRole(null);
+    }
+    setLoading(false);
+  }, [fetchRole]);
 
+  useEffect(() => {
     // Set up listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, newSession) => {
-        if (!mounted) return;
-        setSession(newSession);
-        if (newSession?.user) {
-          const r = await fetchRole(newSession.user.id);
-          if (mounted) {
-            setRole(r);
-            setLoading(false);
-          }
-        } else {
-          setRole(null);
-          setLoading(false);
+      (_event, newSession) => {
+        // After init, only the listener handles state
+        if (initialized.current) {
+          handleSession(newSession);
         }
       }
     );
 
-    // Then get initial session
-    supabase.auth.getSession().then(async ({ data: { session: initial } }) => {
-      if (!mounted) return;
-      // Only set if onAuthStateChange hasn't already fired
-      if (initial?.user) {
-        setSession(initial);
-        const r = await fetchRole(initial.user.id);
-        if (mounted) {
-          setRole(r);
-          setLoading(false);
-        }
-      } else {
-        setLoading(false);
+    // Get initial session once
+    supabase.auth.getSession().then(({ data: { session: initial } }) => {
+      if (!initialized.current) {
+        initialized.current = true;
+        handleSession(initial);
       }
     });
 
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
-  }, [fetchRole]);
+    return () => subscription.unsubscribe();
+  }, [handleSession]);
 
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
