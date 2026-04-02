@@ -131,7 +131,22 @@ export default function AdminDashboard() {
         </div>
 
         {/* Activity feed */}
-        {recentActivity.length > 0 && (
+        {isLoading ? (
+          <div>
+            <Skeleton className="h-6 w-40 mb-3" />
+            <div className="space-y-1">
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} className="flex items-center gap-2.5 py-1.5 px-3">
+                  <Skeleton className="h-2 w-2 rounded-full shrink-0" />
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-4 w-16" />
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-10 ml-auto" />
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : recentActivity.length > 0 ? (
           <div>
             <h2 className="text-lg font-semibold mb-3">Senaste aktivitet</h2>
             <div className="space-y-1">
@@ -146,7 +161,7 @@ export default function AdminDashboard() {
               ))}
             </div>
           </div>
-        )}
+        ) : null}
 
         {/* Active assignments */}
         {activeAssignments.length > 0 && (
