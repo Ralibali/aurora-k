@@ -42,11 +42,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     mounted.current = true;
     let ignore = false;
 
-    const apply = async (s: Session | null) => {
+    let initialDone = false;
+
+    const apply = async (s: Session | null, source: string) => {
       if (ignore) return;
+      console.log('[Auth] apply called from', source, 'session:', !!s, 'user:', s?.user?.email);
       setSession(s);
       if (s?.user) {
         const r = await fetchRole(s.user.id);
+        console.log('[Auth] role resolved:', r, 'ignore:', ignore);
         if (!ignore) {
           setRole(r);
           setLoading(false);
@@ -60,13 +64,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // 1. Set up listener FIRST so we don't miss events
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, newSession) => {
-        apply(newSession);
+        console.log('[Auth] onAuthStateChange event:', _event);
+        // Skip if this is INITIAL_SESSION and we haven't processed getSession yet
+        if (_event === 'INITIAL_SESSION') return; // getSession handles initial
+        apply(newSession, 'onAuthStateChange:' + _event);
       }
     );
 
     // 2. Then get initial session
     supabase.auth.getSession().then(({ data: { session: initial } }) => {
-      apply(initial);
+      if (!initialDone) {
+        initialDone = true;
+        apply(initial, 'getSession');
+      }
     });
 
     return () => {
