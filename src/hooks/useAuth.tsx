@@ -18,68 +18,67 @@ const AuthContext = createContext<AuthContextType>({
   signOut: async () => {},
 });
 
+const roleCache: Record<string, 'admin' | 'driver'> = {};
+
+async function fetchRole(userId: string): Promise<'admin' | 'driver' | null> {
+  if (roleCache[userId]) return roleCache[userId];
+  const { data } = await supabase
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', userId)
+    .single();
+  const r = (data?.role as 'admin' | 'driver') ?? null;
+  if (r) roleCache[userId] = r;
+  return r;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<'admin' | 'driver' | null>(null);
   const [loading, setLoading] = useState(true);
-  const roleCache = useRef<Record<string, 'admin' | 'driver'>>({});
   const mounted = useRef(true);
-
-  const applySession = useCallback((newSession: Session | null) => {
-    if (!mounted.current) return;
-
-    setSession(newSession);
-    // Unblock UI immediately
-    setLoading(false);
-
-    if (newSession?.user) {
-      const userId = newSession.user.id;
-      // Return cached role instantly if available
-      if (roleCache.current[userId]) {
-        setRole(roleCache.current[userId]);
-        return;
-      }
-      // Fetch role in background — UI is already unblocked
-      supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId)
-        .single()
-        .then(({ data }) => {
-          if (!mounted.current) return;
-          const r = (data?.role as 'admin' | 'driver') ?? null;
-          if (r) roleCache.current[userId] = r;
-          setRole(r);
-        });
-    } else {
-      setRole(null);
-    }
-  }, []);
 
   useEffect(() => {
     mounted.current = true;
+    let ignore = false;
 
-    // Get initial session first
-    supabase.auth.getSession().then(({ data: { session: initial } }) => {
-      applySession(initial);
-    });
+    const apply = async (s: Session | null) => {
+      if (ignore) return;
+      setSession(s);
+      if (s?.user) {
+        const r = await fetchRole(s.user.id);
+        if (!ignore) {
+          setRole(r);
+          setLoading(false);
+        }
+      } else {
+        setRole(null);
+        setLoading(false);
+      }
+    };
 
-    // Then listen for changes (login, logout, token refresh)
+    // 1. Set up listener FIRST so we don't miss events
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, newSession) => {
-        applySession(newSession);
+        apply(newSession);
       }
     );
 
+    // 2. Then get initial session
+    supabase.auth.getSession().then(({ data: { session: initial } }) => {
+      apply(initial);
+    });
+
     return () => {
+      ignore = true;
       mounted.current = false;
       subscription.unsubscribe();
     };
-  }, [applySession]);
+  }, []);
 
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
-    roleCache.current = {};
+    delete roleCache[Object.keys(roleCache)[0]];
     setSession(null);
     setRole(null);
   }, []);
