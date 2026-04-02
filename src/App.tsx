@@ -28,6 +28,7 @@ const AdminReports = lazy(() => import("./pages/admin/AdminReports"));
 const AdminStatistics = lazy(() => import("./pages/admin/AdminStatistics"));
 const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
 const AdminDriverSettings = lazy(() => import("./pages/admin/AdminDriverSettings"));
+const AdminLiveMap = lazy(() => import("./pages/admin/AdminLiveMap"));
 const DriverAssignments = lazy(() => import("./pages/driver/DriverAssignments"));
 const DriverAssignmentDetail = lazy(() => import("./pages/driver/DriverAssignmentDetail"));
 const DriverProfile = lazy(() => import("./pages/driver/DriverProfile"));
@@ -73,6 +74,7 @@ const App = () => (
                 <Route path="/admin/statistics" element={<ProtectedRoute requiredRole="admin"><AdminStatistics /></ProtectedRoute>} />
                 <Route path="/admin/settings" element={<ProtectedRoute requiredRole="admin"><AdminSettings /></ProtectedRoute>} />
                 <Route path="/admin/driver-settings" element={<ProtectedRoute requiredRole="admin"><AdminDriverSettings /></ProtectedRoute>} />
+                <Route path="/admin/live-map" element={<ProtectedRoute requiredRole="admin"><AdminLiveMap /></ProtectedRoute>} />
                 {/* Driver routes */}
                 <Route path="/driver" element={<ProtectedRoute requiredRole="driver"><DriverAssignments /></ProtectedRoute>} />
                 <Route path="/driver/assignment/:id" element={<ProtectedRoute requiredRole="driver"><DriverAssignmentDetail /></ProtectedRoute>} />

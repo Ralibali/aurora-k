@@ -1,4 +1,4 @@
-import { LayoutDashboard, ClipboardList, Users, Clock, LogOut, Building2, Receipt, BarChart3, Settings, Truck, Moon, Sun, Smartphone } from 'lucide-react';
+import { LayoutDashboard, ClipboardList, Users, Clock, LogOut, Building2, Receipt, BarChart3, Settings, Truck, Moon, Sun, Smartphone, MapPin } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -23,6 +23,7 @@ const mainNav = [
   { title: 'Uppdrag', url: '/admin/assignments', icon: ClipboardList },
   { title: 'Kunder', url: '/admin/customers', icon: Building2 },
   { title: 'Chaufförer', url: '/admin/drivers', icon: Users },
+  { title: 'Live-karta', url: '/admin/live-map', icon: MapPin },
 ];
 
 const financeNav = [
