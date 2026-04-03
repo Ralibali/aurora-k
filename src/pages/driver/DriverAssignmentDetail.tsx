@@ -500,6 +500,6 @@ export default function DriverAssignmentDetail() {
           )}
         </div>
       </div>
-    </DriverLayout>
+    </>
   );
 }
