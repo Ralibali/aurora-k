@@ -45,6 +45,7 @@ export default function AdminNewAssignment() {
   const [adminComment, setAdminComment] = useState(copyFrom?.admin_comment || '');
   const [requireSignature, setRequireSignature] = useState(copyFrom?.require_signature ?? false);
   const [requirePhoto, setRequirePhoto] = useState(copyFrom?.require_photo ?? false);
+  const [cost, setCost] = useState<string>(copyFrom?.cost != null ? String(copyFrom.cost) : '');
 
   // Recurrence
   const [recurrenceEnabled, setRecurrenceEnabled] = useState(false);
