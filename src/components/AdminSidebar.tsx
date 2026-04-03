@@ -1,4 +1,4 @@
-import { LayoutDashboard, ClipboardList, Users, Clock, LogOut, Building2, Receipt, BarChart3, Settings, Truck, Moon, Sun, Smartphone, MapPin, CalendarDays } from 'lucide-react';
+import { LayoutDashboard, ClipboardList, Users, Clock, LogOut, Building2, Receipt, BarChart3, Settings, Truck, Moon, Sun, Smartphone, MapPin, CalendarDays, Package, Car, ShoppingCart, FileText } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
