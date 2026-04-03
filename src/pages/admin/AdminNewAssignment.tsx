@@ -216,6 +216,33 @@ export default function AdminNewAssignment() {
                 <Input id="cost" type="number" step="0.01" min="0" value={cost} onChange={e => setCost(e.target.value)} placeholder="T.ex. 1500" />
               </div>
 
+              {/* Geofence */}
+              <div className="border rounded-lg p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium">Geofence</p>
+                    <p className="text-xs text-muted-foreground">Auto-notis vid ankomst/avfärd</p>
+                  </div>
+                  <Switch checked={!!geofenceRadius} onCheckedChange={(on) => { if (!on) { setGeofenceRadius(''); setGeofenceLat(''); setGeofenceLng(''); } else { setGeofenceRadius('200'); }}} />
+                </div>
+                {!!geofenceRadius && (
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="space-y-1">
+                      <Label className="text-xs">Latitud</Label>
+                      <Input type="number" step="any" value={geofenceLat} onChange={e => setGeofenceLat(e.target.value)} placeholder="59.33" />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Longitud</Label>
+                      <Input type="number" step="any" value={geofenceLng} onChange={e => setGeofenceLng(e.target.value)} placeholder="18.07" />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Radie (m)</Label>
+                      <Input type="number" value={geofenceRadius} onChange={e => setGeofenceRadius(e.target.value)} placeholder="200" />
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* Signatur & Foto krav */}
               <div className="border rounded-lg p-4 space-y-3">
                 <p className="text-sm font-medium">Krav vid slutförande</p>
