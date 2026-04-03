@@ -13,6 +13,8 @@ import { AdminShell } from "@/components/AdminLayout";
 import { DriverLayout } from "@/components/DriverLayout";
 
 const LandingPage = lazy(() => import("./pages/LandingPage"));
+const TransportledningssystemPage = lazy(() => import("./pages/TransportledningssystemPage"));
+const CoredinationAlternativPage = lazy(() => import("./pages/CoredinationAlternativPage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const RegisterPage = lazy(() => import("./pages/RegisterPage"));
 const OnboardingPage = lazy(() => import("./pages/OnboardingPage"));
