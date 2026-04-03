@@ -87,7 +87,7 @@ const App = () => (
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
 
                 {/* Admin routes — share a single sidebar shell */}
-                <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminShell /></ProtectedRoute>}>
+                <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><SubscriptionGuard><AdminShell /></SubscriptionGuard></ProtectedRoute>}>
                   <Route index element={<AdminDashboard />} />
                   <Route path="assignments" element={<AdminAssignments />} />
                   <Route path="assignments/new" element={<AdminNewAssignment />} />
