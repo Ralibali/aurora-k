@@ -7,12 +7,42 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useSettings, useUpdateSettings, useCreateSettings } from '@/hooks/useData';
 import { useFeatureSettings, useToggleFeature, useResetAllFeatures } from '@/hooks/useFeatureSettings';
-import { Save, Upload, ToggleLeft, RotateCcw } from 'lucide-react';
+import { Save, Upload, ToggleLeft, RotateCcw, Sun, Moon, Monitor } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useTheme } from 'next-themes';
 const SubscriptionTab = lazy(() => import('@/components/SubscriptionTab'));
+
+function AppearanceTab() {
+  const { theme, setTheme } = useTheme();
+  const options = [
+    { value: 'light', label: 'Ljust läge', icon: Sun },
+    { value: 'dark', label: 'Mörkt läge', icon: Moon },
+    { value: 'system', label: 'Systemstandard', icon: Monitor },
+  ] as const;
+  return (
+    <Card>
+      <CardHeader><CardTitle>Utseende</CardTitle></CardHeader>
+      <CardContent className="space-y-1">
+        <p className="text-sm text-muted-foreground mb-4">Välj hur Aurora Transport ska visas.</p>
+        {options.map(opt => (
+          <button
+            key={opt.value}
+            onClick={() => setTheme(opt.value)}
+            className={`w-full flex items-center gap-3 rounded-lg px-4 py-3 text-left text-sm transition-colors ${
+              theme === opt.value ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted text-foreground'
+            }`}
+          >
+            <opt.icon className="h-4 w-4" />
+            {opt.label}
+          </button>
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function AdminSettings() {
   const { data: settings, isLoading } = useSettings();
@@ -74,6 +104,7 @@ export default function AdminSettings() {
             <TabsTrigger value="features" className="gap-1.5">
               <ToggleLeft className="h-3.5 w-3.5" /> Funktioner
             </TabsTrigger>
+            <TabsTrigger value="appearance">Utseende</TabsTrigger>
             <TabsTrigger value="subscription">Prenumeration</TabsTrigger>
           </TabsList>
 
@@ -212,8 +243,12 @@ export default function AdminSettings() {
             )}
           </TabsContent>
 
+          <TabsContent value="appearance">
+            <AppearanceTab />
+          </TabsContent>
+
           <TabsContent value="subscription">
-            <Suspense fallback={<div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>}>
+            <Suspense fallback={<div className="space-y-4 py-12"><Skeleton className="h-32 w-full" /><Skeleton className="h-32 w-full" /></div>}>
               <SubscriptionTab />
             </Suspense>
           </TabsContent>
