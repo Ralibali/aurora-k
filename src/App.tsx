@@ -97,6 +97,16 @@ const App = () => (
                 <Route path="/admin/vehicles" element={<ProtectedRoute requiredRole="admin"><AdminVehicles /></ProtectedRoute>} />
                 <Route path="/admin/orders" element={<ProtectedRoute requiredRole="admin"><AdminOrders /></ProtectedRoute>} />
                 <Route path="/admin/order-templates" element={<ProtectedRoute requiredRole="admin"><AdminOrderTemplates /></ProtectedRoute>} />
+                <Route path="/admin/absences" element={<ProtectedRoute requiredRole="admin"><AdminAbsences /></ProtectedRoute>} />
+                <Route path="/admin/approvals" element={<ProtectedRoute requiredRole="admin"><AdminApprovals /></ProtectedRoute>} />
+                <Route path="/admin/invoice-templates" element={<ProtectedRoute requiredRole="admin"><AdminInvoiceTemplates /></ProtectedRoute>} />
+                <Route path="/admin/notifications" element={<ProtectedRoute requiredRole="admin"><AdminNotifications /></ProtectedRoute>} />
+                <Route path="/admin/booking-requests" element={<ProtectedRoute requiredRole="admin"><AdminBookingRequests /></ProtectedRoute>} />
+                <Route path="/admin/external-resources" element={<ProtectedRoute requiredRole="admin"><AdminExternalResources /></ProtectedRoute>} />
+                <Route path="/admin/satisfaction" element={<ProtectedRoute requiredRole="admin"><AdminSatisfaction /></ProtectedRoute>} />
+                <Route path="/admin/environment" element={<ProtectedRoute requiredRole="admin"><AdminEnvironment /></ProtectedRoute>} />
+                <Route path="/admin/api" element={<ProtectedRoute requiredRole="admin"><AdminApiDocs /></ProtectedRoute>} />
+                <Route path="/admin/routes" element={<ProtectedRoute requiredRole="admin"><AdminRouteOptimizer /></ProtectedRoute>} />
                 {/* Driver routes */}
                 <Route path="/driver" element={<ProtectedRoute requiredRole="driver"><DriverAssignments /></ProtectedRoute>} />
                 <Route path="/driver/assignment/:id" element={<ProtectedRoute requiredRole="driver"><DriverAssignmentDetail /></ProtectedRoute>} />
