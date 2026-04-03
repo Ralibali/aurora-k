@@ -362,7 +362,7 @@ function CustomerPortalSection({ customerId }: { customerId: string }) {
                       </code>
                       {expired && <span className="text-[10px] text-destructive font-medium">Utgången</span>}
                     </div>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">
+                    <p className="text-[10px] text-muted-foreground mt-0.5 font-mono">
                       Skapad {new Date(t.created_at).toLocaleDateString('sv-SE')}
                       {t.expires_at && ` · Giltig t.o.m. ${new Date(t.expires_at).toLocaleDateString('sv-SE')}`}
                     </p>
