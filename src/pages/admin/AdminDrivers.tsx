@@ -116,7 +116,7 @@ function CompensationDialog({ driverId, driverName, existing }: { driverId: stri
 /* ── Invite Modal ── */
 interface InviteRow { name: string; email: string }
 
-function InviteModal({ companyId }: { companyId: string }) {
+function InviteModal({ companyId, companyName, adminName }: { companyId: string; companyName: string; adminName: string }) {
   const [open, setOpen] = useState(false);
   const [rows, setRows] = useState<InviteRow[]>([{ name: '', email: '' }]);
   const [submitting, setSubmitting] = useState(false);
@@ -144,7 +144,32 @@ function InviteModal({ companyId }: { companyId: string }) {
         }).select('email, token').single();
 
         if (error) throw error;
-        if (data) inserted.push({ email: data.email, token: data.token! });
+        if (data) {
+          inserted.push({ email: data.email, token: data.token! });
+          // Send driver invite email via Brevo
+          const joinUrl = `${window.location.origin}/join?token=${data.token}`;
+          await supabase.functions.invoke('send-email', {
+            body: {
+              to: data.email,
+              subject: `${companyName} har bjudit in dig till Aurora Transport`,
+              html: `
+                <h1 style="font-size:20px;font-weight:700;color:#0f172a;margin:0 0 16px">Du har blivit inbjuden! 🎉</h1>
+                <p style="font-size:14px;color:#334155;line-height:1.6;margin:0 0 16px"><strong>${adminName}</strong> på <strong>${companyName}</strong> har bjudit in dig att använda Aurora Transport.</p>
+                <div style="background:#f1f5f9;border-radius:8px;padding:16px 20px;margin:16px 0">
+                  <div style="font-size:13px;color:#334155;line-height:1.8">
+                    ✅ Se och hantera dina uppdrag i realtid<br/>
+                    📍 Automatisk GPS-spårning och navigering<br/>
+                    📝 Digital signering och fotobevis
+                  </div>
+                </div>
+                <div style="text-align:center;margin:24px 0">
+                  <a href="${joinUrl}" style="display:inline-block;background:#2563eb;color:#ffffff;font-weight:600;font-size:14px;padding:12px 28px;border-radius:8px;text-decoration:none">Skapa ditt konto</a>
+                </div>
+                <p style="font-size:13px;color:#64748b;line-height:1.5;margin:0 0 12px">Länken är giltig i 7 dagar.</p>
+              `,
+            },
+          });
+        }
       }
 
       setResults(inserted);
@@ -350,11 +375,33 @@ export default function AdminDrivers() {
   const [filter, setFilter] = useState('all');
   const [selectedDriver, setSelectedDriver] = useState<any>(null);
 
-  const { companyId } = useAuth();
+  const { companyId, user } = useAuth();
   const { data: drivers, isLoading } = useDrivers();
   const { data: assignments } = useAssignments();
   const { data: compensations } = useDriverCompensations();
   const qc = useQueryClient();
+
+  // Fetch company name and admin name for invite emails
+  const { data: companyData } = useQuery({
+    queryKey: ['company-name', companyId],
+    queryFn: async () => {
+      if (!companyId) return null;
+      const { data } = await supabase.from('companies').select('name').eq('id', companyId).single();
+      return data;
+    },
+    enabled: !!companyId,
+  });
+  const { data: adminProfile } = useQuery({
+    queryKey: ['admin-profile', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase.from('profiles').select('full_name').eq('id', user.id).single();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+  const companyName = companyData?.name || 'Ditt företag';
+  const adminName = adminProfile?.full_name || 'Admin';
 
   // Fetch pending invitations
   const { data: invitations } = useQuery({
@@ -419,7 +466,7 @@ export default function AdminDrivers() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input placeholder="Sök chaufför..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 w-[200px]" />
             </div>
-            {companyId && <InviteModal companyId={companyId} />}
+            {companyId && <InviteModal companyId={companyId} companyName={companyName} adminName={adminName} />}
           </div>
         </div>
 
