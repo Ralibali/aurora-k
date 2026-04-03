@@ -59,6 +59,7 @@ const navSections = [
     label: 'System',
     items: [
       { title: 'Notifieringar', url: '/admin/notifications', icon: Bell },
+      { title: 'Förarapp-inställningar', url: '/admin/driver-settings', icon: Smartphone },
       { title: 'Externa resurser', url: '/admin/external-resources', icon: Globe },
       { title: 'API', url: '/admin/api', icon: Code },
       { title: 'Inställningar', url: '/admin/settings', icon: Settings },
