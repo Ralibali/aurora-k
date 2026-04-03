@@ -2,7 +2,8 @@ import {
   LayoutDashboard, Briefcase, Calendar, Map, Navigation,
   Users, UserX, CheckSquare, Building, ShoppingCart, Inbox,
   Star, FileText, Package, Leaf, BarChart, TrendingUp,
-  Bell, Globe, Code, Settings, LogOut, Truck,
+  Bell, Globe, Code, Settings, LogOut, Truck, Car,
+  ClipboardList, FileImage, Smartphone,
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useNavigate } from 'react-router-dom';
