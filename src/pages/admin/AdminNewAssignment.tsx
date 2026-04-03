@@ -45,6 +45,7 @@ export default function AdminNewAssignment() {
   const [adminComment, setAdminComment] = useState(copyFrom?.admin_comment || '');
   const [requireSignature, setRequireSignature] = useState(copyFrom?.require_signature ?? false);
   const [requirePhoto, setRequirePhoto] = useState(copyFrom?.require_photo ?? false);
+  const [cost, setCost] = useState<string>(copyFrom?.cost != null ? String(copyFrom.cost) : '');
 
   // Recurrence
   const [recurrenceEnabled, setRecurrenceEnabled] = useState(false);
@@ -89,6 +90,7 @@ export default function AdminNewAssignment() {
             admin_comment: adminComment || null,
             require_signature: requireSignature,
             require_photo: requirePhoto,
+            cost: cost ? parseFloat(cost) : null,
           }, {
             onSuccess: () => resolve(),
             onError: (err) => reject(err),
@@ -176,6 +178,12 @@ export default function AdminNewAssignment() {
               <div className="space-y-2">
                 <Label htmlFor="comment">Intern kommentar (valfritt)</Label>
               <Textarea id="comment" value={adminComment} onChange={e => setAdminComment(e.target.value)} placeholder="Meddelande till chauffören..." />
+              </div>
+
+              {/* Kostnad */}
+              <div className="space-y-2">
+                <Label htmlFor="cost">Kostnad / fakturabelopp (kr, valfritt)</Label>
+                <Input id="cost" type="number" step="0.01" min="0" value={cost} onChange={e => setCost(e.target.value)} placeholder="T.ex. 1500" />
               </div>
 
               {/* Signatur & Foto krav */}

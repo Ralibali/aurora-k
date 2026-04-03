@@ -1,0 +1,2 @@
+ALTER TABLE public.assignments
+  ADD COLUMN cost NUMERIC NULL DEFAULT NULL;

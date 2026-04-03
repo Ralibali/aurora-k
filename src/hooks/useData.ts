@@ -219,6 +219,7 @@ export function useCreateAssignment() {
       admin_comment?: string | null;
       require_signature?: boolean;
       require_photo?: boolean;
+      cost?: number | null;
     }) => {
       const { data, error } = await supabase.from('assignments').insert(assignment).select().single();
       if (error) throw error;

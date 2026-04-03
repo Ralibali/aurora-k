@@ -4,6 +4,7 @@ import { AdminLayout } from '@/components/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -35,6 +36,7 @@ export default function AdminAssignmentDetail() {
   const deleteAssignment = useDeleteAssignment();
   const createLog = useCreateAssignmentLog();
   const [comment, setComment] = useState<string | null>(null);
+  const [costInput, setCostInput] = useState<string | null>(null);
 
   if (isLoading) {
     return <AdminLayout title="Uppdragsdetaljer"><div className="max-w-2xl space-y-4"><Skeleton className="h-8 w-32" /><Skeleton className="h-64 w-full" /></div></AdminLayout>;
@@ -154,6 +156,33 @@ export default function AdminAssignmentDetail() {
                   <p className="font-medium">{calculateDuration(assignment.actual_start, assignment.actual_stop)}</p>
                 </div>
               )}
+            </div>
+
+            <div className="border-t pt-4 space-y-2">
+              <Label htmlFor="cost">Kostnad / fakturabelopp (kr)</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="cost"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  className="max-w-[200px]"
+                  value={costInput !== null ? costInput : ((assignment as any).cost != null ? String((assignment as any).cost) : '')}
+                  onChange={e => setCostInput(e.target.value)}
+                  placeholder="Valfritt"
+                />
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    const val = costInput !== null ? costInput : '';
+                    updateAssignment.mutate({ id: assignment.id, cost: val ? parseFloat(val) : null } as any);
+                    setCostInput(null);
+                  }}
+                >
+                  Spara
+                </Button>
+              </div>
             </div>
 
             <div className="border-t pt-4 space-y-3">
