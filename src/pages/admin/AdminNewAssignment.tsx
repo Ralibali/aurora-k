@@ -204,7 +204,7 @@ export default function AdminNewAssignment() {
                   <Select value={orderId} onValueChange={setOrderId}>
                     <SelectTrigger><SelectValue placeholder="Ingen beställning" /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Ingen beställning</SelectItem>
+                      <SelectItem value="none">Ingen beställning</SelectItem>
                       {(orders ?? []).filter(o => o.status === 'active').map(o => <SelectItem key={o.id} value={o.id}>{o.title}</SelectItem>)}
                     </SelectContent>
                   </Select>
