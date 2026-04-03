@@ -34,6 +34,7 @@ const AdminArticles = lazy(() => import("./pages/admin/AdminArticles"));
 const AdminVehicles = lazy(() => import("./pages/admin/AdminVehicles"));
 const AdminOrders = lazy(() => import("./pages/admin/AdminOrders"));
 const AdminOrderTemplates = lazy(() => import("./pages/admin/AdminOrderTemplates"));
+const CustomerPortal = lazy(() => import("./pages/CustomerPortal"));
 const DriverAssignments = lazy(() => import("./pages/driver/DriverAssignments"));
 const DriverAssignmentDetail = lazy(() => import("./pages/driver/DriverAssignmentDetail"));
 const DriverProfile = lazy(() => import("./pages/driver/DriverProfile"));
