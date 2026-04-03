@@ -8,12 +8,14 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { StatusBadge } from '@/components/StatusBadge';
 import { InvoiceStatusBadge } from '@/components/InvoiceStatusBadge';
 import { useCustomer, useUpdateCustomer, useAssignments, useInvoices } from '@/hooks/useData';
+import { useCustomerPriceList, useUpsertCustomerPrice, useDeleteCustomerPrice, useArticles } from '@/hooks/useNewFeatures';
 import { pricingTypeLabels } from '@/lib/types';
 import { formatSwedishDate, calculateDecimalHours } from '@/lib/format';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, Plus, Trash2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AdminCustomerDetail() {
