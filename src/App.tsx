@@ -78,6 +78,9 @@ const App = () => (
                 <Routes>
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/onboarding" element={<OnboardingPage />} />
+                <Route path="/join" element={<JoinPage />} />
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="/portal" element={<CustomerPortal />} />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
