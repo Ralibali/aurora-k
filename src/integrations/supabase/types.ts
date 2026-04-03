@@ -53,6 +53,44 @@ export type Database = {
         }
         Relationships: []
       }
+      assignment_approvals: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          assignment_id: string
+          comment: string | null
+          created_at: string
+          id: string
+          status: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          assignment_id: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          status?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          assignment_id?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignment_approvals_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assignment_articles: {
         Row: {
           article_id: string | null
@@ -142,6 +180,47 @@ export type Database = {
           },
         ]
       }
+      assignment_protocols: {
+        Row: {
+          assignment_id: string
+          content: string | null
+          created_at: string
+          created_by: string
+          id: string
+          protocol_type: string
+          signature_url: string | null
+          title: string
+        }
+        Insert: {
+          assignment_id: string
+          content?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          protocol_type?: string
+          signature_url?: string | null
+          title: string
+        }
+        Update: {
+          assignment_id?: string
+          content?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          protocol_type?: string
+          signature_url?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignment_protocols_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assignments: {
         Row: {
           actual_start: string | null
@@ -149,11 +228,14 @@ export type Database = {
           address: string
           admin_comment: string | null
           assigned_driver_id: string
+          co2_kg: number | null
           consignment_photo_url: string | null
           cost: number | null
           created_at: string
           customer_id: string
+          distance_km: number | null
           driver_comment: string | null
+          fuel_liters: number | null
           geofence_lat: number | null
           geofence_lng: number | null
           geofence_radius: number | null
@@ -177,11 +259,14 @@ export type Database = {
           address: string
           admin_comment?: string | null
           assigned_driver_id: string
+          co2_kg?: number | null
           consignment_photo_url?: string | null
           cost?: number | null
           created_at?: string
           customer_id: string
+          distance_km?: number | null
           driver_comment?: string | null
+          fuel_liters?: number | null
           geofence_lat?: number | null
           geofence_lng?: number | null
           geofence_radius?: number | null
@@ -205,11 +290,14 @@ export type Database = {
           address?: string
           admin_comment?: string | null
           assigned_driver_id?: string
+          co2_kg?: number | null
           consignment_photo_url?: string | null
           cost?: number | null
           created_at?: string
           customer_id?: string
+          distance_km?: number | null
           driver_comment?: string | null
+          fuel_liters?: number | null
           geofence_lat?: number | null
           geofence_lng?: number | null
           geofence_radius?: number | null
@@ -254,6 +342,59 @@ export type Database = {
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      booking_requests: {
+        Row: {
+          admin_note: string | null
+          created_at: string
+          customer_email: string | null
+          customer_id: string | null
+          customer_name: string
+          customer_phone: string | null
+          description: string | null
+          id: string
+          preferred_date: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          admin_note?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_id?: string | null
+          customer_name: string
+          customer_phone?: string | null
+          description?: string | null
+          id?: string
+          preferred_date?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          admin_note?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_id?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          description?: string | null
+          id?: string
+          preferred_date?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_requests_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
             referencedColumns: ["id"]
           },
         ]
@@ -329,6 +470,48 @@ export type Database = {
           },
         ]
       }
+      customer_satisfaction: {
+        Row: {
+          assignment_id: string | null
+          comment: string | null
+          created_at: string
+          customer_id: string
+          id: string
+          rating: number
+        }
+        Insert: {
+          assignment_id?: string | null
+          comment?: string | null
+          created_at?: string
+          customer_id: string
+          id?: string
+          rating: number
+        }
+        Update: {
+          assignment_id?: string | null
+          comment?: string | null
+          created_at?: string
+          customer_id?: string
+          id?: string
+          rating?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_satisfaction_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_satisfaction_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customers: {
         Row: {
           contact_person: string | null
@@ -379,6 +562,50 @@ export type Database = {
           visit_address?: string | null
         }
         Relationships: []
+      }
+      driver_absences: {
+        Row: {
+          approved: boolean
+          created_at: string
+          driver_id: string
+          end_date: string
+          id: string
+          note: string | null
+          start_date: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          approved?: boolean
+          created_at?: string
+          driver_id: string
+          end_date: string
+          id?: string
+          note?: string | null
+          start_date: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          approved?: boolean
+          created_at?: string
+          driver_id?: string
+          end_date?: string
+          id?: string
+          note?: string | null
+          start_date?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_absences_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       driver_compensation: {
         Row: {
@@ -517,6 +744,87 @@ export type Database = {
         }
         Relationships: []
       }
+      external_resources: {
+        Row: {
+          active: boolean
+          company: string | null
+          created_at: string
+          email: string | null
+          hourly_rate: number | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          specialty: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          hourly_rate?: number | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          specialty?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          hourly_rate?: number | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          specialty?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      invoice_templates: {
+        Row: {
+          created_at: string
+          footer_html: string | null
+          header_html: string | null
+          id: string
+          is_default: boolean
+          name: string
+          primary_color: string
+          show_bank_details: boolean
+          show_logo: boolean
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          footer_html?: string | null
+          header_html?: string | null
+          id?: string
+          is_default?: boolean
+          name: string
+          primary_color?: string
+          show_bank_details?: boolean
+          show_logo?: boolean
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          footer_html?: string | null
+          header_html?: string | null
+          id?: string
+          is_default?: boolean
+          name?: string
+          primary_color?: string
+          show_bank_details?: boolean
+          show_logo?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       invoices: {
         Row: {
           assignment_ids: string[]
@@ -572,6 +880,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          message: string
+          read_by: string[]
+          target_role: string | null
+          target_user_id: string | null
+          title: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          message: string
+          read_by?: string[]
+          target_role?: string | null
+          target_user_id?: string | null
+          title: string
+          type?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          message?: string
+          read_by?: string[]
+          target_role?: string | null
+          target_user_id?: string | null
+          title?: string
+          type?: string
+        }
+        Relationships: []
       }
       order_templates: {
         Row: {
@@ -674,6 +1018,8 @@ export type Database = {
           bankgiro: string | null
           company_name: string
           created_at: string
+          currency: string
+          currency_symbol: string
           email: string | null
           id: string
           logo_url: string | null
@@ -689,6 +1035,8 @@ export type Database = {
           bankgiro?: string | null
           company_name?: string
           created_at?: string
+          currency?: string
+          currency_symbol?: string
           email?: string | null
           id?: string
           logo_url?: string | null
@@ -704,6 +1052,8 @@ export type Database = {
           bankgiro?: string | null
           company_name?: string
           created_at?: string
+          currency?: string
+          currency_symbol?: string
           email?: string | null
           id?: string
           logo_url?: string | null
