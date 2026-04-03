@@ -6,15 +6,19 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useDrivers, useAssignments, useDriverCompensations, useUpsertDriverCompensation } from '@/hooks/useData';
-import { Plus, Trash2, DollarSign, Save, Search, Phone, Briefcase, Users } from 'lucide-react';
+import { Plus, Trash2, DollarSign, Save, Search, Phone, Briefcase, Users, Copy, Send, X, Clock, Mail, Calendar } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { format } from 'date-fns';
+import { sv } from 'date-fns/locale';
 
 const COMP_LABELS: Record<string, string> = {
   hourly: 'Timbaserad',
@@ -37,7 +41,7 @@ function getInitials(name: string) {
   return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 }
 
-/* ── Compensation Dialog (unchanged logic) ── */
+/* ── Compensation Dialog ── */
 function CompensationDialog({ driverId, driverName, existing }: { driverId: string; driverName: string; existing?: any }) {
   const [open, setOpen] = useState(false);
   const [compType, setCompType] = useState<'hourly' | 'per_assignment' | 'monthly'>(existing?.compensation_type ?? 'hourly');
@@ -109,6 +113,230 @@ function CompensationDialog({ driverId, driverName, existing }: { driverId: stri
   );
 }
 
+/* ── Invite Modal ── */
+interface InviteRow { name: string; email: string }
+
+function InviteModal({ companyId }: { companyId: string }) {
+  const [open, setOpen] = useState(false);
+  const [rows, setRows] = useState<InviteRow[]>([{ name: '', email: '' }]);
+  const [submitting, setSubmitting] = useState(false);
+  const [results, setResults] = useState<{ email: string; token: string }[] | null>(null);
+  const qc = useQueryClient();
+
+  const addRow = () => setRows(prev => [...prev, { name: '', email: '' }]);
+  const removeRow = (i: number) => setRows(prev => prev.filter((_, idx) => idx !== i));
+  const updateRow = (i: number, field: keyof InviteRow, val: string) => {
+    setRows(prev => prev.map((r, idx) => idx === i ? { ...r, [field]: val } : r));
+  };
+
+  const handleSubmit = async () => {
+    const valid = rows.filter(r => r.email.trim());
+    if (valid.length === 0) { toast.error('Ange minst en e-postadress'); return; }
+    setSubmitting(true);
+
+    try {
+      const inserted: { email: string; token: string }[] = [];
+      for (const inv of valid) {
+        const { data, error } = await supabase.from('invitations').insert({
+          company_id: companyId,
+          email: inv.email.trim(),
+          name: inv.name.trim() || null,
+        }).select('email, token').single();
+
+        if (error) throw error;
+        if (data) inserted.push({ email: data.email, token: data.token! });
+      }
+
+      setResults(inserted);
+      toast.success(`Inbjudan skickad till ${inserted.length} förare`);
+      qc.invalidateQueries({ queryKey: ['invitations'] });
+    } catch (err: any) {
+      toast.error('Kunde inte skicka: ' + err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const copyLink = (token: string) => {
+    const url = `${window.location.origin}/join?token=${token}`;
+    navigator.clipboard.writeText(url);
+    toast.success('Länk kopierad!');
+  };
+
+  const handleClose = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (!isOpen) {
+      setRows([{ name: '', email: '' }]);
+      setResults(null);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogTrigger asChild>
+        <Button><Plus className="h-4 w-4 mr-1" /> Bjud in förare</Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-lg">
+        <DialogHeader><DialogTitle>Bjud in förare</DialogTitle></DialogHeader>
+
+        {results ? (
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">Dela länkarna nedan med dina förare:</p>
+            {results.map((r, i) => (
+              <div key={i} className="flex items-center gap-2 bg-muted/50 rounded-lg p-3">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{r.email}</p>
+                  <p className="text-xs text-muted-foreground truncate">{window.location.origin}/join?token={r.token}</p>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => copyLink(r.token)}>
+                  <Copy className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            ))}
+            <Button variant="outline" className="w-full" onClick={() => handleClose(false)}>Stäng</Button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">Skicka inbjudningar via e-post så kan de registrera sig direkt.</p>
+            <div className="space-y-3">
+              {rows.map((row, i) => (
+                <div key={i} className="flex gap-2 items-start">
+                  <Input placeholder="Namn" value={row.name} onChange={e => updateRow(i, 'name', e.target.value)} className="flex-1 h-10" />
+                  <Input type="email" placeholder="E-post" value={row.email} onChange={e => updateRow(i, 'email', e.target.value)} className="flex-1 h-10" />
+                  {rows.length > 1 && (
+                    <button onClick={() => removeRow(i)} className="mt-2 text-muted-foreground hover:text-destructive">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+            <button onClick={addRow} className="text-sm text-primary font-medium flex items-center gap-1 hover:underline">
+              <Plus className="h-3.5 w-3.5" /> Lägg till fler
+            </button>
+            <Button onClick={handleSubmit} className="w-full" disabled={submitting}>
+              <Send className="h-4 w-4 mr-1" /> {submitting ? 'Skickar...' : 'Skicka inbjudningar'}
+            </Button>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/* ── Driver Detail Sheet ── */
+function DriverDetailSheet({
+  driver, assignments: allAssignments, onClose
+}: {
+  driver: any;
+  assignments: any[];
+  onClose: () => void;
+}) {
+  const today = new Date().toISOString().split('T')[0];
+  const weekStart = new Date();
+  weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1);
+  const weekStartStr = weekStart.toISOString().split('T')[0];
+
+  const todayAssignments = (allAssignments ?? []).filter(
+    a => a.assigned_driver_id === driver.id && a.scheduled_start.startsWith(today)
+  );
+
+  const weekAssignments = (allAssignments ?? []).filter(
+    a => a.assigned_driver_id === driver.id && a.scheduled_start >= weekStartStr
+  );
+
+  const weekHours = weekAssignments.reduce((sum, a) => {
+    if (a.actual_start && a.actual_stop) {
+      return sum + (new Date(a.actual_stop).getTime() - new Date(a.actual_start).getTime()) / 3600000;
+    }
+    return sum;
+  }, 0);
+
+  const [deactivating, setDeactivating] = useState(false);
+  const qc = useQueryClient();
+
+  const handleDeactivate = async () => {
+    if (!confirm(`Är du säker på att du vill inaktivera ${driver.full_name}?`)) return;
+    setDeactivating(true);
+    try {
+      await supabase.from('profiles').update({ is_available: false }).eq('id', driver.id);
+      toast.success(`${driver.full_name} har inaktiverats`);
+      qc.invalidateQueries({ queryKey: ['drivers'] });
+      onClose();
+    } catch {
+      toast.error('Kunde inte inaktivera');
+    } finally {
+      setDeactivating(false);
+    }
+  };
+
+  return (
+    <Sheet open onOpenChange={(open) => !open && onClose()}>
+      <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle className="flex items-center gap-3">
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm ${avatarColor(driver.full_name)}`}>
+              {getInitials(driver.full_name)}
+            </div>
+            {driver.full_name}
+          </SheetTitle>
+        </SheetHeader>
+
+        <div className="mt-6 space-y-6">
+          {/* Info */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-sm">
+              <Mail className="h-4 w-4 text-muted-foreground" />
+              <span>{driver.email}</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <span>Ansluten {format(new Date(driver.created_at), 'd MMM yyyy', { locale: sv })}</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <Briefcase className="h-4 w-4 text-muted-foreground" />
+              <span>Förare</span>
+            </div>
+          </div>
+
+          {/* Week hours */}
+          <div className="bg-muted/50 rounded-lg p-4">
+            <p className="text-xs text-muted-foreground mb-1">Denna veckas timmar</p>
+            <p className="text-2xl font-mono font-bold">{weekHours.toFixed(1)}h</p>
+          </div>
+
+          {/* Today's assignments */}
+          <div>
+            <h4 className="text-sm font-semibold mb-3">Dagens uppdrag ({todayAssignments.length})</h4>
+            {todayAssignments.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Inga uppdrag idag</p>
+            ) : (
+              <div className="space-y-2">
+                {todayAssignments.map(a => (
+                  <div key={a.id} className="bg-card border rounded-lg p-3">
+                    <p className="text-sm font-medium">{a.title}</p>
+                    <p className="text-xs text-muted-foreground">{a.address}</p>
+                    <Badge variant={a.status === 'completed' ? 'default' : a.status === 'active' ? 'secondary' : 'outline'} className="mt-1 text-xs">
+                      {a.status === 'completed' ? 'Slutfört' : a.status === 'active' ? 'Aktiv' : 'Planerat'}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Deactivate */}
+          <div className="pt-4 border-t">
+            <Button variant="destructive" className="w-full" onClick={handleDeactivate} disabled={deactivating}>
+              {deactivating ? 'Inaktiverar...' : 'Inaktivera konto'}
+            </Button>
+          </div>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
 /* ── Filter pills ── */
 const filters = [
   { key: 'all', label: 'Alla' },
@@ -118,19 +346,30 @@ const filters = [
 ] as const;
 
 export default function AdminDrivers() {
-  const [open, setOpen] = useState(false);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [creating, setCreating] = useState(false);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
+  const [selectedDriver, setSelectedDriver] = useState<any>(null);
 
   const { companyId } = useAuth();
   const { data: drivers, isLoading } = useDrivers();
   const { data: assignments } = useAssignments();
   const { data: compensations } = useDriverCompensations();
   const qc = useQueryClient();
+
+  // Fetch pending invitations
+  const { data: invitations } = useQuery({
+    queryKey: ['invitations', companyId],
+    queryFn: async () => {
+      if (!companyId) return [];
+      const { data } = await supabase
+        .from('invitations')
+        .select('*')
+        .eq('company_id', companyId)
+        .order('created_at', { ascending: false });
+      return data ?? [];
+    },
+    enabled: !!companyId,
+  });
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -164,25 +403,9 @@ export default function AdminDrivers() {
 
   const getCompensation = (driverId: string) => (compensations ?? []).find(c => c.driver_id === driverId);
 
-  const handleCreateDriver = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setCreating(true);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const res = await supabase.functions.invoke('create-driver', {
-        body: { email, full_name: name, password, company_id: companyId },
-        headers: { Authorization: `Bearer ${session?.access_token}` },
-      });
-      if (res.error) throw new Error(res.error.message);
-      if (res.data?.error) throw new Error(res.data.error);
-      toast.success(`Chaufför ${name} skapad!`);
-      qc.invalidateQueries({ queryKey: ['drivers'] });
-      setName(''); setEmail(''); setPassword(''); setOpen(false);
-    } catch (err: any) {
-      toast.error('Kunde inte skapa chaufför: ' + err.message);
-    } finally {
-      setCreating(false);
-    }
+  const copyInviteLink = (token: string) => {
+    navigator.clipboard.writeText(`${window.location.origin}/join?token=${token}`);
+    toast.success('Länk kopierad!');
   };
 
   return (
@@ -196,20 +419,7 @@ export default function AdminDrivers() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input placeholder="Sök chaufför..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 w-[200px]" />
             </div>
-            <Dialog open={open} onOpenChange={setOpen}>
-              <DialogTrigger asChild>
-                <Button><Plus className="h-4 w-4 mr-1" /> Bjud in förare</Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader><DialogTitle>Lägg till ny chaufför</DialogTitle></DialogHeader>
-                <form onSubmit={handleCreateDriver} className="space-y-4">
-                  <div className="space-y-2"><Label htmlFor="driverName">Namn</Label><Input id="driverName" placeholder="Förnamn Efternamn" value={name} onChange={e => setName(e.target.value)} required /></div>
-                  <div className="space-y-2"><Label htmlFor="driverEmail">E-post</Label><Input id="driverEmail" type="email" placeholder="namn@exempel.se" value={email} onChange={e => setEmail(e.target.value)} required /></div>
-                  <div className="space-y-2"><Label htmlFor="driverPassword">Lösenord</Label><Input id="driverPassword" type="password" placeholder="Minst 6 tecken" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} /></div>
-                  <Button type="submit" className="w-full" disabled={creating}>{creating ? 'Skapar...' : 'Skapa chaufförskonto'}</Button>
-                </form>
-              </DialogContent>
-            </Dialog>
+            {companyId && <InviteModal companyId={companyId} />}
           </div>
         </div>
 
@@ -221,8 +431,8 @@ export default function AdminDrivers() {
               onClick={() => setFilter(f.key)}
               className={`px-3 py-1 text-sm rounded-full transition-colors ${
                 filter === f.key
-                  ? 'bg-slate-900 text-white'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  ? 'bg-foreground text-background'
+                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
               }`}
             >
               {f.label}
@@ -236,8 +446,8 @@ export default function AdminDrivers() {
             {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="h-48 rounded-lg" />)}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="bg-card rounded-lg border border-dashed border-border p-16 text-center shadow-card">
-            <Users className="h-12 w-12 text-slate-200 mx-auto mb-3" />
+          <div className="bg-card rounded-lg border border-dashed border-border p-16 text-center">
+            <Users className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
             <p className="text-sm font-medium text-muted-foreground">Inga chaufförer hittades</p>
           </div>
         ) : (
@@ -249,15 +459,18 @@ export default function AdminDrivers() {
               const todayH = stats?.todayHours ?? 0;
 
               return (
-                <div key={driver.id} className="bg-card rounded-lg border border-border p-5 shadow-card hover:shadow-md transition-shadow">
-                  {/* Avatar + status */}
+                <div
+                  key={driver.id}
+                  className="bg-card rounded-lg border border-border p-5 hover:shadow-md transition-shadow cursor-pointer"
+                  onClick={() => setSelectedDriver(driver)}
+                >
                   <div className="flex items-start gap-4">
                     <div className="relative">
                       <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-sm ${avatarColor(driver.full_name)}`}>
                         {getInitials(driver.full_name)}
                       </div>
-                      <span className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white ${
-                        isActive ? 'bg-green-500' : driver.is_available ? 'bg-blue-500' : 'bg-slate-300'
+                      <span className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-background ${
+                        isActive ? 'bg-green-500' : driver.is_available ? 'bg-blue-500' : 'bg-muted-foreground/30'
                       }`} />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -266,23 +479,16 @@ export default function AdminDrivers() {
                     </div>
                   </div>
 
-                  {/* Phone */}
-                  <div className="mt-3 flex items-center gap-1.5 text-sm text-muted-foreground">
-                    <Phone className="h-3.5 w-3.5" />
-                    <a href={`tel:${driver.email}`} className="hover:text-primary transition-colors">{driver.email}</a>
-                  </div>
-
-                  {/* Status + hours */}
                   <div className="mt-3 flex items-center justify-between">
                     <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${
                       isActive
-                        ? 'bg-green-100 text-green-700'
+                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
                         : driver.is_available
-                          ? 'bg-blue-100 text-blue-700'
-                          : 'bg-slate-100 text-slate-600'
+                          ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                          : 'bg-muted text-muted-foreground'
                     }`}>
                       <span className={`h-1.5 w-1.5 rounded-full ${
-                        isActive ? 'bg-green-500' : driver.is_available ? 'bg-blue-500' : 'bg-slate-400'
+                        isActive ? 'bg-green-500' : driver.is_available ? 'bg-blue-500' : 'bg-muted-foreground/50'
                       }`} />
                       {isActive ? 'Aktiv' : driver.is_available ? 'Ledig' : 'Offline'}
                     </span>
@@ -291,8 +497,7 @@ export default function AdminDrivers() {
                     </span>
                   </div>
 
-                  {/* Actions */}
-                  <div className="mt-4 flex items-center gap-2">
+                  <div className="mt-4 flex items-center gap-2" onClick={e => e.stopPropagation()}>
                     <Button variant="ghost" size="sm" className="flex-1 text-xs" asChild>
                       <Link to={`/admin/assignments?driver=${driver.id}`}>
                         <Briefcase className="h-3.5 w-3.5 mr-1" /> Se uppdrag
@@ -305,7 +510,64 @@ export default function AdminDrivers() {
             })}
           </div>
         )}
+
+        {/* Pending Invitations */}
+        {(invitations ?? []).length > 0 && (
+          <div>
+            <h3 className="text-lg font-semibold mb-3">Väntande inbjudningar</h3>
+            <div className="bg-card rounded-lg border overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Namn</TableHead>
+                    <TableHead>E-post</TableHead>
+                    <TableHead>Skickad</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Åtgärd</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {(invitations ?? []).map(inv => {
+                    const accepted = !!inv.accepted_at;
+                    return (
+                      <TableRow key={inv.id}>
+                        <TableCell className="font-medium">{inv.name || '–'}</TableCell>
+                        <TableCell>{inv.email}</TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {inv.created_at ? format(new Date(inv.created_at), 'd MMM yyyy', { locale: sv }) : '–'}
+                        </TableCell>
+                        <TableCell>
+                          {accepted ? (
+                            <Badge variant="default" className="bg-green-100 text-green-700 hover:bg-green-100 border-0">Accepterad</Badge>
+                          ) : (
+                            <Badge variant="secondary" className="bg-amber-100 text-amber-700 hover:bg-amber-100 border-0">Väntar</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {!accepted && inv.token && (
+                            <Button variant="ghost" size="sm" className="text-xs" onClick={() => copyInviteLink(inv.token!)}>
+                              <Copy className="h-3.5 w-3.5 mr-1" /> Kopiera länk
+                            </Button>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Driver Detail Sheet */}
+      {selectedDriver && (
+        <DriverDetailSheet
+          driver={selectedDriver}
+          assignments={assignments ?? []}
+          onClose={() => setSelectedDriver(null)}
+        />
+      )}
     </AdminLayout>
   );
 }
