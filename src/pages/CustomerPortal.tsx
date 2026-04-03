@@ -1,23 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { supabase } from '@/integrations/supabase/client';
-import { ClipboardList, ShoppingCart, Receipt, Building2 } from 'lucide-react';
+import { ClipboardList, ShoppingCart, Receipt, Building2, CalendarPlus } from 'lucide-react';
+import { BookingRequestForm } from '@/components/portal/BookingRequestForm';
 
 const statusLabels: Record<string, string> = {
-  pending: 'Väntande',
-  active: 'Aktiv',
-  in_progress: 'Pågår',
-  completed: 'Slutförd',
-  cancelled: 'Avbruten',
-  draft: 'Utkast',
-  sent: 'Skickad',
-  paid: 'Betald',
-  overdue: 'Förfallen',
+  pending: 'Väntande', active: 'Aktiv', in_progress: 'Pågår', completed: 'Slutförd',
+  cancelled: 'Avbruten', draft: 'Utkast', sent: 'Skickad', paid: 'Betald', overdue: 'Förfallen',
 };
 
 const statusVariant = (s: string): 'default' | 'secondary' | 'destructive' | 'outline' => {
@@ -38,12 +31,6 @@ export default function CustomerPortal() {
     if (!token) { setError('Ingen åtkomsttoken angiven'); setLoading(false); return; }
 
     const fetchData = async () => {
-      const { data: result, error: fetchError } = await supabase.functions.invoke('customer-portal', {
-        body: null,
-        method: 'GET',
-      });
-
-      // Use direct fetch since functions.invoke doesn't support query params well
       const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
       const res = await fetch(
         `https://${projectId}.supabase.co/functions/v1/customer-portal?token=${encodeURIComponent(token)}`,
@@ -88,7 +75,11 @@ export default function CustomerPortal() {
     );
   }
 
-  const { customer, assignments, orders, invoices } = data;
+  const { customer, assignments, orders, invoices, bookings = [] } = data;
+
+  const handleBookingCreated = (booking: any) => {
+    setData((prev: any) => ({ ...prev, bookings: [booking, ...(prev.bookings || [])] }));
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -108,6 +99,7 @@ export default function CustomerPortal() {
             <TabsTrigger value="assignments" className="gap-1"><ClipboardList className="h-3.5 w-3.5" /> Uppdrag</TabsTrigger>
             <TabsTrigger value="orders" className="gap-1"><ShoppingCart className="h-3.5 w-3.5" /> Beställningar</TabsTrigger>
             <TabsTrigger value="invoices" className="gap-1"><Receipt className="h-3.5 w-3.5" /> Fakturor</TabsTrigger>
+            <TabsTrigger value="booking" className="gap-1"><CalendarPlus className="h-3.5 w-3.5" /> Ny förfrågan</TabsTrigger>
           </TabsList>
 
           <TabsContent value="assignments" className="mt-4">
@@ -198,6 +190,10 @@ export default function CustomerPortal() {
                 </Table>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="booking" className="mt-4">
+            <BookingRequestForm token={token!} bookings={bookings} onCreated={handleBookingCreated} />
           </TabsContent>
         </Tabs>
       </main>
