@@ -34,6 +34,16 @@ const AdminArticles = lazy(() => import("./pages/admin/AdminArticles"));
 const AdminVehicles = lazy(() => import("./pages/admin/AdminVehicles"));
 const AdminOrders = lazy(() => import("./pages/admin/AdminOrders"));
 const AdminOrderTemplates = lazy(() => import("./pages/admin/AdminOrderTemplates"));
+const AdminAbsences = lazy(() => import("./pages/admin/AdminAbsences"));
+const AdminApprovals = lazy(() => import("./pages/admin/AdminApprovals"));
+const AdminInvoiceTemplates = lazy(() => import("./pages/admin/AdminInvoiceTemplates"));
+const AdminNotifications = lazy(() => import("./pages/admin/AdminNotifications"));
+const AdminBookingRequests = lazy(() => import("./pages/admin/AdminBookingRequests"));
+const AdminExternalResources = lazy(() => import("./pages/admin/AdminExternalResources"));
+const AdminSatisfaction = lazy(() => import("./pages/admin/AdminSatisfaction"));
+const AdminEnvironment = lazy(() => import("./pages/admin/AdminEnvironment"));
+const AdminApiDocs = lazy(() => import("./pages/admin/AdminApiDocs"));
+const AdminRouteOptimizer = lazy(() => import("./pages/admin/AdminRouteOptimizer"));
 const CustomerPortal = lazy(() => import("./pages/CustomerPortal"));
 const DriverAssignments = lazy(() => import("./pages/driver/DriverAssignments"));
 const DriverAssignmentDetail = lazy(() => import("./pages/driver/DriverAssignmentDetail"));
@@ -87,6 +97,16 @@ const App = () => (
                 <Route path="/admin/vehicles" element={<ProtectedRoute requiredRole="admin"><AdminVehicles /></ProtectedRoute>} />
                 <Route path="/admin/orders" element={<ProtectedRoute requiredRole="admin"><AdminOrders /></ProtectedRoute>} />
                 <Route path="/admin/order-templates" element={<ProtectedRoute requiredRole="admin"><AdminOrderTemplates /></ProtectedRoute>} />
+                <Route path="/admin/absences" element={<ProtectedRoute requiredRole="admin"><AdminAbsences /></ProtectedRoute>} />
+                <Route path="/admin/approvals" element={<ProtectedRoute requiredRole="admin"><AdminApprovals /></ProtectedRoute>} />
+                <Route path="/admin/invoice-templates" element={<ProtectedRoute requiredRole="admin"><AdminInvoiceTemplates /></ProtectedRoute>} />
+                <Route path="/admin/notifications" element={<ProtectedRoute requiredRole="admin"><AdminNotifications /></ProtectedRoute>} />
+                <Route path="/admin/booking-requests" element={<ProtectedRoute requiredRole="admin"><AdminBookingRequests /></ProtectedRoute>} />
+                <Route path="/admin/external-resources" element={<ProtectedRoute requiredRole="admin"><AdminExternalResources /></ProtectedRoute>} />
+                <Route path="/admin/satisfaction" element={<ProtectedRoute requiredRole="admin"><AdminSatisfaction /></ProtectedRoute>} />
+                <Route path="/admin/environment" element={<ProtectedRoute requiredRole="admin"><AdminEnvironment /></ProtectedRoute>} />
+                <Route path="/admin/api" element={<ProtectedRoute requiredRole="admin"><AdminApiDocs /></ProtectedRoute>} />
+                <Route path="/admin/routes" element={<ProtectedRoute requiredRole="admin"><AdminRouteOptimizer /></ProtectedRoute>} />
                 {/* Driver routes */}
                 <Route path="/driver" element={<ProtectedRoute requiredRole="driver"><DriverAssignments /></ProtectedRoute>} />
                 <Route path="/driver/assignment/:id" element={<ProtectedRoute requiredRole="driver"><DriverAssignmentDetail /></ProtectedRoute>} />

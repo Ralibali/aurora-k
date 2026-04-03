@@ -1,4 +1,4 @@
-import { LayoutDashboard, ClipboardList, Users, Clock, LogOut, Building2, Receipt, BarChart3, Settings, Truck, Moon, Sun, Smartphone, MapPin, CalendarDays, Package, Car, ShoppingCart, FileText } from 'lucide-react';
+import { LayoutDashboard, ClipboardList, Users, Clock, LogOut, Building2, Receipt, BarChart3, Settings, Truck, Moon, Sun, Smartphone, MapPin, CalendarDays, Package, Car, ShoppingCart, FileText, CalendarOff, ClipboardCheck, Bell, Inbox, UsersRound, SmilePlus, Leaf, Code, Route } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -32,10 +32,22 @@ const mainNav = [
 const resourceNav = [
   { title: 'Artiklar', url: '/admin/articles', icon: Package },
   { title: 'Mallar', url: '/admin/order-templates', icon: FileText },
+  { title: 'Externa resurser', url: '/admin/external-resources', icon: UsersRound },
+  { title: 'Rutter', url: '/admin/routes', icon: Route },
+];
+
+const operationsNav = [
+  { title: 'Frånvaro', url: '/admin/absences', icon: CalendarOff },
+  { title: 'Attestering', url: '/admin/approvals', icon: ClipboardCheck },
+  { title: 'Notiser', url: '/admin/notifications', icon: Bell },
+  { title: 'Förfrågningar', url: '/admin/booking-requests', icon: Inbox },
+  { title: 'Kundnöjdhet', url: '/admin/satisfaction', icon: SmilePlus },
+  { title: 'Miljödata', url: '/admin/environment', icon: Leaf },
 ];
 
 const financeNav = [
   { title: 'Fakturering', url: '/admin/invoices', icon: Receipt },
+  { title: 'Fakturamallar', url: '/admin/invoice-templates', icon: FileText },
   { title: 'Tidrapporter', url: '/admin/reports', icon: Clock },
   { title: 'Statistik', url: '/admin/statistics', icon: BarChart3 },
 ];
@@ -43,6 +55,7 @@ const financeNav = [
 const systemNav = [
   { title: 'Inställningar', url: '/admin/settings', icon: Settings },
   { title: 'Förarapp', url: '/admin/driver-settings', icon: Smartphone },
+  { title: 'API', url: '/admin/api', icon: Code },
 ];
 
 function NavGroup({ label, items, collapsed }: { label: string; items: typeof mainNav; collapsed: boolean }) {
@@ -109,6 +122,7 @@ export function AdminSidebar() {
       <SidebarContent className="pt-2">
         <NavGroup label="Översikt" items={mainNav} collapsed={collapsed} />
         <NavGroup label="Register" items={resourceNav} collapsed={collapsed} />
+        <NavGroup label="Drift" items={operationsNav} collapsed={collapsed} />
         <NavGroup label="Ekonomi" items={financeNav} collapsed={collapsed} />
         <NavGroup label="System" items={systemNav} collapsed={collapsed} />
       </SidebarContent>
