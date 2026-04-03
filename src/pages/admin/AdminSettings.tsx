@@ -15,6 +15,35 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTheme } from 'next-themes';
 const SubscriptionTab = lazy(() => import('@/components/SubscriptionTab'));
 
+function AppearanceTab() {
+  const { theme, setTheme } = useTheme();
+  const options = [
+    { value: 'light', label: 'Ljust läge', icon: Sun },
+    { value: 'dark', label: 'Mörkt läge', icon: Moon },
+    { value: 'system', label: 'Systemstandard', icon: Monitor },
+  ] as const;
+  return (
+    <Card>
+      <CardHeader><CardTitle>Utseende</CardTitle></CardHeader>
+      <CardContent className="space-y-1">
+        <p className="text-sm text-muted-foreground mb-4">Välj hur Aurora Transport ska visas.</p>
+        {options.map(opt => (
+          <button
+            key={opt.value}
+            onClick={() => setTheme(opt.value)}
+            className={`w-full flex items-center gap-3 rounded-lg px-4 py-3 text-left text-sm transition-colors ${
+              theme === opt.value ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted text-foreground'
+            }`}
+          >
+            <opt.icon className="h-4 w-4" />
+            {opt.label}
+          </button>
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function AdminSettings() {
   const { data: settings, isLoading } = useSettings();
   const updateSettings = useUpdateSettings();
