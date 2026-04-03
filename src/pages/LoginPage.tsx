@@ -114,6 +114,10 @@ export default function LoginPage() {
         </div>
 
         <p className="text-center text-xs text-sidebar-foreground/40 mt-6">
+          Inget konto?{' '}
+          <Link to="/register" className="text-primary hover:underline">Skapa konto</Link>
+        </p>
+        <p className="text-center text-xs text-sidebar-foreground/40 mt-2">
           © {new Date().getFullYear()} Aurora Medias Transport
         </p>
       </div>
