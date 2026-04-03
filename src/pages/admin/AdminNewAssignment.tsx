@@ -51,6 +51,9 @@ export default function AdminNewAssignment() {
   const [cost, setCost] = useState<string>(copyFrom?.cost != null ? String(copyFrom.cost) : '');
   const [vehicleId, setVehicleId] = useState(copyFrom?.vehicle_id || '');
   const [orderId, setOrderId] = useState(copyFrom?.order_id || '');
+  const [geofenceRadius, setGeofenceRadius] = useState('');
+  const [geofenceLat, setGeofenceLat] = useState('');
+  const [geofenceLng, setGeofenceLng] = useState('');
 
   // Recurrence
   const [recurrenceEnabled, setRecurrenceEnabled] = useState(false);
