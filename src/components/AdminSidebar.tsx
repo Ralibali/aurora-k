@@ -43,6 +43,7 @@ const navSections = [
     label: 'Ekonomi',
     items: [
       { title: 'Fakturor', url: '/admin/invoices', icon: FileText },
+      { title: 'Fakturamallar', url: '/admin/invoice-templates', icon: FileImage },
       { title: 'Artiklar', url: '/admin/articles', icon: Package },
       { title: 'Miljöuppföljning', url: '/admin/environment', icon: Leaf },
     ],
