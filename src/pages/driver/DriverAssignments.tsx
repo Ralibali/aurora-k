@@ -2,7 +2,6 @@ import { useState, useCallback, useRef, useMemo } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useDriverAssignments, useProfile } from '@/hooks/useData';
 import { useEffectiveDriverSettings } from '@/hooks/useDriverSettings';
-import { DriverLayout } from '@/components/DriverLayout';
 import { Link } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -83,7 +82,7 @@ export default function DriverAssignments() {
   const nextAssignment = todayAssignments[0] as any | undefined;
 
   return (
-    <DriverLayout hideHeader>
+    <>
       <div
         ref={scrollRef}
         className="flex-1 overflow-auto"
@@ -261,6 +260,6 @@ export default function DriverAssignments() {
           )}
         </div>
       </div>
-    </DriverLayout>
+    </>
   );
 }

@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useEffectiveDriverSettings } from '@/hooks/useDriverSettings';
 import { useAuth } from '@/hooks/useAuth';
 import { useDriverLocationTracker } from '@/hooks/useDriverLocationTracker';
-import { DriverLayout } from '@/components/DriverLayout';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useAssignment, useDriverUpdateAssignment } from '@/hooks/useData';
@@ -210,20 +209,16 @@ export default function DriverAssignmentDetail() {
 
   if (isLoading) {
     return (
-      <DriverLayout hideHeader>
-        <div className="p-5 space-y-4">
+      <div className="p-5 space-y-4">
           <Skeleton className="h-8 w-32" />
           <Skeleton className="h-64 w-full rounded-xl" />
         </div>
-      </DriverLayout>
     );
   }
 
   if (!assignment) {
     return (
-      <DriverLayout hideHeader>
-        <div className="text-center py-16 text-muted-foreground">Uppdraget hittades inte</div>
-      </DriverLayout>
+      <div className="text-center py-16 text-muted-foreground">Uppdraget hittades inte</div>
     );
   }
 
@@ -319,7 +314,7 @@ export default function DriverAssignmentDetail() {
       : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300';
 
   return (
-    <DriverLayout hideHeader>
+    <>
       <div className="flex flex-col min-h-[calc(100vh-env(safe-area-inset-bottom,0px))]">
         {/* Top bar */}
         <div className="flex items-center gap-3 px-5 pt-5 pb-2">
@@ -504,6 +499,6 @@ export default function DriverAssignmentDetail() {
           )}
         </div>
       </div>
-    </DriverLayout>
+    </>
   );
 }

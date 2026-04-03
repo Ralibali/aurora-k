@@ -1,4 +1,3 @@
-import { DriverLayout } from '@/components/DriverLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { InvoiceStatusBadge } from '@/components/InvoiceStatusBadge';
@@ -66,7 +65,7 @@ export default function DriverInvoices() {
   };
 
   return (
-    <DriverLayout>
+    <>
       <div className="p-4 space-y-4">
         <h2 className="text-lg font-semibold">Mina fakturor</h2>
 
@@ -108,6 +107,6 @@ export default function DriverInvoices() {
           </motion.div>
         ))}
       </div>
-    </DriverLayout>
+    </>
   );
 }

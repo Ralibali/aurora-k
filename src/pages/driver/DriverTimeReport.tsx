@@ -1,4 +1,3 @@
-import { DriverLayout } from '@/components/DriverLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { useDriverAssignments } from '@/hooks/useData';
 import { useAuth } from '@/hooks/useAuth';
@@ -41,7 +40,7 @@ export default function DriverTimeReport() {
   const currentHours = period === 'week' ? weekHours : monthHours;
 
   return (
-    <DriverLayout>
+    <>
       <div className="p-4 space-y-4">
         <h2 className="text-lg font-semibold text-foreground">Tidrapport</h2>
 
@@ -108,6 +107,6 @@ export default function DriverTimeReport() {
           </>
         )}
       </div>
-    </DriverLayout>
+    </>
   );
 }

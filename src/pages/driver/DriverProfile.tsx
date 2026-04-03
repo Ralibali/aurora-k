@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { DriverLayout } from '@/components/DriverLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -53,7 +52,7 @@ export default function DriverProfile() {
   };
 
   return (
-    <DriverLayout>
+    <>
       <div className="p-4 space-y-4">
         {/* Profile card */}
         <Card className="overflow-hidden">
@@ -130,6 +129,6 @@ export default function DriverProfile() {
           Logga ut
         </Button>
       </div>
-    </DriverLayout>
+    </>
   );
 }

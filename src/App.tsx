@@ -9,6 +9,7 @@ import { PwaInstallPrompt } from "@/components/PwaInstallPrompt";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AdminShell } from "@/components/AdminLayout";
+import { DriverLayout } from "@/components/DriverLayout";
 
 const LandingPage = lazy(() => import("./pages/LandingPage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
@@ -112,13 +113,15 @@ const App = () => (
                   <Route path="routes" element={<AdminRouteOptimizer />} />
                 </Route>
 
-                {/* Driver routes */}
-                <Route path="/driver" element={<ProtectedRoute requiredRole="driver"><DriverAssignments /></ProtectedRoute>} />
-                <Route path="/driver/assignments" element={<ProtectedRoute requiredRole="driver"><DriverAssignments /></ProtectedRoute>} />
-                <Route path="/driver/assignment/:id" element={<ProtectedRoute requiredRole="driver"><DriverAssignmentDetail /></ProtectedRoute>} />
-                <Route path="/driver/time-report" element={<ProtectedRoute requiredRole="driver"><DriverTimeReport /></ProtectedRoute>} />
-                <Route path="/driver/profile" element={<ProtectedRoute requiredRole="driver"><DriverProfile /></ProtectedRoute>} />
-                <Route path="/driver/invoices" element={<ProtectedRoute requiredRole="driver"><DriverInvoices /></ProtectedRoute>} />
+{/* Driver routes — share a single layout shell */}
+                <Route path="/driver" element={<ProtectedRoute requiredRole="driver"><DriverLayout /></ProtectedRoute>}>
+                  <Route index element={<DriverAssignments />} />
+                  <Route path="assignments" element={<DriverAssignments />} />
+                  <Route path="assignment/:id" element={<DriverAssignmentDetail />} />
+                  <Route path="time-report" element={<DriverTimeReport />} />
+                  <Route path="profile" element={<DriverProfile />} />
+                  <Route path="invoices" element={<DriverInvoices />} />
+                </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
