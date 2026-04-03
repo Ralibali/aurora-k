@@ -1,9 +1,8 @@
 import { useState, useMemo } from 'react';
-import { format, isToday, isTomorrow, isPast, parseISO } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
 import { AdminLayout } from '@/components/AdminLayout';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -11,100 +10,26 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { StatusBadge } from '@/components/StatusBadge';
 import { PriorityBadge } from '@/components/PriorityBadge';
 import { useAssignments, useDrivers, useBulkAssignDriver, useUpdateAssignment } from '@/hooks/useData';
-import { formatSwedishDateTime } from '@/lib/format';
-import { Plus, Search, Users } from 'lucide-react';
+import { formatSwedishDateTime, formatSwedishTime } from '@/lib/format';
+import { Plus, Search, Users, Clock, ChevronRight, Inbox, MoreHorizontal } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from '@/components/ui/table';
 
-function getDateLabel(dateStr: string): string {
-  const date = parseISO(dateStr);
-  if (isToday(date)) return `Idag – ${format(date, 'EEEE d MMMM', { locale: sv })}`;
-  if (isTomorrow(date)) return `Imorgon – ${format(date, 'EEEE d MMMM', { locale: sv })}`;
-  if (isPast(date)) return `Tidigare – ${format(date, 'EEEE d MMMM', { locale: sv })}`;
-  return format(date, 'EEEE d MMMM', { locale: sv });
-}
-
-function DateGroupedAssignments({ filtered, isLoading, selected, toggleSelect, toggleAll, drivers, navigate, updateAssignment }: any) {
-  const groups = useMemo(() => {
-    const map = new Map<string, any[]>();
-    for (const a of filtered) {
-      const dayKey = a.scheduled_start.split('T')[0];
-      if (!map.has(dayKey)) map.set(dayKey, []);
-      map.get(dayKey)!.push(a);
-    }
-    return Array.from(map.entries()).sort((a, b) => b[0].localeCompare(a[0]));
-  }, [filtered]);
-
-  if (isLoading) return <div className="space-y-3">{[1,2,3].map(i => <Skeleton key={i} className="h-20 w-full rounded-xl" />)}</div>;
-
-  if (filtered.length === 0) return <p className="text-center text-muted-foreground py-8">Inga uppdrag hittades</p>;
-
-  return (
-    <div className="space-y-1">
-      {filtered.length > 0 && (
-        <div className="flex items-center gap-2 px-2 mb-2">
-          <Checkbox checked={selected.length === filtered.length} onCheckedChange={toggleAll} />
-          <span className="text-xs text-muted-foreground">Markera alla</span>
-        </div>
-      )}
-      {groups.map(([dayKey, items]) => (
-        <div key={dayKey}>
-          <div className="sticky top-0 bg-background/95 backdrop-blur-sm py-2 px-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border/50 z-10 mb-2">
-            {getDateLabel(dayKey)}
-          </div>
-          <div className="space-y-2 mb-4">
-            {items.map((a: any) => (
-              <div key={a.id} className="flex items-center gap-2">
-                <Checkbox checked={selected.includes(a.id)} onCheckedChange={() => toggleSelect(a.id)} />
-                <Card
-                  className="flex-1 hover:shadow-md hover:border-primary/20 transition-all duration-150 cursor-pointer"
-                  onClick={() => navigate(`/admin/assignments/${a.id}`)}
-                >
-                  <CardContent className="py-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <p className="font-medium truncate">{a.title}</p>
-                          <StatusBadge status={a.status} />
-                          {a.priority !== 'normal' && <PriorityBadge priority={a.priority} />}
-                          {a.invoiced && <span className="status-badge bg-primary/10 text-primary">Fakturerad</span>}
-                        </div>
-                        <p className="text-sm text-muted-foreground">{a.customer?.name} · {a.address}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <p className="text-xs text-muted-foreground">{formatSwedishDateTime(a.scheduled_start)}</p>
-                          <span className="text-xs text-muted-foreground">·</span>
-                          <div onClick={(e: React.MouseEvent) => e.stopPropagation()}>
-                            <Select
-                              value={a.assigned_driver_id}
-                              onValueChange={(driverId: string) => {
-                                updateAssignment.mutate({ id: a.id, assigned_driver_id: driverId });
-                              }}
-                            >
-                              <SelectTrigger className="h-6 text-xs border-none bg-transparent p-0 w-auto gap-1 shadow-none focus:ring-0">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {drivers.map((d: any) => (
-                                  <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
+const filterTabs = [
+  { key: 'all', label: 'Alla' },
+  { key: 'pending', label: 'Ej tilldelade' },
+  { key: 'active', label: 'Pågående' },
+  { key: 'completed', label: 'Slutförda' },
+  { key: 'delayed', label: 'Försenade' },
+] as const;
 
 export default function AdminAssignments() {
   const navigate = useNavigate();
@@ -119,16 +44,23 @@ export default function AdminAssignments() {
   const bulkAssign = useBulkAssignDriver();
   const updateAssignment = useUpdateAssignment();
 
-  const filtered = (assignments ?? []).filter(a => {
-    if (statusFilter !== 'all' && a.status !== statusFilter) return false;
-    if (driverFilter !== 'all' && a.assigned_driver_id !== driverFilter) return false;
-    if (search && !a.title.toLowerCase().includes(search.toLowerCase()) && !a.customer?.name?.toLowerCase().includes(search.toLowerCase())) return false;
-    return true;
-  });
+  const today = format(new Date(), "EEEE d MMMM yyyy", { locale: sv });
 
-  const toggleSelect = (id: string) => {
+  const filtered = useMemo(() =>
+    (assignments ?? []).filter(a => {
+      if (statusFilter !== 'all' && a.status !== statusFilter) return false;
+      if (driverFilter !== 'all' && a.assigned_driver_id !== driverFilter) return false;
+      if (search) {
+        const q = search.toLowerCase();
+        if (!a.title.toLowerCase().includes(q) && !a.customer?.name?.toLowerCase().includes(q)) return false;
+      }
+      return true;
+    }).sort((a, b) => b.scheduled_start.localeCompare(a.scheduled_start)),
+    [assignments, statusFilter, driverFilter, search]
+  );
+
+  const toggleSelect = (id: string) =>
     setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
-  };
 
   const toggleAll = () => {
     if (selected.length === filtered.length) setSelected([]);
@@ -136,35 +68,64 @@ export default function AdminAssignments() {
   };
 
   return (
-    <AdminLayout title="Uppdragshantering" description="Hantera och fördela uppdrag till chaufförer">
-      <div className="space-y-5 max-w-6xl">
-        <div className="flex flex-wrap gap-3">
-          <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Sök uppdrag..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+    <AdminLayout title="Uppdrag" description="Hantera och fördela uppdrag till chaufförer">
+      <div className="space-y-5">
+        {/* Top bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">Uppdrag</h2>
+            <p className="text-sm text-muted-foreground capitalize">{today}</p>
           </div>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[160px]"><SelectValue placeholder="Status" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Alla statusar</SelectItem>
-              <SelectItem value="pending">Ej startad</SelectItem>
-              <SelectItem value="active">Pågår</SelectItem>
-              <SelectItem value="completed">Klar</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={driverFilter} onValueChange={setDriverFilter}>
-            <SelectTrigger className="w-[180px]"><SelectValue placeholder="Chaufför" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Alla chaufförer</SelectItem>
-              {(drivers ?? []).map(d => <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>)}
-            </SelectContent>
-          </Select>
-          <Button asChild><Link to="/admin/assignments/new"><Plus className="h-4 w-4 mr-1" /> Nytt uppdrag</Link></Button>
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Sök uppdrag..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9 w-[220px]"
+              />
+            </div>
+            <Select value={driverFilter} onValueChange={setDriverFilter}>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue placeholder="Chaufför" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Alla chaufförer</SelectItem>
+                {(drivers ?? []).map(d => (
+                  <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button asChild>
+              <Link to="/admin/assignments/new">
+                <Plus className="h-4 w-4 mr-1" /> Nytt uppdrag
+              </Link>
+            </Button>
+          </div>
         </div>
 
+        {/* Filter tabs */}
+        <div className="flex gap-1 overflow-x-auto pb-1 -mb-1">
+          {filterTabs.map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setStatusFilter(tab.key)}
+              className={`px-4 py-2 text-sm whitespace-nowrap rounded-t-md transition-colors ${
+                statusFilter === tab.key
+                  ? 'bg-blue-50 text-blue-700 font-medium border-b-2 border-blue-600'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Bulk selection bar */}
         {selected.length > 0 && (
-          <div className="flex items-center gap-3 bg-primary/5 border border-primary/20 rounded-lg px-4 py-2">
-            <span className="text-sm font-medium">{selected.length} valda</span>
+          <div className="flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2">
+            <span className="text-sm font-medium text-blue-700">{selected.length} valda</span>
             <Button size="sm" variant="outline" onClick={() => setBulkDialogOpen(true)}>
               <Users className="h-4 w-4 mr-1" /> Tilldela chaufför
             </Button>
@@ -172,20 +133,166 @@ export default function AdminAssignments() {
           </div>
         )}
 
-        <DateGroupedAssignments
-          filtered={filtered}
-          isLoading={isLoading}
-          selected={selected}
-          toggleSelect={toggleSelect}
-          toggleAll={toggleAll}
-          drivers={drivers ?? []}
-          navigate={navigate}
-          updateAssignment={updateAssignment}
-        />
+        {/* Desktop table */}
+        {isLoading ? (
+          <div className="space-y-2">
+            {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-14 w-full rounded-lg" />)}
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="bg-card rounded-lg border border-dashed border-border p-16 text-center shadow-card">
+            <Inbox className="h-12 w-12 text-slate-200 mx-auto mb-3" />
+            <p className="text-sm font-medium text-muted-foreground">Inga uppdrag hittades</p>
+            <p className="text-xs text-muted-foreground/60 mt-1">Prova att ändra filter eller skapa ett nytt uppdrag</p>
+            <Button size="sm" className="mt-4" asChild>
+              <Link to="/admin/assignments/new"><Plus className="h-3.5 w-3.5 mr-1" /> Skapa uppdrag</Link>
+            </Button>
+          </div>
+        ) : (
+          <>
+            {/* Desktop table view */}
+            <div className="hidden md:block bg-card rounded-lg border border-border shadow-card overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-10">
+                      <Checkbox
+                        checked={selected.length === filtered.length && filtered.length > 0}
+                        onCheckedChange={toggleAll}
+                      />
+                    </TableHead>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Kund</TableHead>
+                    <TableHead>Datum & Tid</TableHead>
+                    <TableHead>Adress</TableHead>
+                    <TableHead>Chaufför</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="w-10"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filtered.map(a => (
+                    <TableRow
+                      key={a.id}
+                      className="cursor-pointer hover:bg-secondary/50"
+                      onClick={() => navigate(`/admin/assignments/${a.id}`)}
+                    >
+                      <TableCell onClick={(e) => e.stopPropagation()}>
+                        <Checkbox
+                          checked={selected.includes(a.id)}
+                          onCheckedChange={() => toggleSelect(a.id)}
+                        />
+                      </TableCell>
+                      <TableCell className="font-mono text-xs text-muted-foreground">
+                        {a.id.slice(0, 6).toUpperCase()}
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <span className="font-semibold text-sm">{a.customer?.name}</span>
+                          {a.priority !== 'normal' && (
+                            <span className="ml-2"><PriorityBadge priority={a.priority} /></span>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-mono text-sm">
+                        {formatSwedishDateTime(a.scheduled_start)}
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground max-w-[200px] truncate">
+                        {a.address}
+                      </TableCell>
+                      <TableCell>
+                        {a.driver ? (
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                              <span className="text-[9px] font-bold text-blue-700">
+                                {a.driver.full_name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
+                              </span>
+                            </div>
+                            <span className="text-sm">{a.driver.full_name}</span>
+                          </div>
+                        ) : (
+                          <span className="text-sm text-muted-foreground italic">Ej tilldelad</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <StatusBadge status={a.status} />
+                      </TableCell>
+                      <TableCell onClick={(e) => e.stopPropagation()}>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => navigate(`/admin/assignments/${a.id}`)}>
+                              Redigera
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => {
+                              navigate('/admin/assignments/new', { state: { copy: a } });
+                            }}>
+                              Kopiera
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onClick={() => {
+                                updateAssignment.mutate({ id: a.id, status: 'cancelled' } as any);
+                                toast.success('Uppdraget avbokat');
+                              }}
+                            >
+                              Avboka
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
 
+            {/* Mobile card view */}
+            <div className="md:hidden space-y-3">
+              {filtered.map(a => (
+                <Link
+                  key={a.id}
+                  to={`/admin/assignments/${a.id}`}
+                  className="block bg-card rounded-lg border border-border p-4 shadow-card active:bg-secondary transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-sm text-foreground truncate">{a.title}</p>
+                      <p className="text-sm text-muted-foreground mt-0.5">{a.customer?.name}</p>
+                    </div>
+                    <StatusBadge status={a.status} />
+                  </div>
+                  <div className="flex items-center justify-between mt-3">
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <Clock className="h-3.5 w-3.5" />
+                      <span className="font-mono text-xs">{formatSwedishTime(a.scheduled_start)}</span>
+                    </div>
+                    {a.driver && (
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center">
+                          <span className="text-[8px] font-bold text-blue-700">
+                            {a.driver.full_name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
+                          </span>
+                        </div>
+                        <span className="text-xs text-muted-foreground">{a.driver.full_name}</span>
+                      </div>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Bulk assign dialog */}
         <Dialog open={bulkDialogOpen} onOpenChange={setBulkDialogOpen}>
           <DialogContent>
-            <DialogHeader><DialogTitle>Tilldela chaufför till {selected.length} uppdrag</DialogTitle></DialogHeader>
+            <DialogHeader>
+              <DialogTitle>Tilldela chaufför till {selected.length} uppdrag</DialogTitle>
+            </DialogHeader>
             <Select onValueChange={(v) => {
               const driver = (drivers ?? []).find(d => d.id === v);
               bulkAssign.mutate({ assignmentIds: selected, driverId: v }, {
@@ -198,7 +305,9 @@ export default function AdminAssignments() {
             }}>
               <SelectTrigger><SelectValue placeholder="Välj chaufför" /></SelectTrigger>
               <SelectContent>
-                {(drivers ?? []).map(d => <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>)}
+                {(drivers ?? []).map(d => (
+                  <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </DialogContent>
