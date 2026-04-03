@@ -14,7 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Inter", "system-ui", "-apple-system", "sans-serif"],
+        sans: ["Geist", "system-ui", "-apple-system", "sans-serif"],
+        mono: ["Geist Mono", "SF Mono", "monospace"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -71,6 +72,7 @@ export default {
           "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
+          muted: "hsl(var(--sidebar-muted))",
         },
       },
       borderRadius: {
@@ -87,15 +89,20 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
-        "pulse-slow": {
-          "0%, 100%": { opacity: "1" },
-          "50%": { opacity: "0.6" },
+        "pulse-dot": {
+          "0%, 100%": { opacity: "1", transform: "scale(1)" },
+          "50%": { opacity: "0.5", transform: "scale(0.85)" },
+        },
+        "status-crossfade": {
+          "0%": { opacity: "0.4" },
+          "100%": { opacity: "1" },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "pulse-slow": "pulse-slow 2s ease-in-out infinite",
+        "pulse-dot": "pulse-dot 1.5s ease-in-out infinite",
+        "status-crossfade": "status-crossfade 0.3s ease-out",
       },
     },
   },
