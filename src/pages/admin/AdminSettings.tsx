@@ -7,11 +7,12 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useSettings, useUpdateSettings, useCreateSettings } from '@/hooks/useData';
 import { useFeatureSettings, useToggleFeature, useResetAllFeatures } from '@/hooks/useFeatureSettings';
-import { Save, Upload, ToggleLeft, RotateCcw } from 'lucide-react';
+import { Save, Upload, ToggleLeft, RotateCcw, Sun, Moon, Monitor } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useTheme } from 'next-themes';
 const SubscriptionTab = lazy(() => import('@/components/SubscriptionTab'));
 
 export default function AdminSettings() {
