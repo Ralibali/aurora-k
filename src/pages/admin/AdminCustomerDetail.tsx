@@ -188,8 +188,8 @@ export default function AdminCustomerDetail() {
                       {priceList.map((p: any) => (
                         <TableRow key={p.id}>
                           <TableCell className="font-medium">{p.article?.name}</TableCell>
-                          <TableCell className="text-right text-muted-foreground">{p.article?.default_price} kr</TableCell>
-                          <TableCell className="text-right font-medium">{p.price} kr</TableCell>
+                          <TableCell className="text-right text-muted-foreground font-mono">{p.article?.default_price} kr</TableCell>
+                          <TableCell className="text-right font-medium font-mono">{p.price} kr</TableCell>
                           <TableCell>
                             <Button variant="ghost" size="icon" onClick={() => deletePrice.mutate(p.id)}><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>
                           </TableCell>
@@ -225,11 +225,11 @@ export default function AdminCustomerDetail() {
                         customer.pricing_type === 'per_hour' ? hours * (customer.price_per_hour || 0) : 0;
                       return (
                         <TableRow key={a.id}>
-                          <TableCell>{a.actual_start ? formatSwedishDate(a.actual_start) : '–'}</TableCell>
+                          <TableCell className="font-mono text-sm">{a.actual_start ? formatSwedishDate(a.actual_start) : '–'}</TableCell>
                           <TableCell className="font-medium">{a.title}</TableCell>
                           <TableCell>{a.driver?.full_name}</TableCell>
-                          <TableCell>{hours}h</TableCell>
-                          <TableCell className="text-right">{amount > 0 ? `${amount.toFixed(0)} kr` : '–'}</TableCell>
+                          <TableCell className="font-mono text-sm">{hours}h</TableCell>
+                          <TableCell className="text-right font-mono">{amount > 0 ? `${amount.toFixed(0)} kr` : '–'}</TableCell>
                         </TableRow>
                       );
                     })}
@@ -258,10 +258,10 @@ export default function AdminCustomerDetail() {
                     )}
                     {customerInvoices.map(inv => (
                       <TableRow key={inv.id}>
-                        <TableCell className="font-medium">#{inv.invoice_number}</TableCell>
-                        <TableCell>{inv.invoice_date}</TableCell>
-                        <TableCell>{inv.due_date}</TableCell>
-                        <TableCell className="text-right">{inv.total_inc_vat.toFixed(0)} kr</TableCell>
+                        <TableCell className="font-mono text-sm">#{inv.invoice_number}</TableCell>
+                        <TableCell className="font-mono text-sm">{inv.invoice_date}</TableCell>
+                        <TableCell className="font-mono text-sm">{inv.due_date}</TableCell>
+                        <TableCell className="text-right font-mono">{inv.total_inc_vat.toFixed(0)} kr</TableCell>
                         <TableCell><InvoiceStatusBadge status={inv.status} /></TableCell>
                       </TableRow>
                     ))}
@@ -363,7 +363,7 @@ function CustomerPortalSection({ customerId }: { customerId: string }) {
                       </code>
                       {expired && <span className="text-[10px] text-destructive font-medium">Utgången</span>}
                     </div>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">
+                    <p className="text-[10px] text-muted-foreground mt-0.5 font-mono">
                       Skapad {new Date(t.created_at).toLocaleDateString('sv-SE')}
                       {t.expires_at && ` · Giltig t.o.m. ${new Date(t.expires_at).toLocaleDateString('sv-SE')}`}
                     </p>

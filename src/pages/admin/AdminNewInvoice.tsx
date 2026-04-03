@@ -491,14 +491,14 @@ export default function AdminNewInvoice() {
                 </Table>
 
                 <div className="text-right space-y-1 border-t pt-3">
-                  <p>Netto ex. moms: <span className="font-medium">{totalExVat.toFixed(0)} kr</span></p>
+                  <p>Netto ex. moms: <span className="font-medium font-mono">{totalExVat.toFixed(0)} kr</span></p>
                   {vatAmount > 0 && (
-                    <p>Moms: <span className="font-medium">{vatAmount.toFixed(0)} kr</span></p>
+                    <p>Moms: <span className="font-medium font-mono">{vatAmount.toFixed(0)} kr</span></p>
                   )}
                   {vatAmount === 0 && (
                     <p className="text-muted-foreground text-sm">Momsfri faktura</p>
                   )}
-                  <p className="text-lg font-bold">Att betala: {totalIncVat.toFixed(0)} kr</p>
+                  <p className="text-lg font-bold">Att betala: <span className="font-mono">{totalIncVat.toFixed(0)} kr</span></p>
                 </div>
               </div>
 

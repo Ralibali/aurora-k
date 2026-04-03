@@ -54,7 +54,7 @@ export default function DriverTimeReport() {
                   <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-2">
                     <Clock className="h-5 w-5 text-primary" />
                   </div>
-                  <p className="text-2xl font-bold text-foreground">{weekHours.toFixed(1)}h</p>
+                  <p className="text-2xl font-bold text-foreground font-mono">{weekHours.toFixed(1)}h</p>
                   <p className="text-xs text-muted-foreground mt-0.5">Denna vecka</p>
                 </div>
               </div>
@@ -63,7 +63,7 @@ export default function DriverTimeReport() {
                   <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center mx-auto mb-2">
                     <TrendingUp className="h-5 w-5 text-success" />
                   </div>
-                  <p className="text-2xl font-bold text-foreground">{monthHours.toFixed(1)}h</p>
+                  <p className="text-2xl font-bold text-foreground font-mono">{monthHours.toFixed(1)}h</p>
                   <p className="text-xs text-muted-foreground mt-0.5">Denna månad</p>
                 </div>
               </div>
@@ -85,10 +85,10 @@ export default function DriverTimeReport() {
                       <CardContent className="py-3.5 px-4 flex items-center justify-between gap-3">
                         <div className="min-w-0">
                           <p className="font-medium text-sm text-foreground truncate">{a.customer?.name || a.title}</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">{formatSwedishDate(a.actual_start!)}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5 font-mono">{formatSwedishDate(a.actual_start!)}</p>
                         </div>
                         <div className="text-right shrink-0">
-                          <p className="font-semibold text-sm text-foreground tabular-nums">{hours.toFixed(1)}h</p>
+                          <p className="font-semibold text-sm text-foreground tabular-nums font-mono">{hours.toFixed(1)}h</p>
                         </div>
                       </CardContent>
                     </Card>
@@ -99,7 +99,7 @@ export default function DriverTimeReport() {
                     <span className="flex items-center gap-1.5 text-muted-foreground">
                       <CheckCircle2 className="h-4 w-4 text-success" /> {currentItems.length} uppdrag
                     </span>
-                    <span className="text-foreground font-semibold tabular-nums">{currentHours.toFixed(1)} timmar</span>
+                    <span className="text-foreground font-semibold tabular-nums font-mono">{currentHours.toFixed(1)} timmar</span>
                   </div>
                 )}
               </TabsContent>

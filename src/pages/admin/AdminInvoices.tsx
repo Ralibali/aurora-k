@@ -198,11 +198,11 @@ export default function AdminInvoices() {
                 )}
                 {filtered.map(inv => (
                   <TableRow key={inv.id}>
-                    <TableCell className="font-medium">#{inv.invoice_number}</TableCell>
+                    <TableCell className="font-mono text-sm">#{inv.invoice_number}</TableCell>
                     <TableCell>{inv.customer?.name}</TableCell>
-                    <TableCell>{inv.invoice_date}</TableCell>
-                    <TableCell>{inv.due_date}</TableCell>
-                    <TableCell className="text-right">{inv.total_inc_vat.toFixed(0)} kr</TableCell>
+                    <TableCell className="font-mono text-sm">{inv.invoice_date}</TableCell>
+                    <TableCell className="font-mono text-sm">{inv.due_date}</TableCell>
+                    <TableCell className="text-right font-mono text-sm">{inv.total_inc_vat.toFixed(0)} kr</TableCell>
                     <TableCell><InvoiceStatusBadge status={inv.status} /></TableCell>
                     <TableCell>
                       <div className="flex gap-1">
@@ -243,9 +243,9 @@ export default function AdminInvoices() {
                   </div>
                   <div className="text-right">
                     <p className="text-2xl font-bold text-primary">FAKTURA</p>
-                    <p className="text-sm">Nr: {previewInvoice.invoice_number}</p>
-                    <p className="text-sm">Datum: {previewInvoice.invoice_date}</p>
-                    <p className="text-sm">Förfaller: {previewInvoice.due_date}</p>
+                    <p className="text-sm font-mono">Nr: {previewInvoice.invoice_number}</p>
+                    <p className="text-sm font-mono">Datum: {previewInvoice.invoice_date}</p>
+                    <p className="text-sm font-mono">Förfaller: {previewInvoice.due_date}</p>
                     {previewInvoice.reference && <p className="text-sm">Ref: {previewInvoice.reference}</p>}
                   </div>
                 </div>
@@ -274,7 +274,7 @@ export default function AdminInvoices() {
                         <TableRow key={a.id}>
                           <TableCell>{a.title}</TableCell>
                           <TableCell>{a.driver?.full_name}</TableCell>
-                          <TableCell className="text-right">{amount.toFixed(0)} kr</TableCell>
+                          <TableCell className="text-right font-mono">{amount.toFixed(0)} kr</TableCell>
                         </TableRow>
                       );
                     })}
@@ -282,13 +282,13 @@ export default function AdminInvoices() {
                 </Table>
 
                 <div className="text-right space-y-1 border-t pt-3">
-                  <p>Netto: <span className="font-medium">{previewInvoice.total_ex_vat.toFixed(0)} kr</span></p>
+                  <p>Netto: <span className="font-medium font-mono">{previewInvoice.total_ex_vat.toFixed(0)} kr</span></p>
                   {previewData.vatRate > 0 ? (
-                    <p>Moms {previewData.vatRate}%: <span className="font-medium">{previewInvoice.vat_amount.toFixed(0)} kr</span></p>
+                    <p>Moms {previewData.vatRate}%: <span className="font-medium font-mono">{previewInvoice.vat_amount.toFixed(0)} kr</span></p>
                   ) : (
                     <p className="text-sm text-muted-foreground">Momsfri faktura</p>
                   )}
-                  <p className="text-lg font-bold">Att betala: {previewInvoice.total_inc_vat.toFixed(0)} kr</p>
+                  <p className="text-lg font-bold">Att betala: <span className="font-mono">{previewInvoice.total_inc_vat.toFixed(0)} kr</span></p>
                 </div>
 
                 {previewInvoice.message && (

@@ -120,7 +120,7 @@ export default function AdminStatistics() {
             <div className="flex items-center gap-4">
               <div className="stat-card-icon bg-primary/10 text-primary"><ClipboardList className="h-5 w-5" /></div>
               <div>
-                {loadingA ? <Skeleton className="h-8 w-12" /> : <p className="stat-card-value">{completed.length}</p>}
+                {loadingA ? <Skeleton className="h-8 w-12" /> : <p className="stat-card-value font-mono">{completed.length}</p>}
                 <p className="stat-card-label">Leveranser</p>
               </div>
             </div>
@@ -129,7 +129,7 @@ export default function AdminStatistics() {
             <div className="flex items-center gap-4">
               <div className="stat-card-icon bg-success/10 text-success"><Clock className="h-5 w-5" /></div>
               <div>
-                {loadingA ? <Skeleton className="h-8 w-12" /> : <p className="stat-card-value">{totalHours.toFixed(1)}</p>}
+                {loadingA ? <Skeleton className="h-8 w-12" /> : <p className="stat-card-value font-mono">{totalHours.toFixed(1)}</p>}
                 <p className="stat-card-label">Körtimmar</p>
               </div>
             </div>
@@ -138,7 +138,7 @@ export default function AdminStatistics() {
             <div className="flex items-center gap-4">
               <div className="stat-card-icon bg-warning/10 text-warning"><Building2 className="h-5 w-5" /></div>
               <div>
-                {loadingA ? <Skeleton className="h-8 w-12" /> : <p className="stat-card-value">{activeCustomers}</p>}
+                {loadingA ? <Skeleton className="h-8 w-12" /> : <p className="stat-card-value font-mono">{activeCustomers}</p>}
                 <p className="stat-card-label">Aktiva kunder</p>
               </div>
             </div>
@@ -147,7 +147,7 @@ export default function AdminStatistics() {
             <div className="flex items-center gap-4">
               <div className="stat-card-icon bg-info/10 text-info"><Receipt className="h-5 w-5" /></div>
               <div>
-                {loadingA ? <Skeleton className="h-8 w-12" /> : <p className="stat-card-value">{invoicedAmount.toFixed(0)}</p>}
+                {loadingA ? <Skeleton className="h-8 w-12" /> : <p className="stat-card-value font-mono">{invoicedAmount.toFixed(0)}</p>}
                 <p className="stat-card-label">Fakturerat (kr)</p>
               </div>
             </div>
@@ -224,9 +224,9 @@ export default function AdminStatistics() {
                   return (
                     <TableRow key={d.id}>
                       <TableCell className="font-medium">{d.full_name}</TableCell>
-                      <TableCell className="text-center">{driverAssignments.length}</TableCell>
-                      <TableCell className="text-center">{dHours.toFixed(1)}h</TableCell>
-                      <TableCell className="text-center">{avg.toFixed(1)}h</TableCell>
+                      <TableCell className="text-center font-mono">{driverAssignments.length}</TableCell>
+                      <TableCell className="text-center font-mono">{dHours.toFixed(1)}h</TableCell>
+                      <TableCell className="text-center font-mono">{avg.toFixed(1)}h</TableCell>
                     </TableRow>
                   );
                 })}
