@@ -210,12 +210,10 @@ export default function DriverAssignmentDetail() {
 
   if (isLoading) {
     return (
-      <DriverLayout hideHeader>
-        <div className="p-5 space-y-4">
+      <div className="p-5 space-y-4">
           <Skeleton className="h-8 w-32" />
           <Skeleton className="h-64 w-full rounded-xl" />
         </div>
-      </DriverLayout>
     );
   }
 
