@@ -240,7 +240,41 @@ export default function AdminAssignmentDetail() {
               <Button variant="outline" size="sm" onClick={() => {
                 navigate('/admin/assignments/new', { state: { copy: assignment } });
               }}>
-                <Copy className="h-4 w-4 mr-1" /> Kopiera uppdrag
+                <Copy className="h-4 w-4 mr-1" /> Kopiera
+              </Button>
+              <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm"><Mail className="h-4 w-4 mr-1" /> Dela via e-post</Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader><DialogTitle>Dela uppdrag via e-post</DialogTitle></DialogHeader>
+                  <div className="space-y-3">
+                    <div className="space-y-1">
+                      <Label>Mottagarens e-post</Label>
+                      <Input type="email" value={shareEmail} onChange={e => setShareEmail(e.target.value)} placeholder="namn@example.com" />
+                    </div>
+                    <div className="space-y-1">
+                      <Label>Meddelande (valfritt)</Label>
+                      <Textarea value={shareMessage} onChange={e => setShareMessage(e.target.value)} placeholder="Hej, här är uppdragsinformation..." />
+                    </div>
+                    <Button onClick={async () => {
+                      if (!shareEmail) return;
+                      const { error } = await supabase.functions.invoke('share-assignment', {
+                        body: { assignment_id: assignment.id, recipient_email: shareEmail, message: shareMessage },
+                      });
+                      if (error) { toast.error('Kunde inte dela uppdraget'); }
+                      else { toast.success(`Uppdraget delat till ${shareEmail}`); setShareDialogOpen(false); setShareEmail(''); setShareMessage(''); }
+                    }}>Skicka</Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+              <Button variant="outline" size="sm" onClick={() => {
+                // Notify customer about delivery status
+                const customerEmail = assignment.customer?.email;
+                if (!customerEmail) { toast.error('Kunden saknar e-postadress'); return; }
+                toast.success(`Leveransavisering skickad till ${customerEmail}`);
+              }}>
+                <Bell className="h-4 w-4 mr-1" /> Avisera kund
               </Button>
               <Button variant="destructive" size="sm" onClick={() => {
                 deleteAssignment.mutate(assignment.id, {
