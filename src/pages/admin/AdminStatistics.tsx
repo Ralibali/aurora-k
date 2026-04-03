@@ -224,9 +224,9 @@ export default function AdminStatistics() {
                   return (
                     <TableRow key={d.id}>
                       <TableCell className="font-medium">{d.full_name}</TableCell>
-                      <TableCell className="text-center">{driverAssignments.length}</TableCell>
-                      <TableCell className="text-center">{dHours.toFixed(1)}h</TableCell>
-                      <TableCell className="text-center">{avg.toFixed(1)}h</TableCell>
+                      <TableCell className="text-center font-mono">{driverAssignments.length}</TableCell>
+                      <TableCell className="text-center font-mono">{dHours.toFixed(1)}h</TableCell>
+                      <TableCell className="text-center font-mono">{avg.toFixed(1)}h</TableCell>
                     </TableRow>
                   );
                 })}

@@ -99,7 +99,7 @@ export default function DriverTimeReport() {
                     <span className="flex items-center gap-1.5 text-muted-foreground">
                       <CheckCircle2 className="h-4 w-4 text-success" /> {currentItems.length} uppdrag
                     </span>
-                    <span className="text-foreground font-semibold tabular-nums">{currentHours.toFixed(1)} timmar</span>
+                    <span className="text-foreground font-semibold tabular-nums font-mono">{currentHours.toFixed(1)} timmar</span>
                   </div>
                 )}
               </TabsContent>

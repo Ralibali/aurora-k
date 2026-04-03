@@ -71,7 +71,7 @@ export default function AdminCustomers() {
                 {!isLoading && filtered.map(c => (
                   <TableRow key={c.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/admin/customers/${c.id}`)}>
                     <TableCell className="font-medium">{c.name}</TableCell>
-                    <TableCell className="hidden md:table-cell text-muted-foreground">{c.org_number || '–'}</TableCell>
+                    <TableCell className="hidden md:table-cell text-muted-foreground font-mono">{c.org_number || '–'}</TableCell>
                     <TableCell className="hidden md:table-cell">{c.contact_person || '–'}</TableCell>
                     <TableCell className="hidden sm:table-cell text-muted-foreground">{c.email || '–'}</TableCell>
                     <TableCell className="hidden sm:table-cell text-muted-foreground">{c.phone || '–'}</TableCell>

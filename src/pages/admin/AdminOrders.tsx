@@ -121,7 +121,7 @@ export default function AdminOrders() {
                           {statusLabels[o.status] || o.status}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-right">{orderAssignmentCounts[o.id] || 0}</TableCell>
+                      <TableCell className="text-right font-mono">{orderAssignmentCounts[o.id] || 0}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

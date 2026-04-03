@@ -31,7 +31,7 @@ export default function AdminEnvironment() {
           </Card>
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground flex items-center gap-2"><Fuel className="h-4 w-4" /> Bränsleförbrukning</CardTitle></CardHeader>
-            <CardContent><span className="text-2xl font-bold">{stats.totalFuel.toFixed(1)} liter</span><p className="text-xs text-muted-foreground mt-1">Schablon: 0.08 l/km</p></CardContent>
+            <CardContent><span className="text-2xl font-bold font-mono">{stats.totalFuel.toFixed(1)} liter</span><p className="text-xs text-muted-foreground mt-1">Schablon: 0.08 l/km</p></CardContent>
           </Card>
         </div>
         <Card>

@@ -95,8 +95,8 @@ export default function DriverInvoices() {
                 <p className="text-sm text-muted-foreground">{inv.customer?.name}</p>
                 <div className="flex items-center justify-between mt-2">
                   <div className="text-sm">
-                    <span className="text-muted-foreground">Förfaller: {inv.due_date}</span>
-                    <span className="font-medium ml-3">{inv.total_inc_vat.toFixed(0)} kr</span>
+                    <span className="text-muted-foreground font-mono">Förfaller: {inv.due_date}</span>
+                    <span className="font-medium ml-3 font-mono">{inv.total_inc_vat.toFixed(0)} kr</span>
                   </div>
                   <Button variant="ghost" size="icon" onClick={() => handleDownload(inv)} title="Ladda ner PDF">
                     <Download className="h-4 w-4" />
