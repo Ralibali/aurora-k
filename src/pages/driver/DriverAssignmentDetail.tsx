@@ -199,7 +199,7 @@ export default function DriverAssignmentDetail() {
   const requirePhoto = (assignment as any)?.require_photo ?? false;
 
   const activeAssignmentId = assignment?.status === 'active' ? assignment.id : undefined;
-  useDriverLocationTracker(user?.id, activeAssignmentId);
+  useDriverLocationTracker(user?.id, activeAssignmentId, undefined);
 
   useEffect(() => {
     if (assignment?.driver_comment) {

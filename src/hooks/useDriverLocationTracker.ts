@@ -78,7 +78,7 @@ export function useDriverLocationTracker(
       const { error } = await supabase
         .from('driver_locations')
         .upsert(
-          { driver_id: driverId, assignment_id: activeAssignmentId, latitude: lat, longitude: lng },
+          { driver_id: driverId, assignment_id: activeAssignmentId, latitude: lat, longitude: lng, company_id: companyId ?? undefined },
           { onConflict: 'driver_id' }
         );
       if (error) console.warn('[GPS] Upsert error:', error.message);
