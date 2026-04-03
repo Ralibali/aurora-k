@@ -4,17 +4,21 @@ import { useEffectiveDriverSettings } from '@/hooks/useDriverSettings';
 import { useAuth } from '@/hooks/useAuth';
 import { useDriverLocationTracker } from '@/hooks/useDriverLocationTracker';
 import { DriverLayout } from '@/components/DriverLayout';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { StatusBadge } from '@/components/StatusBadge';
-import { PriorityBadge } from '@/components/PriorityBadge';
 import { useAssignment, useDriverUpdateAssignment } from '@/hooks/useData';
 import { formatSwedishDateTime, calculateDuration } from '@/lib/format';
-import { ArrowLeft, Play, Camera, CheckCircle2, MapPin, Clock, FileText, Info, Navigation, SkipForward, MessageSquare, Send, Eraser, ArrowRight } from 'lucide-react';
+import {
+  ArrowLeft, Play, Camera, CheckCircle2, MapPin, Clock, FileText,
+  Info, Navigation, SkipForward, MessageSquare, Send, Eraser, ArrowRight,
+  User as UserIcon, Package,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
+import { motion } from 'framer-motion';
+import { format } from 'date-fns';
+import { sv } from 'date-fns/locale';
 
 function openMaps(address: string) {
   const encoded = encodeURIComponent(address);
@@ -22,6 +26,7 @@ function openMaps(address: string) {
   window.open(isIos ? `maps://maps.apple.com/?q=${encoded}` : `https://www.google.com/maps/search/?api=1&query=${encoded}`, '_blank');
 }
 
+// ─── Elapsed Timer ──────────────────────────────────────
 function ElapsedTimer({ since }: { since: string }) {
   const [elapsed, setElapsed] = useState('');
   useEffect(() => {
@@ -38,13 +43,56 @@ function ElapsedTimer({ since }: { since: string }) {
   }, [since]);
 
   return (
-    <div className="text-center py-5">
-      <p className="text-[11px] text-muted-foreground uppercase tracking-widest mb-1.5 font-medium">Förfluten tid</p>
-      <p className="text-4xl font-mono font-bold text-foreground tabular-nums tracking-tight">{elapsed}</p>
+    <div className="font-mono text-lg font-bold tabular-nums text-green-400">
+      {elapsed}
     </div>
   );
 }
 
+// ─── Stepper ────────────────────────────────────────────
+const STEPS = [
+  { key: 'pending', label: 'Mottagen' },
+  { key: 'active', label: 'Startad' },
+  { key: 'completed', label: 'Slutförd' },
+];
+
+function HorizontalStepper({ currentStatus }: { currentStatus: string }) {
+  const currentIdx = STEPS.findIndex((s) => s.key === currentStatus);
+
+  return (
+    <div className="flex items-center justify-between gap-1 w-full py-4">
+      {STEPS.map((step, i) => {
+        const isComplete = i < currentIdx || (i === currentIdx && currentStatus === 'completed');
+        const isCurrent = i === currentIdx && currentStatus !== 'completed';
+        return (
+          <div key={step.key} className="flex items-center flex-1 last:flex-none">
+            <div className="flex flex-col items-center gap-1.5">
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
+                  isComplete
+                    ? 'bg-green-500 text-white'
+                    : isCurrent
+                      ? 'bg-[#1E40AF] text-white ring-4 ring-blue-100 dark:ring-blue-900'
+                      : 'bg-muted text-muted-foreground'
+                }`}
+              >
+                {isComplete ? '✓' : i + 1}
+              </div>
+              <span className={`text-[11px] font-medium ${isComplete || isCurrent ? 'text-foreground' : 'text-muted-foreground'}`}>
+                {step.label}
+              </span>
+            </div>
+            {i < STEPS.length - 1 && (
+              <div className={`flex-1 h-0.5 mx-2 mb-5 ${i < currentIdx ? 'bg-green-500' : 'bg-muted'}`} />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── Signature Canvas ───────────────────────────────────
 function SignatureCanvas({ onComplete, onSkip }: { onComplete: (blob: Blob) => void; onSkip: () => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [hasStrokes, setHasStrokes] = useState(false);
@@ -79,9 +127,7 @@ function SignatureCanvas({ onComplete, onSkip }: { onComplete: (blob: Blob) => v
     setHasStrokes(true);
   };
 
-  const handlePointerUp = () => {
-    isDrawing.current = false;
-  };
+  const handlePointerUp = () => { isDrawing.current = false; };
 
   const clearCanvas = () => {
     const ctx = canvasRef.current!.getContext('2d')!;
@@ -90,41 +136,54 @@ function SignatureCanvas({ onComplete, onSkip }: { onComplete: (blob: Blob) => v
   };
 
   const handleContinue = () => {
-    canvasRef.current!.toBlob((blob) => {
-      if (blob) onComplete(blob);
-    }, 'image/png');
+    canvasRef.current!.toBlob((blob) => { if (blob) onComplete(blob); }, 'image/png');
   };
 
   return (
-    <Card>
-      <CardContent className="py-4 space-y-3">
-        <p className="text-sm font-medium text-foreground">Mottagarens signatur</p>
-        <canvas
-          ref={canvasRef}
-          width={600}
-          height={200}
-          className="w-full h-[200px] border rounded-lg bg-white touch-none"
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerLeave={handlePointerUp}
-        />
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={clearCanvas} className="flex-1">
-            <Eraser className="h-4 w-4 mr-1" /> Rensa
-          </Button>
-          <Button size="sm" onClick={handleContinue} disabled={!hasStrokes} className="flex-1">
-            Fortsätt till foto <ArrowRight className="h-4 w-4 ml-1" />
-          </Button>
-        </div>
-        <button onClick={onSkip} className="text-xs text-muted-foreground underline w-full text-center">
-          Hoppa över signatur
-        </button>
-      </CardContent>
-    </Card>
+    <div className="space-y-3 px-5">
+      <p className="text-sm font-medium text-foreground">Mottagarens signatur</p>
+      <canvas
+        ref={canvasRef}
+        width={600}
+        height={200}
+        className="w-full h-[200px] border rounded-lg bg-white touch-none"
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerLeave={handlePointerUp}
+      />
+      <div className="flex gap-2">
+        <Button variant="outline" size="sm" onClick={clearCanvas} className="flex-1">
+          <Eraser className="h-4 w-4 mr-1" /> Rensa
+        </Button>
+        <Button size="sm" onClick={handleContinue} disabled={!hasStrokes} className="flex-1">
+          Fortsätt <ArrowRight className="h-4 w-4 ml-1" />
+        </Button>
+      </div>
+      <button onClick={onSkip} className="text-xs text-muted-foreground underline w-full text-center">
+        Hoppa över signatur
+      </button>
+    </div>
   );
 }
 
+// ─── Info Row ───────────────────────────────────────────
+function InfoRow({ icon: Icon, label, value, action }: { icon: any; label: string; value: React.ReactNode; action?: React.ReactNode }) {
+  return (
+    <div className="flex items-start gap-3 py-3 border-b border-border/50 last:border-0">
+      <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
+        <Icon className="h-4 w-4 text-muted-foreground" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-xs text-muted-foreground">{label}</p>
+        <div className="text-sm font-medium text-foreground">{value}</div>
+      </div>
+      {action && <div className="shrink-0 self-center">{action}</div>}
+    </div>
+  );
+}
+
+// ─── Main Component ─────────────────────────────────────
 export default function DriverAssignmentDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -140,7 +199,6 @@ export default function DriverAssignmentDetail() {
   const requireSignature = (assignment as any)?.require_signature ?? false;
   const requirePhoto = (assignment as any)?.require_photo ?? false;
 
-  // Track GPS position when assignment is active
   const activeAssignmentId = assignment?.status === 'active' ? assignment.id : undefined;
   useDriverLocationTracker(user?.id, activeAssignmentId);
 
@@ -151,11 +209,22 @@ export default function DriverAssignmentDetail() {
   }, [assignment]);
 
   if (isLoading) {
-    return <DriverLayout><div className="p-4 space-y-4"><Skeleton className="h-8 w-32" /><Skeleton className="h-64 w-full" /></div></DriverLayout>;
+    return (
+      <DriverLayout hideHeader>
+        <div className="p-5 space-y-4">
+          <Skeleton className="h-8 w-32" />
+          <Skeleton className="h-64 w-full rounded-xl" />
+        </div>
+      </DriverLayout>
+    );
   }
 
   if (!assignment) {
-    return <DriverLayout><div className="text-center py-12 text-muted-foreground">Uppdraget hittades inte</div></DriverLayout>;
+    return (
+      <DriverLayout hideHeader>
+        <div className="text-center py-16 text-muted-foreground">Uppdraget hittades inte</div>
+      </DriverLayout>
+    );
   }
 
   const handleStart = () => {
@@ -169,10 +238,7 @@ export default function DriverAssignmentDetail() {
   const uploadSignature = async (blob: Blob): Promise<string | null> => {
     const path = `${user!.id}/${assignment.id}/signature.png`;
     const { error } = await supabase.storage.from('signatures').upload(path, blob, { upsert: true });
-    if (error) {
-      toast.error('Kunde inte ladda upp signatur');
-      return null;
-    }
+    if (error) { toast.error('Kunde inte ladda upp signatur'); return null; }
     const { data } = await supabase.storage.from('signatures').createSignedUrl(path, 60 * 60 * 24 * 365);
     return data?.signedUrl ?? null;
   };
@@ -184,13 +250,7 @@ export default function DriverAssignmentDetail() {
       if (requirePhoto) {
         setCompletionStep('photo');
       } else {
-        // Skip photo step - complete directly
-        updateAssignment.mutate({
-          id: assignment!.id,
-          status: 'completed',
-          actual_stop: new Date().toISOString(),
-          signature_url: url,
-        });
+        updateAssignment.mutate({ id: assignment!.id, status: 'completed', actual_stop: new Date().toISOString(), signature_url: url });
         toast.success('Uppdraget slutfört!');
         setCompletionStep(null);
       }
@@ -199,11 +259,8 @@ export default function DriverAssignmentDetail() {
 
   const handleSignatureSkip = () => {
     setSignatureUrl(null);
-    if (requirePhoto) {
-      setCompletionStep('photo');
-    } else {
-      handlePhotoComplete(null);
-    }
+    if (requirePhoto) setCompletionStep('photo');
+    else handlePhotoComplete(null);
   };
 
   const handlePhotoComplete = (photoUrl: string | null) => {
@@ -246,77 +303,107 @@ export default function DriverAssignmentDetail() {
       {
         onSuccess: () => { toast.success('Kommentar sparad'); setSavingComment(false); },
         onError: () => setSavingComment(false),
-      }
+      },
     );
   };
 
+  const handleInitiateComplete = () => {
+    if (requireSignature) setCompletionStep('signature');
+    else if (requirePhoto) setCompletionStep('photo');
+    else handlePhotoComplete(null);
+  };
+
+  const statusLabel = assignment.status === 'pending' ? 'Tilldelad' : assignment.status === 'active' ? 'Pågående' : 'Slutförd';
+  const statusColor = assignment.status === 'pending' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
+    : assignment.status === 'active' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+      : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300';
+
   return (
-    <DriverLayout>
-      <div className="p-4 space-y-4 no-pull-refresh">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors touch-target">
-          <ArrowLeft className="h-4 w-4" /> Tillbaka
-        </button>
+    <DriverLayout hideHeader>
+      <div className="flex flex-col min-h-[calc(100vh-env(safe-area-inset-bottom,0px))]">
+        {/* Top bar */}
+        <div className="flex items-center gap-3 px-5 pt-5 pb-2">
+          <button
+            onClick={() => navigate(-1)}
+            className="w-10 h-10 rounded-full bg-muted flex items-center justify-center active:scale-95 transition-transform"
+          >
+            <ArrowLeft className="h-5 w-5 text-foreground" />
+          </button>
+          <div className="flex-1" />
+          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusColor}`}>
+            {statusLabel}
+          </span>
+        </div>
 
-        <Card>
-          <CardContent className="py-5 space-y-4">
-            <div className="flex items-center justify-between flex-wrap gap-2">
-              <h2 className="text-lg font-semibold">{assignment.title}</h2>
-              <div className="flex gap-2">
-                <StatusBadge status={assignment.status} />
-                {assignment.priority !== 'normal' && <PriorityBadge priority={assignment.priority} />}
+        {/* Content */}
+        <div className="flex-1 overflow-auto px-5 pb-32 space-y-5">
+          {/* Title */}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+            <h1 className="text-2xl font-bold text-foreground leading-tight">{assignment.title}</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              {format(new Date(assignment.scheduled_start), 'EEEE d MMMM, HH:mm', { locale: sv })}
+              {assignment.scheduled_end && ` – ${format(new Date(assignment.scheduled_end), 'HH:mm')}`}
+            </p>
+          </motion.div>
+
+          {/* Stepper */}
+          <HorizontalStepper currentStatus={assignment.status} />
+
+          {/* Info rows */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+            className="bg-card border rounded-xl px-4"
+          >
+            <InfoRow icon={FileText} label="Kund" value={assignment.customer?.name ?? '–'} />
+            <InfoRow
+              icon={MapPin}
+              label="Adress"
+              value={
+                <button onClick={() => openMaps(assignment.address)} className="text-primary flex items-center gap-1 text-left">
+                  {assignment.address}
+                  <Navigation className="h-3.5 w-3.5 shrink-0" />
+                </button>
+              }
+            />
+            <InfoRow
+              icon={Clock}
+              label="Schemalagd tid"
+              value={`${formatSwedishDateTime(assignment.scheduled_start)}${assignment.scheduled_end ? ` – ${formatSwedishDateTime(assignment.scheduled_end)}` : ''}`}
+            />
+            {(assignment as any).vehicle_id && (
+              <InfoRow icon={Package} label="Fordon" value={(assignment as any).vehicle_id} />
+            )}
+          </motion.div>
+
+          {/* Instructions */}
+          {assignment.instructions && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }} className="bg-muted/50 border rounded-xl p-4">
+              <p className="text-xs text-muted-foreground mb-1.5 font-medium">Instruktioner</p>
+              <p className="text-sm text-foreground">{assignment.instructions}</p>
+            </motion.div>
+          )}
+
+          {/* Admin comment */}
+          {assignment.admin_comment && (
+            <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-xl p-4 flex gap-3">
+              <Info className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mb-1">Meddelande från admin</p>
+                <p className="text-sm text-foreground">{assignment.admin_comment}</p>
               </div>
             </div>
+          )}
 
-            <div className="space-y-3 text-sm">
-              <div className="flex items-start gap-2">
-                <FileText className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                <div><p className="text-muted-foreground">Kund</p><p className="font-medium">{assignment.customer?.name}</p></div>
-              </div>
-              <div className="flex items-start gap-2">
-                <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                <div className="flex-1">
-                  <p className="text-muted-foreground">Adress</p>
-                  <button onClick={() => openMaps(assignment.address)} className="font-medium text-primary hover:underline flex items-center gap-1 text-left">
-                    {assignment.address}
-                    <Navigation className="h-3.5 w-3.5 shrink-0" />
-                  </button>
-                </div>
-              </div>
-              <div className="flex items-start gap-2">
-                <Clock className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-muted-foreground">Schemalagd tid</p>
-                  <p className="font-medium">{formatSwedishDateTime(assignment.scheduled_start)}{assignment.scheduled_end && ` – ${formatSwedishDateTime(assignment.scheduled_end)}`}</p>
-                </div>
-              </div>
-              {assignment.instructions && (
-                <div className="bg-muted p-3 rounded-lg">
-                  <p className="text-xs text-muted-foreground mb-1">Instruktioner</p>
-                  <p className="text-sm">{assignment.instructions}</p>
-                </div>
-              )}
-              {assignment.admin_comment && (
-                <div className="bg-primary/5 border border-primary/20 p-3 rounded-lg flex gap-2">
-                  <Info className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                  <div>
-                    <p className="text-xs text-primary font-medium mb-1">Meddelande från admin</p>
-                    <p className="text-sm">{assignment.admin_comment}</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Driver comment */}
-        <Card>
-          <CardContent className="py-4 space-y-3">
+          {/* Driver comment */}
+          <div className="bg-card border rounded-xl p-4 space-y-3">
             <div className="flex items-center gap-2 text-sm font-medium text-foreground">
               <MessageSquare className="h-4 w-4 text-muted-foreground" />
               Förarkommentar
             </div>
             <Textarea
-              placeholder="Lämna en anteckning, t.ex. 'porten var låst'..."
+              placeholder="Lämna en anteckning..."
               value={driverComment}
               onChange={(e) => setDriverComment(e.target.value)}
               rows={3}
@@ -331,57 +418,29 @@ export default function DriverAssignmentDetail() {
               <Send className="h-3.5 w-3.5 mr-1.5" />
               {savingComment ? 'Sparar...' : 'Spara kommentar'}
             </Button>
-          </CardContent>
-        </Card>
+          </div>
 
-        {assignment.status === 'pending' && (
-          <Button onClick={handleStart} disabled={updateAssignment.isPending} className="w-full touch-target text-lg bg-success hover:bg-success/90 text-success-foreground shadow-lg shadow-success/20" size="lg">
-            <Play className="h-5 w-5 mr-2" /> Starta uppdrag
-          </Button>
-        )}
-
-        {assignment.status === 'active' && assignment.actual_start && (
-          <>
-            <ElapsedTimer since={assignment.actual_start} />
-            {completionStep === null && (
-              <Button onClick={() => {
-                if (requireSignature) {
-                  setCompletionStep('signature');
-                } else if (requirePhoto) {
-                  setCompletionStep('photo');
-                } else {
-                  handlePhotoComplete(null);
-                }
-              }} disabled={updateAssignment.isPending} className="w-full touch-target text-lg" size="lg">
-                <CheckCircle2 className="h-5 w-5 mr-2" /> Slutför uppdrag
+          {/* Completion steps inline */}
+          {completionStep === 'signature' && (
+            <SignatureCanvas onComplete={handleSignatureComplete} onSkip={handleSignatureSkip} />
+          )}
+          {completionStep === 'photo' && (
+            <div className="space-y-2 px-1">
+              <p className="text-sm font-medium text-foreground">Fraktsedelfoto</p>
+              <Button onClick={handleTakePhoto} disabled={updateAssignment.isPending} className="w-full min-h-[48px]" size="lg">
+                <Camera className="h-5 w-5 mr-2" /> Ta foto av fraktsedel
               </Button>
-            )}
-            {completionStep === 'signature' && (
-              <SignatureCanvas onComplete={handleSignatureComplete} onSkip={handleSignatureSkip} />
-            )}
-            {completionStep === 'photo' && (
-              <Card>
-                <CardContent className="py-4 space-y-3">
-                  <p className="text-sm font-medium text-foreground">Fraktsedelfoto</p>
-                  <div className="space-y-2">
-                    <Button onClick={handleTakePhoto} disabled={updateAssignment.isPending} className="w-full touch-target" size="lg">
-                      <Camera className="h-5 w-5 mr-2" /> Ta foto av fraktsedel
-                    </Button>
-                    <Button onClick={() => handlePhotoComplete(null)} disabled={updateAssignment.isPending} variant="outline" className="w-full touch-target" size="lg">
-                      <SkipForward className="h-5 w-5 mr-2" /> Hoppa över foto
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </>
-        )}
+              <Button onClick={() => handlePhotoComplete(null)} disabled={updateAssignment.isPending} variant="outline" className="w-full min-h-[48px]" size="lg">
+                <SkipForward className="h-5 w-5 mr-2" /> Hoppa över foto
+              </Button>
+            </div>
+          )}
 
-        {assignment.status === 'completed' && (
-          <Card>
-            <CardContent className="py-5 text-center space-y-3">
-              <CheckCircle2 className="h-12 w-12 text-success mx-auto" />
-              <p className="font-semibold text-lg">Uppdraget slutfört</p>
+          {/* Completed summary */}
+          {assignment.status === 'completed' && (
+            <div className="bg-card border rounded-xl p-5 text-center space-y-3">
+              <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto" />
+              <p className="font-semibold text-lg text-foreground">Uppdraget slutfört</p>
               {assignment.actual_start && assignment.actual_stop && (
                 <div className="text-sm text-muted-foreground space-y-1">
                   <p>Start: {formatSwedishDateTime(assignment.actual_start)}</p>
@@ -398,9 +457,52 @@ export default function DriverAssignmentDetail() {
               {assignment.consignment_photo_url && (
                 <img src={assignment.consignment_photo_url} alt="Fraktsedel" className="w-full max-w-[200px] mx-auto rounded-lg border mt-3" />
               )}
-            </CardContent>
-          </Card>
-        )}
+            </div>
+          )}
+        </div>
+
+        {/* FIXED BOTTOM ACTION BAR */}
+        <div
+          className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-md border-t px-5 py-3 z-50"
+          style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}
+        >
+          {assignment.status === 'pending' && (
+            <button
+              onClick={handleStart}
+              disabled={updateAssignment.isPending}
+              className="w-full bg-[#1E40AF] hover:bg-[#1E40AF]/90 text-white font-semibold rounded-xl py-4 text-base flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 min-h-[48px]"
+            >
+              <Play className="h-5 w-5" />
+              Starta körning
+            </button>
+          )}
+
+          {assignment.status === 'active' && completionStep === null && (
+            <div className="flex items-center gap-3">
+              {assignment.actual_start && (
+                <ElapsedTimer since={assignment.actual_start} />
+              )}
+              <button
+                onClick={handleInitiateComplete}
+                disabled={updateAssignment.isPending}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl py-4 text-base flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 min-h-[48px]"
+              >
+                <CheckCircle2 className="h-5 w-5" />
+                Markera slutförd
+              </button>
+            </div>
+          )}
+
+          {assignment.status === 'completed' && (
+            <button
+              onClick={() => navigate('/driver/time-report')}
+              className="w-full border border-border text-foreground font-medium rounded-xl py-4 text-base flex items-center justify-center gap-2 active:scale-[0.98] transition-all min-h-[48px]"
+            >
+              <Clock className="h-5 w-5" />
+              Se tidrapport
+            </button>
+          )}
+        </div>
       </div>
     </DriverLayout>
   );
