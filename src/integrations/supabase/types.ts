@@ -14,6 +14,96 @@ export type Database = {
   }
   public: {
     Tables: {
+      articles: {
+        Row: {
+          active: boolean
+          article_number: string | null
+          created_at: string
+          default_price: number
+          description: string | null
+          id: string
+          name: string
+          unit: string
+          updated_at: string
+          vat_rate: number
+        }
+        Insert: {
+          active?: boolean
+          article_number?: string | null
+          created_at?: string
+          default_price?: number
+          description?: string | null
+          id?: string
+          name: string
+          unit?: string
+          updated_at?: string
+          vat_rate?: number
+        }
+        Update: {
+          active?: boolean
+          article_number?: string | null
+          created_at?: string
+          default_price?: number
+          description?: string | null
+          id?: string
+          name?: string
+          unit?: string
+          updated_at?: string
+          vat_rate?: number
+        }
+        Relationships: []
+      }
+      assignment_articles: {
+        Row: {
+          article_id: string | null
+          assignment_id: string
+          created_at: string
+          id: string
+          name: string
+          quantity: number
+          unit: string
+          unit_price: number
+          vat_rate: number
+        }
+        Insert: {
+          article_id?: string | null
+          assignment_id: string
+          created_at?: string
+          id?: string
+          name: string
+          quantity?: number
+          unit?: string
+          unit_price?: number
+          vat_rate?: number
+        }
+        Update: {
+          article_id?: string | null
+          assignment_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+          quantity?: number
+          unit?: string
+          unit_price?: number
+          vat_rate?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignment_articles_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignment_articles_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assignment_logs: {
         Row: {
           action: string
@@ -64,9 +154,13 @@ export type Database = {
           created_at: string
           customer_id: string
           driver_comment: string | null
+          geofence_lat: number | null
+          geofence_lng: number | null
+          geofence_radius: number | null
           id: string
           instructions: string | null
           invoiced: boolean
+          order_id: string | null
           priority: string
           require_photo: boolean
           require_signature: boolean
@@ -75,6 +169,7 @@ export type Database = {
           signature_url: string | null
           status: string
           title: string
+          vehicle_id: string | null
         }
         Insert: {
           actual_start?: string | null
@@ -87,9 +182,13 @@ export type Database = {
           created_at?: string
           customer_id: string
           driver_comment?: string | null
+          geofence_lat?: number | null
+          geofence_lng?: number | null
+          geofence_radius?: number | null
           id?: string
           instructions?: string | null
           invoiced?: boolean
+          order_id?: string | null
           priority?: string
           require_photo?: boolean
           require_signature?: boolean
@@ -98,6 +197,7 @@ export type Database = {
           signature_url?: string | null
           status?: string
           title: string
+          vehicle_id?: string | null
         }
         Update: {
           actual_start?: string | null
@@ -110,9 +210,13 @@ export type Database = {
           created_at?: string
           customer_id?: string
           driver_comment?: string | null
+          geofence_lat?: number | null
+          geofence_lng?: number | null
+          geofence_radius?: number | null
           id?: string
           instructions?: string | null
           invoiced?: boolean
+          order_id?: string | null
           priority?: string
           require_photo?: boolean
           require_signature?: boolean
@@ -121,6 +225,7 @@ export type Database = {
           signature_url?: string | null
           status?: string
           title?: string
+          vehicle_id?: string | null
         }
         Relationships: [
           {
@@ -132,6 +237,91 @@ export type Database = {
           },
           {
             foreignKeyName: "assignments_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignments_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_access_tokens: {
+        Row: {
+          created_at: string
+          customer_id: string
+          expires_at: string | null
+          id: string
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          expires_at?: string | null
+          id?: string
+          token?: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          expires_at?: string | null
+          id?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_access_tokens_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_price_lists: {
+        Row: {
+          article_id: string
+          created_at: string
+          customer_id: string
+          id: string
+          price: number
+        }
+        Insert: {
+          article_id: string
+          created_at?: string
+          customer_id: string
+          id?: string
+          price: number
+        }
+        Update: {
+          article_id?: string
+          created_at?: string
+          customer_id?: string
+          id?: string
+          price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_price_lists_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_price_lists_customer_id_fkey"
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "customers"
@@ -383,6 +573,74 @@ export type Database = {
           },
         ]
       }
+      order_templates: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          template_data: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          template_data?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          template_data?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      orders: {
+        Row: {
+          created_at: string
+          customer_id: string
+          description: string | null
+          id: string
+          order_number: number
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          description?: string | null
+          id?: string
+          order_number?: number
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          description?: string | null
+          id?: string
+          order_number?: number
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -473,6 +731,48 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      vehicles: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          make: string | null
+          model: string | null
+          name: string
+          notes: string | null
+          registration_number: string | null
+          type: string
+          updated_at: string
+          year: number | null
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          make?: string | null
+          model?: string | null
+          name: string
+          notes?: string | null
+          registration_number?: string | null
+          type?: string
+          updated_at?: string
+          year?: number | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          make?: string | null
+          model?: string | null
+          name?: string
+          notes?: string | null
+          registration_number?: string | null
+          type?: string
+          updated_at?: string
+          year?: number | null
         }
         Relationships: []
       }

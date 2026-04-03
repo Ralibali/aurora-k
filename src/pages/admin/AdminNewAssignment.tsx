@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { useCustomers, useDrivers, useCreateAssignment } from '@/hooks/useData';
+import { useVehicles, useOrders } from '@/hooks/useNewFeatures';
 import { priorityLabels } from '@/lib/types';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
@@ -32,6 +33,8 @@ export default function AdminNewAssignment() {
 
   const { data: customers } = useCustomers();
   const { data: drivers } = useDrivers();
+  const { data: vehicles } = useVehicles();
+  const { data: orders } = useOrders();
   const createAssignment = useCreateAssignment();
 
   const [title, setTitle] = useState(copyFrom ? copyFrom.title : '');
@@ -46,6 +49,11 @@ export default function AdminNewAssignment() {
   const [requireSignature, setRequireSignature] = useState(copyFrom?.require_signature ?? false);
   const [requirePhoto, setRequirePhoto] = useState(copyFrom?.require_photo ?? false);
   const [cost, setCost] = useState<string>(copyFrom?.cost != null ? String(copyFrom.cost) : '');
+  const [vehicleId, setVehicleId] = useState(copyFrom?.vehicle_id || '');
+  const [orderId, setOrderId] = useState(copyFrom?.order_id || '');
+  const [geofenceRadius, setGeofenceRadius] = useState('');
+  const [geofenceLat, setGeofenceLat] = useState('');
+  const [geofenceLng, setGeofenceLng] = useState('');
 
   // Recurrence
   const [recurrenceEnabled, setRecurrenceEnabled] = useState(false);
@@ -91,6 +99,11 @@ export default function AdminNewAssignment() {
             require_signature: requireSignature,
             require_photo: requirePhoto,
             cost: cost ? parseFloat(cost) : null,
+            vehicle_id: vehicleId || null,
+            order_id: orderId || null,
+            geofence_radius: geofenceRadius ? parseInt(geofenceRadius) : null,
+            geofence_lat: geofenceLat ? parseFloat(geofenceLat) : null,
+            geofence_lng: geofenceLng ? parseFloat(geofenceLng) : null,
           }, {
             onSuccess: () => resolve(),
             onError: (err) => reject(err),
@@ -175,6 +188,29 @@ export default function AdminNewAssignment() {
                 </Select>
               </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Fordon (valfritt)</Label>
+                  <Select value={vehicleId} onValueChange={setVehicleId}>
+                    <SelectTrigger><SelectValue placeholder="Inget fordon" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Inget fordon</SelectItem>
+                      {(vehicles ?? []).map(v => <SelectItem key={v.id} value={v.id}>{v.name} {v.registration_number ? `(${v.registration_number})` : ''}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Beställning (valfritt)</Label>
+                  <Select value={orderId} onValueChange={setOrderId}>
+                    <SelectTrigger><SelectValue placeholder="Ingen beställning" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Ingen beställning</SelectItem>
+                      {(orders ?? []).filter(o => o.status === 'active').map(o => <SelectItem key={o.id} value={o.id}>{o.title}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="comment">Intern kommentar (valfritt)</Label>
               <Textarea id="comment" value={adminComment} onChange={e => setAdminComment(e.target.value)} placeholder="Meddelande till chauffören..." />
@@ -184,6 +220,33 @@ export default function AdminNewAssignment() {
               <div className="space-y-2">
                 <Label htmlFor="cost">Kostnad / fakturabelopp (kr, valfritt)</Label>
                 <Input id="cost" type="number" step="0.01" min="0" value={cost} onChange={e => setCost(e.target.value)} placeholder="T.ex. 1500" />
+              </div>
+
+              {/* Geofence */}
+              <div className="border rounded-lg p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium">Geofence</p>
+                    <p className="text-xs text-muted-foreground">Auto-notis vid ankomst/avfärd</p>
+                  </div>
+                  <Switch checked={!!geofenceRadius} onCheckedChange={(on) => { if (!on) { setGeofenceRadius(''); setGeofenceLat(''); setGeofenceLng(''); } else { setGeofenceRadius('200'); }}} />
+                </div>
+                {!!geofenceRadius && (
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="space-y-1">
+                      <Label className="text-xs">Latitud</Label>
+                      <Input type="number" step="any" value={geofenceLat} onChange={e => setGeofenceLat(e.target.value)} placeholder="59.33" />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Longitud</Label>
+                      <Input type="number" step="any" value={geofenceLng} onChange={e => setGeofenceLng(e.target.value)} placeholder="18.07" />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Radie (m)</Label>
+                      <Input type="number" value={geofenceRadius} onChange={e => setGeofenceRadius(e.target.value)} placeholder="200" />
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Signatur & Foto krav */}

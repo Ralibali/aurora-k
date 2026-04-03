@@ -1,4 +1,4 @@
-import { LayoutDashboard, ClipboardList, Users, Clock, LogOut, Building2, Receipt, BarChart3, Settings, Truck, Moon, Sun, Smartphone, MapPin, CalendarDays } from 'lucide-react';
+import { LayoutDashboard, ClipboardList, Users, Clock, LogOut, Building2, Receipt, BarChart3, Settings, Truck, Moon, Sun, Smartphone, MapPin, CalendarDays, Package, Car, ShoppingCart, FileText } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -22,9 +22,16 @@ const mainNav = [
   { title: 'Dashboard', url: '/admin', icon: LayoutDashboard },
   { title: 'Uppdrag', url: '/admin/assignments', icon: ClipboardList },
   { title: 'Kalender', url: '/admin/calendar', icon: CalendarDays },
+  { title: 'Beställningar', url: '/admin/orders', icon: ShoppingCart },
   { title: 'Kunder', url: '/admin/customers', icon: Building2 },
   { title: 'Chaufförer', url: '/admin/drivers', icon: Users },
+  { title: 'Fordon', url: '/admin/vehicles', icon: Car },
   { title: 'Live-karta', url: '/admin/live-map', icon: MapPin },
+];
+
+const resourceNav = [
+  { title: 'Artiklar', url: '/admin/articles', icon: Package },
+  { title: 'Mallar', url: '/admin/order-templates', icon: FileText },
 ];
 
 const financeNav = [
@@ -101,6 +108,7 @@ export function AdminSidebar() {
       <Separator className="bg-sidebar-border mx-3" />
       <SidebarContent className="pt-2">
         <NavGroup label="Översikt" items={mainNav} collapsed={collapsed} />
+        <NavGroup label="Register" items={resourceNav} collapsed={collapsed} />
         <NavGroup label="Ekonomi" items={financeNav} collapsed={collapsed} />
         <NavGroup label="System" items={systemNav} collapsed={collapsed} />
       </SidebarContent>

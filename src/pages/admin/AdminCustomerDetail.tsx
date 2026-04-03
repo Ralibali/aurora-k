@@ -8,12 +8,14 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { StatusBadge } from '@/components/StatusBadge';
 import { InvoiceStatusBadge } from '@/components/InvoiceStatusBadge';
 import { useCustomer, useUpdateCustomer, useAssignments, useInvoices } from '@/hooks/useData';
+import { useCustomerPriceList, useUpsertCustomerPrice, useDeleteCustomerPrice, useArticles } from '@/hooks/useNewFeatures';
 import { pricingTypeLabels } from '@/lib/types';
 import { formatSwedishDate, calculateDecimalHours } from '@/lib/format';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, Plus, Trash2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AdminCustomerDetail() {
@@ -22,9 +24,15 @@ export default function AdminCustomerDetail() {
   const { data: customer, isLoading } = useCustomer(id);
   const { data: allAssignments } = useAssignments();
   const { data: allInvoices } = useInvoices();
+  const { data: priceList } = useCustomerPriceList(id);
+  const { data: articles } = useArticles();
   const updateCustomer = useUpdateCustomer();
+  const upsertPrice = useUpsertCustomerPrice();
+  const deletePrice = useDeleteCustomerPrice();
 
   const [form, setForm] = useState<Record<string, any> | null>(null);
+  const [newPriceArticle, setNewPriceArticle] = useState('');
+  const [newPriceValue, setNewPriceValue] = useState('');
 
   if (isLoading) {
     return <AdminLayout title="Kund"><div className="max-w-4xl space-y-4"><Skeleton className="h-8 w-32" /><Skeleton className="h-96 w-full" /></div></AdminLayout>;
@@ -55,6 +63,7 @@ export default function AdminCustomerDetail() {
         <Tabs defaultValue="details">
           <TabsList>
             <TabsTrigger value="details">Uppgifter</TabsTrigger>
+            <TabsTrigger value="prices">Prislistor</TabsTrigger>
             <TabsTrigger value="deliveries">Leveranser</TabsTrigger>
             <TabsTrigger value="invoices">Fakturor</TabsTrigger>
           </TabsList>
@@ -127,6 +136,61 @@ export default function AdminCustomerDetail() {
                 <Button onClick={handleSave} disabled={updateCustomer.isPending}>
                   <Save className="h-4 w-4 mr-1" /> {updateCustomer.isPending ? 'Sparar...' : 'Spara'}
                 </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="prices" className="mt-4">
+            <Card>
+              <CardContent className="pt-6 space-y-4">
+                <p className="text-sm text-muted-foreground">Ange kundspecifika priser för artiklar. Dessa priser används istället för standardpriset vid fakturering.</p>
+                <div className="flex gap-2 items-end">
+                  <div className="space-y-1 flex-1">
+                    <Label className="text-xs">Artikel</Label>
+                    <Select value={newPriceArticle} onValueChange={setNewPriceArticle}>
+                      <SelectTrigger className="h-9"><SelectValue placeholder="Välj artikel" /></SelectTrigger>
+                      <SelectContent>
+                        {(articles ?? []).map(a => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1 w-32">
+                    <Label className="text-xs">Pris (kr)</Label>
+                    <Input type="number" step="0.01" value={newPriceValue} onChange={e => setNewPriceValue(e.target.value)} className="h-9" />
+                  </div>
+                  <Button size="sm" className="h-9" onClick={() => {
+                    if (newPriceArticle && newPriceValue && id) {
+                      upsertPrice.mutate({ customer_id: id, article_id: newPriceArticle, price: parseFloat(newPriceValue) });
+                      setNewPriceArticle(''); setNewPriceValue('');
+                    }
+                  }}>
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                {priceList && priceList.length > 0 && (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Artikel</TableHead>
+                        <TableHead className="text-right">Standardpris</TableHead>
+                        <TableHead className="text-right">Kundpris</TableHead>
+                        <TableHead className="w-[60px]" />
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {priceList.map((p: any) => (
+                        <TableRow key={p.id}>
+                          <TableCell className="font-medium">{p.article?.name}</TableCell>
+                          <TableCell className="text-right text-muted-foreground">{p.article?.default_price} kr</TableCell>
+                          <TableCell className="text-right font-medium">{p.price} kr</TableCell>
+                          <TableCell>
+                            <Button variant="ghost" size="icon" onClick={() => deletePrice.mutate(p.id)}><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
