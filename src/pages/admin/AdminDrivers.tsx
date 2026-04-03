@@ -375,11 +375,33 @@ export default function AdminDrivers() {
   const [filter, setFilter] = useState('all');
   const [selectedDriver, setSelectedDriver] = useState<any>(null);
 
-  const { companyId } = useAuth();
+  const { companyId, user } = useAuth();
   const { data: drivers, isLoading } = useDrivers();
   const { data: assignments } = useAssignments();
   const { data: compensations } = useDriverCompensations();
   const qc = useQueryClient();
+
+  // Fetch company name and admin name for invite emails
+  const { data: companyData } = useQuery({
+    queryKey: ['company-name', companyId],
+    queryFn: async () => {
+      if (!companyId) return null;
+      const { data } = await supabase.from('companies').select('name').eq('id', companyId).single();
+      return data;
+    },
+    enabled: !!companyId,
+  });
+  const { data: adminProfile } = useQuery({
+    queryKey: ['admin-profile', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase.from('profiles').select('full_name').eq('id', user.id).single();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+  const companyName = companyData?.name || 'Ditt företag';
+  const adminName = adminProfile?.full_name || 'Admin';
 
   // Fetch pending invitations
   const { data: invitations } = useQuery({
