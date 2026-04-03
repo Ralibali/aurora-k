@@ -33,6 +33,8 @@ export default function AdminNewAssignment() {
 
   const { data: customers } = useCustomers();
   const { data: drivers } = useDrivers();
+  const { data: vehicles } = useVehicles();
+  const { data: orders } = useOrders();
   const createAssignment = useCreateAssignment();
 
   const [title, setTitle] = useState(copyFrom ? copyFrom.title : '');
