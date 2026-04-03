@@ -219,9 +219,7 @@ export default function DriverAssignmentDetail() {
 
   if (!assignment) {
     return (
-      <DriverLayout hideHeader>
-        <div className="text-center py-16 text-muted-foreground">Uppdraget hittades inte</div>
-      </DriverLayout>
+      <div className="text-center py-16 text-muted-foreground">Uppdraget hittades inte</div>
     );
   }
 
