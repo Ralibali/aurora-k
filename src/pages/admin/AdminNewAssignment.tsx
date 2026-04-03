@@ -201,7 +201,7 @@ export default function AdminNewAssignment() {
                 </div>
                 <div className="space-y-2">
                   <Label>Beställning (valfritt)</Label>
-                  <Select value={orderId} onValueChange={setOrderId}>
+                   <Select value={orderId || 'none'} onValueChange={(v) => setOrderId(v === 'none' ? '' : v)}>
                     <SelectTrigger><SelectValue placeholder="Ingen beställning" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="none">Ingen beställning</SelectItem>
