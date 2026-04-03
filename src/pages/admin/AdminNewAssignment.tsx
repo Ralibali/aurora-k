@@ -49,6 +49,8 @@ export default function AdminNewAssignment() {
   const [requireSignature, setRequireSignature] = useState(copyFrom?.require_signature ?? false);
   const [requirePhoto, setRequirePhoto] = useState(copyFrom?.require_photo ?? false);
   const [cost, setCost] = useState<string>(copyFrom?.cost != null ? String(copyFrom.cost) : '');
+  const [vehicleId, setVehicleId] = useState(copyFrom?.vehicle_id || '');
+  const [orderId, setOrderId] = useState(copyFrom?.order_id || '');
 
   // Recurrence
   const [recurrenceEnabled, setRecurrenceEnabled] = useState(false);
