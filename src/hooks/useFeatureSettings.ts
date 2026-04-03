@@ -39,6 +39,20 @@ export function useToggleFeature() {
   });
 }
 
+export function useResetAllFeatures() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from('feature_settings')
+        .update({ enabled: true, updated_at: new Date().toISOString() })
+        .neq('id', '00000000-0000-0000-0000-000000000000'); // match all rows
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['feature_settings'] }),
+  });
+}
+
 /** Returns a Set of enabled feature keys for quick lookup */
 export function useEnabledFeatures() {
   const { data, isLoading } = useFeatureSettings();

@@ -156,9 +156,26 @@ export default function AdminSettings() {
           </TabsContent>
 
           <TabsContent value="features" className="space-y-6">
-            <div className="space-y-1 mb-4">
-              <h2 className="text-sm font-semibold">Aktiva funktioner</h2>
-              <p className="text-xs text-muted-foreground">Välj vilka moduler som ska vara synliga i sidomenyn. Avaktiverade funktioner döljs men data raderas inte.</p>
+            <div className="flex items-center justify-between mb-4">
+              <div className="space-y-1">
+                <h2 className="text-sm font-semibold">Aktiva funktioner</h2>
+                <p className="text-xs text-muted-foreground">Välj vilka moduler som ska vara synliga i sidomenyn. Avaktiverade funktioner döljs men data raderas inte.</p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5 shrink-0"
+                disabled={resetFeatures.isPending}
+                onClick={() => {
+                  resetFeatures.mutate(undefined, {
+                    onSuccess: () => toast.success('Alla funktioner återställda till standard'),
+                    onError: () => toast.error('Kunde inte återställa'),
+                  });
+                }}
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+                Återställ alla
+              </Button>
             </div>
 
             {featuresLoading ? (
