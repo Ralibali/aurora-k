@@ -88,7 +88,7 @@ export default function DriverTimeReport() {
                           <p className="text-xs text-muted-foreground mt-0.5 font-mono">{formatSwedishDate(a.actual_start!)}</p>
                         </div>
                         <div className="text-right shrink-0">
-                          <p className="font-semibold text-sm text-foreground tabular-nums">{hours.toFixed(1)}h</p>
+                          <p className="font-semibold text-sm text-foreground tabular-nums font-mono">{hours.toFixed(1)}h</p>
                         </div>
                       </CardContent>
                     </Card>
