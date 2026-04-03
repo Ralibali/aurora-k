@@ -108,6 +108,6 @@ export default function DriverInvoices() {
           </motion.div>
         ))}
       </div>
-    </DriverLayout>
+    </>
   );
 }

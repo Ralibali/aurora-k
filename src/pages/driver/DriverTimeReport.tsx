@@ -108,6 +108,6 @@ export default function DriverTimeReport() {
           </>
         )}
       </div>
-    </DriverLayout>
+    </>
   );
 }

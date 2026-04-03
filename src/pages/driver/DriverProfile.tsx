@@ -130,6 +130,6 @@ export default function DriverProfile() {
           Logga ut
         </Button>
       </div>
-    </DriverLayout>
+    </>
   );
 }

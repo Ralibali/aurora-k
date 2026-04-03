@@ -261,6 +261,6 @@ export default function DriverAssignments() {
           )}
         </div>
       </div>
-    </DriverLayout>
+    </>
   );
 }
