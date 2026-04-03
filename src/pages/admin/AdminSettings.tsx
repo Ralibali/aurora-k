@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+const SubscriptionTab = lazy(() => import('@/components/SubscriptionTab'));
 
 export default function AdminSettings() {
   const { data: settings, isLoading } = useSettings();
