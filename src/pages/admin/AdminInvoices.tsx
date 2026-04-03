@@ -282,13 +282,13 @@ export default function AdminInvoices() {
                 </Table>
 
                 <div className="text-right space-y-1 border-t pt-3">
-                  <p>Netto: <span className="font-medium">{previewInvoice.total_ex_vat.toFixed(0)} kr</span></p>
+                  <p>Netto: <span className="font-medium font-mono">{previewInvoice.total_ex_vat.toFixed(0)} kr</span></p>
                   {previewData.vatRate > 0 ? (
-                    <p>Moms {previewData.vatRate}%: <span className="font-medium">{previewInvoice.vat_amount.toFixed(0)} kr</span></p>
+                    <p>Moms {previewData.vatRate}%: <span className="font-medium font-mono">{previewInvoice.vat_amount.toFixed(0)} kr</span></p>
                   ) : (
                     <p className="text-sm text-muted-foreground">Momsfri faktura</p>
                   )}
-                  <p className="text-lg font-bold">Att betala: {previewInvoice.total_inc_vat.toFixed(0)} kr</p>
+                  <p className="text-lg font-bold">Att betala: <span className="font-mono">{previewInvoice.total_inc_vat.toFixed(0)} kr</span></p>
                 </div>
 
                 {previewInvoice.message && (
