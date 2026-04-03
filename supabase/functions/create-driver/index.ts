@@ -83,6 +83,7 @@ Deno.serve(async (req) => {
     await adminClient.from("user_roles").upsert({
       user_id: userId,
       role: "driver",
+      company_id,
     }, { onConflict: "user_id,role" });
 
     // Profile is auto-created by trigger, but ensure data is correct
@@ -91,6 +92,7 @@ Deno.serve(async (req) => {
       email,
       full_name,
       role: "driver",
+      company_id,
     }, { onConflict: "id" });
 
     return new Response(
