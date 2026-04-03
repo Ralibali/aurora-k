@@ -188,8 +188,8 @@ export default function AdminCustomerDetail() {
                       {priceList.map((p: any) => (
                         <TableRow key={p.id}>
                           <TableCell className="font-medium">{p.article?.name}</TableCell>
-                          <TableCell className="text-right text-muted-foreground">{p.article?.default_price} kr</TableCell>
-                          <TableCell className="text-right font-medium">{p.price} kr</TableCell>
+                          <TableCell className="text-right text-muted-foreground font-mono">{p.article?.default_price} kr</TableCell>
+                          <TableCell className="text-right font-medium font-mono">{p.price} kr</TableCell>
                           <TableCell>
                             <Button variant="ghost" size="icon" onClick={() => deletePrice.mutate(p.id)}><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>
                           </TableCell>
