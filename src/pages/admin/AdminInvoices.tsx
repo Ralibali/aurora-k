@@ -243,9 +243,9 @@ export default function AdminInvoices() {
                   </div>
                   <div className="text-right">
                     <p className="text-2xl font-bold text-primary">FAKTURA</p>
-                    <p className="text-sm">Nr: {previewInvoice.invoice_number}</p>
-                    <p className="text-sm">Datum: {previewInvoice.invoice_date}</p>
-                    <p className="text-sm">Förfaller: {previewInvoice.due_date}</p>
+                    <p className="text-sm font-mono">Nr: {previewInvoice.invoice_number}</p>
+                    <p className="text-sm font-mono">Datum: {previewInvoice.invoice_date}</p>
+                    <p className="text-sm font-mono">Förfaller: {previewInvoice.due_date}</p>
                     {previewInvoice.reference && <p className="text-sm">Ref: {previewInvoice.reference}</p>}
                   </div>
                 </div>
