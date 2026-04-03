@@ -1,25 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Component, ReactNode, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AdminLayout } from '@/components/AdminLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, User, Clock, Navigation } from 'lucide-react';
+import { MapPin, User, Clock, Navigation, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
-
-// Fix Leaflet default marker icons in bundlers
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: markerIcon2x,
-  iconUrl: markerIcon,
-  shadowUrl: markerShadow,
-});
+import { Button } from '@/components/ui/button';
 
 interface DriverLocation {
   id: string;
@@ -42,17 +28,27 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(minutes / 60)}h sedan`;
 }
 
-// Auto-fit map to markers
-function FitBounds({ positions }: { positions: [number, number][] }) {
-  const map = useMap();
-  useEffect(() => {
-    if (positions.length > 0) {
-      const bounds = L.latLngBounds(positions.map(([lat, lng]) => [lat, lng]));
-      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
+// Error boundary to catch map rendering issues
+class MapErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+  state = { hasError: false };
+  static getDerivedStateFromError() { return { hasError: true }; }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="h-full flex flex-col items-center justify-center text-muted-foreground gap-3 p-8">
+          <AlertTriangle className="h-10 w-10 text-destructive opacity-50" />
+          <p className="font-medium">Kartan kunde inte laddas</p>
+          <p className="text-sm">Prova att ladda om sidan</p>
+          <Button variant="outline" size="sm" onClick={() => window.location.reload()}>Ladda om</Button>
+        </div>
+      );
     }
-  }, [positions, map]);
-  return null;
+    return this.state.hasError ? null : this.props.children;
+  }
 }
+
+// Lazy load the map component to isolate potential issues
+const LeafletMap = lazy(() => import('./AdminLiveMapLeaflet'));
 
 export default function AdminLiveMap() {
   const navigate = useNavigate();
@@ -65,7 +61,6 @@ export default function AdminLiveMap() {
       .select('*');
 
     if (data && data.length > 0) {
-      // Fetch driver and assignment info
       const driverIds = [...new Set(data.map((d) => d.driver_id))];
       const assignmentIds = [...new Set(data.map((d) => d.assignment_id).filter(Boolean))] as string[];
 
@@ -99,94 +94,46 @@ export default function AdminLiveMap() {
   useEffect(() => {
     fetchLocations();
 
-    // Subscribe to realtime changes
     const channel = supabase
       .channel('driver-locations-live')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'driver_locations' },
-        () => {
-          fetchLocations();
-        }
+        () => { fetchLocations(); }
       )
       .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => { supabase.removeChannel(channel); };
   }, []);
-
-  // Default center: Sweden (Stockholm)
-  const defaultCenter: [number, number] = [59.33, 18.07];
-  const positions: [number, number][] = locations.map((l) => [l.latitude, l.longitude]);
 
   return (
     <AdminLayout title="Live-karta" description="Realtidsposition för chaufförer med aktiva uppdrag">
       <div className="space-y-4">
         <Badge variant="outline" className="gap-1.5">
           <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
           </span>
           {locations.length} aktiv{locations.length !== 1 ? 'a' : ''}
         </Badge>
 
         <Card className="overflow-hidden">
           <CardContent className="p-0">
-            <div className="h-[calc(100vh-220px)] min-h-[400px]">
+            <div className="h-[calc(100vh-220px)] min-h-[400px] relative">
               {loading ? (
                 <div className="h-full flex items-center justify-center text-muted-foreground">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
                 </div>
               ) : (
-                <MapContainer
-                  center={positions.length > 0 ? positions[0] : defaultCenter}
-                  zoom={10}
-                  className="h-full w-full z-0"
-                  style={{ background: 'hsl(var(--muted))' }}
-                >
-                  <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                    url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  />
-                  {positions.length > 0 && <FitBounds positions={positions} />}
-                  {locations.map((loc) => (
-                    <Marker key={loc.id} position={[loc.latitude, loc.longitude]}>
-                      <Popup>
-                        <div className="min-w-[180px] space-y-2 text-sm">
-                          <div className="flex items-center gap-2 font-semibold">
-                            <User className="h-4 w-4 text-primary" />
-                            {loc.driver?.full_name ?? 'Okänd förare'}
-                          </div>
-                          {loc.assignment && (
-                            <>
-                              <div className="flex items-center gap-2 text-muted-foreground">
-                                <Navigation className="h-3.5 w-3.5" />
-                                {loc.assignment.title}
-                              </div>
-                              <div className="flex items-center gap-2 text-muted-foreground">
-                                <MapPin className="h-3.5 w-3.5" />
-                                {loc.assignment.address}
-                              </div>
-                            </>
-                          )}
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <Clock className="h-3 w-3" />
-                            Uppdaterad {timeAgo(loc.updated_at)}
-                          </div>
-                          {loc.assignment_id && (
-                            <button
-                              onClick={() => navigate(`/admin/assignments/${loc.assignment_id}`)}
-                              className="mt-1 w-full text-xs font-medium text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/20 rounded px-2 py-1.5 transition-colors text-center"
-                            >
-                              Visa uppdrag →
-                            </button>
-                          )}
-                        </div>
-                      </Popup>
-                    </Marker>
-                  ))}
-                </MapContainer>
+                <MapErrorBoundary>
+                  <Suspense fallback={
+                    <div className="h-full flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+                    </div>
+                  }>
+                    <LeafletMap locations={locations} navigate={navigate} />
+                  </Suspense>
+                </MapErrorBoundary>
               )}
 
               {!loading && locations.length === 0 && (
