@@ -158,6 +158,33 @@ export default function AdminAssignmentDetail() {
               )}
             </div>
 
+            <div className="border-t pt-4 space-y-2">
+              <Label htmlFor="cost">Kostnad / fakturabelopp (kr)</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="cost"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  className="max-w-[200px]"
+                  value={costInput !== null ? costInput : ((assignment as any).cost != null ? String((assignment as any).cost) : '')}
+                  onChange={e => setCostInput(e.target.value)}
+                  placeholder="Valfritt"
+                />
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    const val = costInput !== null ? costInput : '';
+                    updateAssignment.mutate({ id: assignment.id, cost: val ? parseFloat(val) : null } as any);
+                    setCostInput(null);
+                  }}
+                >
+                  Spara
+                </Button>
+              </div>
+            </div>
+
             <div className="border-t pt-4 space-y-3">
               <p className="text-sm font-medium">Krav vid leverans</p>
               <div className="flex items-center justify-between">
