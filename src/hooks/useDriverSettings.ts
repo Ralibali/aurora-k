@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
 
 export interface DriverSettings {
   id: string;
@@ -23,17 +24,17 @@ export interface DriverSettingsOverride {
 
 // Global defaults
 export function useDriverSettings() {
+  const { companyId } = useAuth();
   return useQuery({
-    queryKey: ['driver_settings'],
+    queryKey: ['driver_settings', companyId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('driver_settings')
-        .select('*')
-        .limit(1)
-        .maybeSingle();
+      const q = supabase.from('driver_settings').select('*').limit(1);
+      if (companyId) q.eq('company_id', companyId);
+      const { data, error } = await q.maybeSingle();
       if (error) throw error;
       return data as unknown as DriverSettings | null;
     },
+    enabled: !!companyId,
   });
 }
 
@@ -57,15 +58,17 @@ export function useDriverSettingsOverride(driverId: string | undefined) {
 
 // All overrides (for admin page)
 export function useAllDriverSettingsOverrides() {
+  const { companyId } = useAuth();
   return useQuery({
-    queryKey: ['driver_settings_overrides'],
+    queryKey: ['driver_settings_overrides', companyId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('driver_settings_overrides')
-        .select('*');
+      const q = supabase.from('driver_settings_overrides').select('*');
+      if (companyId) q.eq('company_id', companyId);
+      const { data, error } = await q;
       if (error) throw error;
       return (data ?? []) as unknown as DriverSettingsOverride[];
     },
+    enabled: !!companyId,
   });
 }
 
@@ -110,12 +113,13 @@ export function useUpdateDriverSettings() {
 
 export function useUpsertDriverSettingsOverride() {
   const qc = useQueryClient();
+  const { companyId } = useAuth();
   return useMutation({
     mutationFn: async ({ driver_id, ...updates }: Partial<DriverSettingsOverride> & { driver_id: string }) => {
       const { data, error } = await supabase
         .from('driver_settings_overrides')
         .upsert(
-          { driver_id, ...updates, updated_at: new Date().toISOString() },
+          { driver_id, ...updates, company_id: companyId, updated_at: new Date().toISOString() },
           { onConflict: 'driver_id' }
         )
         .select()

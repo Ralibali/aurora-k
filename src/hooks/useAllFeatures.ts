@@ -1,26 +1,31 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
 
 // ─── DRIVER ABSENCES ─────────────────────────────────────
 export function useDriverAbsences(driverId?: string) {
+  const { companyId } = useAuth();
   return useQuery({
-    queryKey: ['driver_absences', driverId],
+    queryKey: ['driver_absences', driverId, companyId],
     queryFn: async () => {
       let q = supabase.from('driver_absences').select('*, driver:profiles(*)').order('start_date', { ascending: false });
+      if (companyId) q = q.eq('company_id', companyId);
       if (driverId) q = q.eq('driver_id', driverId);
       const { data, error } = await q;
       if (error) throw error;
       return data;
     },
+    enabled: !!companyId,
   });
 }
 
 export function useCreateAbsence() {
   const qc = useQueryClient();
+  const { companyId } = useAuth();
   return useMutation({
     mutationFn: async (a: { driver_id: string; type: string; start_date: string; end_date: string; note?: string }) => {
-      const { error } = await supabase.from('driver_absences').insert(a);
+      const { error } = await supabase.from('driver_absences').insert({ ...a, company_id: companyId });
       if (error) throw error;
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['driver_absences'] }); toast.success('Frånvaro registrerad!'); },
@@ -65,9 +70,10 @@ export function useProtocols(assignmentId?: string) {
 
 export function useCreateProtocol() {
   const qc = useQueryClient();
+  const { companyId } = useAuth();
   return useMutation({
     mutationFn: async (p: { assignment_id: string; title: string; content?: string; protocol_type?: string; created_by: string }) => {
-      const { error } = await supabase.from('assignment_protocols').insert(p);
+      const { error } = await supabase.from('assignment_protocols').insert({ ...p, company_id: companyId });
       if (error) throw error;
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['protocols'] }); toast.success('Protokoll skapat!'); },
@@ -103,9 +109,10 @@ export function useApprovals() {
 
 export function useCreateApproval() {
   const qc = useQueryClient();
+  const { companyId } = useAuth();
   return useMutation({
     mutationFn: async (a: { assignment_id: string }) => {
-      const { error } = await supabase.from('assignment_approvals').insert(a);
+      const { error } = await supabase.from('assignment_approvals').insert({ ...a, company_id: companyId });
       if (error) throw error;
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['approvals'] }); toast.success('Skickad för attestering!'); },
@@ -125,21 +132,26 @@ export function useUpdateApproval() {
 
 // ─── INVOICE TEMPLATES ───────────────────────────────────
 export function useInvoiceTemplates() {
+  const { companyId } = useAuth();
   return useQuery({
-    queryKey: ['invoice_templates'],
+    queryKey: ['invoice_templates', companyId],
     queryFn: async () => {
-      const { data, error } = await supabase.from('invoice_templates').select('*').order('name');
+      const q = supabase.from('invoice_templates').select('*').order('name');
+      if (companyId) q.eq('company_id', companyId);
+      const { data, error } = await q;
       if (error) throw error;
       return data;
     },
+    enabled: !!companyId,
   });
 }
 
 export function useCreateInvoiceTemplate() {
   const qc = useQueryClient();
+  const { companyId } = useAuth();
   return useMutation({
     mutationFn: async (t: { name: string; header_html?: string; footer_html?: string; primary_color?: string }) => {
-      const { error } = await supabase.from('invoice_templates').insert(t);
+      const { error } = await supabase.from('invoice_templates').insert({ ...t, company_id: companyId });
       if (error) throw error;
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['invoice_templates'] }); toast.success('Fakturamall skapad!'); },
@@ -170,13 +182,17 @@ export function useDeleteInvoiceTemplate() {
 
 // ─── BOOKING REQUESTS ────────────────────────────────────
 export function useBookingRequests() {
+  const { companyId } = useAuth();
   return useQuery({
-    queryKey: ['booking_requests'],
+    queryKey: ['booking_requests', companyId],
     queryFn: async () => {
-      const { data, error } = await supabase.from('booking_requests').select('*').order('created_at', { ascending: false });
+      const q = supabase.from('booking_requests').select('*').order('created_at', { ascending: false });
+      if (companyId) q.eq('company_id', companyId);
+      const { data, error } = await q;
       if (error) throw error;
       return data;
     },
+    enabled: !!companyId,
   });
 }
 
@@ -193,21 +209,26 @@ export function useUpdateBookingRequest() {
 
 // ─── EXTERNAL RESOURCES ──────────────────────────────────
 export function useExternalResources() {
+  const { companyId } = useAuth();
   return useQuery({
-    queryKey: ['external_resources'],
+    queryKey: ['external_resources', companyId],
     queryFn: async () => {
-      const { data, error } = await supabase.from('external_resources').select('*').order('name');
+      const q = supabase.from('external_resources').select('*').order('name');
+      if (companyId) q.eq('company_id', companyId);
+      const { data, error } = await q;
       if (error) throw error;
       return data;
     },
+    enabled: !!companyId,
   });
 }
 
 export function useCreateExternalResource() {
   const qc = useQueryClient();
+  const { companyId } = useAuth();
   return useMutation({
     mutationFn: async (r: { name: string; company?: string; email?: string; phone?: string; specialty?: string; hourly_rate?: number; notes?: string }) => {
-      const { error } = await supabase.from('external_resources').insert(r);
+      const { error } = await supabase.from('external_resources').insert({ ...r, company_id: companyId });
       if (error) throw error;
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['external_resources'] }); toast.success('Resurs skapad!'); },
@@ -238,21 +259,26 @@ export function useDeleteExternalResource() {
 
 // ─── NOTIFICATIONS ───────────────────────────────────────
 export function useNotifications() {
+  const { companyId } = useAuth();
   return useQuery({
-    queryKey: ['notifications'],
+    queryKey: ['notifications', companyId],
     queryFn: async () => {
-      const { data, error } = await supabase.from('notifications').select('*').order('created_at', { ascending: false }).limit(50);
+      const q = supabase.from('notifications').select('*').order('created_at', { ascending: false }).limit(50);
+      if (companyId) q.eq('company_id', companyId);
+      const { data, error } = await q;
       if (error) throw error;
       return data;
     },
+    enabled: !!companyId,
   });
 }
 
 export function useCreateNotification() {
   const qc = useQueryClient();
+  const { companyId } = useAuth();
   return useMutation({
     mutationFn: async (n: { title: string; message: string; type?: string; target_role?: string; target_user_id?: string; created_by: string }) => {
-      const { error } = await supabase.from('notifications').insert(n);
+      const { error } = await supabase.from('notifications').insert({ ...n, company_id: companyId });
       if (error) throw error;
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['notifications'] }); toast.success('Notis skickad!'); },
