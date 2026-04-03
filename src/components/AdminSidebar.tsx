@@ -18,6 +18,7 @@ const navSections = [
       { title: 'Kalender', url: '/admin/calendar', icon: Calendar },
       { title: 'Live-karta', url: '/admin/live-map', icon: Map },
       { title: 'Ruttoptimering', url: '/admin/routes', icon: Navigation },
+      { title: 'Fordon', url: '/admin/vehicles', icon: Car },
     ],
   },
   {
