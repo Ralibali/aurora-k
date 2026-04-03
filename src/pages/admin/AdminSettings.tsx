@@ -6,8 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useSettings, useUpdateSettings, useCreateSettings } from '@/hooks/useData';
-import { useFeatureSettings, useToggleFeature } from '@/hooks/useFeatureSettings';
-import { Save, Upload, ToggleLeft } from 'lucide-react';
+import { useFeatureSettings, useToggleFeature, useResetAllFeatures } from '@/hooks/useFeatureSettings';
+import { Save, Upload, ToggleLeft, RotateCcw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -22,6 +22,7 @@ export default function AdminSettings() {
 
   const { data: features, isLoading: featuresLoading } = useFeatureSettings();
   const toggleFeature = useToggleFeature();
+  const resetFeatures = useResetAllFeatures();
 
   if (isLoading) {
     return <AdminLayout title="Inställningar"><div className="max-w-2xl space-y-6"><Skeleton className="h-64 w-full" /></div></AdminLayout>;
@@ -155,9 +156,26 @@ export default function AdminSettings() {
           </TabsContent>
 
           <TabsContent value="features" className="space-y-6">
-            <div className="space-y-1 mb-4">
-              <h2 className="text-sm font-semibold">Aktiva funktioner</h2>
-              <p className="text-xs text-muted-foreground">Välj vilka moduler som ska vara synliga i sidomenyn. Avaktiverade funktioner döljs men data raderas inte.</p>
+            <div className="flex items-center justify-between mb-4">
+              <div className="space-y-1">
+                <h2 className="text-sm font-semibold">Aktiva funktioner</h2>
+                <p className="text-xs text-muted-foreground">Välj vilka moduler som ska vara synliga i sidomenyn. Avaktiverade funktioner döljs men data raderas inte.</p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5 shrink-0"
+                disabled={resetFeatures.isPending}
+                onClick={() => {
+                  resetFeatures.mutate(undefined, {
+                    onSuccess: () => toast.success('Alla funktioner återställda till standard'),
+                    onError: () => toast.error('Kunde inte återställa'),
+                  });
+                }}
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+                Återställ alla
+              </Button>
             </div>
 
             {featuresLoading ? (
