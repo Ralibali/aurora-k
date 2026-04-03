@@ -15,8 +15,10 @@ import { useCustomer, useUpdateCustomer, useAssignments, useInvoices } from '@/h
 import { useCustomerPriceList, useUpsertCustomerPrice, useDeleteCustomerPrice, useArticles } from '@/hooks/useNewFeatures';
 import { pricingTypeLabels } from '@/lib/types';
 import { formatSwedishDate, calculateDecimalHours } from '@/lib/format';
-import { ArrowLeft, Save, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, Save, Plus, Trash2, Link2, Copy, ExternalLink, Loader2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 export default function AdminCustomerDetail() {
   const { id } = useParams();
