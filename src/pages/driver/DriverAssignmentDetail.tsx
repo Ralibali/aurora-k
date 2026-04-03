@@ -372,8 +372,8 @@ export default function DriverAssignmentDetail() {
               label="Schemalagd tid"
               value={`${formatSwedishDateTime(assignment.scheduled_start)}${assignment.scheduled_end ? ` – ${formatSwedishDateTime(assignment.scheduled_end)}` : ''}`}
             />
-            {assignment.vehicle && (
-              <InfoRow icon={Package} label="Fordon" value={(assignment as any).vehicle?.name ?? '–'} />
+            {(assignment as any).vehicle_id && (
+              <InfoRow icon={Package} label="Fordon" value={(assignment as any).vehicle_id} />
             )}
           </motion.div>
 
