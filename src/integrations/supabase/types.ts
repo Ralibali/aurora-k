@@ -60,6 +60,7 @@ export type Database = {
           admin_comment: string | null
           assigned_driver_id: string
           consignment_photo_url: string | null
+          cost: number | null
           created_at: string
           customer_id: string
           driver_comment: string | null
@@ -82,6 +83,7 @@ export type Database = {
           admin_comment?: string | null
           assigned_driver_id: string
           consignment_photo_url?: string | null
+          cost?: number | null
           created_at?: string
           customer_id: string
           driver_comment?: string | null
@@ -104,6 +106,7 @@ export type Database = {
           admin_comment?: string | null
           assigned_driver_id?: string
           consignment_photo_url?: string | null
+          cost?: number | null
           created_at?: string
           customer_id?: string
           driver_comment?: string | null
