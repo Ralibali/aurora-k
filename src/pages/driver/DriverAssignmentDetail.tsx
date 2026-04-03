@@ -315,7 +315,7 @@ export default function DriverAssignmentDetail() {
       : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300';
 
   return (
-    <DriverLayout hideHeader>
+    <>
       <div className="flex flex-col min-h-[calc(100vh-env(safe-area-inset-bottom,0px))]">
         {/* Top bar */}
         <div className="flex items-center gap-3 px-5 pt-5 pb-2">
