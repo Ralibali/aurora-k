@@ -1,8 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { corsHeaders } from "npm:@supabase/supabase-js@2.100.1/cors";
 
-const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY")!;
-const BREVO_URL = "https://api.brevo.com/v3/smtp/email";
+const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
 
 const FOOTER = `
 <div style="margin-top:40px;padding-top:20px;border-top:1px solid #e5e7eb;color:#9ca3af;font-size:12px;line-height:1.6">
@@ -16,6 +15,16 @@ serve(async (req) => {
   }
 
   try {
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      throw new Error("LOVABLE_API_KEY is not configured");
+    }
+
+    const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+    if (!RESEND_API_KEY) {
+      throw new Error("RESEND_API_KEY is not configured");
+    }
+
     const { to, subject, html } = await req.json();
 
     if (!to || !subject || !html) {
@@ -42,25 +51,25 @@ serve(async (req) => {
 </body>
 </html>`;
 
-    const res = await fetch(BREVO_URL, {
+    const res = await fetch(`${GATEWAY_URL}/emails`, {
       method: "POST",
       headers: {
-        "api-key": BREVO_API_KEY,
         "Content-Type": "application/json",
-        Accept: "application/json",
+        "Authorization": `Bearer ${LOVABLE_API_KEY}`,
+        "X-Connection-Api-Key": RESEND_API_KEY,
       },
       body: JSON.stringify({
-        sender: { name: "Aurora Transport", email: "noreply@auroramedia.se" },
-        to: [{ email: to }],
+        from: "Aurora Transport <noreply@auroramedia.se>",
+        to: [to],
         subject,
-        htmlContent: fullHtml,
+        html: fullHtml,
       }),
     });
 
     const result = await res.json();
 
     if (!res.ok) {
-      console.error("[send-email] Brevo error:", result);
+      console.error("[send-email] Resend error:", result);
       return new Response(JSON.stringify({ error: "Email send failed", details: result }), {
         status: 502,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -68,7 +77,7 @@ serve(async (req) => {
     }
 
     console.log(`[send-email] Sent to ${to}: ${subject}`);
-    return new Response(JSON.stringify({ success: true, messageId: result.messageId }), {
+    return new Response(JSON.stringify({ success: true, id: result.id }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
