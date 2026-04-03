@@ -156,12 +156,25 @@ export default function AdminAssignmentDetail() {
               )}
             </div>
 
-            {((assignment as any).require_signature || (assignment as any).require_photo) && (
-              <div className="flex gap-2 flex-wrap">
-                {(assignment as any).require_signature && <Badge variant="outline">Signatur krävs</Badge>}
-                {(assignment as any).require_photo && <Badge variant="outline">Foto krävs</Badge>}
+            <div className="border-t pt-4 space-y-3">
+              <p className="text-sm font-medium">Krav vid leverans</p>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="req-sig">Kräv mottagarsignatur</Label>
+                <Switch
+                  id="req-sig"
+                  checked={assignment.require_signature}
+                  onCheckedChange={(checked) => updateAssignment.mutate({ id: assignment.id, require_signature: checked })}
+                />
               </div>
-            )}
+              <div className="flex items-center justify-between">
+                <Label htmlFor="req-photo">Kräv fraktsedelsfoto</Label>
+                <Switch
+                  id="req-photo"
+                  checked={assignment.require_photo}
+                  onCheckedChange={(checked) => updateAssignment.mutate({ id: assignment.id, require_photo: checked })}
+                />
+              </div>
+            </div>
             {assignment.signature_url && (
               <div>
                 <p className="text-sm text-muted-foreground mb-2">Mottagarens signatur</p>
