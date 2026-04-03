@@ -138,7 +138,7 @@ export default function AdminStatistics() {
             <div className="flex items-center gap-4">
               <div className="stat-card-icon bg-warning/10 text-warning"><Building2 className="h-5 w-5" /></div>
               <div>
-                {loadingA ? <Skeleton className="h-8 w-12" /> : <p className="stat-card-value">{activeCustomers}</p>}
+                {loadingA ? <Skeleton className="h-8 w-12" /> : <p className="stat-card-value font-mono">{activeCustomers}</p>}
                 <p className="stat-card-label">Aktiva kunder</p>
               </div>
             </div>
