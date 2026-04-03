@@ -140,6 +140,61 @@ export default function AdminCustomerDetail() {
             </Card>
           </TabsContent>
 
+          <TabsContent value="prices" className="mt-4">
+            <Card>
+              <CardContent className="pt-6 space-y-4">
+                <p className="text-sm text-muted-foreground">Ange kundspecifika priser för artiklar. Dessa priser används istället för standardpriset vid fakturering.</p>
+                <div className="flex gap-2 items-end">
+                  <div className="space-y-1 flex-1">
+                    <Label className="text-xs">Artikel</Label>
+                    <Select value={newPriceArticle} onValueChange={setNewPriceArticle}>
+                      <SelectTrigger className="h-9"><SelectValue placeholder="Välj artikel" /></SelectTrigger>
+                      <SelectContent>
+                        {(articles ?? []).map(a => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1 w-32">
+                    <Label className="text-xs">Pris (kr)</Label>
+                    <Input type="number" step="0.01" value={newPriceValue} onChange={e => setNewPriceValue(e.target.value)} className="h-9" />
+                  </div>
+                  <Button size="sm" className="h-9" onClick={() => {
+                    if (newPriceArticle && newPriceValue && id) {
+                      upsertPrice.mutate({ customer_id: id, article_id: newPriceArticle, price: parseFloat(newPriceValue) });
+                      setNewPriceArticle(''); setNewPriceValue('');
+                    }
+                  }}>
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                {priceList && priceList.length > 0 && (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Artikel</TableHead>
+                        <TableHead className="text-right">Standardpris</TableHead>
+                        <TableHead className="text-right">Kundpris</TableHead>
+                        <TableHead className="w-[60px]" />
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {priceList.map((p: any) => (
+                        <TableRow key={p.id}>
+                          <TableCell className="font-medium">{p.article?.name}</TableCell>
+                          <TableCell className="text-right text-muted-foreground">{p.article?.default_price} kr</TableCell>
+                          <TableCell className="text-right font-medium">{p.price} kr</TableCell>
+                          <TableCell>
+                            <Button variant="ghost" size="icon" onClick={() => deletePrice.mutate(p.id)}><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           <TabsContent value="deliveries" className="mt-4">
             <Card>
               <CardContent className="p-0">
