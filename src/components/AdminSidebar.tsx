@@ -22,9 +22,16 @@ const mainNav = [
   { title: 'Dashboard', url: '/admin', icon: LayoutDashboard },
   { title: 'Uppdrag', url: '/admin/assignments', icon: ClipboardList },
   { title: 'Kalender', url: '/admin/calendar', icon: CalendarDays },
+  { title: 'Beställningar', url: '/admin/orders', icon: ShoppingCart },
   { title: 'Kunder', url: '/admin/customers', icon: Building2 },
   { title: 'Chaufförer', url: '/admin/drivers', icon: Users },
+  { title: 'Fordon', url: '/admin/vehicles', icon: Car },
   { title: 'Live-karta', url: '/admin/live-map', icon: MapPin },
+];
+
+const resourceNav = [
+  { title: 'Artiklar', url: '/admin/articles', icon: Package },
+  { title: 'Mallar', url: '/admin/order-templates', icon: FileText },
 ];
 
 const financeNav = [
