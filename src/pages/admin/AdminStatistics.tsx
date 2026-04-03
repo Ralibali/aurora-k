@@ -120,7 +120,7 @@ export default function AdminStatistics() {
             <div className="flex items-center gap-4">
               <div className="stat-card-icon bg-primary/10 text-primary"><ClipboardList className="h-5 w-5" /></div>
               <div>
-                {loadingA ? <Skeleton className="h-8 w-12" /> : <p className="stat-card-value">{completed.length}</p>}
+                {loadingA ? <Skeleton className="h-8 w-12" /> : <p className="stat-card-value font-mono">{completed.length}</p>}
                 <p className="stat-card-label">Leveranser</p>
               </div>
             </div>
