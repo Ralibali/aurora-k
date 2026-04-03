@@ -32,6 +32,17 @@ const mainNav = [
 const resourceNav = [
   { title: 'Artiklar', url: '/admin/articles', icon: Package },
   { title: 'Mallar', url: '/admin/order-templates', icon: FileText },
+  { title: 'Externa resurser', url: '/admin/external-resources', icon: UsersRound },
+  { title: 'Rutter', url: '/admin/routes', icon: Route },
+];
+
+const operationsNav = [
+  { title: 'Frånvaro', url: '/admin/absences', icon: CalendarOff },
+  { title: 'Attestering', url: '/admin/approvals', icon: ClipboardCheck },
+  { title: 'Notiser', url: '/admin/notifications', icon: Bell },
+  { title: 'Förfrågningar', url: '/admin/booking-requests', icon: Inbox },
+  { title: 'Kundnöjdhet', url: '/admin/satisfaction', icon: SmilePlus },
+  { title: 'Miljödata', url: '/admin/environment', icon: Leaf },
 ];
 
 const financeNav = [
