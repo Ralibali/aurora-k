@@ -27,7 +27,7 @@ export default function AdminEnvironment() {
           </Card>
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground flex items-center gap-2"><Leaf className="h-4 w-4" /> CO₂-utsläpp</CardTitle></CardHeader>
-            <CardContent><span className="text-2xl font-bold">{stats.totalCo2.toFixed(1)} kg</span><p className="text-xs text-muted-foreground mt-1">Schablon: 0.12 kg/km</p></CardContent>
+            <CardContent><span className="text-2xl font-bold font-mono">{stats.totalCo2.toFixed(1)} kg</span><p className="text-xs text-muted-foreground mt-1">Schablon: 0.12 kg/km</p></CardContent>
           </Card>
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground flex items-center gap-2"><Fuel className="h-4 w-4" /> Bränsleförbrukning</CardTitle></CardHeader>
