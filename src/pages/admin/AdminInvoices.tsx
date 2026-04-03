@@ -274,7 +274,7 @@ export default function AdminInvoices() {
                         <TableRow key={a.id}>
                           <TableCell>{a.title}</TableCell>
                           <TableCell>{a.driver?.full_name}</TableCell>
-                          <TableCell className="text-right">{amount.toFixed(0)} kr</TableCell>
+                          <TableCell className="text-right font-mono">{amount.toFixed(0)} kr</TableCell>
                         </TableRow>
                       );
                     })}
