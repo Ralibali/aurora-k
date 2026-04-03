@@ -275,3 +275,116 @@ export default function AdminCustomerDetail() {
     </AdminLayout>
   );
 }
+
+function CustomerPortalSection({ customerId }: { customerId: string }) {
+  const [tokens, setTokens] = useState<any[]>([]);
+  const [loaded, setLoaded] = useState(false);
+  const [generating, setGenerating] = useState(false);
+
+  const loadTokens = async () => {
+    const { data } = await supabase
+      .from('customer_access_tokens')
+      .select('*')
+      .eq('customer_id', customerId)
+      .order('created_at', { ascending: false });
+    setTokens(data ?? []);
+    setLoaded(true);
+  };
+
+  if (!loaded) {
+    loadTokens();
+  }
+
+  const generateToken = async () => {
+    setGenerating(true);
+    const { data, error } = await supabase
+      .from('customer_access_tokens')
+      .insert({ customer_id: customerId })
+      .select()
+      .single();
+    if (error) {
+      toast.error('Kunde inte generera länk');
+      setGenerating(false);
+      return;
+    }
+    setTokens(prev => [data, ...prev]);
+    setGenerating(false);
+    toast.success('Portallänk skapad!');
+  };
+
+  const getPortalUrl = (token: string) => {
+    const base = window.location.origin;
+    return `${base}/portal?token=${token}`;
+  };
+
+  const copyLink = (token: string) => {
+    navigator.clipboard.writeText(getPortalUrl(token));
+    toast.success('Länk kopierad!');
+  };
+
+  const deleteToken = async (id: string) => {
+    await supabase.from('customer_access_tokens').delete().eq('id', id);
+    setTokens(prev => prev.filter(t => t.id !== id));
+    toast.success('Länk borttagen');
+  };
+
+  return (
+    <Card>
+      <CardContent className="pt-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium">Kundportal</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Generera en unik länk som kunden kan använda för att se sina uppdrag, beställningar och fakturor.</p>
+          </div>
+          <Button size="sm" onClick={generateToken} disabled={generating}>
+            {generating ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <Plus className="h-3.5 w-3.5 mr-1" />}
+            Ny länk
+          </Button>
+        </div>
+
+        {tokens.length === 0 && loaded && (
+          <div className="border-2 border-dashed rounded-lg py-8 text-center">
+            <Link2 className="h-8 w-8 text-muted-foreground/30 mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">Inga portallänkar ännu</p>
+            <p className="text-xs text-muted-foreground/60 mt-1">Skapa en länk som du kan dela med kunden</p>
+          </div>
+        )}
+
+        {tokens.length > 0 && (
+          <div className="space-y-2">
+            {tokens.map(t => {
+              const expired = t.expires_at && new Date(t.expires_at) < new Date();
+              return (
+                <div key={t.id} className="flex items-center gap-2 p-3 rounded-lg border bg-muted/30">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <code className="text-[11px] font-mono text-muted-foreground truncate block max-w-[300px]">
+                        {getPortalUrl(t.token)}
+                      </code>
+                      {expired && <span className="text-[10px] text-destructive font-medium">Utgången</span>}
+                    </div>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">
+                      Skapad {new Date(t.created_at).toLocaleDateString('sv-SE')}
+                      {t.expires_at && ` · Giltig t.o.m. ${new Date(t.expires_at).toLocaleDateString('sv-SE')}`}
+                    </p>
+                  </div>
+                  <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8" onClick={() => copyLink(t.token)} title="Kopiera länk">
+                    <Copy className="h-3.5 w-3.5" />
+                  </Button>
+                  <a href={getPortalUrl(t.token)} target="_blank" rel="noopener noreferrer">
+                    <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8" title="Öppna portal">
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </Button>
+                  </a>
+                  <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8 text-destructive" onClick={() => deleteToken(t.id)} title="Ta bort">
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
