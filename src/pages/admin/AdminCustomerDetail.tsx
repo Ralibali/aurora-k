@@ -224,7 +224,8 @@ export default function AdminCustomerDetail() {
                       const amount = customer.pricing_type === 'per_delivery' ? (customer.price_per_delivery || 0) :
                         customer.pricing_type === 'per_hour' ? hours * (customer.price_per_hour || 0) : 0;
                       return (
-                         <TableCell className="font-mono text-sm">{a.actual_start ? formatSwedishDate(a.actual_start) : '–'}</TableCell>
+                        <TableRow key={a.id}>
+                          <TableCell className="font-mono text-sm">{a.actual_start ? formatSwedishDate(a.actual_start) : '–'}</TableCell>
                           <TableCell className="font-medium">{a.title}</TableCell>
                           <TableCell>{a.driver?.full_name}</TableCell>
                           <TableCell className="font-mono text-sm">{hours}h</TableCell>
