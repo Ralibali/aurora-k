@@ -90,6 +90,7 @@ export default function AdminNewAssignment() {
             admin_comment: adminComment || null,
             require_signature: requireSignature,
             require_photo: requirePhoto,
+            cost: cost ? parseFloat(cost) : null,
           }, {
             onSuccess: () => resolve(),
             onError: (err) => reject(err),
