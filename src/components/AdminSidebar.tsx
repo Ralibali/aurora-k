@@ -122,6 +122,7 @@ export function AdminSidebar() {
       <SidebarContent className="pt-2">
         <NavGroup label="Översikt" items={mainNav} collapsed={collapsed} />
         <NavGroup label="Register" items={resourceNav} collapsed={collapsed} />
+        <NavGroup label="Drift" items={operationsNav} collapsed={collapsed} />
         <NavGroup label="Ekonomi" items={financeNav} collapsed={collapsed} />
         <NavGroup label="System" items={systemNav} collapsed={collapsed} />
       </SidebarContent>
