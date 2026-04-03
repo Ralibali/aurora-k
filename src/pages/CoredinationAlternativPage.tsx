@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Truck, CreditCard, Calendar, Puzzle, Check, ArrowRight } from 'lucide-react';
+import { Truck, CreditCard, Calendar, Layers, Check, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
@@ -18,12 +18,12 @@ export default function CoredinationAlternativPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       <Navbar />
       <Hero />
       <WhySwitch />
       <ComparisonTable />
-      <MigrationSteps />
+      <ForWho />
       <FaqSection />
       <FinalCta />
       <Footer />
@@ -33,7 +33,7 @@ export default function CoredinationAlternativPage() {
 
 function Navbar() {
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur border-b border-border">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
@@ -56,23 +56,23 @@ function Navbar() {
 
 function Hero() {
   return (
-    <section className="pt-32 pb-20 bg-white" style={{ backgroundImage: 'radial-gradient(circle, #e2e8f0 1px, transparent 1px)', backgroundSize: '20px 20px' }}>
+    <section className="pt-32 pb-20 bg-background" style={{ backgroundImage: 'radial-gradient(circle, hsl(var(--border)) 1px, transparent 1px)', backgroundSize: '20px 20px' }}>
       <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
-        <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="inline-flex px-4 py-1.5 rounded-full bg-amber-50 text-sm font-medium text-amber-700 mb-6">
+        <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="inline-flex px-4 py-1.5 rounded-full bg-amber-500/10 text-sm font-medium text-amber-700 mb-6">
           Byter från Coredination?
         </motion.span>
         <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-4xl sm:text-5xl font-bold text-foreground leading-tight mb-6">
           Det bästa <span className="text-primary">Coredination-alternativet</span> för svenska transportföretag
         </motion.h1>
-        <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-xl text-slate-500 leading-relaxed mb-8 max-w-2xl mx-auto">
+        <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-xl text-muted-foreground leading-relaxed mb-8 max-w-2xl mx-auto">
           Samma kärnfunktioner. Fast pris. Kom igång utan demo.
         </motion.p>
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="flex flex-col sm:flex-row gap-3 justify-center">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
           <Button size="lg" asChild className="rounded-xl px-8 py-6 text-base font-semibold">
             <Link to="/register">Testa Aurora Transport — 449 kr/mån</Link>
           </Button>
         </motion.div>
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="flex justify-center flex-wrap gap-x-6 gap-y-2 text-sm text-slate-400 mt-8">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="flex justify-center flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground mt-8">
           <span>✓ Ingen bindningstid</span>
           <span>✓ Obegränsat antal användare</span>
           <span>✓ Igång på 5 minuter</span>
@@ -84,12 +84,12 @@ function Hero() {
 
 function WhySwitch() {
   const cards = [
-    { icon: CreditCard, title: 'Priset skenar med teamet', desc: 'Coredination-priset ökar per användare. Aurora Transport kostar alltid 449 kr/mån — oavsett om du har 3 eller 30 förare.' },
-    { icon: Calendar, title: 'Lång onboarding', desc: 'Coredination kräver ofta demo och implementation. Med Aurora Transport är du igång samma dag du registrerar dig.' },
-    { icon: Puzzle, title: 'Mer än du behöver', desc: 'Komplexa system med funktioner du aldrig använder. Aurora Transport fokuserar på det som faktiskt behövs i fält.' },
+    { icon: CreditCard, title: 'Priset skenar med teamet', desc: 'Coredination-priset ökar per användare. Vi tar alltid 449 kr/mån — oavsett om du har 3 eller 30 förare.' },
+    { icon: Calendar, title: 'Lång onboarding', desc: 'Coredination kräver demo och setup-hjälp. Med Aurora Transport är du igång på 5 minuter.' },
+    { icon: Layers, title: 'Byggd för alla branscher', desc: 'Coredination är ett generalistverktyg. Vi är byggda specifikt för transport och bemanning.' },
   ];
   return (
-    <section className="py-20 bg-slate-50">
+    <section className="py-20 bg-muted">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <motion.h2 initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp} className="text-3xl sm:text-4xl font-bold text-foreground text-center mb-4">
           Varför byta från Coredination?
@@ -99,8 +99,8 @@ function WhySwitch() {
         </motion.p>
         <div className="grid md:grid-cols-3 gap-6">
           {cards.map((c, i) => (
-            <motion.div key={c.title} custom={i} variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="bg-white rounded-xl border border-slate-200 p-6">
-              <div className="w-11 h-11 rounded-lg bg-amber-50 flex items-center justify-center mb-4">
+            <motion.div key={c.title} custom={i} variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="bg-background rounded-xl border border-border p-6">
+              <div className="w-11 h-11 rounded-lg bg-amber-500/10 flex items-center justify-center mb-4">
                 <c.icon className="h-5 w-5 text-amber-600" />
               </div>
               <h3 className="font-semibold text-foreground mb-2">{c.title}</h3>
@@ -114,44 +114,57 @@ function WhySwitch() {
 }
 
 function ComparisonTable() {
-  const rows = [
-    { feature: 'Jobbdispatch i realtid', aurora: true, core: true },
-    { feature: 'Mobilapp för förare', aurora: true, core: true },
+  type Row = { feature: string; aurora: string | true; core: string | true | false };
+  const rows: Row[] = [
+    { feature: 'Jobbdispatch', aurora: true, core: true },
+    { feature: 'Mobilapp', aurora: true, core: true },
     { feature: 'Tidrapportering', aurora: true, core: true },
-    { feature: 'Fast pris oavsett användare', aurora: true, core: false },
+    { feature: 'Fortnox', aurora: true, core: true },
+    { feature: 'Fast månadspris', aurora: true, core: false },
+    { feature: 'Obegränsade användare', aurora: true, core: false },
     { feature: 'Kom igång utan demo', aurora: true, core: false },
-    { feature: 'Ingen bindningstid', aurora: true, core: false },
-    { feature: 'Fortnox-export', aurora: true, core: true },
-    { feature: 'Support på svenska', aurora: true, core: true },
+    { feature: 'Självbetjäning', aurora: true, core: false },
   ];
+  const textRows: { feature: string; aurora: string; core: string }[] = [
+    { feature: 'Pris', aurora: '449 kr/mån', core: 'Kontakta för pris' },
+    { feature: 'Bindningstid', aurora: 'Ingen', core: 'Varierar' },
+    { feature: 'Onboardingtid', aurora: '5 minuter', core: 'Dagar–veckor' },
+  ];
+
   return (
-    <section className="py-20 bg-white">
+    <section className="py-20 bg-background">
       <div className="max-w-3xl mx-auto px-4 sm:px-6">
         <motion.h2 initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp} className="text-3xl sm:text-4xl font-bold text-foreground text-center mb-12">
           Aurora Transport vs Coredination
         </motion.h2>
-        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="overflow-x-auto rounded-xl border border-slate-200">
+        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="overflow-x-auto rounded-xl border border-border">
           <table className="w-full text-sm">
             <thead>
               <tr>
-                <th className="text-left px-5 py-3.5 text-muted-foreground font-medium bg-slate-50">Funktion</th>
+                <th className="text-left px-5 py-3.5 text-muted-foreground font-medium bg-muted">Funktion</th>
                 <th className="px-5 py-3.5 text-center font-semibold text-primary-foreground bg-primary">Aurora Transport</th>
-                <th className="px-5 py-3.5 text-center text-muted-foreground font-medium bg-slate-50">Coredination</th>
+                <th className="px-5 py-3.5 text-center text-muted-foreground font-medium bg-muted">Coredination</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((r, i) => (
-                <tr key={r.feature} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
+                <tr key={r.feature} className={i % 2 === 0 ? 'bg-background' : 'bg-muted/50'}>
                   <td className="px-5 py-3 text-foreground font-medium">{r.feature}</td>
-                  <td className="px-5 py-3 text-center bg-blue-50/50"><span className="text-green-600 font-bold">✓</span></td>
-                  <td className="px-5 py-3 text-center">{r.core ? <span className="text-green-600 font-bold">✓</span> : <span className="text-slate-300">✗</span>}</td>
+                  <td className="px-5 py-3 text-center bg-primary/5">
+                    {r.aurora === true ? <span className="text-green-600 font-bold">✓</span> : <span className="font-mono">{r.aurora}</span>}
+                  </td>
+                  <td className="px-5 py-3 text-center">
+                    {r.core === true ? <span className="text-green-600 font-bold">✓</span> : r.core === false ? <span className="text-muted-foreground/30">✗</span> : <span className="font-mono">{r.core}</span>}
+                  </td>
                 </tr>
               ))}
-              <tr className="border-t border-slate-200">
-                <td className="px-5 py-3 text-foreground font-semibold">Pris per månad</td>
-                <td className="px-5 py-3 text-center bg-blue-50/50 font-mono font-bold text-primary">449 kr</td>
-                <td className="px-5 py-3 text-center font-mono text-muted-foreground">~800 kr+</td>
-              </tr>
+              {textRows.map((r, i) => (
+                <tr key={r.feature} className="border-t border-border">
+                  <td className="px-5 py-3 text-foreground font-semibold">{r.feature}</td>
+                  <td className="px-5 py-3 text-center bg-primary/5 font-mono font-bold text-primary">{r.aurora}</td>
+                  <td className="px-5 py-3 text-center font-mono text-muted-foreground">{r.core}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </motion.div>
@@ -160,26 +173,40 @@ function ComparisonTable() {
   );
 }
 
-function MigrationSteps() {
-  const steps = [
-    { num: '01', title: 'Skapa konto', desc: 'Registrera dig på under 2 minuter.' },
-    { num: '02', title: 'Bjud in dina förare', desc: 'De får en inbjudningslänk via e-post.' },
-    { num: '03', title: 'Kör igång', desc: 'Börja skapa och tilldela uppdrag direkt.' },
+function ForWho() {
+  const good = [
+    'Litet/medelstort transportföretag',
+    'Vill komma igång direkt',
+    'Fast förutsägbart pris',
+    'Ingen bindningstid',
+  ];
+  const notFor = [
+    'Avancerade bygg-protokoll',
+    'Maskinuthyrning med daglig tillsyn',
   ];
   return (
-    <section className="py-20 bg-slate-50">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <motion.h2 initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp} className="text-3xl sm:text-4xl font-bold text-foreground text-center mb-14">
-          Byt på under 10 minuter.
+    <section className="py-20 bg-muted">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6">
+        <motion.h2 initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp} className="text-3xl sm:text-4xl font-bold text-foreground text-center mb-12">
+          Är Aurora Transport rätt för dig?
         </motion.h2>
-        <div className="grid md:grid-cols-3 gap-8">
-          {steps.map((s, i) => (
-            <motion.div key={s.num} custom={i} variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center">
-              <div className="text-5xl font-mono font-bold text-primary/15 mb-3">{s.num}</div>
-              <h3 className="font-semibold text-foreground text-lg mb-1">{s.title}</h3>
-              <p className="text-sm text-muted-foreground">{s.desc}</p>
-            </motion.div>
-          ))}
+        <div className="grid sm:grid-cols-2 gap-6">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp} className="bg-background rounded-xl border border-border p-6">
+            <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2"><Check className="h-5 w-5 text-green-600" /> Perfekt för dig om du…</h3>
+            <ul className="space-y-3">
+              {good.map(g => (
+                <li key={g} className="flex items-start gap-2 text-sm text-muted-foreground"><Check className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />{g}</li>
+              ))}
+            </ul>
+          </motion.div>
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} custom={1} variants={fadeUp} className="bg-background rounded-xl border border-border p-6">
+            <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2"><X className="h-5 w-5 text-muted-foreground" /> Kanske inte rätt om du behöver…</h3>
+            <ul className="space-y-3">
+              {notFor.map(n => (
+                <li key={n} className="flex items-start gap-2 text-sm text-muted-foreground"><span className="text-muted-foreground/50 mt-0.5 shrink-0">—</span>{n}</li>
+              ))}
+            </ul>
+          </motion.div>
         </div>
       </div>
     </section>
@@ -188,21 +215,20 @@ function MigrationSteps() {
 
 function FaqSection() {
   const faqs = [
-    { q: 'Kan jag migrera data från Coredination?', a: 'Vi hjälper dig att komma igång snabbt. Kontakta oss så assisterar vi med migrationen.' },
-    { q: 'Varför är Aurora Transport billigare?', a: 'Vi fokuserar på kärnfunktionerna för svenska transportföretag utan onödig komplexitet. Fast pris — inte per användare.' },
-    { q: 'Har ni samma funktioner som Coredination?', a: 'Vi täcker kärnbehoven: dispatch, tidrapportering, GPS-spårning och export. Utan funktioner du aldrig använder.' },
-    { q: 'Behöver jag boka en demo?', a: 'Nej. Skapa ett konto och börja använda systemet direkt. Behöver du hjälp finns vi på info@auroramedia.se.' },
-    { q: 'Finns det en bindningstid?', a: 'Nej. Månadsvis betalning. Avsluta när du vill.' },
+    { q: 'Kan jag importera data från Coredination?', a: 'Vi hjälper dig att komma igång snabbt. Kontakta oss på info@auroramedia.se så assisterar vi med migrationen.' },
+    { q: 'Vad kostar det jämfört med Coredination?', a: 'Aurora Transport kostar 449 kr/mån oavsett antal användare. Coredination prissätts per användare, vilket gör det dyrare ju fler förare du har.' },
+    { q: 'Förlorar jag funktioner?', a: 'Vi täcker kärnbehoven: dispatch, tidrapportering, GPS-spårning och export. Om du behöver avancerade bygg-protokoll kan Coredination passa bättre.' },
+    { q: 'Hur snabbt kan jag komma igång?', a: 'Under 5 minuter. Registrera dig, bjud in förare och börja tilldela uppdrag direkt.' },
   ];
   return (
-    <section className="py-20 bg-white">
+    <section className="py-20 bg-background">
       <div className="max-w-2xl mx-auto px-4 sm:px-6">
         <motion.h2 initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp} className="text-3xl sm:text-4xl font-bold text-foreground text-center mb-12">
           Vanliga frågor vid byte
         </motion.h2>
         <Accordion type="single" collapsible className="space-y-3">
           {faqs.map((faq, i) => (
-            <AccordionItem key={i} value={`faq-${i}`} className="bg-slate-50 rounded-xl border border-slate-200 px-5">
+            <AccordionItem key={i} value={`faq-${i}`} className="bg-muted rounded-xl border border-border px-5">
               <AccordionTrigger className="text-left font-medium text-foreground hover:no-underline py-4">{faq.q}</AccordionTrigger>
               <AccordionContent className="text-muted-foreground pb-4">{faq.a}</AccordionContent>
             </AccordionItem>
@@ -215,7 +241,7 @@ function FaqSection() {
 
 function FinalCta() {
   return (
-    <section className="py-20 bg-[#0F172A] text-white">
+    <section className="py-20 bg-[hsl(222,47%,11%)] text-white">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
         <motion.h2 initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp} className="text-3xl sm:text-4xl font-bold mb-4">
           Redo att byta till enklare och billigare?
@@ -224,7 +250,7 @@ function FinalCta() {
           449 kr/mån. Obegränsat antal användare. Ingen bindningstid.
         </motion.p>
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} custom={2} variants={fadeUp}>
-          <Button size="lg" asChild className="rounded-xl px-10 py-6 text-base font-semibold bg-white text-[#0F172A] hover:bg-white/90">
+          <Button size="lg" asChild className="rounded-xl px-10 py-6 text-base font-semibold bg-white text-[hsl(222,47%,11%)] hover:bg-white/90">
             <Link to="/register">Skapa ditt konto nu</Link>
           </Button>
         </motion.div>
@@ -238,7 +264,7 @@ function FinalCta() {
 
 function Footer() {
   return (
-    <footer className="bg-[#0F172A] border-t border-slate-800 py-10">
+    <footer className="bg-[hsl(222,47%,11%)] border-t border-slate-800 py-10">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row md:items-start justify-between gap-8">
         <div>
           <div className="flex items-center gap-2 mb-2"><Truck className="h-4 w-4 text-slate-400" /><span className="font-semibold text-white">Aurora Transport</span></div>
