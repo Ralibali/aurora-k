@@ -39,6 +39,9 @@ export default function AdminAssignmentDetail() {
   const createLog = useCreateAssignmentLog();
   const [comment, setComment] = useState<string | null>(null);
   const [costInput, setCostInput] = useState<string | null>(null);
+  const [shareEmail, setShareEmail] = useState('');
+  const [shareMessage, setShareMessage] = useState('');
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
 
   if (isLoading) {
     return <AdminLayout title="Uppdragsdetaljer"><div className="max-w-2xl space-y-4"><Skeleton className="h-8 w-32" /><Skeleton className="h-64 w-full" /></div></AdminLayout>;
