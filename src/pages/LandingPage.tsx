@@ -5,10 +5,18 @@ import { Button } from '@/components/ui/button';
 import {
   Truck, Clock, Users, MapPin, Smartphone, Zap, FileText,
   MessageSquare, FileSpreadsheet, Phone, Check, X, ChevronDown,
-  Menu, ArrowRight,
+  Menu, ArrowRight, Play,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -73,11 +81,37 @@ export default function LandingPage() {
 /* ═══════════════════════ NAVBAR ═══════════════════════ */
 function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const [demoLoading, setDemoLoading] = useState(false);
+  const navigate = useNavigate();
+
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', fn, { passive: true });
     return () => window.removeEventListener('scroll', fn);
   }, []);
+
+  const handleDemo = async (type: 'akeri' | 'bemanning') => {
+    setDemoLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('demo-login', {
+        body: { type },
+      });
+      if (error || !data?.email) throw new Error(data?.error || 'Kunde inte skapa demo');
+      
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
+      if (signInError) throw signInError;
+      
+      toast.success(`Inloggad som ${data.companyName}`);
+      navigate('/admin');
+    } catch (err: any) {
+      toast.error(err.message || 'Demo-inloggning misslyckades');
+    } finally {
+      setDemoLoading(false);
+    }
+  };
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all ${scrolled ? 'bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm' : 'bg-white/80 backdrop-blur'}`}>
@@ -97,6 +131,28 @@ function Navbar() {
         </div>
 
         <div className="flex items-center gap-3">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" disabled={demoLoading} className="gap-1.5 hidden sm:inline-flex">
+                <Play className="h-3.5 w-3.5" />
+                {demoLoading ? 'Laddar...' : 'Testa demo'}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuItem onClick={() => handleDemo('akeri')} className="cursor-pointer">
+                <div>
+                  <p className="font-medium">Demo Åkeri AB</p>
+                  <p className="text-xs text-muted-foreground">Transport & logistik</p>
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleDemo('bemanning')} className="cursor-pointer">
+                <div>
+                  <p className="font-medium">Demo Bemanning AB</p>
+                  <p className="text-xs text-muted-foreground">Bemanning & personal</p>
+                </div>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button variant="ghost" size="sm" asChild className="hidden md:inline-flex">
             <Link to="/login">Logga in</Link>
           </Button>
