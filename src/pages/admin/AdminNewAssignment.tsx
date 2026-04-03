@@ -96,6 +96,8 @@ export default function AdminNewAssignment() {
             require_signature: requireSignature,
             require_photo: requirePhoto,
             cost: cost ? parseFloat(cost) : null,
+            vehicle_id: vehicleId || null,
+            order_id: orderId || null,
           }, {
             onSuccess: () => resolve(),
             onError: (err) => reject(err),
