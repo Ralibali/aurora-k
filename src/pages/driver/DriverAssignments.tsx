@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useMemo } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useDriverAssignments, useProfile } from '@/hooks/useData';
 import { useEffectiveDriverSettings } from '@/hooks/useDriverSettings';
-import { DriverLayout } from '@/components/DriverLayout';
+import { Link } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
