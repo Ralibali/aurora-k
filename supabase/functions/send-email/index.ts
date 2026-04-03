@@ -5,8 +5,8 @@ const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
 
 const FOOTER = `
 <div style="margin-top:40px;padding-top:20px;border-top:1px solid #e5e7eb;color:#9ca3af;font-size:12px;line-height:1.6">
-  <p style="margin:0">Aurora Media AB · Org.nr 559272-0220</p>
-  <p style="margin:4px 0 0">Frågor? <a href="mailto:info@auroramedia.se" style="color:#6b7280">info@auroramedia.se</a></p>
+  <p style="margin:0">Aurora Transport · auroratransport.se</p>
+  <p style="margin:4px 0 0">Frågor? <a href="mailto:info@auroratransport.se" style="color:#6b7280">info@auroratransport.se</a></p>
 </div>`;
 
 serve(async (req) => {
