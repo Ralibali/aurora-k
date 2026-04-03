@@ -180,6 +180,12 @@ export default function AdminNewAssignment() {
               <Textarea id="comment" value={adminComment} onChange={e => setAdminComment(e.target.value)} placeholder="Meddelande till chauffören..." />
               </div>
 
+              {/* Kostnad */}
+              <div className="space-y-2">
+                <Label htmlFor="cost">Kostnad / fakturabelopp (kr, valfritt)</Label>
+                <Input id="cost" type="number" step="0.01" min="0" value={cost} onChange={e => setCost(e.target.value)} placeholder="T.ex. 1500" />
+              </div>
+
               {/* Signatur & Foto krav */}
               <div className="border rounded-lg p-4 space-y-3">
                 <p className="text-sm font-medium">Krav vid slutförande</p>
