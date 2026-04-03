@@ -89,7 +89,7 @@ export default function DriverInvoices() {
             <Card>
               <CardContent className="py-4 px-4">
                 <div className="flex items-center justify-between gap-2 mb-1">
-                  <p className="font-semibold text-[15px]">Faktura #{inv.invoice_number}</p>
+                  <p className="font-semibold text-[15px] font-mono">Faktura #{inv.invoice_number}</p>
                   <InvoiceStatusBadge status={inv.status} />
                 </div>
                 <p className="text-sm text-muted-foreground">{inv.customer?.name}</p>
