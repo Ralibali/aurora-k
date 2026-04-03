@@ -129,7 +129,7 @@ export default function AdminStatistics() {
             <div className="flex items-center gap-4">
               <div className="stat-card-icon bg-success/10 text-success"><Clock className="h-5 w-5" /></div>
               <div>
-                {loadingA ? <Skeleton className="h-8 w-12" /> : <p className="stat-card-value">{totalHours.toFixed(1)}</p>}
+                {loadingA ? <Skeleton className="h-8 w-12" /> : <p className="stat-card-value font-mono">{totalHours.toFixed(1)}</p>}
                 <p className="stat-card-label">Körtimmar</p>
               </div>
             </div>
