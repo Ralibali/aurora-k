@@ -77,7 +77,7 @@ export function BookingRequestForm({ token, bookings, onCreated }: BookingReques
         <CardContent>
           {submitted ? (
             <div className="text-center py-6">
-              <CheckCircle2 className="h-10 w-10 mx-auto mb-3 text-green-500" />
+              <CheckCircle2 className="h-10 w-10 mx-auto mb-3 text-primary" />
               <p className="font-medium">Tack! Din förfrågan har skickats.</p>
               <p className="text-sm text-muted-foreground mt-1">Vi återkommer så snart som möjligt.</p>
             </div>
