@@ -101,6 +101,9 @@ export default function AdminNewAssignment() {
             cost: cost ? parseFloat(cost) : null,
             vehicle_id: vehicleId || null,
             order_id: orderId || null,
+            geofence_radius: geofenceRadius ? parseInt(geofenceRadius) : null,
+            geofence_lat: geofenceLat ? parseFloat(geofenceLat) : null,
+            geofence_lng: geofenceLng ? parseFloat(geofenceLng) : null,
           }, {
             onSuccess: () => resolve(),
             onError: (err) => reject(err),

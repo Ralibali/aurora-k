@@ -222,6 +222,9 @@ export function useCreateAssignment() {
       cost?: number | null;
       vehicle_id?: string | null;
       order_id?: string | null;
+      geofence_radius?: number | null;
+      geofence_lat?: number | null;
+      geofence_lng?: number | null;
     }) => {
       const { data, error } = await supabase.from('assignments').insert(assignment).select().single();
       if (error) throw error;
