@@ -191,10 +191,10 @@ export default function AdminNewAssignment() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Fordon (valfritt)</Label>
-                  <Select value={vehicleId} onValueChange={setVehicleId}>
+                   <Select value={vehicleId || 'none'} onValueChange={(v) => setVehicleId(v === 'none' ? '' : v)}>
                     <SelectTrigger><SelectValue placeholder="Inget fordon" /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Inget fordon</SelectItem>
+                      <SelectItem value="none">Inget fordon</SelectItem>
                       {(vehicles ?? []).map(v => <SelectItem key={v.id} value={v.id}>{v.name} {v.registration_number ? `(${v.registration_number})` : ''}</SelectItem>)}
                     </SelectContent>
                   </Select>
