@@ -1,5 +1,4 @@
 import { Card, CardContent } from '@/components/ui/card';
-import { Card, CardContent } from '@/components/ui/card';
 import { useDriverAssignments } from '@/hooks/useData';
 import { useAuth } from '@/hooks/useAuth';
 import { calculateDecimalHours, formatSwedishDate } from '@/lib/format';
