@@ -22,6 +22,7 @@ export default function AdminSettings() {
 
   const { data: features, isLoading: featuresLoading } = useFeatureSettings();
   const toggleFeature = useToggleFeature();
+  const resetFeatures = useResetAllFeatures();
 
   if (isLoading) {
     return <AdminLayout title="Inställningar"><div className="max-w-2xl space-y-6"><Skeleton className="h-64 w-full" /></div></AdminLayout>;
