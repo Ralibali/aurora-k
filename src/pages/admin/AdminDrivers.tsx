@@ -144,7 +144,32 @@ function InviteModal({ companyId, companyName, adminName }: { companyId: string;
         }).select('email, token').single();
 
         if (error) throw error;
-        if (data) inserted.push({ email: data.email, token: data.token! });
+        if (data) {
+          inserted.push({ email: data.email, token: data.token! });
+          // Send driver invite email via Brevo
+          const joinUrl = `${window.location.origin}/join?token=${data.token}`;
+          await supabase.functions.invoke('send-email', {
+            body: {
+              to: data.email,
+              subject: `${companyName} har bjudit in dig till Aurora Transport`,
+              html: `
+                <h1 style="font-size:20px;font-weight:700;color:#0f172a;margin:0 0 16px">Du har blivit inbjuden! 🎉</h1>
+                <p style="font-size:14px;color:#334155;line-height:1.6;margin:0 0 16px"><strong>${adminName}</strong> på <strong>${companyName}</strong> har bjudit in dig att använda Aurora Transport.</p>
+                <div style="background:#f1f5f9;border-radius:8px;padding:16px 20px;margin:16px 0">
+                  <div style="font-size:13px;color:#334155;line-height:1.8">
+                    ✅ Se och hantera dina uppdrag i realtid<br/>
+                    📍 Automatisk GPS-spårning och navigering<br/>
+                    📝 Digital signering och fotobevis
+                  </div>
+                </div>
+                <div style="text-align:center;margin:24px 0">
+                  <a href="${joinUrl}" style="display:inline-block;background:#2563eb;color:#ffffff;font-weight:600;font-size:14px;padding:12px 28px;border-radius:8px;text-decoration:none">Skapa ditt konto</a>
+                </div>
+                <p style="font-size:13px;color:#64748b;line-height:1.5;margin:0 0 12px">Länken är giltig i 7 dagar.</p>
+              `,
+            },
+          });
+        }
       }
 
       setResults(inserted);
