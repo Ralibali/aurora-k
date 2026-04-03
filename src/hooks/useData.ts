@@ -1,21 +1,23 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 
 // ─── CUSTOMERS ───────────────────────────────────────────
 export function useCustomers() {
+  const { companyId } = useAuth();
   return useQuery({
-    queryKey: ['customers'],
+    queryKey: ['customers', companyId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('customers')
-        .select('*')
-        .order('name');
+      const q = supabase.from('customers').select('*').order('name');
+      if (companyId) q.eq('company_id', companyId);
+      const { data, error } = await q;
       if (error) throw error;
       return data;
     },
     staleTime: 5 * 60 * 1000,
+    enabled: !!companyId,
   });
 }
 
@@ -38,6 +40,7 @@ export function useCustomer(id: string | undefined) {
 
 export function useCreateCustomer() {
   const qc = useQueryClient();
+  const { companyId } = useAuth();
   return useMutation({
     mutationFn: async (customer: {
       name: string;
@@ -53,7 +56,7 @@ export function useCreateCustomer() {
       payment_terms_days?: number;
       notes?: string | null;
     }) => {
-      const { data, error } = await supabase.from('customers').insert(customer).select().single();
+      const { data, error } = await supabase.from('customers').insert({ ...customer, company_id: companyId }).select().single();
       if (error) throw error;
       return data;
     },
@@ -84,18 +87,18 @@ export function useUpdateCustomer() {
 
 // ─── PROFILES (drivers) ─────────────────────────────────
 export function useDrivers() {
+  const { companyId } = useAuth();
   return useQuery({
-    queryKey: ['drivers'],
+    queryKey: ['drivers', companyId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('role', 'driver')
-        .order('full_name');
+      const q = supabase.from('profiles').select('*').eq('role', 'driver').order('full_name');
+      if (companyId) q.eq('company_id', companyId);
+      const { data, error } = await q;
       if (error) throw error;
       return data;
     },
     staleTime: 5 * 60 * 1000,
+    enabled: !!companyId,
   });
 }
 
@@ -115,6 +118,7 @@ export function useProfile(id: string | undefined) {
 // ─── ASSIGNMENTS (with realtime) ────────────────────────
 export function useAssignments() {
   const qc = useQueryClient();
+  const { companyId } = useAuth();
 
   useEffect(() => {
     const channelName = `assignments-realtime-${Math.random().toString(36).slice(2)}`;
@@ -129,16 +133,19 @@ export function useAssignments() {
   }, [qc]);
 
   return useQuery({
-    queryKey: ['assignments'],
+    queryKey: ['assignments', companyId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const q = supabase
         .from('assignments')
         .select('*, customer:customers(*), driver:profiles!assignments_assigned_driver_id_fkey(*)')
         .order('scheduled_start', { ascending: false });
+      if (companyId) q.eq('company_id', companyId);
+      const { data, error } = await q;
       if (error) throw error;
       return data;
     },
     staleTime: 30 * 1000,
+    enabled: !!companyId,
   });
 }
 
@@ -206,6 +213,7 @@ export function useDriverAssignments(driverId: string | undefined) {
 
 export function useCreateAssignment() {
   const qc = useQueryClient();
+  const { companyId } = useAuth();
   return useMutation({
     mutationFn: async (assignment: {
       title: string;
@@ -226,7 +234,7 @@ export function useCreateAssignment() {
       geofence_lat?: number | null;
       geofence_lng?: number | null;
     }) => {
-      const { data, error } = await supabase.from('assignments').insert(assignment).select().single();
+      const { data, error } = await supabase.from('assignments').insert({ ...assignment, company_id: companyId }).select().single();
       if (error) throw error;
       return data;
     },
@@ -255,7 +263,6 @@ export function useUpdateAssignment() {
   });
 }
 
-// Driver-specific update that only allows permitted fields via secure RPC
 export function useDriverUpdateAssignment() {
   const qc = useQueryClient();
   return useMutation({
@@ -339,6 +346,7 @@ export function useAssignmentLogs(assignmentId: string | undefined) {
 
 export function useCreateAssignmentLog() {
   const qc = useQueryClient();
+  const { companyId } = useAuth();
   return useMutation({
     mutationFn: async (log: {
       assignment_id: string;
@@ -347,7 +355,7 @@ export function useCreateAssignmentLog() {
       old_value?: string | null;
       new_value?: string | null;
     }) => {
-      const { error } = await supabase.from('assignment_logs').insert(log);
+      const { error } = await supabase.from('assignment_logs').insert({ ...log, company_id: companyId });
       if (error) throw error;
     },
     onSuccess: (_data, variables) => {
@@ -358,17 +366,21 @@ export function useCreateAssignmentLog() {
 
 // ─── INVOICES ────────────────────────────────────────────
 export function useInvoices() {
+  const { companyId } = useAuth();
   return useQuery({
-    queryKey: ['invoices'],
+    queryKey: ['invoices', companyId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const q = supabase
         .from('invoices')
         .select('*, customer:customers(*)')
         .order('invoice_number', { ascending: false });
+      if (companyId) q.eq('company_id', companyId);
+      const { data, error } = await q;
       if (error) throw error;
       return data;
     },
     staleTime: 60 * 1000,
+    enabled: !!companyId,
   });
 }
 
@@ -385,6 +397,7 @@ export function useNextInvoiceNumber() {
 
 export function useCreateInvoice() {
   const qc = useQueryClient();
+  const { companyId } = useAuth();
   return useMutation({
     mutationFn: async (invoice: {
       invoice_number: number;
@@ -399,7 +412,7 @@ export function useCreateInvoice() {
       reference?: string | null;
       message?: string | null;
     }) => {
-      const { data, error } = await supabase.from('invoices').insert(invoice).select().single();
+      const { data, error } = await supabase.from('invoices').insert({ ...invoice, company_id: companyId }).select().single();
       if (error) throw error;
       await supabase.from('assignments').update({ invoiced: true }).in('id', invoice.assignment_ids);
       return data;
@@ -431,14 +444,18 @@ export function useUpdateInvoiceStatus() {
 
 // ─── SETTINGS ────────────────────────────────────────────
 export function useSettings() {
+  const { companyId } = useAuth();
   return useQuery({
-    queryKey: ['settings'],
+    queryKey: ['settings', companyId],
     queryFn: async () => {
-      const { data, error } = await supabase.from('settings').select('*').limit(1).maybeSingle();
+      const q = supabase.from('settings').select('*').limit(1);
+      if (companyId) q.eq('company_id', companyId);
+      const { data, error } = await q.maybeSingle();
       if (error) throw error;
       return data;
     },
     staleTime: 10 * 60 * 1000,
+    enabled: !!companyId,
   });
 }
 
@@ -461,9 +478,10 @@ export function useUpdateSettings() {
 
 export function useCreateSettings() {
   const qc = useQueryClient();
+  const { companyId } = useAuth();
   return useMutation({
     mutationFn: async (settings: { company_name: string; [key: string]: any }) => {
-      const { data, error } = await supabase.from('settings').insert(settings).select().single();
+      const { data, error } = await supabase.from('settings').insert({ ...settings, company_id: companyId }).select().single();
       if (error) throw error;
       return data;
     },
@@ -475,16 +493,18 @@ export function useCreateSettings() {
 
 // ─── DRIVER COMPENSATION ────────────────────────────────
 export function useDriverCompensations() {
+  const { companyId } = useAuth();
   return useQuery({
-    queryKey: ['driver_compensations'],
+    queryKey: ['driver_compensations', companyId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('driver_compensation')
-        .select('*');
+      const q = supabase.from('driver_compensation').select('*');
+      if (companyId) q.eq('company_id', companyId);
+      const { data, error } = await q;
       if (error) throw error;
       return data;
     },
     staleTime: 5 * 60 * 1000,
+    enabled: !!companyId,
   });
 }
 
@@ -507,6 +527,7 @@ export function useDriverCompensation(driverId: string | undefined) {
 
 export function useUpsertDriverCompensation() {
   const qc = useQueryClient();
+  const { companyId } = useAuth();
   return useMutation({
     mutationFn: async (comp: {
       driver_id: string;
@@ -519,7 +540,7 @@ export function useUpsertDriverCompensation() {
     }) => {
       const { data, error } = await supabase
         .from('driver_compensation')
-        .upsert([comp], { onConflict: 'driver_id' })
+        .upsert([{ ...comp, company_id: companyId }], { onConflict: 'driver_id' })
         .select()
         .single();
       if (error) throw error;
