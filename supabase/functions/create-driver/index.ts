@@ -51,10 +51,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { email, full_name, password } = await req.json();
-    if (!email || !full_name || !password) {
+    const { email, full_name, password, company_id } = await req.json();
+    if (!email || !full_name || !password || !company_id) {
       return new Response(
-        JSON.stringify({ error: "email, full_name and password required" }),
+        JSON.stringify({ error: "email, full_name, password and company_id required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -83,6 +83,7 @@ Deno.serve(async (req) => {
     await adminClient.from("user_roles").upsert({
       user_id: userId,
       role: "driver",
+      company_id,
     }, { onConflict: "user_id,role" });
 
     // Profile is auto-created by trigger, but ensure data is correct
@@ -91,6 +92,7 @@ Deno.serve(async (req) => {
       email,
       full_name,
       role: "driver",
+      company_id,
     }, { onConflict: "id" });
 
     return new Response(

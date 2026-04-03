@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { useDrivers, useAssignments, useDriverCompensations, useUpsertDriverCompensation } from '@/hooks/useData';
 import { Plus, Trash2, DollarSign, Save, Search, Phone, Briefcase, Users } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
@@ -125,6 +126,7 @@ export default function AdminDrivers() {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
 
+  const { companyId } = useAuth();
   const { data: drivers, isLoading } = useDrivers();
   const { data: assignments } = useAssignments();
   const { data: compensations } = useDriverCompensations();
@@ -168,7 +170,7 @@ export default function AdminDrivers() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const res = await supabase.functions.invoke('create-driver', {
-        body: { email, full_name: name, password },
+        body: { email, full_name: name, password, company_id: companyId },
         headers: { Authorization: `Bearer ${session?.access_token}` },
       });
       if (res.error) throw new Error(res.error.message);

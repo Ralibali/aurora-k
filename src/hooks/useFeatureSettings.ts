@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 export interface FeatureSetting {
   id: string;
@@ -12,16 +13,17 @@ export interface FeatureSetting {
 }
 
 export function useFeatureSettings() {
+  const { companyId } = useAuth();
   return useQuery({
-    queryKey: ['feature_settings'],
+    queryKey: ['feature_settings', companyId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('feature_settings')
-        .select('*')
-        .order('sort_order');
+      const q = supabase.from('feature_settings').select('*').order('sort_order');
+      if (companyId) q.eq('company_id', companyId);
+      const { data, error } = await q;
       if (error) throw error;
       return data as FeatureSetting[];
     },
+    enabled: !!companyId,
   });
 }
 
@@ -46,7 +48,7 @@ export function useResetAllFeatures() {
       const { error } = await supabase
         .from('feature_settings')
         .update({ enabled: true, updated_at: new Date().toISOString() })
-        .neq('id', '00000000-0000-0000-0000-000000000000'); // match all rows
+        .neq('id', '00000000-0000-0000-0000-000000000000');
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['feature_settings'] }),
@@ -59,6 +61,5 @@ export function useEnabledFeatures() {
   const enabledSet = new Set(
     (data ?? []).filter(f => f.enabled).map(f => f.feature_key)
   );
-  // If still loading, assume all enabled so sidebar doesn't flash
   return { enabledFeatures: enabledSet, isLoading, isEmpty: !data || data.length === 0 };
 }

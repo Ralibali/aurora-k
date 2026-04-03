@@ -6,6 +6,7 @@ interface AuthContextType {
   session: Session | null;
   user: User | null;
   role: 'admin' | 'driver' | null;
+  companyId: string | null;
   loading: boolean;
   signOut: () => Promise<void>;
 }
@@ -14,27 +15,44 @@ const AuthContext = createContext<AuthContextType>({
   session: null,
   user: null,
   role: null,
+  companyId: null,
   loading: true,
   signOut: async () => {},
 });
 
-const roleCache: Record<string, 'admin' | 'driver'> = {};
+const profileCache: Record<string, { role: 'admin' | 'driver'; companyId: string | null }> = {};
 
-async function fetchRole(userId: string): Promise<'admin' | 'driver' | null> {
-  if (roleCache[userId]) return roleCache[userId];
-  const { data } = await supabase
+async function fetchProfile(userId: string): Promise<{ role: 'admin' | 'driver' | null; companyId: string | null }> {
+  if (profileCache[userId]) return profileCache[userId];
+
+  // Fetch role from user_roles
+  const { data: roleData } = await supabase
     .from('user_roles')
     .select('role')
     .eq('user_id', userId)
     .single();
-  const r = (data?.role as 'admin' | 'driver') ?? null;
-  if (r) roleCache[userId] = r;
-  return r;
+
+  // Fetch company_id from profiles
+  const { data: profileData } = await supabase
+    .from('profiles')
+    .select('company_id')
+    .eq('id', userId)
+    .single();
+
+  const role = (roleData?.role as 'admin' | 'driver') ?? null;
+  const companyId = profileData?.company_id ?? null;
+
+  if (role) {
+    profileCache[userId] = { role, companyId };
+  }
+
+  return { role, companyId };
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<'admin' | 'driver' | null>(null);
+  const [companyId, setCompanyId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const mounted = useRef(true);
 
@@ -49,29 +67,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log('[Auth] apply called from', source, 'session:', !!s, 'user:', s?.user?.email);
       setSession(s);
       if (s?.user) {
-        const r = await fetchRole(s.user.id);
-        console.log('[Auth] role resolved:', r, 'ignore:', ignore);
+        const profile = await fetchProfile(s.user.id);
+        console.log('[Auth] profile resolved:', profile, 'ignore:', ignore);
         if (!ignore) {
-          setRole(r);
+          setRole(profile.role);
+          setCompanyId(profile.companyId);
           setLoading(false);
         }
       } else {
         setRole(null);
+        setCompanyId(null);
         setLoading(false);
       }
     };
 
-    // 1. Set up listener FIRST so we don't miss events
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, newSession) => {
         console.log('[Auth] onAuthStateChange event:', _event);
-        // Skip if this is INITIAL_SESSION and we haven't processed getSession yet
-        if (_event === 'INITIAL_SESSION') return; // getSession handles initial
+        if (_event === 'INITIAL_SESSION') return;
         apply(newSession, 'onAuthStateChange:' + _event);
       }
     );
 
-    // 2. Then get initial session
     supabase.auth.getSession().then(({ data: { session: initial } }) => {
       if (!initialDone) {
         initialDone = true;
@@ -88,13 +105,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
-    delete roleCache[Object.keys(roleCache)[0]];
+    delete profileCache[Object.keys(profileCache)[0]];
     setSession(null);
     setRole(null);
+    setCompanyId(null);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ session, user: session?.user ?? null, role, loading, signOut }}>
+    <AuthContext.Provider value={{ session, user: session?.user ?? null, role, companyId, loading, signOut }}>
       {children}
     </AuthContext.Provider>
   );

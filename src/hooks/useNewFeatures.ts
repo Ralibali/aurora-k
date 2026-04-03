@@ -1,24 +1,30 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
 
 // ─── ARTICLES ────────────────────────────────────────────
 export function useArticles() {
+  const { companyId } = useAuth();
   return useQuery({
-    queryKey: ['articles'],
+    queryKey: ['articles', companyId],
     queryFn: async () => {
-      const { data, error } = await supabase.from('articles').select('*').order('name');
+      const q = supabase.from('articles').select('*').order('name');
+      if (companyId) q.eq('company_id', companyId);
+      const { data, error } = await q;
       if (error) throw error;
       return data;
     },
+    enabled: !!companyId,
   });
 }
 
 export function useCreateArticle() {
   const qc = useQueryClient();
+  const { companyId } = useAuth();
   return useMutation({
     mutationFn: async (article: { name: string; description?: string | null; unit?: string; default_price?: number; article_number?: string | null; vat_rate?: number }) => {
-      const { data, error } = await supabase.from('articles').insert(article).select().single();
+      const { data, error } = await supabase.from('articles').insert({ ...article, company_id: companyId }).select().single();
       if (error) throw error;
       return data;
     },
@@ -53,21 +59,26 @@ export function useDeleteArticle() {
 
 // ─── VEHICLES ────────────────────────────────────────────
 export function useVehicles() {
+  const { companyId } = useAuth();
   return useQuery({
-    queryKey: ['vehicles'],
+    queryKey: ['vehicles', companyId],
     queryFn: async () => {
-      const { data, error } = await supabase.from('vehicles').select('*').order('name');
+      const q = supabase.from('vehicles').select('*').order('name');
+      if (companyId) q.eq('company_id', companyId);
+      const { data, error } = await q;
       if (error) throw error;
       return data;
     },
+    enabled: !!companyId,
   });
 }
 
 export function useCreateVehicle() {
   const qc = useQueryClient();
+  const { companyId } = useAuth();
   return useMutation({
     mutationFn: async (vehicle: { name: string; registration_number?: string | null; type?: string; make?: string | null; model?: string | null; year?: number | null; notes?: string | null }) => {
-      const { data, error } = await supabase.from('vehicles').insert(vehicle).select().single();
+      const { data, error } = await supabase.from('vehicles').insert({ ...vehicle, company_id: companyId }).select().single();
       if (error) throw error;
       return data;
     },
@@ -102,21 +113,26 @@ export function useDeleteVehicle() {
 
 // ─── ORDERS ──────────────────────────────────────────────
 export function useOrders() {
+  const { companyId } = useAuth();
   return useQuery({
-    queryKey: ['orders'],
+    queryKey: ['orders', companyId],
     queryFn: async () => {
-      const { data, error } = await supabase.from('orders').select('*, customer:customers(*)').order('created_at', { ascending: false });
+      const q = supabase.from('orders').select('*, customer:customers(*)').order('created_at', { ascending: false });
+      if (companyId) q.eq('company_id', companyId);
+      const { data, error } = await q;
       if (error) throw error;
       return data;
     },
+    enabled: !!companyId,
   });
 }
 
 export function useCreateOrder() {
   const qc = useQueryClient();
+  const { companyId } = useAuth();
   return useMutation({
     mutationFn: async (order: { title: string; customer_id: string; description?: string | null }) => {
-      const { data, error } = await supabase.from('orders').insert(order).select().single();
+      const { data, error } = await supabase.from('orders').insert({ ...order, company_id: companyId }).select().single();
       if (error) throw error;
       return data;
     },
@@ -152,9 +168,10 @@ export function useCustomerPriceList(customerId: string | undefined) {
 
 export function useUpsertCustomerPrice() {
   const qc = useQueryClient();
+  const { companyId } = useAuth();
   return useMutation({
     mutationFn: async (item: { customer_id: string; article_id: string; price: number }) => {
-      const { error } = await supabase.from('customer_price_lists').upsert(item, { onConflict: 'customer_id,article_id' });
+      const { error } = await supabase.from('customer_price_lists').upsert({ ...item, company_id: companyId }, { onConflict: 'customer_id,article_id' });
       if (error) throw error;
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['customer_price_list'] }); toast.success('Pris sparat!'); },
@@ -175,21 +192,26 @@ export function useDeleteCustomerPrice() {
 
 // ─── ORDER TEMPLATES ─────────────────────────────────────
 export function useOrderTemplates() {
+  const { companyId } = useAuth();
   return useQuery({
-    queryKey: ['order_templates'],
+    queryKey: ['order_templates', companyId],
     queryFn: async () => {
-      const { data, error } = await supabase.from('order_templates').select('*').order('name');
+      const q = supabase.from('order_templates').select('*').order('name');
+      if (companyId) q.eq('company_id', companyId);
+      const { data, error } = await q;
       if (error) throw error;
       return data;
     },
+    enabled: !!companyId,
   });
 }
 
 export function useCreateOrderTemplate() {
   const qc = useQueryClient();
+  const { companyId } = useAuth();
   return useMutation({
     mutationFn: async (template: { name: string; description?: string | null; template_data?: any }) => {
-      const { data, error } = await supabase.from('order_templates').insert(template).select().single();
+      const { data, error } = await supabase.from('order_templates').insert({ ...template, company_id: companyId }).select().single();
       if (error) throw error;
       return data;
     },
@@ -224,9 +246,10 @@ export function useAssignmentArticles(assignmentId: string | undefined) {
 
 export function useAddAssignmentArticle() {
   const qc = useQueryClient();
+  const { companyId } = useAuth();
   return useMutation({
     mutationFn: async (item: { assignment_id: string; article_id?: string | null; name: string; unit?: string; quantity?: number; unit_price?: number; vat_rate?: number }) => {
-      const { error } = await supabase.from('assignment_articles').insert(item);
+      const { error } = await supabase.from('assignment_articles').insert({ ...item, company_id: companyId });
       if (error) throw error;
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['assignment_articles'] }); toast.success('Artikel tillagd!'); },
