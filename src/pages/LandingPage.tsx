@@ -5,10 +5,18 @@ import { Button } from '@/components/ui/button';
 import {
   Truck, Clock, Users, MapPin, Smartphone, Zap, FileText,
   MessageSquare, FileSpreadsheet, Phone, Check, X, ChevronDown,
-  Menu, ArrowRight,
+  Menu, ArrowRight, Play,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
