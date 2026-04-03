@@ -1,170 +1,136 @@
 import {
-  LayoutDashboard, Briefcase, Users, Truck, Clock, Settings, LogOut,
-  Moon, Sun, Smartphone, MapPin, CalendarDays, Package, Car,
-  ShoppingCart, FileText, CalendarOff, ClipboardCheck, Bell, Inbox,
-  UsersRound, SmilePlus, Leaf, Code, Route, Receipt, BarChart3,
+  LayoutDashboard, Briefcase, Calendar, Map, Navigation,
+  Users, UserX, CheckSquare, Building, ShoppingCart, Inbox,
+  Star, FileText, Package, Leaf, BarChart, TrendingUp,
+  Bell, Globe, Code, Settings, LogOut, Truck,
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { useTheme } from 'next-themes';
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarFooter,
-  SidebarHeader,
-  useSidebar,
-} from '@/components/ui/sidebar';
 
 const navSections = [
   {
-    label: 'Översikt',
+    label: 'Dispatch',
     items: [
-      { title: 'Dashboard', url: '/admin', icon: LayoutDashboard },
-    ],
-  },
-  {
-    label: 'Operativt',
-    items: [
+      { title: 'Översikt', url: '/admin', icon: LayoutDashboard, end: true },
       { title: 'Uppdrag', url: '/admin/assignments', icon: Briefcase },
-      { title: 'Kalender', url: '/admin/calendar', icon: CalendarDays },
-      { title: 'Beställningar', url: '/admin/orders', icon: ShoppingCart },
-      { title: 'Live-karta', url: '/admin/live-map', icon: MapPin },
-      { title: 'Rutter', url: '/admin/routes', icon: Route },
+      { title: 'Kalender', url: '/admin/calendar', icon: Calendar },
+      { title: 'Live-karta', url: '/admin/live-map', icon: Map },
+      { title: 'Ruttoptimering', url: '/admin/routes', icon: Navigation },
     ],
   },
   {
     label: 'Personal',
     items: [
       { title: 'Chaufförer', url: '/admin/drivers', icon: Users },
-      { title: 'Fordon', url: '/admin/vehicles', icon: Car },
-      { title: 'Frånvaro', url: '/admin/absences', icon: CalendarOff },
-      { title: 'Externa resurser', url: '/admin/external-resources', icon: UsersRound },
+      { title: 'Frånvaro', url: '/admin/absences', icon: UserX },
+      { title: 'Godkännanden', url: '/admin/approvals', icon: CheckSquare },
     ],
   },
   {
-    label: 'Kunder',
+    label: 'Kunder & Order',
     items: [
-      { title: 'Kunder', url: '/admin/customers', icon: Truck },
-      { title: 'Förfrågningar', url: '/admin/booking-requests', icon: Inbox },
-      { title: 'Kundnöjdhet', url: '/admin/satisfaction', icon: SmilePlus },
+      { title: 'Kunder', url: '/admin/customers', icon: Building },
+      { title: 'Ordrar', url: '/admin/orders', icon: ShoppingCart },
+      { title: 'Bokningsförfrågningar', url: '/admin/booking-requests', icon: Inbox },
+      { title: 'Kundnöjdhet', url: '/admin/satisfaction', icon: Star },
     ],
   },
   {
     label: 'Ekonomi',
     items: [
-      { title: 'Fakturering', url: '/admin/invoices', icon: Receipt },
-      { title: 'Fakturamallar', url: '/admin/invoice-templates', icon: FileText },
-      { title: 'Tidrapporter', url: '/admin/reports', icon: Clock },
-      { title: 'Statistik', url: '/admin/statistics', icon: BarChart3 },
+      { title: 'Fakturor', url: '/admin/invoices', icon: FileText },
+      { title: 'Artiklar', url: '/admin/articles', icon: Package },
+      { title: 'Miljöuppföljning', url: '/admin/environment', icon: Leaf },
     ],
   },
   {
-    label: 'Register',
+    label: 'Rapporter',
     items: [
-      { title: 'Artiklar', url: '/admin/articles', icon: Package },
-      { title: 'Mallar', url: '/admin/order-templates', icon: FileText },
+      { title: 'Rapporter', url: '/admin/reports', icon: BarChart },
+      { title: 'Statistik', url: '/admin/statistics', icon: TrendingUp },
     ],
   },
   {
     label: 'System',
     items: [
-      { title: 'Inställningar', url: '/admin/settings', icon: Settings },
-      { title: 'Förarapp', url: '/admin/driver-settings', icon: Smartphone },
-      { title: 'Notiser', url: '/admin/notifications', icon: Bell },
-      { title: 'Attestering', url: '/admin/approvals', icon: ClipboardCheck },
-      { title: 'Miljödata', url: '/admin/environment', icon: Leaf },
+      { title: 'Notifieringar', url: '/admin/notifications', icon: Bell },
+      { title: 'Externa resurser', url: '/admin/external-resources', icon: Globe },
       { title: 'API', url: '/admin/api', icon: Code },
+      { title: 'Inställningar', url: '/admin/settings', icon: Settings },
     ],
   },
 ];
 
 export function AdminSidebar() {
-  const { state } = useSidebar();
-  const collapsed = state === 'collapsed';
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const { theme, setTheme } = useTheme();
 
   const handleLogout = async () => {
     await signOut();
     navigate('/');
   };
 
-  const initials = user?.user_metadata?.full_name
-    ? user.user_metadata.full_name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
-    : 'AD';
+  const fullName = user?.user_metadata?.full_name || 'Admin';
+  const initials = fullName
+    .split(' ')
+    .map((n: string) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
 
   return (
-    <Sidebar collapsible="icon">
-      <SidebarHeader className="p-4">
-        <div className="flex items-center gap-3">
-          {/* Avatar */}
-          <div className="w-8 h-8 rounded-lg bg-sidebar-primary flex items-center justify-center shrink-0">
-            <span className="text-xs font-bold text-sidebar-primary-foreground">{initials}</span>
-          </div>
-          {!collapsed && (
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-sidebar-foreground truncate">Aurora Medias</p>
-              <p className="text-[10px] text-sidebar-muted uppercase tracking-wider">Transport AB</p>
-            </div>
-          )}
+    <aside className="hidden md:flex flex-col fixed inset-y-0 left-0 w-60 bg-[#0F172A] z-40">
+      {/* Header */}
+      <div className="h-16 flex items-center gap-3 px-5 shrink-0 border-b border-white/5">
+        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+          <Truck className="h-4 w-4 text-white" />
         </div>
-      </SidebarHeader>
+        <span className="text-sm font-semibold text-white tracking-tight">Aurora Transport</span>
+      </div>
 
-      <SidebarContent className="pt-1 px-2">
+      {/* Navigation */}
+      <nav className="flex-1 overflow-y-auto py-3 scrollbar-thin">
         {navSections.map((section) => (
-          <SidebarGroup key={section.label}>
-            {!collapsed && (
-              <SidebarGroupLabel className="text-sidebar-muted text-[10px] uppercase tracking-widest font-semibold px-3 mb-0.5">
-                {section.label}
-              </SidebarGroupLabel>
-            )}
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {section.items.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <NavLink
-                        to={item.url}
-                        end={item.url === '/admin'}
-                        className="flex items-center gap-3 px-3 py-2 rounded-md text-sidebar-muted hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors duration-100 text-[13px] border-l-2 border-transparent"
-                        activeClassName="!border-l-2 !border-sidebar-primary bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                      >
-                        <item.icon className="h-4 w-4 shrink-0" />
-                        {!collapsed && <span>{item.title}</span>}
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+          <div key={section.label}>
+            <p className="text-[10px] font-semibold text-slate-600 uppercase tracking-widest px-5 mt-4 mb-1">
+              {section.label}
+            </p>
+            {section.items.map((item) => (
+              <NavLink
+                key={item.url}
+                to={item.url}
+                end={item.end}
+                className="flex items-center gap-3 text-slate-400 text-sm px-4 py-2 rounded-md mx-2 transition-colors duration-100 hover:bg-[#1E293B] hover:text-slate-200 border-l-2 border-transparent"
+                activeClassName="!bg-[#1E3A8A] !text-white !border-l-2 !border-[#3B82F6]"
+              >
+                <item.icon className="h-4 w-4 shrink-0" />
+                <span>{item.title}</span>
+              </NavLink>
+            ))}
+          </div>
         ))}
-      </SidebarContent>
+      </nav>
 
-      <SidebarFooter className="p-3 space-y-1">
-        <button
-          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-          className="flex items-center gap-3 px-3 py-2 text-sidebar-muted hover:text-sidebar-foreground transition-colors w-full rounded-md hover:bg-sidebar-accent text-[13px]"
-        >
-          {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          {!collapsed && <span>{theme === 'dark' ? 'Ljust läge' : 'Mörkt läge'}</span>}
-        </button>
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-2 text-sidebar-muted hover:text-sidebar-foreground transition-colors w-full rounded-md hover:bg-sidebar-accent text-[13px]"
-        >
-          <LogOut className="h-4 w-4" />
-          {!collapsed && <span>Logga ut</span>}
-        </button>
-      </SidebarFooter>
-    </Sidebar>
+      {/* Footer - User */}
+      <div className="shrink-0 border-t border-white/5 p-4">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center shrink-0">
+            <span className="text-xs font-bold text-white">{initials}</span>
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm text-white truncate">{fullName}</p>
+            <p className="text-xs text-slate-400">Admin</p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="text-slate-500 hover:text-slate-300 transition-colors p-1"
+            title="Logga ut"
+          >
+            <LogOut className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    </aside>
   );
 }
