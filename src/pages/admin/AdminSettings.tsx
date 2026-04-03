@@ -75,6 +75,7 @@ export default function AdminSettings() {
             <TabsTrigger value="features" className="gap-1.5">
               <ToggleLeft className="h-3.5 w-3.5" /> Funktioner
             </TabsTrigger>
+            <TabsTrigger value="appearance">Utseende</TabsTrigger>
             <TabsTrigger value="subscription">Prenumeration</TabsTrigger>
           </TabsList>
 

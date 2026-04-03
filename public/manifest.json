@@ -1,0 +1,20 @@
+{
+  "name": "Aurora Transport",
+  "short_name": "Aurora",
+  "theme_color": "#1E40AF",
+  "background_color": "#F8FAFC",
+  "display": "standalone",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "/placeholder.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/placeholder.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}
