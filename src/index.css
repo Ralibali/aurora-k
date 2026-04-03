@@ -1,7 +1,5 @@
 @tailwind base;
 
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap');
-
 /* Override browser autofill */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
@@ -17,54 +15,68 @@ input:-webkit-autofill:focus {
 
 @layer base {
   :root {
+    /* Background: #F8FAFC */
     --background: 210 40% 98%;
+    /* Text primary: #0F172A */
     --foreground: 222 47% 11%;
 
+    /* Card: #FFFFFF */
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    --primary: 224 76% 48%;
+    /* Primary: #1E40AF */
+    --primary: 224 76% 40%;
     --primary-foreground: 0 0% 100%;
+    /* Primary hover: #1D4ED8 — used via hover utilities */
 
     --secondary: 210 40% 96%;
     --secondary-foreground: 222 47% 20%;
 
     --muted: 210 40% 96%;
+    /* Text secondary: #64748B */
     --muted-foreground: 215 16% 47%;
 
     --accent: 210 40% 96%;
     --accent-foreground: 222 47% 20%;
 
+    /* Error: #EF4444 */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
+    /* Success: #10B981 */
     --success: 160 84% 39%;
     --success-foreground: 0 0% 100%;
 
+    /* Warning: #F59E0B */
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
 
-    --info: 217 91% 60%;
+    --info: 224 76% 40%;
     --info-foreground: 0 0% 100%;
 
+    /* Border: #E2E8F0 */
     --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 224 76% 48%;
+    --input: 215 20% 83%;
+    --ring: 224 76% 40%;
 
     --radius: 0.5rem;
 
+    /* Sidebar: #0F172A */
     --sidebar-background: 222 47% 11%;
     --sidebar-foreground: 213 31% 91%;
-    --sidebar-primary: 224 76% 48%;
+    --sidebar-primary: 224 76% 40%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 217 33% 17%;
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 217 33% 17%;
-    --sidebar-ring: 224 76% 48%;
+    --sidebar-ring: 224 76% 40%;
     --sidebar-muted: 215 20% 65%;
+
+    /* Card shadow */
+    --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   }
 
   .dark {
@@ -84,8 +96,14 @@ input:-webkit-autofill:focus {
     --accent-foreground: 210 40% 96%;
     --destructive: 0 62% 30%;
     --destructive-foreground: 210 40% 98%;
+    --success: 160 84% 39%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --info: 224 76% 48%;
+    --info-foreground: 0 0% 100%;
     --border: 217 33% 17%;
-    --input: 217 33% 17%;
+    --input: 217 33% 20%;
     --ring: 224 76% 48%;
     --sidebar-background: 222 47% 6%;
     --sidebar-foreground: 210 20% 90%;
@@ -96,6 +114,7 @@ input:-webkit-autofill:focus {
     --sidebar-border: 217 33% 14%;
     --sidebar-ring: 224 76% 48%;
     --sidebar-muted: 215 20% 55%;
+    --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   }
 }
 
@@ -106,7 +125,7 @@ input:-webkit-autofill:focus {
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Geist', system-ui, -apple-system, sans-serif;
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -147,13 +166,13 @@ input:-webkit-autofill:focus {
   /* Stat cards */
   .stat-card {
     @apply relative overflow-hidden rounded-lg border bg-card p-5 transition-shadow hover:shadow-md;
+    box-shadow: var(--card-shadow);
   }
   .stat-card-icon {
     @apply w-10 h-10 rounded-lg flex items-center justify-center;
   }
   .stat-card-value {
-    @apply text-2xl font-bold tracking-tight text-foreground;
-    font-family: 'Geist', sans-serif;
+    @apply text-2xl font-bold tracking-tight text-foreground font-mono-ui;
   }
   .stat-card-label {
     @apply text-xs text-muted-foreground font-medium uppercase tracking-wider;
@@ -162,11 +181,12 @@ input:-webkit-autofill:focus {
   /* Table container */
   .admin-table-card {
     @apply rounded-lg border bg-card overflow-hidden;
+    box-shadow: var(--card-shadow);
   }
 
   /* Mono text utility */
   .font-mono-ui {
-    font-family: 'Geist Mono', 'SF Mono', monospace;
+    font-family: 'DM Mono', 'SF Mono', monospace;
   }
 }
 

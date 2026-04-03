@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Geist", "system-ui", "-apple-system", "sans-serif"],
-        mono: ["Geist Mono", "SF Mono", "monospace"],
+        sans: ["DM Sans", "system-ui", "-apple-system", "sans-serif"],
+        mono: ["DM Mono", "SF Mono", "monospace"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -26,6 +26,7 @@ export default {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+          hover: "hsl(224 76% 48%)",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -79,6 +80,9 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      boxShadow: {
+        card: "var(--card-shadow)",
       },
       keyframes: {
         "accordion-down": {
