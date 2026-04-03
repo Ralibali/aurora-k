@@ -13,9 +13,11 @@ import { PriorityBadge } from '@/components/PriorityBadge';
 import { useAssignment, useUpdateAssignment, useDeleteAssignment, useDrivers, useAssignmentLogs, useCreateAssignmentLog } from '@/hooks/useData';
 import { useAuth } from '@/hooks/useAuth';
 import { formatSwedishDateTime, calculateDuration } from '@/lib/format';
-import { ArrowLeft, Trash2, Copy, History } from 'lucide-react';
+import { ArrowLeft, Trash2, Copy, History, Mail, Bell } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const ACTION_LABELS: Record<string, string> = {
