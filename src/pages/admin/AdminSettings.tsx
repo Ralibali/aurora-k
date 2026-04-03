@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { AdminLayout } from '@/components/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+const SubscriptionTab = lazy(() => import('@/components/SubscriptionTab'));
 
 export default function AdminSettings() {
   const { data: settings, isLoading } = useSettings();
@@ -73,6 +74,7 @@ export default function AdminSettings() {
             <TabsTrigger value="features" className="gap-1.5">
               <ToggleLeft className="h-3.5 w-3.5" /> Funktioner
             </TabsTrigger>
+            <TabsTrigger value="subscription">Prenumeration</TabsTrigger>
           </TabsList>
 
           <TabsContent value="company" className="space-y-6">
@@ -208,6 +210,12 @@ export default function AdminSettings() {
                 );
               })
             )}
+          </TabsContent>
+
+          <TabsContent value="subscription">
+            <Suspense fallback={<div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>}>
+              <SubscriptionTab />
+            </Suspense>
           </TabsContent>
         </Tabs>
       </div>

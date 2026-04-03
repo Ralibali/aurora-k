@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Truck, Building2, User, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Truck, Building2, User, Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -23,6 +23,9 @@ function getPasswordStrength(pw: string): { label: string; pct: number; color: s
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const cancelled = searchParams.get('cancelled');
+
   const [companyName, setCompanyName] = useState('');
   const [orgNumber, setOrgNumber] = useState('');
   const [fullName, setFullName] = useState('');
@@ -95,8 +98,21 @@ export default function RegisterPage() {
       localStorage.setItem('onboarding_company_name', companyName);
       localStorage.setItem('onboarding_org_nr', orgNumber);
 
-      toast.success('Konto skapat!');
-      navigate('/onboarding');
+      // 5. Create Stripe Checkout session
+      const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke('create-checkout', {
+        body: { companyId: company.id, companyName },
+      });
+
+      if (checkoutError || !checkoutData?.url) {
+        // If Stripe fails, still allow onboarding (manual activation later)
+        console.error('Stripe checkout error:', checkoutError);
+        toast.success('Konto skapat! Betalning kan slutföras senare.');
+        navigate('/onboarding');
+        return;
+      }
+
+      // 6. Redirect to Stripe Checkout
+      window.location.href = checkoutData.url;
     } catch (err: any) {
       toast.error(err.message || 'Något gick fel');
     } finally {
@@ -116,6 +132,13 @@ export default function RegisterPage() {
           </div>
           <h1 className="text-xl font-bold text-foreground">Aurora Transport</h1>
         </div>
+
+        {cancelled && (
+          <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-4 mb-4 text-sm">
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            <p>Betalningen avbröts. Du kan försöka igen.</p>
+          </div>
+        )}
 
         <div className="bg-white rounded-2xl border shadow-sm p-8">
           <h2 className="text-lg font-semibold text-foreground mb-1">Skapa konto</h2>
