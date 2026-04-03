@@ -65,6 +65,7 @@ export default function AdminCustomerDetail() {
         <Tabs defaultValue="details">
           <TabsList>
             <TabsTrigger value="details">Uppgifter</TabsTrigger>
+            <TabsTrigger value="portal" className="gap-1.5"><Link2 className="h-3.5 w-3.5" /> Portal</TabsTrigger>
             <TabsTrigger value="prices">Prislistor</TabsTrigger>
             <TabsTrigger value="deliveries">Leveranser</TabsTrigger>
             <TabsTrigger value="invoices">Fakturor</TabsTrigger>
