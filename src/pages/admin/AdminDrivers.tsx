@@ -170,7 +170,7 @@ export default function AdminDrivers() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const res = await supabase.functions.invoke('create-driver', {
-        body: { email, full_name: name, password },
+        body: { email, full_name: name, password, company_id: companyId },
         headers: { Authorization: `Bearer ${session?.access_token}` },
       });
       if (res.error) throw new Error(res.error.message);
