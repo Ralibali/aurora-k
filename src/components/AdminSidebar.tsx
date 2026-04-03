@@ -47,6 +47,7 @@ const operationsNav = [
 
 const financeNav = [
   { title: 'Fakturering', url: '/admin/invoices', icon: Receipt },
+  { title: 'Fakturamallar', url: '/admin/invoice-templates', icon: FileText },
   { title: 'Tidrapporter', url: '/admin/reports', icon: Clock },
   { title: 'Statistik', url: '/admin/statistics', icon: BarChart3 },
 ];
