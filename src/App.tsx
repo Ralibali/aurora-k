@@ -80,6 +80,8 @@ const App = () => (
               <Suspense fallback={<PageLoader />}>
                 <Routes>
                 <Route path="/" element={<LandingPage />} />
+                <Route path="/transportledningssystem" element={<TransportledningssystemPage />} />
+                <Route path="/coredination-alternativ" element={<CoredinationAlternativPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/onboarding" element={<OnboardingPage />} />
