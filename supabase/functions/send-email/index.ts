@@ -59,7 +59,7 @@ serve(async (req) => {
         "X-Connection-Api-Key": RESEND_API_KEY,
       },
       body: JSON.stringify({
-        from: "Aurora Transport <noreply@auroramedia.se>",
+        from: "Aurora Transport <noreply@auroratransport.se>",
         to: [to],
         subject,
         html: fullHtml,
