@@ -9,6 +9,7 @@ import { PwaInstallPrompt } from "@/components/PwaInstallPrompt";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AdminShell } from "@/components/AdminLayout";
+import { DriverLayout } from "@/components/DriverLayout";
 
 const LandingPage = lazy(() => import("./pages/LandingPage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
