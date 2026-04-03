@@ -24,9 +24,15 @@ export default function AdminCustomerDetail() {
   const { data: customer, isLoading } = useCustomer(id);
   const { data: allAssignments } = useAssignments();
   const { data: allInvoices } = useInvoices();
+  const { data: priceList } = useCustomerPriceList(id);
+  const { data: articles } = useArticles();
   const updateCustomer = useUpdateCustomer();
+  const upsertPrice = useUpsertCustomerPrice();
+  const deletePrice = useDeleteCustomerPrice();
 
   const [form, setForm] = useState<Record<string, any> | null>(null);
+  const [newPriceArticle, setNewPriceArticle] = useState('');
+  const [newPriceValue, setNewPriceValue] = useState('');
 
   if (isLoading) {
     return <AdminLayout title="Kund"><div className="max-w-4xl space-y-4"><Skeleton className="h-8 w-32" /><Skeleton className="h-96 w-full" /></div></AdminLayout>;
