@@ -13,6 +13,8 @@ import { AdminShell } from "@/components/AdminLayout";
 import { DriverLayout } from "@/components/DriverLayout";
 
 const LandingPage = lazy(() => import("./pages/LandingPage"));
+const TransportledningssystemPage = lazy(() => import("./pages/TransportledningssystemPage"));
+const CoredinationAlternativPage = lazy(() => import("./pages/CoredinationAlternativPage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const RegisterPage = lazy(() => import("./pages/RegisterPage"));
 const OnboardingPage = lazy(() => import("./pages/OnboardingPage"));
@@ -78,6 +80,8 @@ const App = () => (
               <Suspense fallback={<PageLoader />}>
                 <Routes>
                 <Route path="/" element={<LandingPage />} />
+                <Route path="/transportledningssystem" element={<TransportledningssystemPage />} />
+                <Route path="/coredination-alternativ" element={<CoredinationAlternativPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/onboarding" element={<OnboardingPage />} />
