@@ -116,7 +116,7 @@ function CompensationDialog({ driverId, driverName, existing }: { driverId: stri
 /* ── Invite Modal ── */
 interface InviteRow { name: string; email: string }
 
-function InviteModal({ companyId }: { companyId: string }) {
+function InviteModal({ companyId, companyName, adminName }: { companyId: string; companyName: string; adminName: string }) {
   const [open, setOpen] = useState(false);
   const [rows, setRows] = useState<InviteRow[]>([{ name: '', email: '' }]);
   const [submitting, setSubmitting] = useState(false);
