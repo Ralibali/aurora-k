@@ -22,6 +22,7 @@ interface GeofenceConfig {
 export function useDriverLocationTracker(
   driverId: string | undefined,
   activeAssignmentId: string | undefined,
+  companyId: string | null | undefined,
   geofence?: GeofenceConfig | null,
   onGeofenceEnter?: () => void,
   onGeofenceExit?: () => void,
