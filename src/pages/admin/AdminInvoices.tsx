@@ -198,11 +198,11 @@ export default function AdminInvoices() {
                 )}
                 {filtered.map(inv => (
                   <TableRow key={inv.id}>
-                    <TableCell className="font-medium">#{inv.invoice_number}</TableCell>
+                    <TableCell className="font-mono text-sm">#{inv.invoice_number}</TableCell>
                     <TableCell>{inv.customer?.name}</TableCell>
-                    <TableCell>{inv.invoice_date}</TableCell>
-                    <TableCell>{inv.due_date}</TableCell>
-                    <TableCell className="text-right">{inv.total_inc_vat.toFixed(0)} kr</TableCell>
+                    <TableCell className="font-mono text-sm">{inv.invoice_date}</TableCell>
+                    <TableCell className="font-mono text-sm">{inv.due_date}</TableCell>
+                    <TableCell className="text-right font-mono text-sm">{inv.total_inc_vat.toFixed(0)} kr</TableCell>
                     <TableCell><InvoiceStatusBadge status={inv.status} /></TableCell>
                     <TableCell>
                       <div className="flex gap-1">
