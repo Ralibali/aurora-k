@@ -786,6 +786,39 @@ export type Database = {
         }
         Relationships: []
       }
+      feature_settings: {
+        Row: {
+          category: string
+          description: string | null
+          enabled: boolean
+          feature_key: string
+          id: string
+          label: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          description?: string | null
+          enabled?: boolean
+          feature_key: string
+          id?: string
+          label: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          description?: string | null
+          enabled?: boolean
+          feature_key?: string
+          id?: string
+          label?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       invoice_templates: {
         Row: {
           created_at: string
