@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, Suspense } from 'react';
 import { PageTransition } from '@/components/PageTransition';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AdminSidebar } from '@/components/AdminSidebar';
@@ -11,7 +11,15 @@ export function AdminShell() {
       <div className="min-h-screen flex w-full bg-background">
         <AdminSidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          <Outlet />
+          <Suspense
+            fallback={
+              <div className="flex-1 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+              </div>
+            }
+          >
+            <Outlet />
+          </Suspense>
         </div>
       </div>
     </SidebarProvider>
