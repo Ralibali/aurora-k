@@ -53,7 +53,7 @@ export default function DriverProfile() {
   };
 
   return (
-    <DriverLayout>
+    <>
       <div className="p-4 space-y-4">
         {/* Profile card */}
         <Card className="overflow-hidden">

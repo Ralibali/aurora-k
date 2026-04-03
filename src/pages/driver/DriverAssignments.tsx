@@ -83,7 +83,7 @@ export default function DriverAssignments() {
   const nextAssignment = todayAssignments[0] as any | undefined;
 
   return (
-    <DriverLayout hideHeader>
+    <>
       <div
         ref={scrollRef}
         className="flex-1 overflow-auto"

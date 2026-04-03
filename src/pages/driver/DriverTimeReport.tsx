@@ -41,7 +41,7 @@ export default function DriverTimeReport() {
   const currentHours = period === 'week' ? weekHours : monthHours;
 
   return (
-    <DriverLayout>
+    <>
       <div className="p-4 space-y-4">
         <h2 className="text-lg font-semibold text-foreground">Tidrapport</h2>
 
