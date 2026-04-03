@@ -126,6 +126,7 @@ export default function AdminDrivers() {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
 
+  const { companyId } = useAuth();
   const { data: drivers, isLoading } = useDrivers();
   const { data: assignments } = useAssignments();
   const { data: compensations } = useDriverCompensations();
