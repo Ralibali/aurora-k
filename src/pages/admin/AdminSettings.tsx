@@ -214,8 +214,12 @@ export default function AdminSettings() {
             )}
           </TabsContent>
 
+          <TabsContent value="appearance">
+            <AppearanceTab />
+          </TabsContent>
+
           <TabsContent value="subscription">
-            <Suspense fallback={<div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>}>
+            <Suspense fallback={<div className="space-y-4 py-12"><Skeleton className="h-32 w-full" /><Skeleton className="h-32 w-full" /></div>}>
               <SubscriptionTab />
             </Suspense>
           </TabsContent>
