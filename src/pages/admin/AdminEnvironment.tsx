@@ -23,7 +23,7 @@ export default function AdminEnvironment() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground flex items-center gap-2"><Route className="h-4 w-4" /> Total körsträcka</CardTitle></CardHeader>
-            <CardContent><span className="text-2xl font-bold">{stats.totalKm.toFixed(0)} km</span></CardContent>
+            <CardContent><span className="text-2xl font-bold font-mono">{stats.totalKm.toFixed(0)} km</span></CardContent>
           </Card>
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground flex items-center gap-2"><Leaf className="h-4 w-4" /> CO₂-utsläpp</CardTitle></CardHeader>
