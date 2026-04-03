@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { useCustomers, useDrivers, useCreateAssignment } from '@/hooks/useData';
+import { useVehicles, useOrders } from '@/hooks/useNewFeatures';
 import { priorityLabels } from '@/lib/types';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
