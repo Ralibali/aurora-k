@@ -143,6 +143,10 @@ export default function AdminCustomerDetail() {
             </Card>
           </TabsContent>
 
+          <TabsContent value="portal" className="mt-4">
+            <CustomerPortalSection customerId={id!} />
+          </TabsContent>
+
           <TabsContent value="prices" className="mt-4">
             <Card>
               <CardContent className="pt-6 space-y-4">
