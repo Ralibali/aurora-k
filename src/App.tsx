@@ -81,6 +81,10 @@ const App = () => (
                 <Route path="/admin/driver-settings" element={<ProtectedRoute requiredRole="admin"><AdminDriverSettings /></ProtectedRoute>} />
                 <Route path="/admin/live-map" element={<ProtectedRoute requiredRole="admin"><AdminLiveMap /></ProtectedRoute>} />
                 <Route path="/admin/calendar" element={<ProtectedRoute requiredRole="admin"><AdminCalendar /></ProtectedRoute>} />
+                <Route path="/admin/articles" element={<ProtectedRoute requiredRole="admin"><AdminArticles /></ProtectedRoute>} />
+                <Route path="/admin/vehicles" element={<ProtectedRoute requiredRole="admin"><AdminVehicles /></ProtectedRoute>} />
+                <Route path="/admin/orders" element={<ProtectedRoute requiredRole="admin"><AdminOrders /></ProtectedRoute>} />
+                <Route path="/admin/order-templates" element={<ProtectedRoute requiredRole="admin"><AdminOrderTemplates /></ProtectedRoute>} />
                 {/* Driver routes */}
                 <Route path="/driver" element={<ProtectedRoute requiredRole="driver"><DriverAssignments /></ProtectedRoute>} />
                 <Route path="/driver/assignment/:id" element={<ProtectedRoute requiredRole="driver"><DriverAssignmentDetail /></ProtectedRoute>} />
