@@ -1,10 +1,6 @@
-import { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { User, MapPin, Clock, Navigation } from 'lucide-react';
-
-// Fix Leaflet default marker icons in bundlers
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
@@ -24,74 +20,70 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(minutes / 60)}h sedan`;
 }
 
-function FitBounds({ positions }: { positions: [number, number][] }) {
-  const map = useMap();
-  useEffect(() => {
-    if (positions.length > 0) {
-      const bounds = L.latLngBounds(positions.map(([lat, lng]) => [lat, lng]));
-      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
-    }
-  }, [positions, map]);
-  return null;
-}
-
 interface LeafletMapProps {
   locations: any[];
   navigate: (path: string) => void;
 }
 
 export default function LeafletMap({ locations, navigate }: LeafletMapProps) {
-  const defaultCenter: [number, number] = [59.33, 18.07];
-  const positions: [number, number][] = locations.map((l: any) => [l.latitude, l.longitude]);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<L.Map | null>(null);
 
-  return (
-    <MapContainer
-      center={positions.length > 0 ? positions[0] : defaultCenter}
-      zoom={10}
-      className="h-full w-full z-0"
-      style={{ background: 'hsl(var(--muted))' }}
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      {positions.length > 0 && <FitBounds positions={positions} />}
-      {locations.map((loc: any) => (
-        <Marker key={loc.id} position={[loc.latitude, loc.longitude]}>
-          <Popup>
-            <div className="min-w-[180px] space-y-2 text-sm">
-              <div className="flex items-center gap-2 font-semibold">
-                <User className="h-4 w-4 text-primary" />
-                {loc.driver?.full_name ?? 'Okänd förare'}
-              </div>
-              {loc.assignment && (
-                <>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Navigation className="h-3.5 w-3.5" />
-                    {loc.assignment.title}
-                  </div>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <MapPin className="h-3.5 w-3.5" />
-                    {loc.assignment.address}
-                  </div>
-                </>
-              )}
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Clock className="h-3 w-3" />
-                Uppdaterad {timeAgo(loc.updated_at)}
-              </div>
-              {loc.assignment_id && (
-                <button
-                  onClick={() => navigate(`/admin/assignments/${loc.assignment_id}`)}
-                  className="mt-1 w-full text-xs font-medium text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/20 rounded px-2 py-1.5 transition-colors text-center"
-                >
-                  Visa uppdrag →
-                </button>
-              )}
-            </div>
-          </Popup>
-        </Marker>
-      ))}
-    </MapContainer>
-  );
+  useEffect(() => {
+    if (!containerRef.current || mapRef.current) return;
+
+    const defaultCenter: L.LatLngExpression = [59.33, 18.07];
+    const map = L.map(containerRef.current).setView(defaultCenter, 10);
+
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    }).addTo(map);
+
+    mapRef.current = map;
+
+    return () => {
+      map.remove();
+      mapRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    // Clear existing markers
+    map.eachLayer((layer) => {
+      if (layer instanceof L.Marker) map.removeLayer(layer);
+    });
+
+    const positions: L.LatLngExpression[] = [];
+
+    locations.forEach((loc) => {
+      const pos: L.LatLngExpression = [loc.latitude, loc.longitude];
+      positions.push(pos);
+
+      const marker = L.marker(pos).addTo(map);
+
+      const driverName = loc.driver?.full_name ?? 'Okänd förare';
+      let popupHtml = `<div style="min-width:180px"><strong>${driverName}</strong>`;
+      if (loc.assignment) {
+        popupHtml += `<br/><span style="color:#666">📍 ${loc.assignment.title}</span>`;
+        popupHtml += `<br/><span style="color:#666">${loc.assignment.address}</span>`;
+      }
+      popupHtml += `<br/><small style="color:#999">Uppdaterad ${timeAgo(loc.updated_at)}</small>`;
+      if (loc.assignment_id) {
+        popupHtml += `<br/><a href="/admin/assignments/${loc.assignment_id}" style="color:#3b82f6;font-size:12px">Visa uppdrag →</a>`;
+      }
+      popupHtml += '</div>';
+
+      marker.bindPopup(popupHtml);
+    });
+
+    if (positions.length > 0) {
+      const bounds = L.latLngBounds(positions as L.LatLngExpression[]);
+      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
+    }
+  }, [locations, navigate]);
+
+  return <div ref={containerRef} className="h-full w-full" />;
 }
