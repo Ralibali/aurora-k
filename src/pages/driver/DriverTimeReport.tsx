@@ -85,7 +85,7 @@ export default function DriverTimeReport() {
                       <CardContent className="py-3.5 px-4 flex items-center justify-between gap-3">
                         <div className="min-w-0">
                           <p className="font-medium text-sm text-foreground truncate">{a.customer?.name || a.title}</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">{formatSwedishDate(a.actual_start!)}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5 font-mono">{formatSwedishDate(a.actual_start!)}</p>
                         </div>
                         <div className="text-right shrink-0">
                           <p className="font-semibold text-sm text-foreground tabular-nums">{hours.toFixed(1)}h</p>
