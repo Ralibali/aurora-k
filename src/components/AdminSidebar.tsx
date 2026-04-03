@@ -34,6 +34,7 @@ const navSections = [
     items: [
       { title: 'Kunder', url: '/admin/customers', icon: Building },
       { title: 'Ordrar', url: '/admin/orders', icon: ShoppingCart },
+      { title: 'Ordermallar', url: '/admin/order-templates', icon: ClipboardList },
       { title: 'Bokningsförfrågningar', url: '/admin/booking-requests', icon: Inbox },
       { title: 'Kundnöjdhet', url: '/admin/satisfaction', icon: Star },
     ],
