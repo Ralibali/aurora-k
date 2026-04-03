@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { useDrivers, useAssignments, useDriverCompensations, useUpsertDriverCompensation } from '@/hooks/useData';
 import { Plus, Trash2, DollarSign, Save, Search, Phone, Briefcase, Users } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
