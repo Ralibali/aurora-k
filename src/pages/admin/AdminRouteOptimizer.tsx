@@ -1,12 +1,14 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, lazy, Suspense } from 'react';
 import { AdminLayout } from '@/components/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAssignments, useDrivers } from '@/hooks/useData';
-import { MapPin, Route, ArrowDown } from 'lucide-react';
+import { MapPin, Route } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
+
+const RouteMapLeaflet = lazy(() => import('./AdminRouteMapLeaflet'));
 
 export default function AdminRouteOptimizer() {
   const { data: assignments } = useAssignments();
@@ -39,6 +41,24 @@ export default function AdminRouteOptimizer() {
             <input type="date" value={selectedDate} onChange={e => setSelectedDate(e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
           </div>
         </div>
+
+        {/* Route Map */}
+        {driverAssignments.length > 0 && (
+          <Card className="overflow-hidden">
+            <CardHeader><CardTitle className="text-sm">Ruttkarta</CardTitle></CardHeader>
+            <CardContent className="p-0">
+              <div className="h-[350px]">
+                <Suspense fallback={
+                  <div className="h-full flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+                  </div>
+                }>
+                  <RouteMapLeaflet assignments={driverAssignments} />
+                </Suspense>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {selectedDriver && driverAssignments.length === 0 && (
           <Card><CardContent className="py-12 text-center text-muted-foreground"><Route className="h-10 w-10 mx-auto mb-3 opacity-30" /><p>Inga uppdrag för vald dag</p></CardContent></Card>
