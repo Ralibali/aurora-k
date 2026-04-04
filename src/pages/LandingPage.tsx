@@ -751,6 +751,47 @@ function FaqSection() {
   );
 }
 
+/* ═══════════════════════ SEO CONTENT ═══════════════════════ */
+function SeoContent() {
+  return (
+    <section className="py-20 bg-slate-50 border-t border-slate-200">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6">
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp}>
+          <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-6">
+            Transportledningssystem för moderna åkerier och bemanningsföretag
+          </h2>
+          <div className="prose prose-slate max-w-none text-muted-foreground leading-relaxed space-y-4">
+            <p>
+              Aurora Transport är ett svenskt <strong>transportledningssystem</strong> byggt för små och medelstora transport-, åkeri- och bemanningsföretag. Plattformen samlar allt du behöver — jobbdispatch, personalhantering, tidrapportering och fakturering — i ett enda verktyg med fast pris på 449 kr/mån, oavsett antal användare.
+            </p>
+            <p>
+              Med Aurora Transport slipper du hantera uppdrag via WhatsApp, SMS och kalkylark. Istället skapar du uppdrag digitalt, tilldelar rätt förare med ett klick och får automatisk tidrapportering när föraren stämplar in och ut. Allt synligt i realtid — på dator, surfplatta och mobil.
+            </p>
+            <h3 className="text-lg font-semibold text-foreground !mt-8 !mb-3">Vad ingår?</h3>
+            <ul className="list-disc pl-5 space-y-1">
+              <li><strong>Jobbdispatch i realtid</strong> — skapa uppdrag och tilldela till förare. Notifiering direkt i mobilen.</li>
+              <li><strong>Digital tidrapportering</strong> — förare stämplar in och ut per uppdrag. Timmar beräknas automatiskt.</li>
+              <li><strong>GPS-spårning och live-karta</strong> — se var dina fordon och förare befinner sig just nu.</li>
+              <li><strong>Kundregister med prislistor</strong> — hantera kunder, kontaktpersoner och individuella priser.</li>
+              <li><strong>Fakturering</strong> — skapa fakturor direkt från slutförda uppdrag med anpassningsbara mallar.</li>
+              <li><strong>Fortnox-export</strong> — exportera tidrapporter och bokföringsunderlag med ett klick.</li>
+              <li><strong>Mobilapp utan installation</strong> — en PWA som fungerar direkt i webbläsaren, utan app-butik.</li>
+              <li><strong>Obegränsat antal förare och admins</strong> — inga extra kostnader oavsett teamstorlek.</li>
+            </ul>
+            <h3 className="text-lg font-semibold text-foreground !mt-8 !mb-3">Varför välja Aurora Transport?</h3>
+            <p>
+              Till skillnad från stora system som kräver säljdemo, implementation och per-användare-priser kan du komma igång med Aurora Transport på under 5 minuter. Vi erbjuder en komplett plattform till ett fast månadspris — ingen bindningstid, inga dolda avgifter. Support sker på svenska, och alla framtida uppdateringar ingår.
+            </p>
+            <p>
+              Oavsett om du driver ett litet åkeri med tre fordon eller ett bemanningsföretag med trettio förare så skalar Aurora Transport med dig. Vår plattform är ett modernt alternativ till system som Coredination, Pinpointer och andra traditionella transportledningssystem — enklare, billigare och snabbare att komma igång med.
+            </p>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
 /* ═══════════════════════ FINAL CTA ═══════════════════════ */
 function FinalCta() {
   return (
