@@ -1,8 +1,16 @@
 import { Link } from "react-router-dom";
+import { useMemo } from "react";
 import { ArrowLeft, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useBreadcrumbJsonLd } from "@/lib/breadcrumb-jsonld";
 
-const PrivacyPage = () => (
+const PrivacyPage = () => {
+  useBreadcrumbJsonLd(useMemo(() => [
+    { name: 'Hem', url: 'https://auroratransport.se/' },
+    { name: 'Integritetspolicy', url: 'https://auroratransport.se/privacy' },
+  ], []));
+
+  return (
   <div className="min-h-screen bg-background">
     <header className="border-b border-border bg-card/80 backdrop-blur sticky top-0 z-30">
       <div className="max-w-3xl mx-auto px-4 py-4 flex items-center gap-3">

@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Truck, Zap, Clock, Users, MapPin, Smartphone, FileText, MessageSquare, FileSpreadsheet, Phone } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { useBreadcrumbJsonLd } from '@/lib/breadcrumb-jsonld';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -16,6 +17,11 @@ export default function TransportledningssystemPage() {
     const meta = document.querySelector('meta[name="description"]');
     if (meta) meta.setAttribute('content', 'Enkelt transportledningssystem som samlar uppdrag, förare och tidrapporter. Kom igång samma dag. 449 kr/mån.');
   }, []);
+
+  useBreadcrumbJsonLd(useMemo(() => [
+    { name: 'Hem', url: 'https://auroratransport.se/' },
+    { name: 'Transportledningssystem', url: 'https://auroratransport.se/transportledningssystem' },
+  ], []));
 
   return (
     <div className="min-h-screen bg-background">
