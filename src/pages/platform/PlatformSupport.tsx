@@ -32,10 +32,10 @@ export default function PlatformSupport() {
   const { data: tickets } = useQuery({
     queryKey: ['platform-support-tickets'],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await (supabase
         .from('support_tickets' as any)
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false }) as any);
       return (data || []) as Ticket[];
     },
   });

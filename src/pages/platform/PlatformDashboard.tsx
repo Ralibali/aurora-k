@@ -28,7 +28,7 @@ export default function PlatformDashboard() {
     queryFn: async () => {
       const { data } = await supabase
         .from('support_tickets' as any)
-        .select('id, status');
+        .select('id, status') as any;
       return (data || []) as { id: string; status: string }[];
     },
   });

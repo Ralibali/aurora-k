@@ -33,10 +33,10 @@ export default function PlatformAnnouncements() {
   const { data: announcements } = useQuery({
     queryKey: ['platform-announcements'],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await (supabase
         .from('platform_announcements' as any)
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false }) as any);
       return (data || []) as Announcement[];
     },
   });
