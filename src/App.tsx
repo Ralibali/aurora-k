@@ -64,6 +64,7 @@ const PlatformDashboard = lazy(() => import("./pages/platform/PlatformDashboard"
 const PlatformCompanies = lazy(() => import("./pages/platform/PlatformCompanies"));
 const PlatformSupport = lazy(() => import("./pages/platform/PlatformSupport"));
 const PlatformAnnouncements = lazy(() => import("./pages/platform/PlatformAnnouncements"));
+const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -100,6 +101,7 @@ const App = () => (
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="/portal" element={<CustomerPortal />} />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
+                <Route path="/privacy" element={<PrivacyPage />} />
 
                 {/* Admin routes — share a single sidebar shell */}
                 <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><SubscriptionGuard><AdminShell /></SubscriptionGuard></ProtectedRoute>}>
