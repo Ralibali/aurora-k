@@ -13,7 +13,10 @@ export function SubscriptionGuard({ children }: { children: React.ReactNode }) {
   const [redirecting, setRedirecting] = useState(false);
 
   useEffect(() => {
-    if (!companyId) return;
+    if (!companyId) {
+      setLoading(false);
+      return;
+    }
     supabase
       .from('companies')
       .select('subscription_status')
