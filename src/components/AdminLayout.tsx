@@ -38,10 +38,11 @@ export function AdminLayout({ children, title, description }: AdminLayoutProps) 
   return (
     <>
       <header className="h-14 flex items-center gap-3 border-b border-border px-4 md:px-6 bg-card shrink-0 sticky top-0 z-30">
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <h1 className="text-sm font-semibold text-foreground truncate leading-tight">{title}</h1>
           {description && <p className="text-[11px] text-muted-foreground truncate">{description}</p>}
         </div>
+        <LogoutButton />
       </header>
       <main className="flex-1 p-4 md:p-6 overflow-auto">
         <PageTransition>{children}</PageTransition>
