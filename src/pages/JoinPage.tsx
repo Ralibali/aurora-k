@@ -39,13 +39,9 @@ export default function JoinPage() {
     }
 
     (async () => {
-      // Look up invitation by token
+      // Look up invitation securely via RPC
       const { data, error: fetchError } = await supabase
-        .from('invitations')
-        .select('id, email, name, company_id')
-        .eq('token', token)
-        .is('accepted_at', null)
-        .maybeSingle();
+        .rpc('lookup_invitation_by_token', { p_token: token });
 
       if (fetchError || !data) {
         setError('Inbjudan har redan använts eller är ogiltig.');
@@ -53,18 +49,24 @@ export default function JoinPage() {
         return;
       }
 
-      // Get company name
-      const { data: company } = await supabase
-        .from('companies')
-        .select('name')
-        .eq('id', data.company_id)
-        .single();
+      const inv = data as { id: string; email: string; name: string | null; company_id: string };
+
+      // Get company name (will work after sign-up, but try anyway)
+      let companyName = 'Okänt företag';
+      try {
+        const { data: company } = await supabase
+          .from('companies')
+          .select('name')
+          .eq('id', inv.company_id)
+          .single();
+        if (company?.name) companyName = company.name;
+      } catch {}
 
       setInvitation({
-        ...data,
-        company_name: company?.name || 'Okänt företag',
+        ...inv,
+        company_name: companyName,
       });
-      setName(data.name || '');
+      setName(inv.name || '');
       setLoading(false);
     })();
   }, [token]);
@@ -115,10 +117,11 @@ export default function JoinPage() {
         company_id: invitation.company_id,
       }, { onConflict: 'user_id,role' });
 
-      // 4. Mark invitation accepted
-      await supabase.from('invitations').update({
-        accepted_at: new Date().toISOString(),
-      }).eq('id', invitation.id);
+      // 4. Mark invitation accepted via secure RPC
+      await supabase.rpc('accept_invitation', {
+        p_token: token!,
+        p_user_id: userId,
+      } as any);
 
       toast.success('Välkommen! Ditt konto är skapat.');
       navigate('/driver', { replace: true });
