@@ -62,6 +62,9 @@ export default function LandingPage() {
       {/* FEATURES */}
       <FeaturesSection />
 
+      {/* FULL PLATFORM SHOWCASE */}
+      <PlatformShowcase />
+
       {/* COMPARISON */}
       <ComparisonTable />
 
