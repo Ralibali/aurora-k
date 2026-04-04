@@ -119,6 +119,19 @@ export function AdminSidebar() {
         ))}
       </nav>
 
+      {/* Platform Admin Link */}
+      {isPlatformAdmin && (
+        <div className="shrink-0 border-t border-white/5 px-2 py-2">
+          <Link
+            to="/platform"
+            className="flex items-center gap-3 text-amber-400 text-sm px-4 py-2 rounded-md transition-colors hover:bg-amber-500/10"
+          >
+            <Shield className="h-4 w-4" />
+            <span>Platform Admin</span>
+          </Link>
+        </div>
+      )}
+
       {/* Footer - User */}
       <div className="shrink-0 border-t border-white/5 p-4">
         <div className="flex items-center gap-3">
