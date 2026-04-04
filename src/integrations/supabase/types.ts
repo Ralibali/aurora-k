@@ -1650,6 +1650,10 @@ export type Database = {
       is_platform_admin: { Args: { _user_id: string }; Returns: boolean }
       lookup_invitation_by_token: { Args: { p_token: string }; Returns: Json }
       next_invoice_number: { Args: never; Returns: number }
+      register_company: {
+        Args: { _name: string; _org_nr?: string; _user_full_name?: string }
+        Returns: string
+      }
       submit_satisfaction: {
         Args: { p_comment?: string; p_rating: number; p_token: string }
         Returns: undefined
