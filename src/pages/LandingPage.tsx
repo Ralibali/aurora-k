@@ -5,7 +5,9 @@ import { Button } from '@/components/ui/button';
 import {
   Truck, Clock, Users, MapPin, Smartphone, Zap, FileText,
   MessageSquare, FileSpreadsheet, Phone, Check, X, ChevronDown,
-  Menu, ArrowRight, Play,
+  Menu, ArrowRight, Play, Shield, BarChart3, CalendarDays,
+  Route, Bell, Camera, PenTool, Package, Globe, Headphones,
+  RefreshCw, FileDown, Settings, TrendingUp, Layers,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -59,6 +61,9 @@ export default function LandingPage() {
 
       {/* FEATURES */}
       <FeaturesSection />
+
+      {/* FULL PLATFORM SHOWCASE */}
+      <PlatformShowcase />
 
       {/* COMPARISON */}
       <ComparisonTable />
@@ -270,7 +275,7 @@ function SocialProofBar() {
     <div className="bg-slate-50 border-y border-slate-200 py-6">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
         <p className="text-sm text-slate-400">
-          Används redan av: <span className="text-slate-500 font-medium">CJ Bemanning AB</span> · <span className="text-slate-400 italic">Ditt företag?</span>
+          Byggd för svenska transport- och bemanningsföretag · <span className="text-slate-400 italic">Ditt företag nästa?</span>
         </p>
       </div>
     </div>
@@ -387,6 +392,156 @@ function FeaturesSection() {
             </motion.div>
           ))}
         </div>
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════ PLATFORM SHOWCASE ═══════════════════════ */
+const platformCategories = [
+  {
+    title: 'Order & Dispatch',
+    icon: Package,
+    color: 'bg-blue-50 text-blue-600',
+    items: [
+      { icon: Zap, text: 'Skapa och tilldela uppdrag på sekunder' },
+      { icon: Bell, text: 'Föraren notifieras direkt i appen' },
+      { icon: Layers, text: 'Hantera ordrar med status-flöde' },
+      { icon: RefreshCw, text: 'Ordermallar för återkommande uppdrag' },
+      { icon: CalendarDays, text: 'Kalendervy för översikt & planering' },
+    ],
+  },
+  {
+    title: 'Realtid & Karta',
+    icon: MapPin,
+    color: 'bg-emerald-50 text-emerald-600',
+    items: [
+      { icon: MapPin, text: 'Live-karta med förarpositioner' },
+      { icon: Route, text: 'Ruttoptimering för effektiva körningar' },
+      { icon: Globe, text: 'Geofencing — automatisk incheckning' },
+      { icon: TrendingUp, text: 'Hastighet, riktning & uppdragsstatus' },
+    ],
+  },
+  {
+    title: 'Tidrapportering & Lön',
+    icon: Clock,
+    color: 'bg-violet-50 text-violet-600',
+    items: [
+      { icon: Clock, text: 'In/ut-stämpling per uppdrag' },
+      { icon: FileDown, text: 'Export till Fortnox med ett klick' },
+      { icon: BarChart3, text: 'Lönemodeller: tim, fast, per uppdrag' },
+      { icon: CalendarDays, text: 'Frånvarohantering & semester' },
+    ],
+  },
+  {
+    title: 'Kund & Faktura',
+    icon: FileText,
+    color: 'bg-amber-50 text-amber-600',
+    items: [
+      { icon: Users, text: 'Kundregister med prislistor' },
+      { icon: FileText, text: 'Fakturering direkt från uppdrag' },
+      { icon: Settings, text: 'Anpassningsbara fakturamallar' },
+      { icon: FileDown, text: 'Bokföringsexport (SIE/CSV)' },
+    ],
+  },
+  {
+    title: 'Personal & Fordon',
+    icon: Users,
+    color: 'bg-rose-50 text-rose-600',
+    items: [
+      { icon: Users, text: 'Obegränsat antal förare & admins' },
+      { icon: Truck, text: 'Fordonsregister med status' },
+      { icon: Shield, text: 'Rollbaserad behörighet' },
+      { icon: Headphones, text: 'Extern resurshantering' },
+    ],
+  },
+  {
+    title: 'Avrapportering & Dokumentation',
+    icon: Camera,
+    color: 'bg-cyan-50 text-cyan-600',
+    items: [
+      { icon: Camera, text: 'Fotodokumentation per uppdrag' },
+      { icon: PenTool, text: 'Digital signatur vid leverans' },
+      { icon: FileText, text: 'Fraktprotokoll & anteckningar' },
+      { icon: BarChart3, text: 'Miljöuppföljning (CO₂, bränsle)' },
+    ],
+  },
+];
+
+function PlatformShowcase() {
+  return (
+    <section className="py-20 bg-white">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        <motion.div
+          initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp}
+          className="text-center mb-4"
+        >
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-sm font-medium text-blue-700 mb-4">
+            Från order till faktura
+          </span>
+        </motion.div>
+        <motion.h2
+          initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp}
+          className="text-3xl sm:text-4xl font-bold text-foreground text-center mb-3"
+        >
+          Allt som ingår — i ett fast pris.
+        </motion.h2>
+        <motion.p
+          initial="hidden" whileInView="visible" viewport={{ once: true }} custom={1} variants={fadeUp}
+          className="text-center text-muted-foreground mb-14 max-w-2xl mx-auto"
+        >
+          Medan konkurrenterna tar betalt per användare och kräver en säljdemo så ingår allt hos oss. Punkt.
+        </motion.p>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {platformCategories.map((cat, i) => (
+            <motion.div
+              key={cat.title} custom={i} variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}
+              className="bg-slate-50 rounded-2xl border border-slate-200 p-6 hover:shadow-lg hover:border-primary/20 transition-all duration-300 group"
+            >
+              <div className="flex items-center gap-3 mb-5">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${cat.color} group-hover:scale-110 transition-transform`}>
+                  <cat.icon className="h-5 w-5" />
+                </div>
+                <h3 className="font-bold text-foreground text-lg">{cat.title}</h3>
+              </div>
+              <ul className="space-y-3">
+                {cat.items.map((item, j) => (
+                  <li key={j} className="flex items-start gap-2.5 text-sm text-muted-foreground">
+                    <item.icon className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                    <span>{item.text}</span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Bottom highlight strip */}
+        <motion.div
+          initial="hidden" whileInView="visible" viewport={{ once: true }} custom={6} variants={fadeUp}
+          className="mt-10 bg-primary rounded-2xl p-6 sm:p-8 text-center text-primary-foreground"
+        >
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12">
+            <div>
+              <p className="text-3xl sm:text-4xl font-mono font-bold">449 kr/mån</p>
+              <p className="text-primary-foreground/70 text-sm">Allt ovan inkluderat</p>
+            </div>
+            <div className="hidden sm:block w-px h-12 bg-primary-foreground/20" />
+            <div>
+              <p className="text-3xl sm:text-4xl font-mono font-bold">∞</p>
+              <p className="text-primary-foreground/70 text-sm">Användare inkluderade</p>
+            </div>
+            <div className="hidden sm:block w-px h-12 bg-primary-foreground/20" />
+            <div>
+              <p className="text-3xl sm:text-4xl font-mono font-bold">0 kr</p>
+              <p className="text-primary-foreground/70 text-sm">Extrakostnad per förare</p>
+            </div>
+          </div>
+          <Button asChild className="mt-6 bg-white text-primary hover:bg-white/90 rounded-xl px-8 py-3 font-semibold">
+            <Link to="/register">Kom igång — ingen demo krävs</Link>
+          </Button>
+        </motion.div>
       </div>
     </section>
   );
