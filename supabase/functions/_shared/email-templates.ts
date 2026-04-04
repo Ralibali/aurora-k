@@ -230,9 +230,8 @@ export function subscriptionCancelledEmail(data: {
     html: layout(html),
   };
 }
-}) {
-  const html = `
-    ${heading('Prenumeration avslutad')}
+
+
     ${subheading(`Hej ${data.firstName}, vi är ledsna att se dig gå.`)}
     ${paragraph('Din Aurora Transport-prenumeration har nu avslutats. Vi hoppas att tjänsten har varit till nytta för ditt företag.')}
     ${alertBox('📦 Din data sparas i <strong>30 dagar</strong>. Under den perioden kan du återaktivera ditt konto och behålla all data.', BRAND.primary)}
