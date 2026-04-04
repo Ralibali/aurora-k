@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Truck, CreditCard, Calendar, Layers, Check, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { useBreadcrumbJsonLd } from '@/lib/breadcrumb-jsonld';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -16,6 +17,11 @@ export default function CoredinationAlternativPage() {
     const meta = document.querySelector('meta[name="description"]');
     if (meta) meta.setAttribute('content', 'Letar du efter alternativ till Coredination? Fast pris 449 kr/mån, obegränsat antal användare. Kom igång på 5 min.');
   }, []);
+
+  useBreadcrumbJsonLd(useMemo(() => [
+    { name: 'Hem', url: 'https://auroratransport.se/' },
+    { name: 'Coredination alternativ', url: 'https://auroratransport.se/coredination-alternativ' },
+  ], []));
 
   return (
     <div className="min-h-screen bg-background">
