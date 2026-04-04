@@ -230,7 +230,6 @@ export function subscriptionCancelledEmail(data: {
     html: layout(html),
   };
 }
-  reactivateUrl: string;
 }) {
   const html = `
     ${heading('Prenumeration avslutad')}
