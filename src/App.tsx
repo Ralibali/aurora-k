@@ -9,8 +9,10 @@ import { PwaInstallPrompt } from "@/components/PwaInstallPrompt";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { SubscriptionGuard } from "@/components/SubscriptionGuard";
+import { PlatformAdminGuard } from "@/components/PlatformAdminGuard";
 import { AdminShell } from "@/components/AdminLayout";
 import { DriverLayout } from "@/components/DriverLayout";
+import { PlatformAdminShell } from "@/components/PlatformAdminLayout";
 
 const LandingPage = lazy(() => import("./pages/LandingPage"));
 const TransportledningssystemPage = lazy(() => import("./pages/TransportledningssystemPage"));
@@ -57,6 +59,10 @@ const DriverAssignmentDetail = lazy(() => import("./pages/driver/DriverAssignmen
 const DriverProfile = lazy(() => import("./pages/driver/DriverProfile"));
 const DriverTimeReport = lazy(() => import("./pages/driver/DriverTimeReport"));
 const DriverInvoices = lazy(() => import("./pages/driver/DriverInvoices"));
+const PlatformDashboard = lazy(() => import("./pages/platform/PlatformDashboard"));
+const PlatformCompanies = lazy(() => import("./pages/platform/PlatformCompanies"));
+const PlatformSupport = lazy(() => import("./pages/platform/PlatformSupport"));
+const PlatformAnnouncements = lazy(() => import("./pages/platform/PlatformAnnouncements"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -126,6 +132,14 @@ const App = () => (
                   <Route path="environment" element={<AdminEnvironment />} />
                   <Route path="api" element={<AdminApiDocs />} />
                   <Route path="routes" element={<AdminRouteOptimizer />} />
+                </Route>
+
+                {/* Platform admin routes */}
+                <Route path="/platform" element={<PlatformAdminGuard><PlatformAdminShell /></PlatformAdminGuard>}>
+                  <Route index element={<PlatformDashboard />} />
+                  <Route path="companies" element={<PlatformCompanies />} />
+                  <Route path="support" element={<PlatformSupport />} />
+                  <Route path="announcements" element={<PlatformAnnouncements />} />
                 </Route>
 
 {/* Driver routes — share a single layout shell */}

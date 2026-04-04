@@ -3,11 +3,12 @@ import {
   Users, UserX, CheckSquare, Building, ShoppingCart, Inbox,
   Star, FileText, Package, Leaf, BarChart, TrendingUp,
   Bell, Globe, Code, Settings, LogOut, Truck, Car,
-  ClipboardList, FileImage, Smartphone,
+  ClipboardList, FileImage, Smartphone, Shield,
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { usePlatformAdmin } from '@/hooks/usePlatformAdmin';
 
 const navSections = [
   {
@@ -69,6 +70,7 @@ const navSections = [
 
 export function AdminSidebar() {
   const { user, signOut } = useAuth();
+  const { isPlatformAdmin } = usePlatformAdmin();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -116,6 +118,19 @@ export function AdminSidebar() {
           </div>
         ))}
       </nav>
+
+      {/* Platform Admin Link */}
+      {isPlatformAdmin && (
+        <div className="shrink-0 border-t border-white/5 px-2 py-2">
+          <Link
+            to="/platform"
+            className="flex items-center gap-3 text-amber-400 text-sm px-4 py-2 rounded-md transition-colors hover:bg-amber-500/10"
+          >
+            <Shield className="h-4 w-4" />
+            <span>Platform Admin</span>
+          </Link>
+        </div>
+      )}
 
       {/* Footer - User */}
       <div className="shrink-0 border-t border-white/5 p-4">
