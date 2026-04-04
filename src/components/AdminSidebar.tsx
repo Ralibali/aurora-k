@@ -3,11 +3,12 @@ import {
   Users, UserX, CheckSquare, Building, ShoppingCart, Inbox,
   Star, FileText, Package, Leaf, BarChart, TrendingUp,
   Bell, Globe, Code, Settings, LogOut, Truck, Car,
-  ClipboardList, FileImage, Smartphone,
+  ClipboardList, FileImage, Smartphone, Shield,
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { usePlatformAdmin } from '@/hooks/usePlatformAdmin';
 
 const navSections = [
   {
