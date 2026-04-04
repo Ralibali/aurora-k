@@ -6,6 +6,20 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { LogOut } from 'lucide-react';
 
+function LogoutButton() {
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
+  return (
+    <button
+      onClick={async () => { await signOut(); navigate('/'); }}
+      className="md:hidden text-muted-foreground hover:text-foreground p-2 rounded-md transition-colors"
+      title="Logga ut"
+    >
+      <LogOut className="h-4 w-4" />
+    </button>
+  );
+}
+
 /** Shared shell — rendered once, sidebar stays mounted across route changes */
 export function AdminShell() {
   return (
