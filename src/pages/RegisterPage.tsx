@@ -81,13 +81,13 @@ export default function RegisterPage() {
       const companyId = companyResult as string;
 
       // Save onboarding state
-      localStorage.setItem('onboarding_company_id', company.id);
+      localStorage.setItem('onboarding_company_id', companyId);
       localStorage.setItem('onboarding_company_name', companyName);
       localStorage.setItem('onboarding_org_nr', orgNumber);
 
-      // 5. Create Stripe Checkout session
+      // 3. Create Stripe Checkout session
       const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke('create-checkout', {
-        body: { companyId: company.id, companyName },
+        body: { companyId, companyName },
       });
 
       if (checkoutError || !checkoutData?.url) {
