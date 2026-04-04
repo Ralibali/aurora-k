@@ -2,7 +2,9 @@ import { ReactNode, Suspense } from 'react';
 import { PageTransition } from '@/components/PageTransition';
 import { AdminSidebar } from '@/components/AdminSidebar';
 import { MobileTabBar } from '@/components/MobileTabBar';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
+import { LogOut } from 'lucide-react';
 
 /** Shared shell — rendered once, sidebar stays mounted across route changes */
 export function AdminShell() {
