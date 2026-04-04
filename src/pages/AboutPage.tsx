@@ -28,6 +28,7 @@ const values = [
 
 export default function AboutPage() {
   const { setTheme, theme } = useTheme();
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (theme !== 'light') setTheme('light');
