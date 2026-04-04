@@ -1,10 +1,15 @@
 import { Link } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Mail, Building2, Globe, Shield, Users, Truck, Heart } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { ArrowRight, Mail, Building2, Globe, Shield, Users, Truck, Heart, Send, Loader2 } from 'lucide-react';
 import { useBreadcrumbJsonLd } from '@/lib/breadcrumb-jsonld';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
