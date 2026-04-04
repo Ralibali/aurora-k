@@ -230,17 +230,3 @@ export function subscriptionCancelledEmail(data: {
     html: layout(html),
   };
 }
-
-
-    ${subheading(`Hej ${data.firstName}, vi är ledsna att se dig gå.`)}
-    ${paragraph('Din Aurora Transport-prenumeration har nu avslutats. Vi hoppas att tjänsten har varit till nytta för ditt företag.')}
-    ${alertBox('📦 Din data sparas i <strong>30 dagar</strong>. Under den perioden kan du återaktivera ditt konto och behålla all data.', BRAND.primary)}
-    ${button('Återaktivera mitt konto →', data.reactivateUrl)}
-    ${divider()}
-    ${smallText('Tack för att du använde Aurora Transport. Vi finns här om du vill komma tillbaka.')}
-  `;
-  return {
-    subject: 'Ditt Aurora Transport-konto har avslutats',
-    html: layout(html),
-  };
-}
