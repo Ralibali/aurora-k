@@ -69,16 +69,14 @@ export default function RegisterPage() {
 
       const userId = authData.user.id;
 
-      // 2. Create company + update profile + assign role (atomic, bypasses RLS)
-      const { data: companyResult, error: companyError } = await supabase
-        .rpc('register_company', {
-          _name: companyName,
-          _org_nr: orgNumber || null,
-          _user_full_name: fullName,
-        });
+      // 2. Create company via edge function (bypasses RLS since no session yet)
+      const { data: companyResult, error: companyError } = await supabase.functions.invoke('register-company', {
+        body: { userId, companyName, orgNr: orgNumber || null, fullName },
+      });
       if (companyError) throw companyError;
+      if (!companyResult?.companyId) throw new Error('Kunde inte skapa företag');
 
-      const companyId = companyResult as string;
+      const companyId = companyResult.companyId;
 
       // Save onboarding state
       localStorage.setItem('onboarding_company_id', companyId);
