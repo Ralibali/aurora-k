@@ -272,7 +272,7 @@ function SocialProofBar() {
     <div className="bg-slate-50 border-y border-slate-200 py-6">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
         <p className="text-sm text-slate-400">
-          Används redan av: <span className="text-slate-500 font-medium">CJ Bemanning AB</span> · <span className="text-slate-400 italic">Ditt företag?</span>
+          Byggd för svenska transport- och bemanningsföretag · <span className="text-slate-400 italic">Ditt företag nästa?</span>
         </p>
       </div>
     </div>
