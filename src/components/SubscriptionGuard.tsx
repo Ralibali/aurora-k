@@ -60,6 +60,11 @@ export function SubscriptionGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
+  // No company linked — let them through (edge case during setup)
+  if (!companyId) {
+    return <>{children}</>;
+  }
+
   // Active subscription — render normally
   if (status === 'active') {
     return <>{children}</>;
