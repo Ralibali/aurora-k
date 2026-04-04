@@ -783,6 +783,49 @@ function PricingSection() {
   );
 }
 
+/* ═══════════════════════ TESTIMONIALS ═══════════════════════ */
+const testimonials = [
+  { name: 'Marcus L.', role: 'Åkeriägare', text: 'Vi bytte från papper och Excel till Aurora på en eftermiddag. Nu har vi koll på alla uppdrag i realtid.' },
+  { name: 'Anna K.', role: 'Transportledare', text: 'Äntligen ett system som inte kräver en veckas utbildning. Förarna fattade direkt.' },
+  { name: 'Johan S.', role: 'VD, budföretag', text: 'Priset var det som avgjorde — 449 kr oavsett hur många förare vi har. Otroligt bra deal.' },
+  { name: 'Sara M.', role: 'Ekonomiansvarig', text: 'Tidrapporterna exporteras rakt in i Fortnox. Sparar mig timmar varje månad.' },
+];
+
+function TestimonialsSection() {
+  return (
+    <section className="py-20 bg-slate-50 border-t border-slate-200">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6">
+        <motion.h2
+          initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}
+          className="text-2xl sm:text-3xl font-bold text-center mb-12 text-foreground"
+        >
+          Vad våra användare säger
+        </motion.h2>
+        <div className="grid sm:grid-cols-2 gap-6">
+          {testimonials.map((t, i) => (
+            <motion.div
+              key={i}
+              initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
+              className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm"
+            >
+              <p className="text-muted-foreground mb-4 leading-relaxed italic">"{t.text}"</p>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
+                  {t.name.charAt(0)}
+                </div>
+                <div>
+                  <p className="font-semibold text-foreground text-sm">{t.name}</p>
+                  <p className="text-xs text-muted-foreground">{t.role}</p>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ═══════════════════════ FAQ ═══════════════════════ */
 const faqs = [
   { q: 'Vad är Aurora Transport?', a: 'Ett transportledningssystem för svenska transport- och bemanningsföretag. Dispatch, tidrapportering och personalhantering i en app.' },
