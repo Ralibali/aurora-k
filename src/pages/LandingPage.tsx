@@ -72,6 +72,9 @@ export default function LandingPage() {
       {/* FAQ */}
       <FaqSection />
 
+      {/* SEO CONTENT */}
+      <SeoContent />
+
       {/* FINAL CTA */}
       <FinalCta />
 
