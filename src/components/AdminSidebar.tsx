@@ -70,6 +70,7 @@ const navSections = [
 
 export function AdminSidebar() {
   const { user, signOut } = useAuth();
+  const { isPlatformAdmin } = usePlatformAdmin();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
