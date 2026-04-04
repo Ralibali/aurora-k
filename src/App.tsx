@@ -134,6 +134,14 @@ const App = () => (
                   <Route path="routes" element={<AdminRouteOptimizer />} />
                 </Route>
 
+                {/* Platform admin routes */}
+                <Route path="/platform" element={<PlatformAdminGuard><PlatformAdminShell /></PlatformAdminGuard>}>
+                  <Route index element={<PlatformDashboard />} />
+                  <Route path="companies" element={<PlatformCompanies />} />
+                  <Route path="support" element={<PlatformSupport />} />
+                  <Route path="announcements" element={<PlatformAnnouncements />} />
+                </Route>
+
 {/* Driver routes — share a single layout shell */}
                 <Route path="/driver" element={<ProtectedRoute requiredRole="driver"><DriverLayout /></ProtectedRoute>}>
                   <Route index element={<DriverAssignments />} />
