@@ -87,41 +87,20 @@ export default function JoinPage() {
     setSubmitting(true);
 
     try {
-      // 1. Create auth user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: invitation.email,
-        password,
-        options: {
-          data: { full_name: name, role: 'driver' },
-          emailRedirectTo: window.location.origin,
-        },
+      const { data, error: fnError } = await supabase.functions.invoke('join-driver', {
+        body: { token, name, password },
       });
-      if (authError) throw authError;
-      if (!authData.user) throw new Error('Kunde inte skapa konto');
 
-      const userId = authData.user.id;
+      if (fnError) throw new Error(fnError.message || 'Något gick fel');
+      if (data?.error) throw new Error(data.error);
 
-      // 2. Set profile
-      await supabase.from('profiles').upsert({
-        id: userId,
-        email: invitation.email,
-        full_name: name,
-        role: 'driver',
-        company_id: invitation.company_id,
-      }, { onConflict: 'id' });
-
-      // 3. Set role
-      await supabase.from('user_roles').upsert({
-        user_id: userId,
-        role: 'driver' as const,
-        company_id: invitation.company_id,
-      }, { onConflict: 'user_id,role' });
-
-      // 4. Mark invitation accepted via secure RPC
-      await supabase.rpc('accept_invitation', {
-        p_token: token!,
-        p_user_id: userId,
-      } as any);
+      // Set session from the response
+      if (data?.session) {
+        await supabase.auth.setSession({
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token,
+        });
+      }
 
       toast.success('Välkommen! Ditt konto är skapat.');
       navigate('/driver', { replace: true });
