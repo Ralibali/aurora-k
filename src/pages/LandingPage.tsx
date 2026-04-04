@@ -38,9 +38,60 @@ export default function LandingPage() {
     if (theme !== 'light') setTheme('light');
   }, [theme, setTheme]);
 
+  // JSON-LD structured data for SEO
+  useEffect(() => {
+    const jsonLd = [
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Aurora Transport",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web, iOS, Android",
+        "description": "Transportledningssystem för åkerier och transportföretag. Hantera uppdrag, personal, tidrapporter och fakturering i en app.",
+        "url": "https://auroratransport.se",
+        "offers": {
+          "@type": "Offer",
+          "price": "449",
+          "priceCurrency": "SEK",
+          "priceValidUntil": "2027-12-31",
+          "availability": "https://schema.org/InStock"
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.8",
+          "ratingCount": "24"
+        },
+        "featureList": "Uppdragshantering, GPS-spårning, Tidrapporter, Fakturering, Kundportal, Ruttoptimering"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Aurora Transport",
+        "url": "https://auroratransport.se",
+        "logo": "https://auroratransport.se/icon-512x512.png",
+        "description": "Dispatch- och transportledningssystem för svenska åkerier och budföretag.",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "SE"
+        },
+        "sameAs": []
+      }
+    ];
+
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.textContent = JSON.stringify(jsonLd);
+    script.id = 'aurora-jsonld';
+    document.head.appendChild(script);
+
+    return () => {
+      const el = document.getElementById('aurora-jsonld');
+      if (el) el.remove();
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-white">
-      {/* SEO - handled via Helmet-style in index.html */}
 
       {/* NAVBAR */}
       <Navbar />
