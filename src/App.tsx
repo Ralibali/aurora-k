@@ -6,6 +6,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { PwaInstallPrompt } from "@/components/PwaInstallPrompt";
+import { CookieConsent } from "@/components/CookieConsent";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { SubscriptionGuard } from "@/components/SubscriptionGuard";
