@@ -1,6 +1,11 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2.100.1/cors";
+import { assignmentConfirmationEmail } from "../_shared/email-templates.ts";
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
+
+const TEMPLATE_MAP: Record<string, (data: any) => { subject: string; html: string }> = {
+  'assignment-confirmation': assignmentConfirmationEmail,
+};
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -14,7 +19,23 @@ Deno.serve(async (req) => {
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
     if (!RESEND_API_KEY) throw new Error("RESEND_API_KEY is not configured");
 
-    const { to, subject, html } = await req.json();
+    const body = await req.json();
+    const { to, templateName, templateData } = body;
+    let { subject, html } = body;
+
+    // If a template is specified, use it to generate subject + html
+    if (templateName) {
+      const templateFn = TEMPLATE_MAP[templateName];
+      if (!templateFn) {
+        return new Response(JSON.stringify({ error: `Unknown template: ${templateName}` }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const result = templateFn(templateData || {});
+      subject = result.subject;
+      html = result.html;
+    }
 
     if (!to || !subject || !html) {
       return new Response(JSON.stringify({ error: "Missing to, subject, or html" }), {

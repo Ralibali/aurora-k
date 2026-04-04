@@ -178,6 +178,40 @@ export function paymentFailedEmail(data: {
   };
 }
 
+export function assignmentConfirmationEmail(data: {
+  driverName: string;
+  title: string;
+  address: string;
+  scheduledStart: string;
+  customerName: string;
+  priority: string;
+  instructions?: string | null;
+  adminComment?: string | null;
+  appUrl: string;
+}) {
+  const priorityLabel: Record<string, string> = { low: '🟢 Låg', normal: '🔵 Normal', urgent: '🔴 Brådskande' };
+  const html = `
+    ${heading('Nytt uppdrag tilldelat! 📋')}
+    ${subheading(`Hej ${data.driverName}, du har fått ett nytt uppdrag.`)}
+    ${infoBox(`
+      ${detailRow('Uppdrag', data.title)}
+      ${detailRow('Kund', data.customerName)}
+      ${detailRow('Adress', data.address)}
+      ${detailRow('Datum & tid', data.scheduledStart)}
+      ${detailRow('Prioritet', priorityLabel[data.priority] || data.priority)}
+    `)}
+    ${data.instructions ? alertBox(`📝 <strong>Instruktioner:</strong> ${data.instructions}`, BRAND.primary) : ''}
+    ${data.adminComment ? alertBox(`💬 <strong>Kommentar från admin:</strong> ${data.adminComment}`, BRAND.primaryLight) : ''}
+    ${button('Öppna i appen →', data.appUrl)}
+    ${divider()}
+    ${smallText('Du kan se alla dina uppdrag i Aurora Transport-appen.')}
+  `;
+  return {
+    subject: `Nytt uppdrag: ${data.title}`,
+    html: layout(html),
+  };
+}
+
 export function subscriptionCancelledEmail(data: {
   firstName: string;
   reactivateUrl: string;
