@@ -1,4 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
+import { useTheme } from 'next-themes';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -31,6 +32,12 @@ const fadeUp = {
 export default function LandingPage() {
   const { user, role, loading } = useAuth();
   const navigate = useNavigate();
+  const { setTheme, theme } = useTheme();
+
+  useEffect(() => {
+    // Force light theme on landing page
+    if (theme !== 'light') setTheme('light');
+  }, [theme, setTheme]);
 
   useEffect(() => {
     if (!loading && user) {
