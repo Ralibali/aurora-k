@@ -845,9 +845,9 @@ function Footer() {
             <p className="text-sm text-slate-500">Org.nr 559272-0220</p>
           </div>
           <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-400">
-            <a href="#funktioner" className="hover:text-white transition-colors">Transportledningssystem</a>
-            <a href="#pris" className="hover:text-white transition-colors">Coredination-alternativ</a>
-            <a href="#" className="hover:text-white transition-colors">Integritetspolicy</a>
+            <Link to="/transportledningssystem" className="hover:text-white transition-colors">Transportledningssystem</Link>
+            <Link to="/coredination-alternativ" className="hover:text-white transition-colors">Coredination-alternativ</Link>
+            <Link to="/privacy" className="hover:text-white transition-colors">Integritetspolicy</Link>
             <a href="mailto:info@auroramedia.se" className="hover:text-white transition-colors">Kontakt</a>
           </div>
         </div>
