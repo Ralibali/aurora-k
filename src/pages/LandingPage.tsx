@@ -5,7 +5,9 @@ import { Button } from '@/components/ui/button';
 import {
   Truck, Clock, Users, MapPin, Smartphone, Zap, FileText,
   MessageSquare, FileSpreadsheet, Phone, Check, X, ChevronDown,
-  Menu, ArrowRight, Play,
+  Menu, ArrowRight, Play, Shield, BarChart3, CalendarDays,
+  Route, Bell, Camera, PenTool, Package, Globe, Headphones,
+  RefreshCw, FileDown, Settings, TrendingUp, Layers,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
