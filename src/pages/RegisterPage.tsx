@@ -69,29 +69,16 @@ export default function RegisterPage() {
 
       const userId = authData.user.id;
 
-      // 2. Create company
-      const { data: company, error: companyError } = await supabase
-        .from('companies')
-        .insert({ name: companyName, org_nr: orgNumber || null, subscription_status: 'pending' })
-        .select()
-        .single();
+      // 2. Create company + update profile + assign role (atomic, bypasses RLS)
+      const { data: companyResult, error: companyError } = await supabase
+        .rpc('register_company', {
+          _name: companyName,
+          _org_nr: orgNumber || null,
+          _user_full_name: fullName,
+        });
       if (companyError) throw companyError;
 
-      // 3. Update profile with company_id and role
-      await supabase.from('profiles').upsert({
-        id: userId,
-        email,
-        full_name: fullName,
-        role: 'admin',
-        company_id: company.id,
-      }, { onConflict: 'id' });
-
-      // 4. Insert user_role
-      await supabase.from('user_roles').upsert({
-        user_id: userId,
-        role: 'admin' as const,
-        company_id: company.id,
-      }, { onConflict: 'user_id,role' });
+      const companyId = companyResult as string;
 
       // Save onboarding state
       localStorage.setItem('onboarding_company_id', company.id);
