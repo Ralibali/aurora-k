@@ -9,8 +9,10 @@ import { PwaInstallPrompt } from "@/components/PwaInstallPrompt";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { SubscriptionGuard } from "@/components/SubscriptionGuard";
+import { PlatformAdminGuard } from "@/components/PlatformAdminGuard";
 import { AdminShell } from "@/components/AdminLayout";
 import { DriverLayout } from "@/components/DriverLayout";
+import { PlatformAdminShell } from "@/components/PlatformAdminLayout";
 
 const LandingPage = lazy(() => import("./pages/LandingPage"));
 const TransportledningssystemPage = lazy(() => import("./pages/TransportledningssystemPage"));
