@@ -102,6 +102,7 @@ const App = () => (
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="/portal" element={<CustomerPortal />} />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
+                <Route path="/om-oss" element={<AboutPage />} />
                 <Route path="/privacy" element={<PrivacyPage />} />
 
                 {/* Admin routes — share a single sidebar shell */}
