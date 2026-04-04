@@ -1623,6 +1623,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_invitation: {
+        Args: { p_token: string; p_user_id: string }
+        Returns: undefined
+      }
       driver_update_assignment: {
         Args: {
           _actual_start?: string
@@ -1644,6 +1648,7 @@ export type Database = {
         Returns: boolean
       }
       is_platform_admin: { Args: { _user_id: string }; Returns: boolean }
+      lookup_invitation_by_token: { Args: { p_token: string }; Returns: Json }
       next_invoice_number: { Args: never; Returns: number }
       submit_satisfaction: {
         Args: { p_comment?: string; p_rating: number; p_token: string }
