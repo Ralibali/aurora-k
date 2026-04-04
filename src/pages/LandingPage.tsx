@@ -83,6 +83,7 @@ export default function LandingPage() {
 
 /* ═══════════════════════ NAVBAR ═══════════════════════ */
 function Navbar() {
+  const { user, role } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [demoLoading, setDemoLoading] = useState(false);
   const navigate = useNavigate();
