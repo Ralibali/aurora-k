@@ -59,6 +59,10 @@ const DriverAssignmentDetail = lazy(() => import("./pages/driver/DriverAssignmen
 const DriverProfile = lazy(() => import("./pages/driver/DriverProfile"));
 const DriverTimeReport = lazy(() => import("./pages/driver/DriverTimeReport"));
 const DriverInvoices = lazy(() => import("./pages/driver/DriverInvoices"));
+const PlatformDashboard = lazy(() => import("./pages/platform/PlatformDashboard"));
+const PlatformCompanies = lazy(() => import("./pages/platform/PlatformCompanies"));
+const PlatformSupport = lazy(() => import("./pages/platform/PlatformSupport"));
+const PlatformAnnouncements = lazy(() => import("./pages/platform/PlatformAnnouncements"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
