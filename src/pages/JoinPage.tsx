@@ -117,10 +117,11 @@ export default function JoinPage() {
         company_id: invitation.company_id,
       }, { onConflict: 'user_id,role' });
 
-      // 4. Mark invitation accepted
-      await supabase.from('invitations').update({
-        accepted_at: new Date().toISOString(),
-      }).eq('id', invitation.id);
+      // 4. Mark invitation accepted via secure RPC
+      await supabase.rpc('accept_invitation', {
+        p_token: token!,
+        p_user_id: userId,
+      } as any);
 
       toast.success('Välkommen! Ditt konto är skapat.');
       navigate('/driver', { replace: true });
