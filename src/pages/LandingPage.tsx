@@ -30,22 +30,13 @@ const fadeUp = {
 };
 
 export default function LandingPage() {
-  const { user, role, loading } = useAuth();
-  const navigate = useNavigate();
+  const { user, role } = useAuth();
   const { setTheme, theme } = useTheme();
 
   useEffect(() => {
     // Force light theme on landing page
     if (theme !== 'light') setTheme('light');
   }, [theme, setTheme]);
-
-  useEffect(() => {
-    if (!loading && user) {
-      navigate(role === 'admin' ? '/admin' : '/driver', { replace: true });
-    }
-  }, [user, role, loading, navigate]);
-
-  if (loading || user) return null;
 
   return (
     <div className="min-h-screen bg-white">
