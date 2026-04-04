@@ -111,9 +111,39 @@ export default function AdminNewAssignment() {
           });
         });
       }
-      if (dates.length > 1) {
-        toast.success(`Skapade ${dates.length} uppdrag`);
+
+      // Send assignment confirmation email to driver
+      try {
+        const driver = (drivers ?? []).find(d => d.id === driverId);
+        const customer = (customers ?? []).find(c => c.id === customerId);
+        if (driver?.email && customer) {
+          const formattedDate = new Date(scheduledStart).toLocaleString('sv-SE', {
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+            hour: '2-digit', minute: '2-digit',
+          });
+          await supabase.functions.invoke('send-email', {
+            body: {
+              to: driver.email,
+              subject: `Nytt uppdrag: ${title}`,
+              templateName: 'assignment-confirmation',
+              templateData: {
+                driverName: driver.full_name,
+                title,
+                address,
+                scheduledStart: formattedDate,
+                customerName: customer.name,
+                priority,
+                instructions: instructions || null,
+                adminComment: adminComment || null,
+                appUrl: `${window.location.origin}/driver/assignments`,
+              },
+            },
+          });
+        }
+      } catch (emailErr) {
+        console.error('Failed to send assignment email:', emailErr);
       }
+
       navigate('/admin/assignments');
     } catch {
       setIsSubmitting(false);
