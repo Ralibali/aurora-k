@@ -1,10 +1,15 @@
 import { Link } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Mail, Building2, Globe, Shield, Users, Truck, Heart } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { ArrowRight, Mail, Building2, Globe, Shield, Users, Truck, Heart, Send, Loader2 } from 'lucide-react';
 import { useBreadcrumbJsonLd } from '@/lib/breadcrumb-jsonld';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -23,6 +28,7 @@ const values = [
 
 export default function AboutPage() {
   const { setTheme, theme } = useTheme();
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (theme !== 'light') setTheme('light');
@@ -203,24 +209,102 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Contact / CTA */}
-      <section className="py-20 bg-primary text-primary-foreground">
+      {/* Contact Form */}
+      <section className="py-20 bg-card border-y border-border" id="kontakt">
+        <div className="max-w-2xl mx-auto px-4">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0} className="text-center mb-10">
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">Kontakta oss</h2>
+            <p className="text-muted-foreground text-lg">
+              Har du frågor, vill boka en demo eller bara veta mer? Fyll i formuläret så återkommer vi.
+            </p>
+          </motion.div>
+
+          <motion.form
+            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={1}
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const form = e.currentTarget;
+              const fd = new FormData(form);
+              const name = fd.get('name') as string;
+              const email = fd.get('email') as string;
+              const phone = fd.get('phone') as string;
+              const message = fd.get('message') as string;
+
+              if (!name || !email || !message) {
+                toast.error('Fyll i alla obligatoriska fält');
+                return;
+              }
+
+              setSubmitting(true);
+              try {
+                const { error } = await supabase.functions.invoke('send-email', {
+                  body: {
+                    to: 'info@auroramedia.se',
+                    subject: `Kontaktförfrågan från ${name}`,
+                    html: `
+                      <h2 style="margin:0 0 16px;font-size:18px;color:#1a1a1a">Nytt meddelande via kontaktformuläret</h2>
+                      <table style="width:100%;border-collapse:collapse;font-size:14px;color:#333">
+                        <tr><td style="padding:8px 0;font-weight:600;width:100px">Namn:</td><td style="padding:8px 0">${name}</td></tr>
+                        <tr><td style="padding:8px 0;font-weight:600">E-post:</td><td style="padding:8px 0"><a href="mailto:${email}" style="color:#2563eb">${email}</a></td></tr>
+                        ${phone ? `<tr><td style="padding:8px 0;font-weight:600">Telefon:</td><td style="padding:8px 0">${phone}</td></tr>` : ''}
+                      </table>
+                      <div style="margin-top:20px;padding:16px;background:#f8fafc;border-radius:8px;font-size:14px;line-height:1.6;color:#333">
+                        ${message.replace(/\n/g, '<br/>')}
+                      </div>
+                    `,
+                  },
+                });
+                if (error) throw error;
+                toast.success('Tack! Vi har mottagit ditt meddelande och återkommer så snart vi kan.');
+                form.reset();
+              } catch (err) {
+                console.error('[contact-form]', err);
+                toast.error('Kunde inte skicka meddelandet. Försök igen eller maila oss direkt.');
+              } finally {
+                setSubmitting(false);
+              }
+            }}
+            className="space-y-5 bg-background rounded-xl p-6 md:p-8 border border-border shadow-sm"
+          >
+            <div className="grid sm:grid-cols-2 gap-5">
+              <div className="space-y-2">
+                <Label htmlFor="name">Namn *</Label>
+                <Input id="name" name="name" placeholder="Ditt namn" required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">E-post *</Label>
+                <Input id="email" name="email" type="email" placeholder="din@epost.se" required />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Telefon</Label>
+              <Input id="phone" name="phone" type="tel" placeholder="070-123 45 67" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="message">Meddelande *</Label>
+              <Textarea id="message" name="message" placeholder="Beskriv vad du vill veta mer om..." rows={5} required />
+            </div>
+            <Button type="submit" size="lg" className="w-full gap-2" disabled={submitting}>
+              {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              {submitting ? 'Skickar...' : 'Skicka meddelande'}
+            </Button>
+            <p className="text-xs text-muted-foreground text-center">
+              Du kan också nå oss direkt på <a href="mailto:info@auroramedia.se" className="text-primary hover:underline">info@auroramedia.se</a>
+            </p>
+          </motion.form>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-16 bg-primary text-primary-foreground">
         <div className="max-w-3xl mx-auto px-4 text-center space-y-6">
-          <h2 className="text-2xl md:text-3xl font-bold">Kontakta oss</h2>
-          <p className="text-primary-foreground/80 text-lg">
-            Har du frågor, vill boka en demo eller bara veta mer? Vi svarar gärna.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a href="mailto:info@auroramedia.se" className="inline-flex items-center gap-2 bg-primary-foreground text-primary font-semibold px-6 py-3 rounded-lg hover:opacity-90 transition-opacity">
-              <Mail className="w-5 h-5" />
-              info@auroramedia.se
-            </a>
-            <Link to="/register">
-              <Button size="lg" variant="secondary" className="gap-2">
-                Kom igång gratis <ArrowRight className="w-4 h-4" />
-              </Button>
-            </Link>
-          </div>
+          <h2 className="text-2xl md:text-3xl font-bold">Redo att komma igång?</h2>
+          <p className="text-primary-foreground/80 text-lg">Testa Aurora Transport gratis – inga bindningstider.</p>
+          <Link to="/register">
+            <Button size="lg" variant="secondary" className="gap-2">
+              Kom igång gratis <ArrowRight className="w-4 h-4" />
+            </Button>
+          </Link>
           <p className="text-sm text-primary-foreground/60">
             Aurora Media AB · Org.nr 559272-0220 · Sverige
           </p>
