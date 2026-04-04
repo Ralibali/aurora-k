@@ -230,7 +230,6 @@ export function subscriptionCancelledEmail(data: {
     html: layout(html),
   };
 }
-  firstName: string;
   reactivateUrl: string;
 }) {
   const html = `
