@@ -1645,6 +1645,11 @@ export type Database = {
       }
       is_platform_admin: { Args: { _user_id: string }; Returns: boolean }
       next_invoice_number: { Args: never; Returns: number }
+      submit_satisfaction: {
+        Args: { p_comment?: string; p_rating: number; p_token: string }
+        Returns: undefined
+      }
+      validate_customer_token: { Args: { p_token: string }; Returns: Json }
     }
     Enums: {
       app_role: "admin" | "driver"
