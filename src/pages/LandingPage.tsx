@@ -108,11 +108,11 @@ function Navbar() {
       });
       if (signInError) throw signInError;
       
-      toast.success(`Inloggad som ${data.companyName}`);
-      navigate('/admin');
+      toast.success(`Inloggad som ${data.companyName} — omdirigerar...`);
+      // Give auth state a moment to propagate before navigating
+      setTimeout(() => navigate('/admin'), 500);
     } catch (err: any) {
       toast.error(err.message || 'Demo-inloggning misslyckades');
-    } finally {
       setDemoLoading(false);
     }
   };
