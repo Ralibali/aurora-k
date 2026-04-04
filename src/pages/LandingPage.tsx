@@ -129,6 +129,9 @@ export default function LandingPage() {
       {/* COMPARISON */}
       <ComparisonTable />
 
+      {/* TESTIMONIALS */}
+      <TestimonialsSection />
+
       {/* PRICING */}
       <PricingSection />
 
