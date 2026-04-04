@@ -32,6 +32,12 @@ const fadeUp = {
 export default function LandingPage() {
   const { user, role, loading } = useAuth();
   const navigate = useNavigate();
+  const { setTheme, theme } = useTheme();
+
+  useEffect(() => {
+    // Force light theme on landing page
+    if (theme !== 'light') setTheme('light');
+  }, [theme, setTheme]);
 
   useEffect(() => {
     if (!loading && user) {
