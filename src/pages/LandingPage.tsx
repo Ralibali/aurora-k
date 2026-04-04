@@ -30,22 +30,13 @@ const fadeUp = {
 };
 
 export default function LandingPage() {
-  const { user, role, loading } = useAuth();
-  const navigate = useNavigate();
+  const { user, role } = useAuth();
   const { setTheme, theme } = useTheme();
 
   useEffect(() => {
     // Force light theme on landing page
     if (theme !== 'light') setTheme('light');
   }, [theme, setTheme]);
-
-  useEffect(() => {
-    if (!loading && user) {
-      navigate(role === 'admin' ? '/admin' : '/driver', { replace: true });
-    }
-  }, [user, role, loading, navigate]);
-
-  if (loading || user) return null;
 
   return (
     <div className="min-h-screen bg-white">
@@ -92,6 +83,7 @@ export default function LandingPage() {
 
 /* ═══════════════════════ NAVBAR ═══════════════════════ */
 function Navbar() {
+  const { user, role } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [demoLoading, setDemoLoading] = useState(false);
   const navigate = useNavigate();
@@ -143,34 +135,42 @@ function Navbar() {
         </div>
 
         <div className="flex items-center gap-3">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" disabled={demoLoading} className="gap-1.5 hidden sm:inline-flex">
-                <Play className="h-3.5 w-3.5" />
-                {demoLoading ? 'Laddar...' : 'Testa demo'}
+          {user ? (
+            <Button size="sm" asChild>
+              <Link to={role === 'admin' ? '/admin' : '/driver'}>Gå till dashboard</Link>
+            </Button>
+          ) : (
+            <>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" disabled={demoLoading} className="gap-1.5 hidden sm:inline-flex">
+                    <Play className="h-3.5 w-3.5" />
+                    {demoLoading ? 'Laddar...' : 'Testa demo'}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem onClick={() => handleDemo('akeri')} className="cursor-pointer">
+                    <div>
+                      <p className="font-medium">Demo Åkeri AB</p>
+                      <p className="text-xs text-muted-foreground">Transport & logistik</p>
+                    </div>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleDemo('bemanning')} className="cursor-pointer">
+                    <div>
+                      <p className="font-medium">Demo Bemanning AB</p>
+                      <p className="text-xs text-muted-foreground">Bemanning & personal</p>
+                    </div>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Button variant="ghost" size="sm" asChild className="hidden md:inline-flex">
+                <Link to="/login">Logga in</Link>
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem onClick={() => handleDemo('akeri')} className="cursor-pointer">
-                <div>
-                  <p className="font-medium">Demo Åkeri AB</p>
-                  <p className="text-xs text-muted-foreground">Transport & logistik</p>
-                </div>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleDemo('bemanning')} className="cursor-pointer">
-                <div>
-                  <p className="font-medium">Demo Bemanning AB</p>
-                  <p className="text-xs text-muted-foreground">Bemanning & personal</p>
-                </div>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <Button variant="ghost" size="sm" asChild className="hidden md:inline-flex">
-            <Link to="/login">Logga in</Link>
-          </Button>
-          <Button size="sm" asChild>
-            <Link to="/register">Kom igång</Link>
-          </Button>
+              <Button size="sm" asChild>
+                <Link to="/register">Kom igång</Link>
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </nav>

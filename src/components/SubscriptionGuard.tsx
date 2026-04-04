@@ -13,7 +13,10 @@ export function SubscriptionGuard({ children }: { children: React.ReactNode }) {
   const [redirecting, setRedirecting] = useState(false);
 
   useEffect(() => {
-    if (!companyId) return;
+    if (!companyId) {
+      setLoading(false);
+      return;
+    }
     supabase
       .from('companies')
       .select('subscription_status')
@@ -55,6 +58,11 @@ export function SubscriptionGuard({ children }: { children: React.ReactNode }) {
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
       </div>
     );
+  }
+
+  // No company linked — let them through (edge case during setup)
+  if (!companyId) {
+    return <>{children}</>;
   }
 
   // Active subscription — render normally
