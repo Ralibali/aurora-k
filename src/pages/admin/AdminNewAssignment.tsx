@@ -13,6 +13,8 @@ import { useVehicles, useOrders } from '@/hooks/useNewFeatures';
 import { priorityLabels } from '@/lib/types';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { assignmentConfirmationEmail } from '@/../supabase/functions/_shared/email-templates';
 
 type RecurrenceFrequency = 'weekly' | 'biweekly' | 'monthly';
 

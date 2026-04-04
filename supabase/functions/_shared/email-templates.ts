@@ -178,7 +178,58 @@ export function paymentFailedEmail(data: {
   };
 }
 
+export function assignmentConfirmationEmail(data: {
+  driverName: string;
+  title: string;
+  address: string;
+  scheduledStart: string;
+  customerName: string;
+  priority: string;
+  instructions?: string | null;
+  adminComment?: string | null;
+  appUrl: string;
+}) {
+  const priorityLabel: Record<string, string> = { low: '🟢 Låg', normal: '🔵 Normal', urgent: '🔴 Brådskande' };
+  const html = `
+    ${heading('Nytt uppdrag tilldelat! 📋')}
+    ${subheading(`Hej ${data.driverName}, du har fått ett nytt uppdrag.`)}
+    ${infoBox(`
+      ${detailRow('Uppdrag', data.title)}
+      ${detailRow('Kund', data.customerName)}
+      ${detailRow('Adress', data.address)}
+      ${detailRow('Datum & tid', data.scheduledStart)}
+      ${detailRow('Prioritet', priorityLabel[data.priority] || data.priority)}
+    `)}
+    ${data.instructions ? alertBox(`📝 <strong>Instruktioner:</strong> ${data.instructions}`, BRAND.primary) : ''}
+    ${data.adminComment ? alertBox(`💬 <strong>Kommentar från admin:</strong> ${data.adminComment}`, BRAND.primaryLight) : ''}
+    ${button('Öppna i appen →', data.appUrl)}
+    ${divider()}
+    ${smallText('Du kan se alla dina uppdrag i Aurora Transport-appen.')}
+  `;
+  return {
+    subject: `Nytt uppdrag: ${data.title}`,
+    html: layout(html),
+  };
+}
+
 export function subscriptionCancelledEmail(data: {
+  firstName: string;
+  reactivateUrl: string;
+}) {
+  const html = `
+    ${heading('Prenumeration avslutad')}
+    ${subheading(`Hej ${data.firstName}, vi är ledsna att se dig gå.`)}
+    ${paragraph('Din Aurora Transport-prenumeration har nu avslutats. Vi hoppas att tjänsten har varit till nytta för ditt företag.')}
+    ${alertBox('📦 Din data sparas i <strong>30 dagar</strong>. Under den perioden kan du återaktivera ditt konto och behålla all data.', BRAND.primary)}
+    ${button('Återaktivera mitt konto →', data.reactivateUrl)}
+    ${divider()}
+    ${smallText('Tack för att du använde Aurora Transport. Vi finns här om du vill komma tillbaka.')}
+  `;
+  return {
+    subject: 'Ditt Aurora Transport-konto har avslutats',
+    html: layout(html),
+  };
+}
   firstName: string;
   reactivateUrl: string;
 }) {
