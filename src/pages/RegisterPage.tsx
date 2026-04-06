@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useBreadcrumbJsonLd } from '@/lib/breadcrumb-jsonld';
+import { useCanonical } from '@/lib/use-canonical';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,6 +33,7 @@ export default function RegisterPage() {
     const meta = document.querySelector('meta[name="description"]');
     if (meta) meta.setAttribute('content', 'Skapa konto och kom igång med Aurora Transport på under 5 minuter. 449 kr/mån, ingen bindningstid.');
   }, []);
+  useCanonical('https://auroratransport.se/register');
 
   useBreadcrumbJsonLd(useMemo(() => [
     { name: 'Hem', url: 'https://auroratransport.se/' },

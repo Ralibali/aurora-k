@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useBreadcrumbJsonLd } from '@/lib/breadcrumb-jsonld';
+import { useCanonical } from '@/lib/use-canonical';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -48,6 +49,7 @@ export default function LoginPage() {
     const meta = document.querySelector('meta[name="description"]');
     if (meta) meta.setAttribute('content', 'Logga in på Aurora Transport för att hantera uppdrag, förare och fakturor.');
   }, []);
+  useCanonical('https://auroratransport.se/login');
 
   useBreadcrumbJsonLd(useMemo(() => [
     { name: 'Hem', url: 'https://auroratransport.se/' },

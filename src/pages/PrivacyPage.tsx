@@ -3,6 +3,7 @@ import { useEffect, useMemo } from "react";
 import { ArrowLeft, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useBreadcrumbJsonLd } from "@/lib/breadcrumb-jsonld";
+import { useCanonical } from '@/lib/use-canonical';
 
 const PrivacyPage = () => {
   useEffect(() => {
@@ -10,6 +11,7 @@ const PrivacyPage = () => {
     const meta = document.querySelector('meta[name="description"]');
     if (meta) meta.setAttribute('content', 'Läs om hur Aurora Transport hanterar personuppgifter, cookies och datasäkerhet i enlighet med GDPR.');
   }, []);
+  useCanonical('https://auroratransport.se/privacy');
   useBreadcrumbJsonLd(useMemo(() => [
     { name: 'Hem', url: 'https://auroratransport.se/' },
     { name: 'Integritetspolicy', url: 'https://auroratransport.se/privacy' },

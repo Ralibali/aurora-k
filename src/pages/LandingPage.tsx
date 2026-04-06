@@ -3,6 +3,7 @@ import { useTheme } from 'next-themes';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useMemo, useState } from 'react';
 import { useBreadcrumbJsonLd } from '@/lib/breadcrumb-jsonld';
+import { useCanonical } from '@/lib/use-canonical';
 import { Button } from '@/components/ui/button';
 import {
   Truck, Clock, Users, MapPin, Smartphone, Zap, FileText,
@@ -37,6 +38,7 @@ export default function LandingPage() {
   useBreadcrumbJsonLd(useMemo(() => [
     { name: 'Hem', url: 'https://auroratransport.se/' },
   ], []));
+  useCanonical('https://auroratransport.se/');
 
   useEffect(() => {
     if (theme !== 'light') setTheme('light');
