@@ -18,6 +18,7 @@ import { PlatformAdminShell } from "@/components/PlatformAdminLayout";
 const LandingPage = lazy(() => import("./pages/LandingPage"));
 const TransportledningssystemPage = lazy(() => import("./pages/TransportledningssystemPage"));
 const CoredinationAlternativPage = lazy(() => import("./pages/CoredinationAlternativPage"));
+const TjansterPage = lazy(() => import("./pages/TjansterPage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const RegisterPage = lazy(() => import("./pages/RegisterPage"));
 const OnboardingPage = lazy(() => import("./pages/OnboardingPage"));
@@ -95,6 +96,7 @@ const App = () => (
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/transportledningssystem" element={<TransportledningssystemPage />} />
                 <Route path="/coredination-alternativ" element={<CoredinationAlternativPage />} />
+                <Route path="/tjanster" element={<TjansterPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/onboarding" element={<OnboardingPage />} />
