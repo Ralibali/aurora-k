@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { ArrowRight, Mail, Building2, Globe, Shield, Users, Truck, Heart, Send, Loader2 } from 'lucide-react';
 import { useBreadcrumbJsonLd } from '@/lib/breadcrumb-jsonld';
+import { useCanonical } from '@/lib/use-canonical';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
