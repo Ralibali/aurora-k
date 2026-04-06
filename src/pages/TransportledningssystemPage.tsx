@@ -5,6 +5,7 @@ import { Truck, Zap, Clock, Users, MapPin, Smartphone, FileText, MessageSquare, 
 import { motion } from 'framer-motion';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { useBreadcrumbJsonLd } from '@/lib/breadcrumb-jsonld';
+import { useCanonical } from '@/lib/use-canonical';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
