@@ -1,8 +1,26 @@
-import { defineConfig } from "vite";
+import { defineConfig, Plugin } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
+import fs from "fs";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
+
+function sitemapLastmod(): Plugin {
+  return {
+    name: "sitemap-lastmod",
+    buildStart() {
+      const sitemapPath = path.resolve(__dirname, "public/sitemap.xml");
+      if (!fs.existsSync(sitemapPath)) return;
+      const today = new Date().toISOString().slice(0, 10);
+      const content = fs.readFileSync(sitemapPath, "utf-8");
+      const updated = content.replace(
+        /<lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/g,
+        `<lastmod>${today}</lastmod>`
+      );
+      fs.writeFileSync(sitemapPath, updated, "utf-8");
+    },
+  };
+}
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
