@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { useBreadcrumbJsonLd } from '@/lib/breadcrumb-jsonld';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,6 +26,11 @@ export default function RegisterPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const cancelled = searchParams.get('cancelled');
+
+  useBreadcrumbJsonLd(useMemo(() => [
+    { name: 'Hem', url: 'https://auroratransport.se/' },
+    { name: 'Registrera', url: 'https://auroratransport.se/register' },
+  ], []));
 
   const [companyName, setCompanyName] = useState('');
   const [orgNumber, setOrgNumber] = useState('');
