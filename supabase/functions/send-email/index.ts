@@ -1,10 +1,11 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2.100.1/cors";
-import { assignmentConfirmationEmail } from "../_shared/email-templates.ts";
+import { assignmentConfirmationEmail, driverWelcomeEmail } from "../_shared/email-templates.ts";
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
 
 const TEMPLATE_MAP: Record<string, (data: any) => { subject: string; html: string }> = {
   'assignment-confirmation': assignmentConfirmationEmail,
+  'driver-welcome': driverWelcomeEmail,
 };
 
 Deno.serve(async (req) => {
