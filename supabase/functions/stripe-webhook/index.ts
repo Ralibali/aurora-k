@@ -84,7 +84,7 @@ serve(async (req) => {
             companyName: company?.name || "Ditt företag",
             dashboardUrl: `https://aurora-k.lovable.app/admin`,
           });
-          await sendEmail(profile.email, tmpl);
+          await sendEmail("info@auroramedia.se", tmpl);
         }
 
         console.log(`[stripe-webhook] Company ${companyId} activated`);
