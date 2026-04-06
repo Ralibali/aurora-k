@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useBreadcrumbJsonLd } from '@/lib/breadcrumb-jsonld';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -26,6 +26,12 @@ export default function RegisterPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const cancelled = searchParams.get('cancelled');
+
+  useEffect(() => {
+    document.title = 'Registrera företag – Kom igång gratis | Aurora Transport';
+    const meta = document.querySelector('meta[name="description"]');
+    if (meta) meta.setAttribute('content', 'Skapa konto och kom igång med Aurora Transport på under 5 minuter. 449 kr/mån, ingen bindningstid.');
+  }, []);
 
   useBreadcrumbJsonLd(useMemo(() => [
     { name: 'Hem', url: 'https://auroratransport.se/' },

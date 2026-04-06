@@ -45,8 +45,8 @@ export default function AboutPage() {
       "@context": "https://schema.org",
       "@type": "Organization",
       "name": "Aurora Media AB",
-      "url": "https://aurora-k.lovable.app",
-      "logo": "https://aurora-k.lovable.app/placeholder.svg",
+      "url": "https://auroratransport.se",
+      "logo": "https://auroratransport.se/icon-512x512.png",
       "description": "Aurora Media AB utvecklar Aurora Transport – ett modernt transportledningssystem för svenska åkerier och transportföretag.",
       "foundingDate": "2022",
       "address": {
