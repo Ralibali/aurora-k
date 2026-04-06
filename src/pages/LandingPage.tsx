@@ -38,6 +38,7 @@ export default function LandingPage() {
   useBreadcrumbJsonLd(useMemo(() => [
     { name: 'Hem', url: 'https://auroratransport.se/' },
   ], []));
+  useCanonical('https://auroratransport.se/');
 
   useEffect(() => {
     if (theme !== 'light') setTheme('light');

@@ -33,6 +33,7 @@ export default function RegisterPage() {
     const meta = document.querySelector('meta[name="description"]');
     if (meta) meta.setAttribute('content', 'Skapa konto och kom igång med Aurora Transport på under 5 minuter. 449 kr/mån, ingen bindningstid.');
   }, []);
+  useCanonical('https://auroratransport.se/register');
 
   useBreadcrumbJsonLd(useMemo(() => [
     { name: 'Hem', url: 'https://auroratransport.se/' },

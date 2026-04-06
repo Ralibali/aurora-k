@@ -49,6 +49,7 @@ export default function LoginPage() {
     const meta = document.querySelector('meta[name="description"]');
     if (meta) meta.setAttribute('content', 'Logga in på Aurora Transport för att hantera uppdrag, förare och fakturor.');
   }, []);
+  useCanonical('https://auroratransport.se/login');
 
   useBreadcrumbJsonLd(useMemo(() => [
     { name: 'Hem', url: 'https://auroratransport.se/' },

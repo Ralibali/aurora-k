@@ -34,6 +34,7 @@ export default function AboutPage() {
   useEffect(() => {
     if (theme !== 'light') setTheme('light');
   }, [theme, setTheme]);
+  useCanonical('https://auroratransport.se/om-oss');
 
   useEffect(() => {
     document.title = 'Om oss – Aurora Transport | Transportledningssystem';
