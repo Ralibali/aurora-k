@@ -198,6 +198,7 @@ function Navbar() {
 
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-8">
+          <Link to="/tjanster" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Tjänster</Link>
           <a href="#funktioner" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Funktioner</a>
           <a href="#pris" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Pris</a>
           <a href="#faq" className="text-sm text-muted-foreground hover:text-foreground transition-colors">FAQ</a>
