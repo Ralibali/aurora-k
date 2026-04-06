@@ -74,8 +74,8 @@ export default function AboutPage() {
   }, []);
 
   useBreadcrumbJsonLd([
-    { name: 'Hem', url: 'https://aurora-k.lovable.app/' },
-    { name: 'Om oss', url: 'https://aurora-k.lovable.app/om-oss' },
+    { name: 'Hem', url: 'https://auroratransport.se/' },
+    { name: 'Om oss', url: 'https://auroratransport.se/om-oss' },
   ]);
 
   return (
