@@ -108,6 +108,7 @@ export default function TjansterPage() {
       <PricingSection />
       <Advantages />
       <OnboardingSteps />
+      <FaqSection />
       <DemoSection />
       <FinalCta />
       <Footer />
