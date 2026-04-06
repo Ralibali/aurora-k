@@ -27,6 +27,12 @@ export default function RegisterPage() {
   const [searchParams] = useSearchParams();
   const cancelled = searchParams.get('cancelled');
 
+  useEffect(() => {
+    document.title = 'Registrera företag – Kom igång gratis | Aurora Transport';
+    const meta = document.querySelector('meta[name="description"]');
+    if (meta) meta.setAttribute('content', 'Skapa konto och kom igång med Aurora Transport på under 5 minuter. 449 kr/mån, ingen bindningstid.');
+  }, []);
+
   useBreadcrumbJsonLd(useMemo(() => [
     { name: 'Hem', url: 'https://auroratransport.se/' },
     { name: 'Registrera', url: 'https://auroratransport.se/register' },

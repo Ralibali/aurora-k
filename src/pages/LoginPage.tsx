@@ -44,6 +44,17 @@ export default function LoginPage() {
   };
 
   useEffect(() => {
+    document.title = 'Logga in – Aurora Transport';
+    const meta = document.querySelector('meta[name="description"]');
+    if (meta) meta.setAttribute('content', 'Logga in på Aurora Transport för att hantera uppdrag, förare och fakturor.');
+  }, []);
+
+  useBreadcrumbJsonLd(useMemo(() => [
+    { name: 'Hem', url: 'https://auroratransport.se/' },
+    { name: 'Logga in', url: 'https://auroratransport.se/login' },
+  ], []));
+
+  useEffect(() => {
     if (!loading && session && role) {
       if (role === 'admin') navigate('/admin', { replace: true });
       else navigate('/driver', { replace: true });
