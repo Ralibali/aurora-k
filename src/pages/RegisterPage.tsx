@@ -27,6 +27,11 @@ export default function RegisterPage() {
   const [searchParams] = useSearchParams();
   const cancelled = searchParams.get('cancelled');
 
+  useBreadcrumbJsonLd(useMemo(() => [
+    { name: 'Hem', url: 'https://auroratransport.se/' },
+    { name: 'Registrera', url: 'https://auroratransport.se/register' },
+  ], []));
+
   const [companyName, setCompanyName] = useState('');
   const [orgNumber, setOrgNumber] = useState('');
   const [fullName, setFullName] = useState('');

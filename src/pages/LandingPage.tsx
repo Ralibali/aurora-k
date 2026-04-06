@@ -34,8 +34,11 @@ export default function LandingPage() {
   const { user, role } = useAuth();
   const { setTheme, theme } = useTheme();
 
+  useBreadcrumbJsonLd(useMemo(() => [
+    { name: 'Hem', url: 'https://auroratransport.se/' },
+  ], []));
+
   useEffect(() => {
-    // Force light theme on landing page
     if (theme !== 'light') setTheme('light');
   }, [theme, setTheme]);
 
