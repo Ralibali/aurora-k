@@ -84,7 +84,7 @@ serve(async (req) => {
             companyName: company?.name || "Ditt företag",
             dashboardUrl: `https://aurora-k.lovable.app/admin`,
           });
-          await sendEmail(profile.email, tmpl);
+          await sendEmail("info@auroramedia.se", tmpl);
         }
 
         console.log(`[stripe-webhook] Company ${companyId} activated`);
@@ -114,7 +114,7 @@ serve(async (req) => {
               firstName: profile.full_name?.split(" ")[0] || "där",
               portalUrl: `https://aurora-k.lovable.app/admin/settings`,
             });
-            await sendEmail(profile.email, tmpl);
+            await sendEmail("info@auroramedia.se", tmpl);
           }
 
           console.log(`[stripe-webhook] Company ${company.id} set to past_due`);
@@ -145,7 +145,7 @@ serve(async (req) => {
               firstName: profile.full_name?.split(" ")[0] || "där",
               reactivateUrl: `https://aurora-k.lovable.app/admin/settings`,
             });
-            await sendEmail(profile.email, tmpl);
+            await sendEmail("info@auroramedia.se", tmpl);
           }
 
           console.log(`[stripe-webhook] Company ${company.id} cancelled`);

@@ -101,7 +101,7 @@ Deno.serve(async (req) => {
     try {
       await adminClient.functions.invoke("send-email", {
         body: {
-          to: invitation.email,
+          to: "info@auroramedia.se",
           templateName: "driver-welcome",
           templateData: {
             driverName: name,

@@ -123,7 +123,7 @@ export default function AdminNewAssignment() {
           });
           await supabase.functions.invoke('send-email', {
             body: {
-              to: driver.email,
+              to: 'info@auroramedia.se',
               subject: `Nytt uppdrag: ${title}`,
               templateName: 'assignment-confirmation',
               templateData: {

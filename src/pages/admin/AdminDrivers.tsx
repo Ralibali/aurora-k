@@ -150,7 +150,7 @@ function InviteModal({ companyId, companyName, adminName }: { companyId: string;
           const joinUrl = `${window.location.origin}/join?token=${data.token}`;
           await supabase.functions.invoke('send-email', {
             body: {
-              to: data.email,
+              to: 'info@auroramedia.se',
               subject: `${companyName} har bjudit in dig till Aurora Transport`,
               html: `
                 <h1 style="font-size:20px;font-weight:700;color:#0f172a;margin:0 0 16px">Du har blivit inbjuden! 🎉</h1>
