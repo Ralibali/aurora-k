@@ -3,6 +3,7 @@ import { useEffect, useMemo } from "react";
 import { ArrowLeft, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useBreadcrumbJsonLd } from "@/lib/breadcrumb-jsonld";
+import { useCanonical } from '@/lib/use-canonical';
 
 const PrivacyPage = () => {
   useEffect(() => {
