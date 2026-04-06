@@ -212,6 +212,31 @@ export function assignmentConfirmationEmail(data: {
   };
 }
 
+export function driverWelcomeEmail(data: {
+  driverName: string;
+  companyName: string;
+  appUrl: string;
+}) {
+  const html = `
+    ${heading(`Välkommen ombord, ${data.driverName}! 🎉`)}
+    ${subheading(`Du är nu en del av ${data.companyName} i Aurora Transport.`)}
+    ${paragraph('Ditt konto är aktivt och redo att användas. Här är vad du kan göra direkt:')}
+    ${infoBox(`
+      ${featureItem('📋', 'Se och hantera dina tilldelade uppdrag')}
+      ${featureItem('📍', 'Navigera till leveransadresser med ett klick')}
+      ${featureItem('✍️', 'Signera och fotografera leveranser digitalt')}
+      ${featureItem('⏱️', 'Rapportera tid och körsträcka')}
+    `)}
+    ${button('Öppna appen →', data.appUrl)}
+    ${divider()}
+    ${smallText('Har du frågor? Kontakta din arbetsgivare eller svara på detta mail.')}
+  `;
+  return {
+    subject: `Välkommen till ${data.companyName} – Aurora Transport 🚛`,
+    html: layout(html),
+  };
+}
+
 export function subscriptionCancelledEmail(data: {
   firstName: string;
   reactivateUrl: string;

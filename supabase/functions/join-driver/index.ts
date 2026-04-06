@@ -86,6 +86,30 @@ Deno.serve(async (req) => {
       .update({ accepted_at: new Date().toISOString() })
       .eq("id", invitation.id);
 
+    // Look up company name for welcome email
+    const { data: company } = await adminClient
+      .from("companies")
+      .select("name")
+      .eq("id", invitation.company_id)
+      .maybeSingle();
+
+    // Send welcome email (fire-and-forget)
+    try {
+      await adminClient.functions.invoke("send-email", {
+        body: {
+          to: invitation.email,
+          templateName: "driver-welcome",
+          templateData: {
+            driverName: name,
+            companyName: company?.name || "ditt företag",
+            appUrl: `${req.headers.get("origin") || "https://aurora-k.lovable.app"}/driver/assignments`,
+          },
+        },
+      });
+    } catch (emailErr) {
+      console.error("[join-driver] Welcome email failed:", emailErr);
+    }
+
     // Generate a session for the new user by signing in
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const anonClient = createClient(supabaseUrl, anonKey);
