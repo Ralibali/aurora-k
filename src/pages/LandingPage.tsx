@@ -1,7 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useTheme } from 'next-themes';
 import { useAuth } from '@/hooks/useAuth';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useBreadcrumbJsonLd } from '@/lib/breadcrumb-jsonld';
 import { Button } from '@/components/ui/button';
 import {
   Truck, Clock, Users, MapPin, Smartphone, Zap, FileText,
