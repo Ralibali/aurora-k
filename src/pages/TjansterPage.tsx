@@ -336,6 +336,49 @@ function OnboardingSteps() {
   );
 }
 
+const faqs = [
+  { q: 'Vad kostar Aurora Transport?', a: '449 kr/mån med en engångs startavgift på 3 500 kr. Obegränsat antal förare, fordon och uppdrag ingår. Inga dolda avgifter.' },
+  { q: 'Behöver förarna ladda ner en app?', a: 'Nej. Aurora använder PWA-teknik (Progressive Web App). Förarna öppnar en länk i mobilen och kan lägga till den på hemskärmen — fungerar som en vanlig app utan App Store.' },
+  { q: 'Hur lång tid tar det att komma igång?', a: 'Under 5 minuter. Registrera företaget, bjud in förare via e-post och börja skapa uppdrag direkt.' },
+  { q: 'Finns det någon bindningstid?', a: 'Nej, ingen bindningstid. Du kan avsluta din prenumeration när som helst.' },
+  { q: 'Kan mina kunder följa sina leveranser?', a: 'Ja. Via kundportalen kan era kunder lägga bokningsförfrågningar, följa leveransstatus i realtid och lämna nöjdhetsbetyg.' },
+  { q: 'Fungerar GPS-spårningen i realtid?', a: 'Ja. Alla förare som har förarappen öppen delar sin position. Administratörer ser alla fordon på en live-karta med hastighet, riktning och positionshistorik.' },
+  { q: 'Kan jag generera fakturor direkt från uppdrag?', a: 'Ja. När ett uppdrag är slutfört kan du generera en faktura med ett klick. Stöd för kundspecifika prislistor, artikelregister och PDF-export.' },
+  { q: 'Hur skiljer sig Aurora från Coredination?', a: 'Aurora erbjuder fast pris utan per-användare-avgifter, snabbare onboarding, modern mobilupplevelse och svenskt gränssnitt — till en lägre totalkostnad.' },
+];
+
+function FaqSection() {
+  return (
+    <section className="py-20 bg-secondary/30">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6">
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-10">
+          <motion.h2 custom={0} variants={fadeUp} className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
+            Vanliga frågor
+          </motion.h2>
+          <motion.p custom={1} variants={fadeUp} className="text-lg text-muted-foreground">
+            Svar på det vi oftast får höra.
+          </motion.p>
+        </motion.div>
+
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} custom={2} variants={fadeUp}>
+          <Accordion type="single" collapsible className="space-y-3">
+            {faqs.map((faq, i) => (
+              <AccordionItem key={i} value={`faq-${i}`} className="bg-card rounded-lg border border-border px-5">
+                <AccordionTrigger className="text-left font-medium text-foreground hover:no-underline py-4">
+                  {faq.q}
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground leading-relaxed pb-4">
+                  {faq.a}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
 function DemoSection() {
   return (
     <section className="py-16 bg-primary/5">
