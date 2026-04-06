@@ -20,6 +20,27 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [demoLoading, setDemoLoading] = useState(false);
+
+  const handleDemo = async (type: 'akeri' | 'bemanning') => {
+    setDemoLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('demo-login', {
+        body: { type },
+      });
+      if (error || !data?.email) throw new Error(data?.error || 'Kunde inte skapa demo');
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
+      if (signInError) throw signInError;
+      toast.success(`Inloggad som ${data.companyName} — omdirigerar...`);
+      setTimeout(() => navigate('/admin'), 500);
+    } catch (err: any) {
+      toast.error(err.message || 'Demo-inloggning misslyckades');
+      setDemoLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!loading && session && role) {
