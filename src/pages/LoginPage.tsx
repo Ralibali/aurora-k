@@ -3,10 +3,16 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Truck, Mail, Lock } from 'lucide-react';
+import { Truck, Mail, Lock, Play } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -14,6 +20,27 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [demoLoading, setDemoLoading] = useState(false);
+
+  const handleDemo = async (type: 'akeri' | 'bemanning') => {
+    setDemoLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('demo-login', {
+        body: { type },
+      });
+      if (error || !data?.email) throw new Error(data?.error || 'Kunde inte skapa demo');
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
+      if (signInError) throw signInError;
+      toast.success(`Inloggad som ${data.companyName} — omdirigerar...`);
+      setTimeout(() => navigate('/admin'), 500);
+    } catch (err: any) {
+      toast.error(err.message || 'Demo-inloggning misslyckades');
+      setDemoLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!loading && session && role) {
@@ -113,7 +140,33 @@ export default function LoginPage() {
           </form>
         </div>
 
-        <p className="text-center text-xs text-sidebar-foreground/40 mt-6">
+        {/* Demo button */}
+        <div className="mt-4 text-center">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" disabled={demoLoading} className="gap-1.5 border-sidebar-border text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent">
+                <Play className="h-3.5 w-3.5" />
+                {demoLoading ? 'Laddar...' : 'Testa demo'}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="center" className="w-56">
+              <DropdownMenuItem onClick={() => handleDemo('akeri')} className="cursor-pointer">
+                <div>
+                  <p className="font-medium">Demo Åkeri AB</p>
+                  <p className="text-xs text-muted-foreground">Transport & logistik</p>
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleDemo('bemanning')} className="cursor-pointer">
+                <div>
+                  <p className="font-medium">Demo Bemanning AB</p>
+                  <p className="text-xs text-muted-foreground">Bemanning & personal</p>
+                </div>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        <p className="text-center text-xs text-sidebar-foreground/40 mt-4">
           Inget konto?{' '}
           <Link to="/register" className="text-primary hover:underline">Skapa konto</Link>
         </p>
