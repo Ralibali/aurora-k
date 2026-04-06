@@ -140,7 +140,33 @@ export default function LoginPage() {
           </form>
         </div>
 
-        <p className="text-center text-xs text-sidebar-foreground/40 mt-6">
+        {/* Demo button */}
+        <div className="mt-4 text-center">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" disabled={demoLoading} className="gap-1.5 border-sidebar-border text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent">
+                <Play className="h-3.5 w-3.5" />
+                {demoLoading ? 'Laddar...' : 'Testa demo'}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="center" className="w-56">
+              <DropdownMenuItem onClick={() => handleDemo('akeri')} className="cursor-pointer">
+                <div>
+                  <p className="font-medium">Demo Åkeri AB</p>
+                  <p className="text-xs text-muted-foreground">Transport & logistik</p>
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleDemo('bemanning')} className="cursor-pointer">
+                <div>
+                  <p className="font-medium">Demo Bemanning AB</p>
+                  <p className="text-xs text-muted-foreground">Bemanning & personal</p>
+                </div>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        <p className="text-center text-xs text-sidebar-foreground/40 mt-4">
           Inget konto?{' '}
           <Link to="/register" className="text-primary hover:underline">Skapa konto</Link>
         </p>
