@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import {
   Truck, MapPin, Smartphone, FileText, Users, BarChart3,
   Car, CalendarDays, Globe, Check, ArrowRight, Zap,
