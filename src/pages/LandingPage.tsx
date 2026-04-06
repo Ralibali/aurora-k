@@ -955,6 +955,7 @@ function Footer() {
             <p className="text-sm text-slate-500">Org.nr 559272-0220</p>
           </div>
           <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-400">
+            <Link to="/tjanster" className="hover:text-white transition-colors">Tjänster</Link>
             <Link to="/transportledningssystem" className="hover:text-white transition-colors">Transportledningssystem</Link>
             <Link to="/coredination-alternativ" className="hover:text-white transition-colors">Coredination-alternativ</Link>
             <Link to="/privacy" className="hover:text-white transition-colors">Integritetspolicy</Link>
