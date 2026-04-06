@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.100.1";
+import { z } from "https://esm.sh/zod@3.23.8";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -6,26 +7,29 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+const BodySchema = z.object({
+  token: z.string().uuid("Ogiltigt token-format"),
+  name: z.string().trim().min(2, "Namnet måste vara minst 2 tecken").max(100, "Namnet får vara max 100 tecken"),
+  password: z.string().min(8, "Lösenordet måste vara minst 8 tecken").max(128, "Lösenordet får vara max 128 tecken"),
+});
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { token, name, password } = await req.json();
-    if (!token || !name || !password) {
+    const rawBody = await req.json();
+    const parsed = BodySchema.safeParse(rawBody);
+
+    if (!parsed.success) {
       return new Response(
-        JSON.stringify({ error: "token, name and password required" }),
+        JSON.stringify({ error: "Valideringsfel", details: parsed.error.flatten().fieldErrors }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    if (password.length < 8) {
-      return new Response(
-        JSON.stringify({ error: "Password must be at least 8 characters" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    const { token, name, password } = parsed.data;
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
