@@ -53,7 +53,7 @@ export default function SubscriptionTab() {
   return (
     <div className="space-y-6">
       {/* Current plan */}
-      <div className="bg-white rounded-xl border p-6">
+      <div className="bg-card rounded-xl border p-6">
         <div className="flex items-start justify-between">
           <div>
             <h3 className="font-semibold text-lg flex items-center gap-2">
@@ -68,7 +68,7 @@ export default function SubscriptionTab() {
       </div>
 
       {/* Manage */}
-      <div className="bg-white rounded-xl border p-6">
+      <div className="bg-card rounded-xl border p-6">
         <h3 className="font-semibold mb-2">Hantera prenumeration</h3>
         <p className="text-sm text-muted-foreground mb-4">
           Ändra betalningsmetod, se fakturor eller avsluta din prenumeration via Stripe.
