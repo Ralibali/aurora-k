@@ -39,6 +39,8 @@ export default function AdminReports() {
   const { data: drivers } = useDrivers();
   const { data: customers } = useCustomers();
   const { data: compensations } = useDriverCompensations();
+  const { data: obRates } = useObRates();
+  const { data: perDiemRates } = usePerDiemRates();
 
   // Week range
   const currentMonday = startOfWeek(addWeeks(new Date(), weekOffset), { weekStartsOn: 1 });
