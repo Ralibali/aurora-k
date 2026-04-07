@@ -267,3 +267,133 @@ export function useDeleteAssignmentArticle() {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['assignment_articles'] }); },
   });
 }
+
+// ─── OB RATES ────────────────────────────────────────────
+export interface ObRate {
+  id: string;
+  name: string;
+  type: string;
+  rate_per_hour: number;
+  start_time: string;
+  end_time: string;
+  applies_to_weekdays: boolean;
+  applies_to_saturdays: boolean;
+  applies_to_sundays: boolean;
+  active: boolean;
+}
+
+export function useObRates() {
+  const { companyId } = useAuth();
+  return useQuery({
+    queryKey: ['ob_rates', companyId],
+    queryFn: async () => {
+      const q = supabase.from('ob_rates' as any).select('*').order('name');
+      if (companyId) q.eq('company_id', companyId);
+      const { data, error } = await q;
+      if (error) throw error;
+      return (data ?? []) as unknown as ObRate[];
+    },
+    enabled: !!companyId,
+  });
+}
+
+export function useCreateObRate() {
+  const qc = useQueryClient();
+  const { companyId } = useAuth();
+  return useMutation({
+    mutationFn: async (rate: Partial<ObRate>) => {
+      const { data, error } = await supabase.from('ob_rates' as any).insert({ ...rate, company_id: companyId } as any).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['ob_rates'] }); toast.success('OB-tillägg skapat!'); },
+    onError: () => toast.error('Kunde inte skapa OB-tillägg'),
+  });
+}
+
+export function useUpdateObRate() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...updates }: { id: string; [key: string]: any }) => {
+      const { error } = await supabase.from('ob_rates' as any).update({ ...updates, updated_at: new Date().toISOString() } as any).eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['ob_rates'] }); toast.success('OB-tillägg uppdaterat!'); },
+    onError: () => toast.error('Kunde inte uppdatera'),
+  });
+}
+
+export function useDeleteObRate() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('ob_rates' as any).delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['ob_rates'] }); toast.success('OB-tillägg borttaget!'); },
+    onError: () => toast.error('Kunde inte ta bort'),
+  });
+}
+
+// ─── PER DIEM RATES ──────────────────────────────────────
+export interface PerDiemRate {
+  id: string;
+  name: string;
+  type: string;
+  amount: number;
+  min_hours: number;
+  active: boolean;
+}
+
+export function usePerDiemRates() {
+  const { companyId } = useAuth();
+  return useQuery({
+    queryKey: ['per_diem_rates', companyId],
+    queryFn: async () => {
+      const q = supabase.from('per_diem_rates' as any).select('*').order('name');
+      if (companyId) q.eq('company_id', companyId);
+      const { data, error } = await q;
+      if (error) throw error;
+      return (data ?? []) as unknown as PerDiemRate[];
+    },
+    enabled: !!companyId,
+  });
+}
+
+export function useCreatePerDiemRate() {
+  const qc = useQueryClient();
+  const { companyId } = useAuth();
+  return useMutation({
+    mutationFn: async (rate: Partial<PerDiemRate>) => {
+      const { data, error } = await supabase.from('per_diem_rates' as any).insert({ ...rate, company_id: companyId } as any).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['per_diem_rates'] }); toast.success('Traktamente skapat!'); },
+    onError: () => toast.error('Kunde inte skapa traktamente'),
+  });
+}
+
+export function useUpdatePerDiemRate() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...updates }: { id: string; [key: string]: any }) => {
+      const { error } = await supabase.from('per_diem_rates' as any).update({ ...updates, updated_at: new Date().toISOString() } as any).eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['per_diem_rates'] }); toast.success('Traktamente uppdaterat!'); },
+    onError: () => toast.error('Kunde inte uppdatera'),
+  });
+}
+
+export function useDeletePerDiemRate() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('per_diem_rates' as any).delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['per_diem_rates'] }); toast.success('Traktamente borttaget!'); },
+    onError: () => toast.error('Kunde inte ta bort'),
+  });
+}

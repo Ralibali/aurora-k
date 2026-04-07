@@ -1,6 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { useDriverAssignments } from '@/hooks/useData';
 import { useAuth } from '@/hooks/useAuth';
+import { useEffectiveDriverSettings } from '@/hooks/useDriverSettings';
 import { calculateDecimalHours, formatSwedishDate } from '@/lib/format';
 import { Skeleton } from '@/components/ui/skeleton';
 import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval, parseISO } from 'date-fns';
@@ -11,7 +12,10 @@ import { Clock, TrendingUp, CheckCircle2 } from 'lucide-react';
 export default function DriverTimeReport() {
   const { user } = useAuth();
   const { data: assignments, isLoading } = useDriverAssignments(user?.id);
+  const { data: driverSettings } = useEffectiveDriverSettings(user?.id);
   const [period, setPeriod] = useState('week');
+
+  const showTotalHours = driverSettings?.show_total_hours ?? true;
 
   const now = new Date();
   const weekStart = startOfWeek(now, { weekStartsOn: 1 });
@@ -48,26 +52,28 @@ export default function DriverTimeReport() {
           <Skeleton className="h-48 w-full rounded-xl" />
         ) : (
           <>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="stat-card">
-                <div className="text-center">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-2">
-                    <Clock className="h-5 w-5 text-primary" />
+            {showTotalHours && (
+              <div className="grid grid-cols-2 gap-3">
+                <div className="stat-card">
+                  <div className="text-center">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-2">
+                      <Clock className="h-5 w-5 text-primary" />
+                    </div>
+                    <p className="text-2xl font-bold text-foreground font-mono">{weekHours.toFixed(1)}h</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Denna vecka</p>
                   </div>
-                  <p className="text-2xl font-bold text-foreground font-mono">{weekHours.toFixed(1)}h</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">Denna vecka</p>
+                </div>
+                <div className="stat-card">
+                  <div className="text-center">
+                    <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center mx-auto mb-2">
+                      <TrendingUp className="h-5 w-5 text-success" />
+                    </div>
+                    <p className="text-2xl font-bold text-foreground font-mono">{monthHours.toFixed(1)}h</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Denna månad</p>
+                  </div>
                 </div>
               </div>
-              <div className="stat-card">
-                <div className="text-center">
-                  <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center mx-auto mb-2">
-                    <TrendingUp className="h-5 w-5 text-success" />
-                  </div>
-                  <p className="text-2xl font-bold text-foreground font-mono">{monthHours.toFixed(1)}h</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">Denna månad</p>
-                </div>
-              </div>
-            </div>
+            )}
 
             <Tabs value={period} onValueChange={setPeriod}>
               <TabsList className="w-full h-11">
@@ -87,9 +93,11 @@ export default function DriverTimeReport() {
                           <p className="font-medium text-sm text-foreground truncate">{a.customer?.name || a.title}</p>
                           <p className="text-xs text-muted-foreground mt-0.5 font-mono">{formatSwedishDate(a.actual_start!)}</p>
                         </div>
-                        <div className="text-right shrink-0">
-                          <p className="font-semibold text-sm text-foreground tabular-nums font-mono">{hours.toFixed(1)}h</p>
-                        </div>
+                        {showTotalHours && (
+                          <div className="text-right shrink-0">
+                            <p className="font-semibold text-sm text-foreground tabular-nums font-mono">{hours.toFixed(1)}h</p>
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
                   );
@@ -99,7 +107,9 @@ export default function DriverTimeReport() {
                     <span className="flex items-center gap-1.5 text-muted-foreground">
                       <CheckCircle2 className="h-4 w-4 text-success" /> {currentItems.length} uppdrag
                     </span>
-                    <span className="text-foreground font-semibold tabular-nums font-mono">{currentHours.toFixed(1)} timmar</span>
+                    {showTotalHours && (
+                      <span className="text-foreground font-semibold tabular-nums font-mono">{currentHours.toFixed(1)} timmar</span>
+                    )}
                   </div>
                 )}
               </TabsContent>
