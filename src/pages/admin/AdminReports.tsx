@@ -1,22 +1,21 @@
 import { useState, useMemo } from 'react';
 import { AdminLayout } from '@/components/AdminLayout';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useAssignments, useDrivers, useCustomers, useDriverCompensations } from '@/hooks/useData';
-import { useObRates, usePerDiemRates, ObRate, PerDiemRate } from '@/hooks/useNewFeatures';
+import { useObRates, usePerDiemRates } from '@/hooks/useNewFeatures';
 import { formatSwedishDate, formatSwedishTime, calculateDecimalHours } from '@/lib/format';
-import { FileText, FileSpreadsheet, Receipt, Banknote, ChevronLeft, ChevronRight, AlertTriangle, Clock, Moon, Coins } from 'lucide-react';
+import { FileText, FileSpreadsheet, Receipt, Banknote, ChevronLeft, ChevronRight, AlertTriangle, Clock, Moon, Coins, CalendarDays, CalendarRange } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
-import { startOfWeek, endOfWeek, addWeeks, format, getISOWeek, eachDayOfInterval, isSameDay, parseISO, getDay } from 'date-fns';
+import { startOfWeek, endOfWeek, addWeeks, format, getISOWeek, eachDayOfInterval, isSameDay, parseISO, getDay, startOfMonth, endOfMonth, addMonths, eachWeekOfInterval } from 'date-fns';
 import { sv } from 'date-fns/locale';
 
 const AVATAR_COLORS = ['bg-blue-600', 'bg-emerald-600', 'bg-violet-600', 'bg-amber-600', 'bg-rose-600', 'bg-cyan-600'];
@@ -31,8 +30,99 @@ function getInitials(name: string) {
 
 const DAY_LABELS = ['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön'];
 
+type ViewMode = 'week' | 'month';
+
+// ── Shared salary computation ──
+function computeSalary(
+  filteredAssignments: any[],
+  drivers: any[],
+  compensations: any[],
+  obRates: any[],
+  perDiemRates: any[],
+) {
+  if (!filteredAssignments.length) return null;
+  const compMap = Object.fromEntries((compensations ?? []).map(c => [c.driver_id, c]));
+  const activeOb = (obRates ?? []).filter((r: any) => r.active);
+  const activePd = (perDiemRates ?? []).filter((r: any) => r.active).sort((a: any, b: any) => b.min_hours - a.min_hours);
+  const driverIds = [...new Set(filteredAssignments.map(a => a.assigned_driver_id))];
+
+  let totalGross = 0, totalOb = 0, totalPerDiem = 0;
+  const rows = driverIds.map(dId => {
+    const driver = (drivers ?? []).find(d => d.id === dId);
+    const comp = compMap[dId];
+    const dAs = filteredAssignments.filter(a => a.assigned_driver_id === dId);
+    const totalH = dAs.reduce((s: number, a: any) => s + calculateDecimalHours(a.actual_start!, a.actual_stop!), 0);
+    const count = dAs.length;
+
+    let grossPay = 0, payType = 'Ej angiven';
+    if (comp) {
+      switch (comp.compensation_type) {
+        case 'hourly': grossPay = totalH * Number(comp.hourly_rate); payType = `${Number(comp.hourly_rate).toFixed(0)} kr/h`; break;
+        case 'per_assignment': grossPay = count * Number(comp.per_assignment_rate); payType = `${Number(comp.per_assignment_rate).toFixed(0)} kr/uppdrag`; break;
+        case 'monthly': grossPay = Number(comp.monthly_salary); payType = `${Number(comp.monthly_salary).toFixed(0)} kr/mån`; break;
+      }
+    }
+
+    let obTotal = 0;
+    dAs.forEach((a: any) => {
+      const start = parseISO(a.actual_start!);
+      const stop = parseISO(a.actual_stop!);
+      const dow = getDay(start);
+      activeOb.forEach((rate: any) => {
+        const isSat = dow === 6 && rate.applies_to_saturdays;
+        const isSun = dow === 0 && rate.applies_to_sundays;
+        const isWd = dow >= 1 && dow <= 5 && rate.applies_to_weekdays;
+        if (!isSat && !isSun && !isWd) return;
+        const [rSH, rSM] = rate.start_time.split(':').map(Number);
+        const [rEH, rEM] = rate.end_time.split(':').map(Number);
+        const rS = rSH * 60 + rSM, rE = rEH * 60 + rEM;
+        const wS = start.getHours() * 60 + start.getMinutes();
+        const wE = stop.getHours() * 60 + stop.getMinutes();
+        let mins = 0;
+        if (isSat || isSun) { mins = wE - wS; }
+        else if (rS > rE) {
+          if (wE <= rE) mins += wE;
+          if (wS < rE) mins = Math.max(mins, Math.min(wE, rE) - wS);
+          if (wE > rS) mins += wE - Math.max(wS, rS);
+          else if (wS >= rS) mins += wE > wS ? wE - wS : 0;
+        } else {
+          const oS = Math.max(wS, rS), oE = Math.min(wE, rE);
+          if (oE > oS) mins = oE - oS;
+        }
+        if (mins > 0) obTotal += (mins / 60) * Number(rate.rate_per_hour);
+      });
+    });
+
+    let perDiemTot = 0;
+    const dm = new Map<string, number>();
+    dAs.forEach((a: any) => {
+      const dk = format(parseISO(a.actual_start!), 'yyyy-MM-dd');
+      dm.set(dk, (dm.get(dk) ?? 0) + calculateDecimalHours(a.actual_start!, a.actual_stop!));
+    });
+    dm.forEach(h => { const m = activePd.find((r: any) => h >= r.min_hours); if (m) perDiemTot += Number(m.amount); });
+
+    totalGross += grossPay; totalOb += obTotal; totalPerDiem += perDiemTot;
+    return {
+      driverId: dId,
+      name: driver?.full_name ?? 'Okänd',
+      payType,
+      hours: totalH,
+      assignments: count,
+      grossPay,
+      obTotal,
+      perDiemTot,
+      total: grossPay + obTotal + perDiemTot,
+      taxTable: comp?.tax_table ?? '',
+    };
+  });
+
+  return { rows, totalGross, totalOb, totalPerDiem, grandTotal: totalGross + totalOb + totalPerDiem };
+}
+
 export default function AdminReports() {
+  const [viewMode, setViewMode] = useState<ViewMode>('week');
   const [weekOffset, setWeekOffset] = useState(0);
+  const [monthOffset, setMonthOffset] = useState(0);
   const [driverFilter, setDriverFilter] = useState<string>('all');
   const [customerFilter, setCustomerFilter] = useState<string>('all');
 
@@ -43,13 +133,19 @@ export default function AdminReports() {
   const { data: obRates } = useObRates();
   const { data: perDiemRates } = usePerDiemRates();
 
-  // Week range
+  // ── Week range ──
   const currentMonday = startOfWeek(addWeeks(new Date(), weekOffset), { weekStartsOn: 1 });
   const currentSunday = endOfWeek(currentMonday, { weekStartsOn: 1 });
   const weekDays = eachDayOfInterval({ start: currentMonday, end: currentSunday });
   const weekNumber = getISOWeek(currentMonday);
 
-  // Completed assignments for the full filter (used for exports)
+  // ── Month range ──
+  const currentMonth = addMonths(new Date(), monthOffset);
+  const monthStart = startOfMonth(currentMonth);
+  const monthEnd = endOfMonth(currentMonth);
+  const monthLabel = format(currentMonth, 'MMMM yyyy', { locale: sv });
+
+  // Completed assignments with filters applied
   const allCompleted = useMemo(() =>
     (assignments ?? []).filter(a => {
       if (a.status !== 'completed' || !a.actual_start || !a.actual_stop) return false;
@@ -60,7 +156,7 @@ export default function AdminReports() {
     [assignments, driverFilter, customerFilter]
   );
 
-  // Assignments in the selected week
+  // Week assignments
   const weekAssignments = useMemo(() =>
     allCompleted.filter(a => {
       const d = parseISO(a.actual_start!);
@@ -69,13 +165,21 @@ export default function AdminReports() {
     [allCompleted, currentMonday, currentSunday]
   );
 
-  // Pending approvals count (assignments completed but not yet approved — simplified)
-  const pendingApprovals = useMemo(() =>
-    weekAssignments.filter(a => a.status === 'completed' && !a.invoiced).length,
-    [weekAssignments]
+  // Month assignments
+  const monthAssignments = useMemo(() =>
+    allCompleted.filter(a => {
+      const d = parseISO(a.actual_start!);
+      return d >= monthStart && d <= monthEnd;
+    }),
+    [allCompleted, monthStart, monthEnd]
   );
 
-  // Build week grid data: driver → day → hours
+  const pendingApprovals = useMemo(() =>
+    (viewMode === 'week' ? weekAssignments : monthAssignments).filter(a => a.status === 'completed' && !a.invoiced).length,
+    [weekAssignments, monthAssignments, viewMode]
+  );
+
+  // ── Week grid ──
   const weekGrid = useMemo(() => {
     const driverList = driverFilter !== 'all'
       ? (drivers ?? []).filter(d => d.id === driverFilter)
@@ -95,82 +199,41 @@ export default function AdminReports() {
     });
   }, [drivers, weekAssignments, weekDays, driverFilter]);
 
-  // Daily totals
   const dailyTotals = weekDays.map((_, i) => weekGrid.reduce((s, row) => s + row.dayCells[i].hours, 0));
   const grandTotal = weekGrid.reduce((s, row) => s + row.total, 0);
 
-  // ── Salary summary for UI display ──
-  const salarySummary = useMemo(() => {
-    if (!weekAssignments.length) return null;
-    const compMap = Object.fromEntries((compensations ?? []).map(c => [c.driver_id, c]));
-    const activeOb = (obRates ?? []).filter(r => r.active);
-    const activePd = (perDiemRates ?? []).filter(r => r.active).sort((a, b) => b.min_hours - a.min_hours);
-    const driverIds = [...new Set(weekAssignments.map(a => a.assigned_driver_id))];
+  // ── Salary summaries ──
+  const weeklySalarySummary = useMemo(() =>
+    computeSalary(weekAssignments, drivers ?? [], compensations ?? [], obRates ?? [], perDiemRates ?? []),
+    [weekAssignments, compensations, obRates, perDiemRates, drivers]
+  );
 
-    let totalGross = 0, totalOb = 0, totalPerDiem = 0;
-    const rows = driverIds.map(dId => {
-      const driver = (drivers ?? []).find(d => d.id === dId);
-      const comp = compMap[dId];
-      const dAs = weekAssignments.filter(a => a.assigned_driver_id === dId);
-      const totalH = dAs.reduce((s, a) => s + calculateDecimalHours(a.actual_start!, a.actual_stop!), 0);
-      const count = dAs.length;
+  const monthlySalarySummary = useMemo(() =>
+    computeSalary(monthAssignments, drivers ?? [], compensations ?? [], obRates ?? [], perDiemRates ?? []),
+    [monthAssignments, compensations, obRates, perDiemRates, drivers]
+  );
 
-      let grossPay = 0;
-      if (comp) {
-        switch (comp.compensation_type) {
-          case 'hourly': grossPay = totalH * Number(comp.hourly_rate); break;
-          case 'per_assignment': grossPay = count * Number(comp.per_assignment_rate); break;
-          case 'monthly': grossPay = Number(comp.monthly_salary); break;
-        }
-      }
-
-      let obTotal = 0;
-      dAs.forEach(a => {
-        const start = parseISO(a.actual_start!);
-        const stop = parseISO(a.actual_stop!);
-        const dow = getDay(start);
-        activeOb.forEach(rate => {
-          const isSat = dow === 6 && rate.applies_to_saturdays;
-          const isSun = dow === 0 && rate.applies_to_sundays;
-          const isWd = dow >= 1 && dow <= 5 && rate.applies_to_weekdays;
-          if (!isSat && !isSun && !isWd) return;
-          const [rSH, rSM] = rate.start_time.split(':').map(Number);
-          const [rEH, rEM] = rate.end_time.split(':').map(Number);
-          const rS = rSH * 60 + rSM, rE = rEH * 60 + rEM;
-          const wS = start.getHours() * 60 + start.getMinutes();
-          const wE = stop.getHours() * 60 + stop.getMinutes();
-          let mins = 0;
-          if (isSat || isSun) { mins = wE - wS; }
-          else if (rS > rE) {
-            if (wE <= rE) mins += wE;
-            if (wS < rE) mins = Math.max(mins, Math.min(wE, rE) - wS);
-            if (wE > rS) mins += wE - Math.max(wS, rS);
-            else if (wS >= rS) mins += wE > wS ? wE - wS : 0;
-          } else {
-            const oS = Math.max(wS, rS), oE = Math.min(wE, rE);
-            if (oE > oS) mins = oE - oS;
-          }
-          if (mins > 0) obTotal += (mins / 60) * Number(rate.rate_per_hour);
-        });
+  // ── Monthly per-week breakdown ──
+  const monthWeekBreakdown = useMemo(() => {
+    if (!monthAssignments.length) return [];
+    const weekStarts = eachWeekOfInterval({ start: monthStart, end: monthEnd }, { weekStartsOn: 1 });
+    return weekStarts.map(ws => {
+      const we = endOfWeek(ws, { weekStartsOn: 1 });
+      const wn = getISOWeek(ws);
+      const wAssignments = monthAssignments.filter(a => {
+        const d = parseISO(a.actual_start!);
+        return d >= ws && d <= we;
       });
+      const totalH = wAssignments.reduce((s, a) => s + calculateDecimalHours(a.actual_start!, a.actual_stop!), 0);
+      const summary = computeSalary(wAssignments, drivers ?? [], compensations ?? [], obRates ?? [], perDiemRates ?? []);
+      return { weekNumber: wn, start: ws, end: we, totalH, assignmentCount: wAssignments.length, summary };
+    }).filter(w => w.assignmentCount > 0);
+  }, [monthAssignments, monthStart, monthEnd, drivers, compensations, obRates, perDiemRates]);
 
-      let perDiemTot = 0;
-      const dm = new Map<string, number>();
-      dAs.forEach(a => {
-        const dk = format(parseISO(a.actual_start!), 'yyyy-MM-dd');
-        dm.set(dk, (dm.get(dk) ?? 0) + calculateDecimalHours(a.actual_start!, a.actual_stop!));
-      });
-      dm.forEach(h => { const m = activePd.find(r => h >= r.min_hours); if (m) perDiemTot += Number(m.amount); });
+  // ── Export helpers ──
+  const activeAssignments = viewMode === 'week' ? weekAssignments : monthAssignments;
+  const activeSummary = viewMode === 'week' ? weeklySalarySummary : monthlySalarySummary;
 
-      totalGross += grossPay; totalOb += obTotal; totalPerDiem += perDiemTot;
-      return { name: driver?.full_name ?? 'Okänd', grossPay, obTotal, perDiemTot, total: grossPay + obTotal + perDiemTot };
-    });
-
-    return { rows, totalGross, totalOb, totalPerDiem, grandTotal: totalGross + totalOb + totalPerDiem };
-  }, [weekAssignments, compensations, obRates, perDiemRates, drivers]);
-
-  // ── Export helpers (kept intact) ──
-  const totalHours = allCompleted.reduce((sum, a) => sum + calculateDecimalHours(a.actual_start!, a.actual_stop!), 0);
   const buildRows = (items: typeof allCompleted) =>
     items.map(a => ({
       driver: a.driver?.full_name || '', date: formatSwedishDate(a.actual_start!),
@@ -179,10 +242,13 @@ export default function AdminReports() {
       hours: calculateDecimalHours(a.actual_start!, a.actual_stop!),
     }));
   const dateStr = () => new Date().toISOString().split('T')[0];
-  const dateRangeLabel = () => `Vecka ${weekNumber}, ${format(currentMonday, 'd MMM', { locale: sv })} – ${format(currentSunday, 'd MMM yyyy', { locale: sv })}`;
+  const dateRangeLabel = () => viewMode === 'week'
+    ? `Vecka ${weekNumber}, ${format(currentMonday, 'd MMM', { locale: sv })} – ${format(currentSunday, 'd MMM yyyy', { locale: sv })}`
+    : format(currentMonth, 'MMMM yyyy', { locale: sv });
+  const filePrefix = () => viewMode === 'week' ? `v${weekNumber}` : format(currentMonth, 'yyyy-MM');
 
   const handleExportPdf = () => {
-    const rows = buildRows(weekAssignments);
+    const rows = buildRows(activeAssignments);
     const doc = new jsPDF({ unit: 'mm', format: 'a4' });
     doc.setFontSize(16); doc.setFont('helvetica', 'bold'); doc.text('Tidrapport', 20, 20);
     doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.text(dateRangeLabel(), 20, 28);
@@ -194,12 +260,12 @@ export default function AdminReports() {
       styles: { fontSize: 8 }, headStyles: { fillColor: [30, 58, 95] },
       footStyles: { fillColor: [245, 247, 250], textColor: [30, 30, 30], fontStyle: 'bold' },
     });
-    doc.save(`tidrapport_v${weekNumber}_${dateStr()}.pdf`);
+    doc.save(`tidrapport_${filePrefix()}_${dateStr()}.pdf`);
     toast.success('PDF exporterad');
   };
 
   const handleExportExcel = () => {
-    const rows = buildRows(weekAssignments);
+    const rows = buildRows(activeAssignments);
     const wsData = [
       ['Chaufför', 'Datum', 'Kund', 'Uppdrag', 'Start', 'Stopp', 'Timmar'],
       ...rows.map(r => [r.driver, r.date, r.customer, r.title, r.start, r.stop, r.hours]),
@@ -208,7 +274,7 @@ export default function AdminReports() {
     const ws = XLSX.utils.aoa_to_sheet(wsData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Tidrapport');
-    XLSX.writeFile(wb, `tidrapport_v${weekNumber}_${dateStr()}.xlsx`);
+    XLSX.writeFile(wb, `tidrapport_${filePrefix()}_${dateStr()}.xlsx`);
     toast.success('Excel exporterad');
   };
 
@@ -216,7 +282,7 @@ export default function AdminReports() {
     if (customerFilter === 'all') { toast.error('Välj en kund först'); return; }
     const customer = (customers ?? []).find(c => c.id === customerFilter);
     if (!customer) return;
-    const rows = buildRows(weekAssignments);
+    const rows = buildRows(activeAssignments);
     const doc = new jsPDF({ unit: 'mm', format: 'a4' });
     doc.setFontSize(16); doc.setFont('helvetica', 'bold'); doc.text('Faktureringsunderlag', 20, 20);
     doc.setFontSize(10); doc.setFont('helvetica', 'normal');
@@ -230,142 +296,104 @@ export default function AdminReports() {
       footStyles: { fillColor: [245, 247, 250], textColor: [30, 30, 30], fontStyle: 'bold' },
     });
     const safeName = customer.name.replace(/[^a-zA-Z0-9åäöÅÄÖ]/g, '_');
-    doc.save(`faktureringsunderlag_${safeName}_v${weekNumber}.pdf`);
+    doc.save(`faktureringsunderlag_${safeName}_${filePrefix()}.pdf`);
     toast.success('Faktureringsunderlag exporterat');
   };
 
   const handleSalaryReport = () => {
-    const compMap = Object.fromEntries((compensations ?? []).map(c => [c.driver_id, c]));
-    const activeObRates = (obRates ?? []).filter(r => r.active);
-    const activePerDiem = (perDiemRates ?? []).filter(r => r.active).sort((a, b) => b.min_hours - a.min_hours);
-
-    const driverIds = [...new Set(weekAssignments.map(a => a.assigned_driver_id))];
-    const salaryRows = driverIds.map(dId => {
-      const driver = (drivers ?? []).find(d => d.id === dId);
-      const comp = compMap[dId];
-      const driverAssignments = weekAssignments.filter(a => a.assigned_driver_id === dId);
-      const totalH = driverAssignments.reduce((sum, a) => sum + calculateDecimalHours(a.actual_start!, a.actual_stop!), 0);
-      const count = driverAssignments.length;
-
-      // Base pay
-      let grossPay = 0, payType = 'Ej angiven';
-      if (comp) {
-        switch (comp.compensation_type) {
-          case 'hourly': grossPay = totalH * Number(comp.hourly_rate); payType = `${Number(comp.hourly_rate).toFixed(0)} kr/h`; break;
-          case 'per_assignment': grossPay = count * Number(comp.per_assignment_rate); payType = `${Number(comp.per_assignment_rate).toFixed(0)} kr/uppdrag`; break;
-          case 'monthly': grossPay = Number(comp.monthly_salary); payType = `${Number(comp.monthly_salary).toFixed(0)} kr/mån`; break;
-        }
-      }
-
-      // OB calculation per assignment
-      let obTotal = 0;
-      driverAssignments.forEach(a => {
-        const start = parseISO(a.actual_start!);
-        const stop = parseISO(a.actual_stop!);
-        const dayOfWeek = getDay(start); // 0=Sun, 6=Sat
-
-        activeObRates.forEach(rate => {
-          const isSat = dayOfWeek === 6 && rate.applies_to_saturdays;
-          const isSun = dayOfWeek === 0 && rate.applies_to_sundays;
-          const isWeekday = dayOfWeek >= 1 && dayOfWeek <= 5 && rate.applies_to_weekdays;
-          if (!isSat && !isSun && !isWeekday) return;
-
-          // Parse rate time window
-          const [rStartH, rStartM] = rate.start_time.split(':').map(Number);
-          const [rEndH, rEndM] = rate.end_time.split(':').map(Number);
-          const rStartMin = rStartH * 60 + rStartM;
-          const rEndMin = rEndH * 60 + rEndM;
-
-          // Work time in minutes from midnight
-          const wStartMin = start.getHours() * 60 + start.getMinutes();
-          const wEndMin = stop.getHours() * 60 + stop.getMinutes();
-
-          let obMinutes = 0;
-          if (isSat || isSun) {
-            // Full day rates — all hours count
-            obMinutes = (wEndMin - wStartMin);
-          } else if (rStartMin > rEndMin) {
-            // Overnight window (e.g. 18:00–06:00)
-            if (wEndMin <= rEndMin) obMinutes += wEndMin;
-            if (wStartMin < rEndMin) obMinutes = Math.max(obMinutes, Math.min(wEndMin, rEndMin) - wStartMin);
-            if (wEndMin > rStartMin) obMinutes += wEndMin - Math.max(wStartMin, rStartMin);
-            else if (wStartMin >= rStartMin) obMinutes += wEndMin > wStartMin ? wEndMin - wStartMin : 0;
-          } else {
-            // Normal window
-            const overlapStart = Math.max(wStartMin, rStartMin);
-            const overlapEnd = Math.min(wEndMin, rEndMin);
-            if (overlapEnd > overlapStart) obMinutes = overlapEnd - overlapStart;
-          }
-
-          if (obMinutes > 0) {
-            obTotal += (obMinutes / 60) * Number(rate.rate_per_hour);
-          }
-        });
-      });
-
-      // Per diem — group by day, check if total hours meet threshold
-      let perDiemTotal = 0;
-      const dayMap = new Map<string, number>();
-      driverAssignments.forEach(a => {
-        const dayKey = format(parseISO(a.actual_start!), 'yyyy-MM-dd');
-        dayMap.set(dayKey, (dayMap.get(dayKey) ?? 0) + calculateDecimalHours(a.actual_start!, a.actual_stop!));
-      });
-      dayMap.forEach(dayHours => {
-        const matching = activePerDiem.find(r => dayHours >= r.min_hours);
-        if (matching) perDiemTotal += Number(matching.amount);
-      });
-
-      const totalPay = grossPay + obTotal + perDiemTotal;
-
-      return {
-        name: driver?.full_name ?? 'Okänd', type: payType, hours: totalH,
-        assignments: count, grossPay, obTotal, perDiemTotal, totalPay,
-        taxTable: comp?.tax_table ?? '',
-      };
-    });
+    const summary = activeSummary;
+    if (!summary) { toast.error('Ingen data att exportera'); return; }
 
     const wsData = [
       ['Lönerapport', dateRangeLabel()], [],
       ['Chaufför', 'Ersättningstyp', 'Timmar', 'Uppdrag', 'Grundlön (kr)', 'OB-tillägg (kr)', 'Traktamente (kr)', 'Totalt (kr)', 'Skattetabell'],
-      ...salaryRows.map(r => [
-        r.name, r.type, r.hours.toFixed(1), r.assignments,
-        r.grossPay.toFixed(0), r.obTotal.toFixed(0), r.perDiemTotal.toFixed(0),
-        r.totalPay.toFixed(0), r.taxTable,
+      ...summary.rows.map(r => [
+        r.name, r.payType, r.hours.toFixed(1), r.assignments,
+        r.grossPay.toFixed(0), r.obTotal.toFixed(0), r.perDiemTot.toFixed(0),
+        r.total.toFixed(0), r.taxTable,
       ]),
       [], ['', '', '', 'Totalt',
-        salaryRows.reduce((s, r) => s + r.grossPay, 0).toFixed(0),
-        salaryRows.reduce((s, r) => s + r.obTotal, 0).toFixed(0),
-        salaryRows.reduce((s, r) => s + r.perDiemTotal, 0).toFixed(0),
-        salaryRows.reduce((s, r) => s + r.totalPay, 0).toFixed(0),
-        '',
+        summary.totalGross.toFixed(0), summary.totalOb.toFixed(0),
+        summary.totalPerDiem.toFixed(0), summary.grandTotal.toFixed(0), '',
       ],
     ];
+
+    // If monthly, add per-week breakdown sheet
+    const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet(wsData);
     ws['!cols'] = [{ wch: 25 }, { wch: 18 }, { wch: 10 }, { wch: 10 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 18 }];
-    const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Lönerapport');
-    XLSX.writeFile(wb, `lonerapport_v${weekNumber}.xlsx`);
+
+    if (viewMode === 'month' && monthWeekBreakdown.length > 0) {
+      const weekData = [
+        ['Veckouppdelning', dateRangeLabel()], [],
+        ['Vecka', 'Period', 'Timmar', 'Uppdrag', 'Grundlön', 'OB', 'Traktamente', 'Totalt'],
+        ...monthWeekBreakdown.map(w => [
+          `V${w.weekNumber}`,
+          `${format(w.start, 'd/M')} – ${format(w.end, 'd/M')}`,
+          w.totalH.toFixed(1),
+          w.assignmentCount,
+          w.summary?.totalGross.toFixed(0) ?? '0',
+          w.summary?.totalOb.toFixed(0) ?? '0',
+          w.summary?.totalPerDiem.toFixed(0) ?? '0',
+          w.summary?.grandTotal.toFixed(0) ?? '0',
+        ]),
+      ];
+      const ws2 = XLSX.utils.aoa_to_sheet(weekData);
+      ws2['!cols'] = [{ wch: 10 }, { wch: 18 }, { wch: 10 }, { wch: 10 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }];
+      XLSX.utils.book_append_sheet(wb, ws2, 'Per vecka');
+    }
+
+    XLSX.writeFile(wb, `lonerapport_${filePrefix()}.xlsx`);
     toast.success('Lönerapport exporterad');
   };
 
+  const salarySummary = viewMode === 'week' ? weeklySalarySummary : monthlySalarySummary;
+
   return (
-    <AdminLayout title="Tidrapporter" description="Veckoöversikt och export">
+    <AdminLayout title="Tidrapporter" description="Vecko- och månadsöversikt">
       <div className="space-y-6">
         {/* Top bar */}
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-3 flex-wrap">
             <h2 className="text-xl sm:text-2xl font-bold text-foreground">Tidrapporter</h2>
-            {/* Week navigator */}
-            <div className="flex items-center gap-1 bg-card border border-border rounded-lg">
-              <button onClick={() => setWeekOffset(w => w - 1)} className="p-2 hover:bg-secondary rounded-l-lg transition-colors">
-                <ChevronLeft className="h-4 w-4" />
-              </button>
-              <span className="px-3 text-sm font-medium whitespace-nowrap">Vecka {weekNumber}</span>
-              <button onClick={() => setWeekOffset(w => w + 1)} className="p-2 hover:bg-secondary rounded-r-lg transition-colors">
-                <ChevronRight className="h-4 w-4" />
-              </button>
-            </div>
+
+            {/* View mode toggle */}
+            <Tabs value={viewMode} onValueChange={v => setViewMode(v as ViewMode)} className="mr-auto sm:mr-0">
+              <TabsList className="h-9">
+                <TabsTrigger value="week" className="text-xs gap-1.5 px-3">
+                  <CalendarDays className="h-3.5 w-3.5" /> Vecka
+                </TabsTrigger>
+                <TabsTrigger value="month" className="text-xs gap-1.5 px-3">
+                  <CalendarRange className="h-3.5 w-3.5" /> Månad
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+
+            {/* Period navigator */}
+            {viewMode === 'week' ? (
+              <div className="flex items-center gap-1 bg-card border border-border rounded-lg">
+                <button onClick={() => setWeekOffset(w => w - 1)} className="p-2 hover:bg-secondary rounded-l-lg transition-colors">
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <span className="px-3 text-sm font-medium whitespace-nowrap">Vecka {weekNumber}</span>
+                <button onClick={() => setWeekOffset(w => w + 1)} className="p-2 hover:bg-secondary rounded-r-lg transition-colors">
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1 bg-card border border-border rounded-lg">
+                <button onClick={() => setMonthOffset(m => m - 1)} className="p-2 hover:bg-secondary rounded-l-lg transition-colors">
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <span className="px-3 text-sm font-medium whitespace-nowrap capitalize">{monthLabel}</span>
+                <button onClick={() => setMonthOffset(m => m + 1)} className="p-2 hover:bg-secondary rounded-r-lg transition-colors">
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            )}
           </div>
+
           <div className="grid grid-cols-2 sm:flex sm:items-center gap-2">
             <Select value={driverFilter} onValueChange={setDriverFilter}>
               <SelectTrigger className="w-full sm:w-[160px]"><SelectValue placeholder="Chaufför" /></SelectTrigger>
@@ -392,7 +420,10 @@ export default function AdminReports() {
 
         {/* Date range label */}
         <p className="text-sm text-muted-foreground capitalize">
-          {format(currentMonday, 'd MMMM', { locale: sv })} – {format(currentSunday, 'd MMMM yyyy', { locale: sv })}
+          {viewMode === 'week'
+            ? `${format(currentMonday, 'd MMMM', { locale: sv })} – ${format(currentSunday, 'd MMMM yyyy', { locale: sv })}`
+            : `${format(monthStart, 'd MMMM', { locale: sv })} – ${format(monthEnd, 'd MMMM yyyy', { locale: sv })}`
+          }
         </p>
 
         {/* Pending approvals banner */}
@@ -400,99 +431,171 @@ export default function AdminReports() {
           <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-lg p-4">
             <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0" />
             <p className="text-sm text-amber-800 font-medium">
-              {pendingApprovals} tidrapporter väntar på godkännande denna vecka
+              {pendingApprovals} tidrapporter väntar på godkännande
             </p>
           </div>
         )}
 
-        {/* Week table */}
-        {isLoading ? (
-          <div className="space-y-2">
-            {[1, 2, 3].map(i => <Skeleton key={i} className="h-14 w-full rounded-lg" />)}
-          </div>
-        ) : weekGrid.length === 0 ? (
-          <div className="bg-card rounded-lg border border-dashed border-border p-16 text-center shadow-card">
-            <Clock className="h-12 w-12 text-slate-200 mx-auto mb-3" />
-            <p className="text-sm font-medium text-muted-foreground">Inga rapporterade timmar denna vecka</p>
-          </div>
-        ) : (
-          <div className="bg-card rounded-lg border border-border shadow-card overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="sticky left-0 bg-secondary z-10 min-w-[180px]">Chaufför</TableHead>
-                  {DAY_LABELS.map((d, i) => (
-                    <TableHead key={d} className="text-center min-w-[70px]">
-                      <div>{d}</div>
-                      <div className="text-[10px] font-normal text-muted-foreground">
-                        {format(weekDays[i], 'd/M')}
-                      </div>
-                    </TableHead>
-                  ))}
-                  <TableHead className="text-center font-bold min-w-[80px]">Totalt</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {weekGrid.map(row => (
-                  <TableRow key={row.driver.id}>
-                    <TableCell className="sticky left-0 bg-card z-10">
-                      <div className="flex items-center gap-2">
-                        <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0 ${avatarColor(row.driver.full_name)}`}>
-                          {getInitials(row.driver.full_name)}
-                        </div>
-                        <span className="text-sm font-medium truncate">{row.driver.full_name}</span>
-                      </div>
-                    </TableCell>
-                    {row.dayCells.map((cell, i) => (
-                      <TableCell key={i} className="text-center">
-                        {cell.hours > 0 ? (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span className="inline-block bg-blue-50 text-blue-700 text-xs font-mono font-medium rounded px-2 py-0.5 cursor-default">
-                                {cell.hours.toFixed(1)}h
-                              </span>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <div className="text-xs space-y-0.5">
-                                {cell.times.map((t, j) => <div key={j}>{t}</div>)}
-                              </div>
-                            </TooltipContent>
-                          </Tooltip>
-                        ) : (
-                          <span className="text-slate-300">–</span>
-                        )}
-                      </TableCell>
+        {/* ── WEEK VIEW: Time grid ── */}
+        {viewMode === 'week' && (
+          <>
+            {isLoading ? (
+              <div className="space-y-2">
+                {[1, 2, 3].map(i => <Skeleton key={i} className="h-14 w-full rounded-lg" />)}
+              </div>
+            ) : weekGrid.length === 0 ? (
+              <div className="bg-card rounded-lg border border-dashed border-border p-16 text-center shadow-card">
+                <Clock className="h-12 w-12 text-slate-200 mx-auto mb-3" />
+                <p className="text-sm font-medium text-muted-foreground">Inga rapporterade timmar denna vecka</p>
+              </div>
+            ) : (
+              <div className="bg-card rounded-lg border border-border shadow-card overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="sticky left-0 bg-secondary z-10 min-w-[180px]">Chaufför</TableHead>
+                      {DAY_LABELS.map((d, i) => (
+                        <TableHead key={d} className="text-center min-w-[70px]">
+                          <div>{d}</div>
+                          <div className="text-[10px] font-normal text-muted-foreground">
+                            {format(weekDays[i], 'd/M')}
+                          </div>
+                        </TableHead>
+                      ))}
+                      <TableHead className="text-center font-bold min-w-[80px]">Totalt</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {weekGrid.map(row => (
+                      <TableRow key={row.driver.id}>
+                        <TableCell className="sticky left-0 bg-card z-10">
+                          <div className="flex items-center gap-2">
+                            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0 ${avatarColor(row.driver.full_name)}`}>
+                              {getInitials(row.driver.full_name)}
+                            </div>
+                            <span className="text-sm font-medium truncate">{row.driver.full_name}</span>
+                          </div>
+                        </TableCell>
+                        {row.dayCells.map((cell, i) => (
+                          <TableCell key={i} className="text-center">
+                            {cell.hours > 0 ? (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="inline-block bg-blue-50 text-blue-700 text-xs font-mono font-medium rounded px-2 py-0.5 cursor-default">
+                                    {cell.hours.toFixed(1)}h
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <div className="text-xs space-y-0.5">
+                                    {cell.times.map((t, j) => <div key={j}>{t}</div>)}
+                                  </div>
+                                </TooltipContent>
+                              </Tooltip>
+                            ) : (
+                              <span className="text-slate-300">–</span>
+                            )}
+                          </TableCell>
+                        ))}
+                        <TableCell className="text-center">
+                          <span className="font-mono font-semibold text-sm">{row.total.toFixed(1)}h</span>
+                        </TableCell>
+                      </TableRow>
                     ))}
-                    <TableCell className="text-center">
-                      <span className="font-mono font-semibold text-sm">{row.total.toFixed(1)}h</span>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {/* Footer totals */}
-                <TableRow className="bg-secondary/50 font-semibold">
-                  <TableCell className="sticky left-0 bg-secondary/50 z-10 text-sm">Totalt</TableCell>
-                  {dailyTotals.map((t, i) => (
-                    <TableCell key={i} className="text-center">
-                      {t > 0 ? (
-                        <span className="font-mono text-xs">{t.toFixed(1)}h</span>
-                      ) : (
-                        <span className="text-slate-300">–</span>
-                      )}
-                    </TableCell>
-                  ))}
-                  <TableCell className="text-center">
-                    <span className="font-mono font-bold text-sm text-primary">{grandTotal.toFixed(1)}h</span>
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </div>
+                    <TableRow className="bg-secondary/50 font-semibold">
+                      <TableCell className="sticky left-0 bg-secondary/50 z-10 text-sm">Totalt</TableCell>
+                      {dailyTotals.map((t, i) => (
+                        <TableCell key={i} className="text-center">
+                          {t > 0 ? <span className="font-mono text-xs">{t.toFixed(1)}h</span> : <span className="text-slate-300">–</span>}
+                        </TableCell>
+                      ))}
+                      <TableCell className="text-center">
+                        <span className="font-mono font-bold text-sm text-primary">{grandTotal.toFixed(1)}h</span>
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* ── MONTH VIEW: Per-week breakdown ── */}
+        {viewMode === 'month' && (
+          <>
+            {isLoading ? (
+              <div className="space-y-2">
+                {[1, 2, 3].map(i => <Skeleton key={i} className="h-14 w-full rounded-lg" />)}
+              </div>
+            ) : monthWeekBreakdown.length === 0 ? (
+              <div className="bg-card rounded-lg border border-dashed border-border p-16 text-center shadow-card">
+                <Clock className="h-12 w-12 text-slate-200 mx-auto mb-3" />
+                <p className="text-sm font-medium text-muted-foreground">Inga rapporterade timmar denna månad</p>
+              </div>
+            ) : (
+              <div className="bg-card rounded-lg border border-border shadow-card overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="min-w-[100px]">Vecka</TableHead>
+                      <TableHead className="min-w-[140px]">Period</TableHead>
+                      <TableHead className="text-right min-w-[80px]">Timmar</TableHead>
+                      <TableHead className="text-right min-w-[80px]">Uppdrag</TableHead>
+                      <TableHead className="text-right min-w-[90px]">Grundlön</TableHead>
+                      <TableHead className="text-right min-w-[80px]">OB</TableHead>
+                      <TableHead className="text-right min-w-[80px]">Trakt.</TableHead>
+                      <TableHead className="text-right font-bold min-w-[90px]">Totalt</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {monthWeekBreakdown.map(w => (
+                      <TableRow key={w.weekNumber}>
+                        <TableCell className="font-medium">V{w.weekNumber}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {format(w.start, 'd MMM', { locale: sv })} – {format(w.end, 'd MMM', { locale: sv })}
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-sm">{w.totalH.toFixed(1)}h</TableCell>
+                        <TableCell className="text-right font-mono text-sm">{w.assignmentCount}</TableCell>
+                        <TableCell className="text-right font-mono text-sm">{(w.summary?.totalGross ?? 0).toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr</TableCell>
+                        <TableCell className="text-right font-mono text-sm">{(w.summary?.totalOb ?? 0) > 0 ? `${(w.summary?.totalOb ?? 0).toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr` : '–'}</TableCell>
+                        <TableCell className="text-right font-mono text-sm">{(w.summary?.totalPerDiem ?? 0) > 0 ? `${(w.summary?.totalPerDiem ?? 0).toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr` : '–'}</TableCell>
+                        <TableCell className="text-right font-mono text-sm font-semibold">{(w.summary?.grandTotal ?? 0).toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr</TableCell>
+                      </TableRow>
+                    ))}
+                    {/* Month totals row */}
+                    <TableRow className="bg-secondary/50 font-semibold">
+                      <TableCell colSpan={2}>Totalt</TableCell>
+                      <TableCell className="text-right font-mono text-sm">
+                        {monthWeekBreakdown.reduce((s, w) => s + w.totalH, 0).toFixed(1)}h
+                      </TableCell>
+                      <TableCell className="text-right font-mono text-sm">
+                        {monthWeekBreakdown.reduce((s, w) => s + w.assignmentCount, 0)}
+                      </TableCell>
+                      <TableCell className="text-right font-mono text-sm">
+                        {(monthlySalarySummary?.totalGross ?? 0).toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr
+                      </TableCell>
+                      <TableCell className="text-right font-mono text-sm">
+                        {(monthlySalarySummary?.totalOb ?? 0).toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr
+                      </TableCell>
+                      <TableCell className="text-right font-mono text-sm">
+                        {(monthlySalarySummary?.totalPerDiem ?? 0).toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr
+                      </TableCell>
+                      <TableCell className="text-right font-mono text-sm font-bold text-primary">
+                        {(monthlySalarySummary?.grandTotal ?? 0).toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </>
         )}
 
         {/* Salary summary with OB & per diem */}
         {salarySummary && salarySummary.rows.length > 0 && (
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-foreground">Lönesammanfattning</h3>
+            <h3 className="text-lg font-semibold text-foreground">
+              Lönesammanfattning {viewMode === 'month' ? `– ${monthLabel}` : ''}
+            </h3>
             {/* Summary cards */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <Card>
