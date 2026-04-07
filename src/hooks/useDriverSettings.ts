@@ -9,6 +9,7 @@ export interface DriverSettings {
   require_photo: boolean;
   show_time_report: boolean;
   show_availability_toggle: boolean;
+  show_total_hours: boolean;
   updated_at: string;
 }
 
@@ -19,6 +20,7 @@ export interface DriverSettingsOverride {
   require_photo: boolean | null;
   show_time_report: boolean | null;
   show_availability_toggle: boolean | null;
+  show_total_hours: boolean | null;
   updated_at: string;
 }
 
@@ -85,6 +87,7 @@ export function useEffectiveDriverSettings(driverId: string | undefined) {
     require_photo: override?.require_photo ?? global.require_photo,
     show_time_report: override?.show_time_report ?? global.show_time_report,
     show_availability_toggle: override?.show_availability_toggle ?? global.show_availability_toggle,
+    show_total_hours: override?.show_total_hours ?? global.show_total_hours,
   };
 
   return { data: effective };

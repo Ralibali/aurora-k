@@ -219,8 +219,12 @@ export default function AdminNewInvoice() {
     });
   };
 
+  const invoiceMode = (settings as any)?.invoice_mode || 'invoice';
+  const isUnderlag = invoiceMode === 'basis';
+  const docTitle = isUnderlag ? 'fakturaunderlag' : 'faktura';
+
   return (
-    <AdminLayout title="Skapa faktura">
+    <AdminLayout title={isUnderlag ? 'Skapa fakturaunderlag' : 'Skapa faktura'}>
       <div className="max-w-3xl space-y-4">
         <Button variant="ghost" size="sm" onClick={() => step > 1 ? setStep(step - 1) : navigate(-1)}>
           <ArrowLeft className="h-4 w-4 mr-1" /> {step > 1 ? 'Föregående steg' : 'Tillbaka'}
@@ -452,7 +456,7 @@ export default function AdminNewInvoice() {
                     <p className="text-sm text-muted-foreground">Org.nr: {settings?.org_number}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-2xl font-bold text-primary">FAKTURA</p>
+                    <p className="text-2xl font-bold text-primary">{isUnderlag ? 'FAKTURAUNDERLAG' : 'FAKTURA'}</p>
                     <p className="text-sm">Nr: {finalInvoiceNumber}</p>
                     <p className="text-sm">Datum: {invoiceDate}</p>
                     <p className="text-sm">Förfaller: {finalDueDate}</p>
@@ -504,11 +508,13 @@ export default function AdminNewInvoice() {
 
               <div className="flex gap-2">
                 <Button onClick={() => handleCreate('draft')} disabled={createInvoice.isPending}>
-                  <FileText className="h-4 w-4 mr-1" /> {createInvoice.isPending ? 'Skapar...' : 'Spara faktura'}
+                  <FileText className="h-4 w-4 mr-1" /> {createInvoice.isPending ? 'Skapar...' : `Spara ${docTitle}`}
                 </Button>
-                <Button variant="outline" onClick={() => handleCreate('sent')}>
-                  Markera som skickad
-                </Button>
+                {!isUnderlag && (
+                  <Button variant="outline" onClick={() => handleCreate('sent')}>
+                    Markera som skickad
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>

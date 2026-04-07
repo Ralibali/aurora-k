@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useSettings, useUpdateSettings, useCreateSettings } from '@/hooks/useData';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useFeatureSettings, useToggleFeature, useResetAllFeatures } from '@/hooks/useFeatureSettings';
 import { Save, Upload, ToggleLeft, RotateCcw, Sun, Moon, Monitor } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -159,6 +160,22 @@ export default function AdminSettings() {
                     <Input value={f.vat_number || ''} onChange={e => setField('vat_number', e.target.value || null)} placeholder="SE559000123401" />
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader><CardTitle>Faktureringsläge</CardTitle></CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">Välj om systemet ska skapa fullständiga fakturor eller enbart fakturaunderlag (för dig som fakturerar via Fortnox eller liknande).</p>
+                <Select value={f.invoice_mode || 'invoice'} onValueChange={v => setField('invoice_mode', v)}>
+                  <SelectTrigger className="w-full max-w-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="invoice">Faktura (fullständig)</SelectItem>
+                    <SelectItem value="basis">Fakturaunderlag (specifikation)</SelectItem>
+                  </SelectContent>
+                </Select>
               </CardContent>
             </Card>
 
