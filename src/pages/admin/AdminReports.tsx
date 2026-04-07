@@ -657,7 +657,7 @@ export default function AdminReports() {
                     </TableRow>
                   </TableBody>
                 </Table>
-              </div>
+              </ScrollableTable>
             )}
           </>
         )}
