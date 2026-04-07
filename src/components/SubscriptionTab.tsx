@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { CreditCard, ExternalLink } from 'lucide-react';
+import { AlertCircle, CreditCard, ExternalLink, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 
 const STATUS_MAP: Record<string, { label: string; variant: 'default' | 'destructive' | 'outline' | 'secondary' }> = {
@@ -14,23 +14,43 @@ const STATUS_MAP: Record<string, { label: string; variant: 'default' | 'destruct
 };
 
 export default function SubscriptionTab() {
-  const { companyId } = useAuth();
+  const { companyId, loading: authLoading } = useAuth();
   const [status, setStatus] = useState('pending');
   const [loading, setLoading] = useState(true);
   const [portalLoading, setPortalLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!companyId) return;
-    supabase
+  const loadSubscription = useCallback(async () => {
+    if (authLoading) return;
+
+    if (!companyId) {
+      setError('Det finns inget företag kopplat till kontot ännu. Koppla användaren till ett företag för att visa prenumerationen här.');
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    const { data, error: companyError } = await supabase
       .from('companies')
       .select('subscription_status')
       .eq('id', companyId)
-      .single()
-      .then(({ data }) => {
-        setStatus(data?.subscription_status || 'pending');
-        setLoading(false);
-      });
-  }, [companyId]);
+      .single();
+
+    if (companyError) {
+      setError('Kunde inte hämta prenumerationsstatus just nu. Försök igen.');
+      setLoading(false);
+      return;
+    }
+
+    setStatus(data?.subscription_status || 'pending');
+    setLoading(false);
+  }, [authLoading, companyId]);
+
+  useEffect(() => {
+    void loadSubscription();
+  }, [loadSubscription]);
 
   const openPortal = async () => {
     setPortalLoading(true);
@@ -44,8 +64,29 @@ export default function SubscriptionTab() {
     }
   };
 
-  if (loading) {
+  if (authLoading || loading) {
     return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-xl border bg-card p-6">
+        <div className="flex items-start gap-3">
+          <div className="rounded-full bg-muted p-2">
+            <AlertCircle className="h-4 w-4 text-muted-foreground" />
+          </div>
+          <div className="min-w-0 flex-1 space-y-2">
+            <h3 className="font-semibold">Prenumerationen kunde inte visas</h3>
+            <p className="text-sm text-muted-foreground">{error}</p>
+            {companyId ? (
+              <Button variant="outline" size="sm" onClick={() => void loadSubscription()} className="gap-2">
+                <RefreshCw className="h-4 w-4" /> Försök igen
+              </Button>
+            ) : null}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const statusInfo = STATUS_MAP[status] || STATUS_MAP.pending;
