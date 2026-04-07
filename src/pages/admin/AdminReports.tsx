@@ -156,22 +156,33 @@ export default function AdminReports() {
     [assignments, driverFilter, customerFilter]
   );
 
-  // Week assignments
+  // Helper: get UTC date string (YYYY-MM-DD) from an ISO timestamp
+  const toUtcDateStr = (iso: string) => iso.slice(0, 10);
+  const toUtcYearMonth = (iso: string) => iso.slice(0, 7);
+
+  // Week range as UTC date strings for comparison
+  const weekStartStr = format(currentMonday, 'yyyy-MM-dd');
+  const weekEndStr = format(currentSunday, 'yyyy-MM-dd');
+
+  // Month range as YYYY-MM string
+  const monthYM = format(monthStart, 'yyyy-MM');
+
+  // Week assignments — compare by UTC date
   const weekAssignments = useMemo(() =>
     allCompleted.filter(a => {
-      const d = parseISO(a.actual_start!);
-      return d >= currentMonday && d <= currentSunday;
+      const ds = toUtcDateStr(a.actual_start!);
+      return ds >= weekStartStr && ds <= weekEndStr;
     }),
-    [allCompleted, currentMonday, currentSunday]
+    [allCompleted, weekStartStr, weekEndStr]
   );
 
-  // Month assignments
+  // Month assignments — compare by UTC year-month
   const monthAssignments = useMemo(() =>
     allCompleted.filter(a => {
-      const d = parseISO(a.actual_start!);
-      return d >= monthStart && d <= monthEnd;
+      const ym = toUtcYearMonth(a.actual_start!);
+      return ym === monthYM;
     }),
-    [allCompleted, monthStart, monthEnd]
+    [allCompleted, monthYM]
   );
 
   const pendingApprovals = useMemo(() =>
