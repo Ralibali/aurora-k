@@ -46,6 +46,7 @@ const navSections = [
       { title: 'Fakturor', url: '/admin/invoices', icon: FileText },
       { title: 'Fakturamallar', url: '/admin/invoice-templates', icon: FileImage },
       { title: 'Artiklar', url: '/admin/articles', icon: Package },
+      { title: 'OB & Traktamente', url: '/admin/compensation', icon: Briefcase },
       { title: 'Miljöuppföljning', url: '/admin/environment', icon: Leaf },
     ],
   },

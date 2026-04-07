@@ -55,6 +55,7 @@ const AdminSatisfaction = lazy(() => import("./pages/admin/AdminSatisfaction"));
 const AdminEnvironment = lazy(() => import("./pages/admin/AdminEnvironment"));
 const AdminApiDocs = lazy(() => import("./pages/admin/AdminApiDocs"));
 const AdminRouteOptimizer = lazy(() => import("./pages/admin/AdminRouteOptimizer"));
+const AdminCompensation = lazy(() => import("./pages/admin/AdminCompensation"));
 const CustomerPortal = lazy(() => import("./pages/CustomerPortal"));
 const DriverAssignments = lazy(() => import("./pages/driver/DriverAssignments"));
 const DriverAssignmentDetail = lazy(() => import("./pages/driver/DriverAssignmentDetail"));
@@ -139,6 +140,7 @@ const App = () => (
                   <Route path="environment" element={<AdminEnvironment />} />
                   <Route path="api" element={<AdminApiDocs />} />
                   <Route path="routes" element={<AdminRouteOptimizer />} />
+                  <Route path="compensation" element={<AdminCompensation />} />
                 </Route>
 
                 {/* Platform admin routes */}
