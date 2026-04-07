@@ -260,6 +260,62 @@ export default function AdminReports() {
       styles: { fontSize: 8 }, headStyles: { fillColor: [30, 58, 95] },
       footStyles: { fillColor: [245, 247, 250], textColor: [30, 30, 30], fontStyle: 'bold' },
     });
+
+    // ── Lönesammanfattning ──
+    const summary = activeSummary;
+    if (summary && summary.rows.length > 0) {
+      const lastTableY = (doc as any).lastAutoTable?.finalY ?? 80;
+      const summaryStartY = lastTableY + 12;
+
+      doc.setFontSize(13); doc.setFont('helvetica', 'bold');
+      doc.text('Lönesammanfattning', 20, summaryStartY);
+
+      // Summary boxes
+      const boxY = summaryStartY + 6;
+      const boxW = 40; const boxH = 16; const boxGap = 4;
+      const summaryItems = [
+        { label: 'Grundlön', value: `${Math.round(summary.totalGross).toLocaleString('sv-SE')} kr` },
+        { label: 'OB-tillägg', value: `${Math.round(summary.totalOb).toLocaleString('sv-SE')} kr` },
+        { label: 'Traktamente', value: `${Math.round(summary.totalPerDiem).toLocaleString('sv-SE')} kr` },
+        { label: 'Totalt', value: `${Math.round(summary.grandTotal).toLocaleString('sv-SE')} kr` },
+      ];
+      summaryItems.forEach((item, i) => {
+        const x = 20 + i * (boxW + boxGap);
+        const isTotal = i === 3;
+        doc.setFillColor(isTotal ? 30 : 245, isTotal ? 58 : 247, isTotal ? 95 : 250);
+        doc.roundedRect(x, boxY, boxW, boxH, 2, 2, 'F');
+        doc.setFontSize(7); doc.setFont('helvetica', 'normal');
+        doc.setTextColor(isTotal ? 255 : 100, isTotal ? 255 : 100, isTotal ? 255 : 100);
+        doc.text(item.label, x + 3, boxY + 5);
+        doc.setFontSize(10); doc.setFont('helvetica', 'bold');
+        doc.setTextColor(isTotal ? 255 : 30, isTotal ? 255 : 30, isTotal ? 255 : 30);
+        doc.text(item.value, x + 3, boxY + 12);
+      });
+      doc.setTextColor(0, 0, 0);
+
+      // Per-driver table
+      autoTable(doc, {
+        startY: boxY + boxH + 8,
+        head: [['Chaufför', 'Grundlön', 'OB', 'Traktamente', 'Totalt']],
+        body: summary.rows.map(r => [
+          r.name,
+          `${Math.round(r.grossPay).toLocaleString('sv-SE')} kr`,
+          `${Math.round(r.obTotal).toLocaleString('sv-SE')} kr`,
+          `${Math.round(r.perDiemTot).toLocaleString('sv-SE')} kr`,
+          `${Math.round(r.total).toLocaleString('sv-SE')} kr`,
+        ]),
+        foot: [[
+          'Totalt',
+          `${Math.round(summary.totalGross).toLocaleString('sv-SE')} kr`,
+          `${Math.round(summary.totalOb).toLocaleString('sv-SE')} kr`,
+          `${Math.round(summary.totalPerDiem).toLocaleString('sv-SE')} kr`,
+          `${Math.round(summary.grandTotal).toLocaleString('sv-SE')} kr`,
+        ]],
+        styles: { fontSize: 8 }, headStyles: { fillColor: [30, 58, 95] },
+        footStyles: { fillColor: [245, 247, 250], textColor: [30, 30, 30], fontStyle: 'bold' },
+      });
+    }
+
     doc.save(`tidrapport_${filePrefix()}_${dateStr()}.pdf`);
     toast.success('PDF exporterad');
   };
