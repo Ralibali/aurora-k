@@ -552,12 +552,12 @@ export default function AdminReports() {
                 <TableBody>
                   {salarySummary.rows.map(r => (
                     <TableRow key={r.name}>
-                      <TableCell>
+                      <TableCell className="sticky left-0 bg-card z-10">
                         <div className="flex items-center gap-2">
-                          <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0 ${avatarColor(r.name)}`}>
+                          <div className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-white text-[9px] sm:text-[10px] font-bold shrink-0 ${avatarColor(r.name)}`}>
                             {getInitials(r.name)}
                           </div>
-                          <span className="text-sm font-medium">{r.name}</span>
+                          <span className="text-xs sm:text-sm font-medium truncate max-w-[80px] sm:max-w-none">{r.name}</span>
                         </div>
                       </TableCell>
                       <TableCell className="text-right font-mono text-sm">{r.grossPay.toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr</TableCell>
