@@ -352,9 +352,9 @@ export default function AdminReports() {
     <AdminLayout title="Tidrapporter" description="Veckoöversikt och export">
       <div className="space-y-6">
         {/* Top bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <h2 className="text-2xl font-bold text-foreground">Tidrapporter</h2>
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-3 flex-wrap">
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">Tidrapporter</h2>
             {/* Week navigator */}
             <div className="flex items-center gap-1 bg-card border border-border rounded-lg">
               <button onClick={() => setWeekOffset(w => w - 1)} className="p-2 hover:bg-secondary rounded-l-lg transition-colors">
@@ -366,25 +366,27 @@ export default function AdminReports() {
               </button>
             </div>
           </div>
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="grid grid-cols-2 sm:flex sm:items-center gap-2">
             <Select value={driverFilter} onValueChange={setDriverFilter}>
-              <SelectTrigger className="w-[160px]"><SelectValue placeholder="Chaufför" /></SelectTrigger>
+              <SelectTrigger className="w-full sm:w-[160px]"><SelectValue placeholder="Chaufför" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Alla chaufförer</SelectItem>
                 {(drivers ?? []).map(d => <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>)}
               </SelectContent>
             </Select>
             <Select value={customerFilter} onValueChange={setCustomerFilter}>
-              <SelectTrigger className="w-[160px]"><SelectValue placeholder="Kund" /></SelectTrigger>
+              <SelectTrigger className="w-full sm:w-[160px]"><SelectValue placeholder="Kund" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Alla kunder</SelectItem>
                 {(customers ?? []).map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
               </SelectContent>
             </Select>
-            <Button variant="outline" size="sm" onClick={handleExportPdf}><FileText className="h-4 w-4 mr-1" /> PDF</Button>
-            <Button variant="outline" size="sm" onClick={handleExportExcel}><FileSpreadsheet className="h-4 w-4 mr-1" /> Excel</Button>
-            <Button variant="outline" size="sm" onClick={handleInvoiceBasis}><Receipt className="h-4 w-4 mr-1" /> Faktura</Button>
-            <Button variant="outline" size="sm" onClick={handleSalaryReport}><Banknote className="h-4 w-4 mr-1" /> Lön</Button>
+          </div>
+          <div className="flex items-center gap-2 overflow-x-auto pb-1">
+            <Button variant="outline" size="sm" className="shrink-0" onClick={handleExportPdf}><FileText className="h-4 w-4 mr-1" /> PDF</Button>
+            <Button variant="outline" size="sm" className="shrink-0" onClick={handleExportExcel}><FileSpreadsheet className="h-4 w-4 mr-1" /> Excel</Button>
+            <Button variant="outline" size="sm" className="shrink-0" onClick={handleInvoiceBasis}><Receipt className="h-4 w-4 mr-1" /> Faktura</Button>
+            <Button variant="outline" size="sm" className="shrink-0" onClick={handleSalaryReport}><Banknote className="h-4 w-4 mr-1" /> Lön</Button>
           </div>
         </div>
 
