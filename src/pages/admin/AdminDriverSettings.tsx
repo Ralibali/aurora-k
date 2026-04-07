@@ -18,7 +18,7 @@ import {
 import { useDrivers } from '@/hooks/useData';
 import { Smartphone, PenLine, Camera, Clock, CircleDot, Users, User, RotateCcw } from 'lucide-react';
 
-const settingsKeys = ['require_signature', 'require_photo', 'show_time_report', 'show_availability_toggle'] as const;
+const settingsKeys = ['require_signature', 'require_photo', 'show_time_report', 'show_availability_toggle', 'show_total_hours'] as const;
 type SettingKey = typeof settingsKeys[number];
 
 const settingsConfig: { key: SettingKey; label: string; description: string; icon: typeof PenLine }[] = [
@@ -45,6 +45,12 @@ const settingsConfig: { key: SettingKey; label: string; description: string; ico
     label: 'Visa tillgänglighets-toggle',
     description: 'Föraren kan markera sig som ledig eller upptagen i sin profil',
     icon: CircleDot,
+  },
+  {
+    key: 'show_total_hours',
+    label: 'Visa totala timmar',
+    description: 'Föraren kan se sina totala timmar i tidrapporten. Avaktivera för att dölja sammanställningen.',
+    icon: Clock,
   },
 ];
 
