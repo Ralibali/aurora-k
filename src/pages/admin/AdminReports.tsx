@@ -538,15 +538,15 @@ export default function AdminReports() {
             </div>
 
             {/* Per-driver breakdown */}
-            <div className="bg-card rounded-lg border border-border shadow-card overflow-x-auto">
+            <div className="bg-card rounded-lg border border-border shadow-card overflow-x-auto -mx-4 sm:mx-0">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Chaufför</TableHead>
-                    <TableHead className="text-right">Grundlön</TableHead>
-                    <TableHead className="text-right">OB-tillägg</TableHead>
-                    <TableHead className="text-right">Traktamente</TableHead>
-                    <TableHead className="text-right font-bold">Totalt</TableHead>
+                    <TableHead className="sticky left-0 bg-secondary z-10 min-w-[130px]">Chaufför</TableHead>
+                    <TableHead className="text-right whitespace-nowrap min-w-[80px]">Grundlön</TableHead>
+                    <TableHead className="text-right whitespace-nowrap min-w-[80px]">OB</TableHead>
+                    <TableHead className="text-right whitespace-nowrap min-w-[80px]">Trakt.</TableHead>
+                    <TableHead className="text-right font-bold whitespace-nowrap min-w-[80px]">Totalt</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
