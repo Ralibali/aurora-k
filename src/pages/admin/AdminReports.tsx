@@ -232,9 +232,11 @@ export default function AdminReports() {
     return weekStarts.map(ws => {
       const we = endOfWeek(ws, { weekStartsOn: 1 });
       const wn = getISOWeek(ws);
+      const wsStr = format(ws, 'yyyy-MM-dd');
+      const weStr = format(we, 'yyyy-MM-dd');
       const wAssignments = monthAssignments.filter(a => {
-        const d = parseISO(a.actual_start!);
-        return d >= ws && d <= we;
+        const ds = toUtcDateStr(a.actual_start!);
+        return ds >= wsStr && ds <= weStr;
       });
       const totalH = wAssignments.reduce((s, a) => s + calculateDecimalHours(a.actual_start!, a.actual_stop!), 0);
       const summary = computeSalary(wAssignments, drivers ?? [], compensations ?? [], obRates ?? [], perDiemRates ?? []);
