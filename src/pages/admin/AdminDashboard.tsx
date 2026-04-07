@@ -42,24 +42,73 @@ function KpiCard({ icon: Icon, value, label, trend, iconBg, iconColor, isLoading
   iconColor: string;
   isLoading: boolean;
 }) {
+  if (isLoading) {
+    return (
+      <div className="bg-card rounded-lg border border-border p-5 shadow-card animate-pulse">
+        <div className="flex items-start justify-between">
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-12 rounded-md" />
+            <Skeleton className="h-3 w-24 rounded" />
+          </div>
+          <Skeleton className="h-9 w-9 rounded-md" />
+        </div>
+        <Skeleton className="h-3 w-20 rounded mt-3" />
+      </div>
+    );
+  }
+
   return (
     <div className="bg-card rounded-lg border border-border p-5 shadow-card">
       <div className="flex items-start justify-between">
         <div>
-          {isLoading ? (
-            <Skeleton className="h-8 w-16 mb-1" />
-          ) : (
-            <p className="text-2xl font-bold tracking-tight text-foreground font-mono">{value}</p>
-          )}
+          <p className="text-2xl font-bold tracking-tight text-foreground font-mono">{value}</p>
           <p className="text-xs text-muted-foreground font-medium mt-1">{label}</p>
         </div>
         <div className={`rounded-md p-2 ${iconBg}`}>
           <Icon className={`h-5 w-5 ${iconColor}`} />
         </div>
       </div>
-      {trend && !isLoading && (
+      {trend && (
         <p className="text-xs text-muted-foreground mt-3">{trend}</p>
       )}
+    </div>
+  );
+}
+
+/* ── Skeleton for assignment card ── */
+function AssignmentCardSkeleton() {
+  return (
+    <div className="flex items-stretch bg-card rounded-lg border border-border overflow-hidden shadow-card animate-pulse">
+      <div className="w-1 shrink-0 bg-muted" />
+      <div className="flex items-center gap-3 px-4 py-3 flex-1">
+        <div className="flex-1 space-y-2">
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-3 w-12 rounded" />
+            <Skeleton className="h-4 w-32 rounded" />
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5">
+              <Skeleton className="h-5 w-5 rounded-full" />
+              <Skeleton className="h-3 w-20 rounded" />
+            </div>
+            <Skeleton className="h-3 w-10 rounded" />
+          </div>
+        </div>
+        <Skeleton className="h-5 w-16 rounded-full" />
+      </div>
+    </div>
+  );
+}
+
+/* ── Skeleton for activity feed item ── */
+function ActivityItemSkeleton() {
+  return (
+    <div className="flex items-start gap-3 px-4 py-3 animate-pulse">
+      <Skeleton className="h-2 w-2 rounded-full mt-1.5 shrink-0" />
+      <div className="flex-1 space-y-1.5">
+        <Skeleton className="h-3 w-3/4 rounded" />
+      </div>
+      <Skeleton className="h-3 w-10 rounded shrink-0" />
     </div>
   );
 }
