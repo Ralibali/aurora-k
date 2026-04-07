@@ -20,8 +20,12 @@ export function usePlatformAdmin() {
       .select('id')
       .eq('user_id', user.id)
       .maybeSingle()
-      .then(({ data }) => {
-        setIsPlatformAdmin(!!data);
+      .then(({ data, error }) => {
+        if (error) {
+          setIsPlatformAdmin(false);
+        } else {
+          setIsPlatformAdmin(!!data);
+        }
         setLoading(false);
       });
   }, [user, authLoading]);

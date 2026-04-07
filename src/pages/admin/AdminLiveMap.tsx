@@ -56,39 +56,44 @@ export default function AdminLiveMap() {
   const [loading, setLoading] = useState(true);
 
   const fetchLocations = async () => {
-    const { data } = await supabase
-      .from('driver_locations')
-      .select('*');
+    try {
+      const { data } = await supabase
+        .from('driver_locations')
+        .select('*');
 
-    if (data && data.length > 0) {
-      const driverIds = [...new Set(data.map((d) => d.driver_id))];
-      const assignmentIds = [...new Set(data.map((d) => d.assignment_id).filter(Boolean))] as string[];
+      if (data && data.length > 0) {
+        const driverIds = [...new Set(data.map((d) => d.driver_id))];
+        const assignmentIds = [...new Set(data.map((d) => d.assignment_id).filter(Boolean))] as string[];
 
-      const [profilesRes, assignmentsRes] = await Promise.all([
-        supabase.from('profiles').select('id, full_name, email').in('id', driverIds),
-        assignmentIds.length > 0
-          ? supabase.from('assignments').select('id, title, address').in('id', assignmentIds)
-          : Promise.resolve({ data: [] }),
-      ]);
+        const [profilesRes, assignmentsRes] = await Promise.all([
+          supabase.from('profiles').select('id, full_name, email').in('id', driverIds),
+          assignmentIds.length > 0
+            ? supabase.from('assignments').select('id, title, address').in('id', assignmentIds)
+            : Promise.resolve({ data: [] }),
+        ]);
 
-      const profilesMap = Object.fromEntries(
-        (profilesRes.data ?? []).map((p) => [p.id, p])
-      );
-      const assignmentsMap = Object.fromEntries(
-        (assignmentsRes.data ?? []).map((a) => [a.id, a])
-      );
+        const profilesMap = Object.fromEntries(
+          (profilesRes.data ?? []).map((p) => [p.id, p])
+        );
+        const assignmentsMap = Object.fromEntries(
+          (assignmentsRes.data ?? []).map((a) => [a.id, a])
+        );
 
-      const enriched = data.map((loc) => ({
-        ...loc,
-        driver: profilesMap[loc.driver_id],
-        assignment: loc.assignment_id ? assignmentsMap[loc.assignment_id] : undefined,
-      }));
+        const enriched = data.map((loc) => ({
+          ...loc,
+          driver: profilesMap[loc.driver_id],
+          assignment: loc.assignment_id ? assignmentsMap[loc.assignment_id] : undefined,
+        }));
 
-      setLocations(enriched);
-    } else {
+        setLocations(enriched);
+      } else {
+        setLocations([]);
+      }
+    } catch {
       setLocations([]);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {

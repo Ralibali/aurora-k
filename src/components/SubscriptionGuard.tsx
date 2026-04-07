@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -7,26 +7,35 @@ import { Lock, AlertTriangle, XCircle } from 'lucide-react';
 type SubStatus = 'active' | 'pending' | 'past_due' | 'cancelled' | null;
 
 export function SubscriptionGuard({ children }: { children: React.ReactNode }) {
-  const { companyId } = useAuth();
+  const { companyId, loading: authLoading } = useAuth();
   const [status, setStatus] = useState<SubStatus>(null);
   const [loading, setLoading] = useState(true);
   const [redirecting, setRedirecting] = useState(false);
 
-  useEffect(() => {
+  const loadStatus = useCallback(async () => {
+    if (authLoading) return;
     if (!companyId) {
       setLoading(false);
       return;
     }
-    supabase
-      .from('companies')
-      .select('subscription_status')
-      .eq('id', companyId)
-      .single()
-      .then(({ data }) => {
-        setStatus((data?.subscription_status as SubStatus) || 'pending');
-        setLoading(false);
-      });
-  }, [companyId]);
+    try {
+      const { data } = await supabase
+        .from('companies')
+        .select('subscription_status')
+        .eq('id', companyId)
+        .single();
+      setStatus((data?.subscription_status as SubStatus) || 'pending');
+    } catch {
+      // On error, allow access rather than blocking forever
+      setStatus('active');
+    } finally {
+      setLoading(false);
+    }
+  }, [authLoading, companyId]);
+
+  useEffect(() => {
+    loadStatus();
+  }, [loadStatus]);
 
   const openPortal = async () => {
     setRedirecting(true);
