@@ -10,7 +10,8 @@ import {
   MessageSquare, FileSpreadsheet, Phone, Check, X, ChevronDown,
   Menu, ArrowRight, Play, Shield, BarChart3, CalendarDays,
   Route, Bell, Camera, PenTool, Package, Globe, Headphones,
-  RefreshCw, FileDown, Settings, TrendingUp, Layers,
+  RefreshCw, FileDown, Settings, TrendingUp, Layers, Wallet,
+  Eye, Moon, Coins,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -67,7 +68,7 @@ export default function LandingPage() {
           "ratingValue": "4.8",
           "ratingCount": "24"
         },
-        "featureList": "Uppdragshantering, GPS-spårning, Tidrapporter, Fakturering, Kundportal, Ruttoptimering"
+        "featureList": "Uppdragshantering, GPS-spårning, Tidrapporter, Fakturering, OB-tillägg, Traktamente, Fakturaunderlag, Kundportal, Ruttoptimering"
       },
       {
         "@context": "https://schema.org",
@@ -439,10 +440,10 @@ function HowItWorks() {
 const features = [
   { icon: Zap, title: 'Jobbdispatch på sekunder', desc: 'Skapa och tilldela uppdrag med några klick. Föraren notifieras direkt.' },
   { icon: Clock, title: 'Digital tidrapportering', desc: 'Förare stämplar in/ut. Automatisk beräkning. Exportera till Fortnox.' },
-  { icon: Users, title: 'Obegränsat antal förare', desc: 'Bjud in hela teamet. Ingen extra kostnad per användare.' },
+  { icon: Wallet, title: 'OB-tillägg & traktamente', desc: 'Konfigurera OB-scheman för kväll, natt och helg. Automatisk traktamentsberäkning.' },
   { icon: MapPin, title: 'Realtidsöversikt', desc: 'Se var dina förare befinner sig och vilka uppdrag som pågår.' },
-  { icon: Smartphone, title: 'PWA — ingen app-install', desc: 'Fungerar direkt i webbläsaren. Lägg till på hemskärmen som en app.' },
-  { icon: FileText, title: 'Fortnox-export', desc: 'Exportera tidrapporter och faktureringsunderlag med ett klick.' },
+  { icon: Users, title: 'Obegränsat antal förare', desc: 'Bjud in hela teamet. Ingen extra kostnad per användare.' },
+  { icon: FileText, title: 'Fakturaunderlag & Fortnox', desc: 'Generera fullständiga fakturor eller fakturaunderlag för Fortnox — du väljer.' },
 ];
 
 function FeaturesSection() {
@@ -511,8 +512,10 @@ const platformCategories = [
     color: 'bg-violet-50 text-violet-600',
     items: [
       { icon: Clock, text: 'In/ut-stämpling per uppdrag' },
-      { icon: FileDown, text: 'Export till Fortnox med ett klick' },
+      { icon: Moon, text: 'OB-tillägg: kväll, natt, helg — konfigurerbart' },
+      { icon: Coins, text: 'Traktamente baserat på arbetade timmar' },
       { icon: BarChart3, text: 'Lönemodeller: tim, fast, per uppdrag' },
+      { icon: FileDown, text: 'Export till Fortnox med ett klick' },
       { icon: CalendarDays, text: 'Frånvarohantering & semester' },
     ],
   },
@@ -523,6 +526,7 @@ const platformCategories = [
     items: [
       { icon: Users, text: 'Kundregister med prislistor' },
       { icon: FileText, text: 'Fakturering direkt från uppdrag' },
+      { icon: FileDown, text: 'Fakturaunderlag för Fortnox-användare' },
       { icon: Settings, text: 'Anpassningsbara fakturamallar' },
       { icon: FileDown, text: 'Bokföringsexport (SIE/CSV)' },
     ],
@@ -533,6 +537,7 @@ const platformCategories = [
     color: 'bg-rose-50 text-rose-600',
     items: [
       { icon: Users, text: 'Obegränsat antal förare & admins' },
+      { icon: Eye, text: 'Styr vad förare ser — dölj timmar, visa/dölj funktioner' },
       { icon: Truck, text: 'Fordonsregister med status' },
       { icon: Shield, text: 'Rollbaserad behörighet' },
       { icon: Headphones, text: 'Extern resurshantering' },
@@ -702,7 +707,8 @@ function PricingSection() {
     'Obegränsat antal uppdrag',
     'iOS, Android & webb (PWA)',
     'Tidrapportering & export',
-    'Fortnox-export',
+    'OB-tillägg & traktamente',
+    'Fakturaunderlag / Fortnox-export',
     'Support på svenska',
     'Alla framtida uppdateringar',
     'Ingen bindningstid',
@@ -839,7 +845,8 @@ const faqs = [
   { q: 'Hur lång tid tar det att komma igång?', a: 'Under 5 minuter. Registrera, betala, bjud in förare, kör.' },
   { q: 'Behöver mina förare ladda ner en app?', a: 'Nej. PWA — fungerar direkt i mobilens webbläsare. Lägg till på hemskärmen som en vanlig app.' },
   { q: 'Kan jag avsluta när jag vill?', a: 'Ja. Ingen bindningstid. Månadsvis betalning.' },
-  { q: 'Fungerar det med Fortnox?', a: 'Ja. Exportera tidrapporter med ett klick.' },
+  { q: 'Fungerar det med Fortnox?', a: 'Ja. Du kan exportera tidrapporter med ett klick, eller välja "Fakturaunderlag" för att generera specifikationer som du enkelt för över till Fortnox.' },
+  { q: 'Hanterar ni OB-tillägg och traktamente?', a: 'Ja. Du konfigurerar OB-scheman (kväll, natt, helg) och traktamentsnivåer under Ekonomi. Beloppen beräknas automatiskt baserat på arbetade timmar.' },
   { q: 'Vad skiljer er från Coredination?', a: 'Enklare, billigare och snabbare. 449 kr/mån fast pris oavsett antal användare. Kom igång på 5 minuter utan att kontakta oss.' },
 ];
 
@@ -890,9 +897,11 @@ function SeoContent() {
             <ul className="list-disc pl-5 space-y-1">
               <li><strong>Jobbdispatch i realtid</strong> — skapa uppdrag och tilldela till förare. Notifiering direkt i mobilen.</li>
               <li><strong>Digital tidrapportering</strong> — förare stämplar in och ut per uppdrag. Timmar beräknas automatiskt.</li>
+              <li><strong>OB-tillägg och traktamente</strong> — konfigurera scheman för kväll, natt och helg samt traktamentsnivåer baserat på arbetade timmar.</li>
               <li><strong>GPS-spårning och live-karta</strong> — se var dina fordon och förare befinner sig just nu.</li>
               <li><strong>Kundregister med prislistor</strong> — hantera kunder, kontaktpersoner och individuella priser.</li>
-              <li><strong>Fakturering</strong> — skapa fakturor direkt från slutförda uppdrag med anpassningsbara mallar.</li>
+              <li><strong>Fakturering och fakturaunderlag</strong> — skapa fullständiga fakturor eller fakturaunderlag anpassat för Fortnox-användare.</li>
+              <li><strong>Förarinställningar</strong> — styr vad förare ser i appen: dölj timmar, visa/dölj funktioner, per förare eller globalt.</li>
               <li><strong>Fortnox-export</strong> — exportera tidrapporter och bokföringsunderlag med ett klick.</li>
               <li><strong>Mobilapp utan installation</strong> — en PWA som fungerar direkt i webbläsaren, utan app-butik.</li>
               <li><strong>Obegränsat antal förare och admins</strong> — inga extra kostnader oavsett teamstorlek.</li>
