@@ -23,6 +23,10 @@ export function usePlatformAdmin() {
       .then(({ data }) => {
         setIsPlatformAdmin(!!data);
         setLoading(false);
+      })
+      .catch(() => {
+        setIsPlatformAdmin(false);
+        setLoading(false);
       });
   }, [user, authLoading]);
 
