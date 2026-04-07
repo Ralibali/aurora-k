@@ -603,7 +603,7 @@ export default function AdminReports() {
                 <p className="text-sm font-medium text-muted-foreground">Inga rapporterade timmar denna månad</p>
               </div>
             ) : (
-              <div className="bg-card rounded-lg border border-border shadow-card overflow-x-auto -mx-4 sm:mx-0">
+              <ScrollableTable className="bg-card rounded-lg border border-border shadow-card -mx-4 sm:mx-0">
                 <Table>
                   <TableHeader>
                     <TableRow>
