@@ -523,22 +523,22 @@ export default function AdminReports() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="sticky left-0 bg-secondary z-10 min-w-[160px] border-r border-border">Chaufför</TableHead>
+                      <TableHead className="sticky left-0 bg-secondary z-10 min-w-[160px] border-r border-border whitespace-nowrap">Chaufför</TableHead>
                       {DAY_LABELS.map((d, i) => (
-                        <TableHead key={d} className="text-center min-w-[70px]">
+                        <TableHead key={d} className="text-center min-w-[70px] whitespace-nowrap">
                           <div>{d}</div>
                           <div className="text-[10px] font-normal text-muted-foreground">
                             {format(weekDays[i], 'd/M')}
                           </div>
                         </TableHead>
                       ))}
-                      <TableHead className="text-center font-bold min-w-[80px]">Totalt</TableHead>
+                      <TableHead className="text-center font-bold min-w-[80px] whitespace-nowrap">Totalt</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {weekGrid.map(row => (
                       <TableRow key={row.driver.id}>
-                        <TableCell className="sticky left-0 bg-card z-10 border-r border-border">
+                        <TableCell className="sticky left-0 bg-card z-10 border-r border-border whitespace-nowrap">
                           <div className="flex items-center gap-2">
                             <div className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-white text-[9px] sm:text-[10px] font-bold shrink-0 ${avatarColor(row.driver.full_name)}`}>
                               {getInitials(row.driver.full_name)}
@@ -547,7 +547,7 @@ export default function AdminReports() {
                           </div>
                         </TableCell>
                         {row.dayCells.map((cell, i) => (
-                          <TableCell key={i} className="text-center">
+                          <TableCell key={i} className="text-center whitespace-nowrap">
                             {cell.hours > 0 ? (
                               <Tooltip>
                                 <TooltipTrigger asChild>
@@ -566,19 +566,19 @@ export default function AdminReports() {
                             )}
                           </TableCell>
                         ))}
-                        <TableCell className="text-center">
+                        <TableCell className="text-center whitespace-nowrap">
                           <span className="font-mono font-semibold text-sm">{row.total.toFixed(1)}h</span>
                         </TableCell>
                       </TableRow>
                     ))}
                     <TableRow className="bg-secondary/50 font-semibold">
-                      <TableCell className="sticky left-0 bg-secondary/50 z-10 text-sm border-r border-border">Totalt</TableCell>
+                      <TableCell className="sticky left-0 bg-secondary/50 z-10 text-sm border-r border-border whitespace-nowrap">Totalt</TableCell>
                       {dailyTotals.map((t, i) => (
-                        <TableCell key={i} className="text-center">
+                        <TableCell key={i} className="text-center whitespace-nowrap">
                           {t > 0 ? <span className="font-mono text-xs">{t.toFixed(1)}h</span> : <span className="text-slate-300">–</span>}
                         </TableCell>
                       ))}
-                      <TableCell className="text-center">
+                      <TableCell className="text-center whitespace-nowrap">
                         <span className="font-mono font-bold text-sm text-primary">{grandTotal.toFixed(1)}h</span>
                       </TableCell>
                     </TableRow>
@@ -606,51 +606,51 @@ export default function AdminReports() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="sticky left-0 bg-secondary z-10 min-w-[100px] border-r border-border">Vecka</TableHead>
-                      <TableHead className="min-w-[140px]">Period</TableHead>
-                      <TableHead className="text-right min-w-[80px]">Timmar</TableHead>
-                      <TableHead className="text-right min-w-[80px]">Uppdrag</TableHead>
-                      <TableHead className="text-right min-w-[90px]">Grundlön</TableHead>
-                      <TableHead className="text-right min-w-[80px]">OB</TableHead>
-                      <TableHead className="text-right min-w-[80px]">Trakt.</TableHead>
-                      <TableHead className="text-right font-bold min-w-[90px]">Totalt</TableHead>
+                      <TableHead className="sticky left-0 bg-secondary z-10 min-w-[100px] border-r border-border whitespace-nowrap">Vecka</TableHead>
+                      <TableHead className="min-w-[140px] whitespace-nowrap">Period</TableHead>
+                      <TableHead className="text-right min-w-[80px] whitespace-nowrap">Timmar</TableHead>
+                      <TableHead className="text-right min-w-[80px] whitespace-nowrap">Uppdrag</TableHead>
+                      <TableHead className="text-right min-w-[90px] whitespace-nowrap">Grundlön</TableHead>
+                      <TableHead className="text-right min-w-[80px] whitespace-nowrap">OB</TableHead>
+                      <TableHead className="text-right min-w-[80px] whitespace-nowrap">Trakt.</TableHead>
+                      <TableHead className="text-right font-bold min-w-[90px] whitespace-nowrap">Totalt</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {monthWeekBreakdown.map(w => (
                       <TableRow key={w.weekNumber}>
-                        <TableCell className="sticky left-0 bg-card z-10 font-medium border-r border-border">V{w.weekNumber}</TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
+                        <TableCell className="sticky left-0 bg-card z-10 font-medium border-r border-border whitespace-nowrap">V{w.weekNumber}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                           {format(w.start, 'd MMM', { locale: sv })} – {format(w.end, 'd MMM', { locale: sv })}
                         </TableCell>
-                        <TableCell className="text-right font-mono text-sm">{w.totalH.toFixed(1)}h</TableCell>
-                        <TableCell className="text-right font-mono text-sm">{w.assignmentCount}</TableCell>
-                        <TableCell className="text-right font-mono text-sm">{(w.summary?.totalGross ?? 0).toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr</TableCell>
-                        <TableCell className="text-right font-mono text-sm">{(w.summary?.totalOb ?? 0) > 0 ? `${(w.summary?.totalOb ?? 0).toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr` : '–'}</TableCell>
-                        <TableCell className="text-right font-mono text-sm">{(w.summary?.totalPerDiem ?? 0) > 0 ? `${(w.summary?.totalPerDiem ?? 0).toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr` : '–'}</TableCell>
-                        <TableCell className="text-right font-mono text-sm font-semibold">{(w.summary?.grandTotal ?? 0).toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr</TableCell>
+                        <TableCell className="text-right font-mono text-sm whitespace-nowrap">{w.totalH.toFixed(1)}h</TableCell>
+                        <TableCell className="text-right font-mono text-sm whitespace-nowrap">{w.assignmentCount}</TableCell>
+                        <TableCell className="text-right font-mono text-sm whitespace-nowrap">{(w.summary?.totalGross ?? 0).toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr</TableCell>
+                        <TableCell className="text-right font-mono text-sm whitespace-nowrap">{(w.summary?.totalOb ?? 0) > 0 ? `${(w.summary?.totalOb ?? 0).toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr` : '–'}</TableCell>
+                        <TableCell className="text-right font-mono text-sm whitespace-nowrap">{(w.summary?.totalPerDiem ?? 0) > 0 ? `${(w.summary?.totalPerDiem ?? 0).toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr` : '–'}</TableCell>
+                        <TableCell className="text-right font-mono text-sm font-semibold whitespace-nowrap">{(w.summary?.grandTotal ?? 0).toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr</TableCell>
                       </TableRow>
                     ))}
                     {/* Month totals row */}
                     <TableRow className="bg-secondary/50 font-semibold">
-                      <TableCell className="sticky left-0 bg-secondary/50 z-10 border-r border-border">Totalt</TableCell>
+                      <TableCell className="sticky left-0 bg-secondary/50 z-10 border-r border-border whitespace-nowrap">Totalt</TableCell>
                       <TableCell></TableCell>
-                      <TableCell className="text-right font-mono text-sm">
+                      <TableCell className="text-right font-mono text-sm whitespace-nowrap">
                         {monthWeekBreakdown.reduce((s, w) => s + w.totalH, 0).toFixed(1)}h
                       </TableCell>
-                      <TableCell className="text-right font-mono text-sm">
+                      <TableCell className="text-right font-mono text-sm whitespace-nowrap">
                         {monthWeekBreakdown.reduce((s, w) => s + w.assignmentCount, 0)}
                       </TableCell>
-                      <TableCell className="text-right font-mono text-sm">
+                      <TableCell className="text-right font-mono text-sm whitespace-nowrap">
                         {(monthlySalarySummary?.totalGross ?? 0).toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr
                       </TableCell>
-                      <TableCell className="text-right font-mono text-sm">
+                      <TableCell className="text-right font-mono text-sm whitespace-nowrap">
                         {(monthlySalarySummary?.totalOb ?? 0).toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr
                       </TableCell>
-                      <TableCell className="text-right font-mono text-sm">
+                      <TableCell className="text-right font-mono text-sm whitespace-nowrap">
                         {(monthlySalarySummary?.totalPerDiem ?? 0).toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr
                       </TableCell>
-                      <TableCell className="text-right font-mono text-sm font-bold text-primary">
+                      <TableCell className="text-right font-mono text-sm font-bold text-primary whitespace-nowrap">
                         {(monthlySalarySummary?.grandTotal ?? 0).toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr
                       </TableCell>
                     </TableRow>
@@ -716,7 +716,7 @@ export default function AdminReports() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="sticky left-0 bg-secondary z-10 min-w-[130px] border-r border-border">Chaufför</TableHead>
+                    <TableHead className="sticky left-0 bg-secondary z-10 min-w-[130px] border-r border-border whitespace-nowrap">Chaufför</TableHead>
                     <TableHead className="text-right whitespace-nowrap min-w-[80px]">Grundlön</TableHead>
                     <TableHead className="text-right whitespace-nowrap min-w-[80px]">OB</TableHead>
                     <TableHead className="text-right whitespace-nowrap min-w-[80px]">Trakt.</TableHead>
@@ -726,7 +726,7 @@ export default function AdminReports() {
                 <TableBody>
                   {salarySummary.rows.map(r => (
                     <TableRow key={r.name}>
-                      <TableCell className="sticky left-0 bg-card z-10 border-r border-border">
+                      <TableCell className="sticky left-0 bg-card z-10 border-r border-border whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <div className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-white text-[9px] sm:text-[10px] font-bold shrink-0 ${avatarColor(r.name)}`}>
                             {getInitials(r.name)}
@@ -734,18 +734,18 @@ export default function AdminReports() {
                           <span className="text-xs sm:text-sm font-medium truncate max-w-[80px] sm:max-w-none">{r.name}</span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-right font-mono text-sm">{r.grossPay.toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr</TableCell>
-                      <TableCell className="text-right font-mono text-sm">{r.obTotal > 0 ? `${r.obTotal.toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr` : '–'}</TableCell>
-                      <TableCell className="text-right font-mono text-sm">{r.perDiemTot > 0 ? `${r.perDiemTot.toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr` : '–'}</TableCell>
-                      <TableCell className="text-right font-mono text-sm font-semibold">{r.total.toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr</TableCell>
+                      <TableCell className="text-right font-mono text-sm whitespace-nowrap">{r.grossPay.toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr</TableCell>
+                      <TableCell className="text-right font-mono text-sm whitespace-nowrap">{r.obTotal > 0 ? `${r.obTotal.toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr` : '–'}</TableCell>
+                      <TableCell className="text-right font-mono text-sm whitespace-nowrap">{r.perDiemTot > 0 ? `${r.perDiemTot.toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr` : '–'}</TableCell>
+                      <TableCell className="text-right font-mono text-sm font-semibold whitespace-nowrap">{r.total.toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr</TableCell>
                     </TableRow>
                   ))}
                   <TableRow className="bg-secondary/50 font-semibold">
-                    <TableCell className="sticky left-0 bg-secondary/50 z-10 border-r border-border">Totalt</TableCell>
-                    <TableCell className="text-right font-mono text-sm">{salarySummary.totalGross.toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr</TableCell>
-                    <TableCell className="text-right font-mono text-sm">{salarySummary.totalOb.toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr</TableCell>
-                    <TableCell className="text-right font-mono text-sm">{salarySummary.totalPerDiem.toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr</TableCell>
-                    <TableCell className="text-right font-mono text-sm font-bold text-primary">{salarySummary.grandTotal.toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr</TableCell>
+                    <TableCell className="sticky left-0 bg-secondary/50 z-10 border-r border-border whitespace-nowrap">Totalt</TableCell>
+                    <TableCell className="text-right font-mono text-sm whitespace-nowrap">{salarySummary.totalGross.toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr</TableCell>
+                    <TableCell className="text-right font-mono text-sm whitespace-nowrap">{salarySummary.totalOb.toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr</TableCell>
+                    <TableCell className="text-right font-mono text-sm whitespace-nowrap">{salarySummary.totalPerDiem.toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr</TableCell>
+                    <TableCell className="text-right font-mono text-sm font-bold text-primary whitespace-nowrap">{salarySummary.grandTotal.toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
