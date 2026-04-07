@@ -264,7 +264,7 @@ export default function AdminDashboard() {
 
             {isLoading ? (
               <div className="space-y-2">
-                {[1, 2, 3].map(i => <Skeleton key={i} className="h-[72px] w-full rounded-lg" />)}
+                {[1, 2, 3, 4].map(i => <AssignmentCardSkeleton key={i} />)}
               </div>
             ) : liveJobs.length === 0 ? (
               <div className="bg-card rounded-lg border border-dashed border-border p-10 text-center shadow-card">
