@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useAssignments, useDrivers, useCustomers, useDriverCompensations } from '@/hooks/useData';
+import { useObRates, usePerDiemRates, ObRate, PerDiemRate } from '@/hooks/useNewFeatures';
 import { formatSwedishDate, formatSwedishTime, calculateDecimalHours } from '@/lib/format';
 import { FileText, FileSpreadsheet, Receipt, Banknote, ChevronLeft, ChevronRight, AlertTriangle, Clock } from 'lucide-react';
 import { toast } from 'sonner';
@@ -14,7 +15,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
-import { startOfWeek, endOfWeek, addWeeks, format, getISOWeek, eachDayOfInterval, isSameDay, parseISO } from 'date-fns';
+import { startOfWeek, endOfWeek, addWeeks, format, getISOWeek, eachDayOfInterval, isSameDay, parseISO, getDay } from 'date-fns';
 import { sv } from 'date-fns/locale';
 
 const AVATAR_COLORS = ['bg-blue-600', 'bg-emerald-600', 'bg-violet-600', 'bg-amber-600', 'bg-rose-600', 'bg-cyan-600'];
