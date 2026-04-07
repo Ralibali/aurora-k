@@ -99,6 +99,76 @@ export default function AdminReports() {
   const dailyTotals = weekDays.map((_, i) => weekGrid.reduce((s, row) => s + row.dayCells[i].hours, 0));
   const grandTotal = weekGrid.reduce((s, row) => s + row.total, 0);
 
+  // ── Salary summary for UI display ──
+  const salarySummary = useMemo(() => {
+    if (!weekAssignments.length) return null;
+    const compMap = Object.fromEntries((compensations ?? []).map(c => [c.driver_id, c]));
+    const activeOb = (obRates ?? []).filter(r => r.active);
+    const activePd = (perDiemRates ?? []).filter(r => r.active).sort((a, b) => b.min_hours - a.min_hours);
+    const driverIds = [...new Set(weekAssignments.map(a => a.assigned_driver_id))];
+
+    let totalGross = 0, totalOb = 0, totalPerDiem = 0;
+    const rows = driverIds.map(dId => {
+      const driver = (drivers ?? []).find(d => d.id === dId);
+      const comp = compMap[dId];
+      const dAs = weekAssignments.filter(a => a.assigned_driver_id === dId);
+      const totalH = dAs.reduce((s, a) => s + calculateDecimalHours(a.actual_start!, a.actual_stop!), 0);
+      const count = dAs.length;
+
+      let grossPay = 0;
+      if (comp) {
+        switch (comp.compensation_type) {
+          case 'hourly': grossPay = totalH * Number(comp.hourly_rate); break;
+          case 'per_assignment': grossPay = count * Number(comp.per_assignment_rate); break;
+          case 'monthly': grossPay = Number(comp.monthly_salary); break;
+        }
+      }
+
+      let obTotal = 0;
+      dAs.forEach(a => {
+        const start = parseISO(a.actual_start!);
+        const stop = parseISO(a.actual_stop!);
+        const dow = getDay(start);
+        activeOb.forEach(rate => {
+          const isSat = dow === 6 && rate.applies_to_saturdays;
+          const isSun = dow === 0 && rate.applies_to_sundays;
+          const isWd = dow >= 1 && dow <= 5 && rate.applies_to_weekdays;
+          if (!isSat && !isSun && !isWd) return;
+          const [rSH, rSM] = rate.start_time.split(':').map(Number);
+          const [rEH, rEM] = rate.end_time.split(':').map(Number);
+          const rS = rSH * 60 + rSM, rE = rEH * 60 + rEM;
+          const wS = start.getHours() * 60 + start.getMinutes();
+          const wE = stop.getHours() * 60 + stop.getMinutes();
+          let mins = 0;
+          if (isSat || isSun) { mins = wE - wS; }
+          else if (rS > rE) {
+            if (wE <= rE) mins += wE;
+            if (wS < rE) mins = Math.max(mins, Math.min(wE, rE) - wS);
+            if (wE > rS) mins += wE - Math.max(wS, rS);
+            else if (wS >= rS) mins += wE > wS ? wE - wS : 0;
+          } else {
+            const oS = Math.max(wS, rS), oE = Math.min(wE, rE);
+            if (oE > oS) mins = oE - oS;
+          }
+          if (mins > 0) obTotal += (mins / 60) * Number(rate.rate_per_hour);
+        });
+      });
+
+      let perDiemTot = 0;
+      const dm = new Map<string, number>();
+      dAs.forEach(a => {
+        const dk = format(parseISO(a.actual_start!), 'yyyy-MM-dd');
+        dm.set(dk, (dm.get(dk) ?? 0) + calculateDecimalHours(a.actual_start!, a.actual_stop!));
+      });
+      dm.forEach(h => { const m = activePd.find(r => h >= r.min_hours); if (m) perDiemTot += Number(m.amount); });
+
+      totalGross += grossPay; totalOb += obTotal; totalPerDiem += perDiemTot;
+      return { name: driver?.full_name ?? 'Okänd', grossPay, obTotal, perDiemTot, total: grossPay + obTotal + perDiemTot };
+    });
+
+    return { rows, totalGross, totalOb, totalPerDiem, grandTotal: totalGross + totalOb + totalPerDiem };
+  }, [weekAssignments, compensations, obRates, perDiemRates, drivers]);
+
   // ── Export helpers (kept intact) ──
   const totalHours = allCompleted.reduce((sum, a) => sum + calculateDecimalHours(a.actual_start!, a.actual_stop!), 0);
   const buildRows = (items: typeof allCompleted) =>
