@@ -32,25 +32,42 @@ export default function SubscriptionTab() {
     setLoading(true);
     setError(null);
 
-    const { data, error: companyError } = await supabase
-      .from('companies')
-      .select('subscription_status')
-      .eq('id', companyId)
-      .single();
+    try {
+      const { data, error: companyError } = await supabase
+        .from('companies')
+        .select('subscription_status')
+        .eq('id', companyId)
+        .single();
 
-    if (companyError) {
+      if (companyError) {
+        setError('Kunde inte hämta prenumerationsstatus just nu. Försök igen.');
+        setLoading(false);
+        return;
+      }
+
+      setStatus(data?.subscription_status || 'pending');
+    } catch {
       setError('Kunde inte hämta prenumerationsstatus just nu. Försök igen.');
+    } finally {
       setLoading(false);
-      return;
     }
-
-    setStatus(data?.subscription_status || 'pending');
-    setLoading(false);
   }, [authLoading, companyId]);
 
   useEffect(() => {
     void loadSubscription();
   }, [loadSubscription]);
+
+  // Safety: if auth stays loading for >5s, stop showing spinner
+  useEffect(() => {
+    if (!authLoading) return;
+    const timer = setTimeout(() => {
+      if (loading) {
+        setLoading(false);
+        setError('Autentiseringen tog för lång tid. Försök ladda om sidan.');
+      }
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [authLoading, loading]);
 
   const openPortal = async () => {
     setPortalLoading(true);
