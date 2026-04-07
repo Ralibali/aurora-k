@@ -871,6 +871,7 @@ export type Database = {
           require_signature: boolean
           show_availability_toggle: boolean
           show_time_report: boolean
+          show_total_hours: boolean
           updated_at: string
         }
         Insert: {
@@ -880,6 +881,7 @@ export type Database = {
           require_signature?: boolean
           show_availability_toggle?: boolean
           show_time_report?: boolean
+          show_total_hours?: boolean
           updated_at?: string
         }
         Update: {
@@ -889,6 +891,7 @@ export type Database = {
           require_signature?: boolean
           show_availability_toggle?: boolean
           show_time_report?: boolean
+          show_total_hours?: boolean
           updated_at?: string
         }
         Relationships: [
@@ -910,6 +913,7 @@ export type Database = {
           require_signature: boolean | null
           show_availability_toggle: boolean | null
           show_time_report: boolean | null
+          show_total_hours: boolean | null
           updated_at: string
         }
         Insert: {
@@ -920,6 +924,7 @@ export type Database = {
           require_signature?: boolean | null
           show_availability_toggle?: boolean | null
           show_time_report?: boolean | null
+          show_total_hours?: boolean | null
           updated_at?: string
         }
         Update: {
@@ -930,6 +935,7 @@ export type Database = {
           require_signature?: boolean | null
           show_availability_toggle?: boolean | null
           show_time_report?: boolean | null
+          show_total_hours?: boolean | null
           updated_at?: string
         }
         Relationships: [
@@ -1240,6 +1246,62 @@ export type Database = {
           },
         ]
       }
+      ob_rates: {
+        Row: {
+          active: boolean
+          applies_to_saturdays: boolean
+          applies_to_sundays: boolean
+          applies_to_weekdays: boolean
+          company_id: string | null
+          created_at: string
+          end_time: string
+          id: string
+          name: string
+          rate_per_hour: number
+          start_time: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          applies_to_saturdays?: boolean
+          applies_to_sundays?: boolean
+          applies_to_weekdays?: boolean
+          company_id?: string | null
+          created_at?: string
+          end_time?: string
+          id?: string
+          name: string
+          rate_per_hour?: number
+          start_time?: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          applies_to_saturdays?: boolean
+          applies_to_sundays?: boolean
+          applies_to_weekdays?: boolean
+          company_id?: string | null
+          created_at?: string
+          end_time?: string
+          id?: string
+          name?: string
+          rate_per_hour?: number
+          start_time?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ob_rates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_templates: {
         Row: {
           company_id: string | null
@@ -1325,6 +1387,50 @@ export type Database = {
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      per_diem_rates: {
+        Row: {
+          active: boolean
+          amount: number
+          company_id: string | null
+          created_at: string
+          id: string
+          min_hours: number
+          name: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          amount?: number
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          min_hours?: number
+          name: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          amount?: number
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          min_hours?: number
+          name?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "per_diem_rates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
@@ -1429,6 +1535,7 @@ export type Database = {
           currency_symbol: string
           email: string | null
           id: string
+          invoice_mode: string
           logo_url: string | null
           org_number: string | null
           phone: string | null
@@ -1447,6 +1554,7 @@ export type Database = {
           currency_symbol?: string
           email?: string | null
           id?: string
+          invoice_mode?: string
           logo_url?: string | null
           org_number?: string | null
           phone?: string | null
@@ -1465,6 +1573,7 @@ export type Database = {
           currency_symbol?: string
           email?: string | null
           id?: string
+          invoice_mode?: string
           logo_url?: string | null
           org_number?: string | null
           phone?: string | null
