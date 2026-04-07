@@ -519,11 +519,11 @@ export default function AdminReports() {
                 <p className="text-sm font-medium text-muted-foreground">Inga rapporterade timmar denna vecka</p>
               </div>
             ) : (
-              <div className="bg-card rounded-lg border border-border shadow-card overflow-x-auto">
+              <div className="bg-card rounded-lg border border-border shadow-card overflow-x-auto -mx-4 sm:mx-0">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="sticky left-0 bg-secondary z-10 min-w-[180px]">Chaufför</TableHead>
+                      <TableHead className="sticky left-0 bg-secondary z-10 min-w-[160px] border-r border-border">Chaufför</TableHead>
                       {DAY_LABELS.map((d, i) => (
                         <TableHead key={d} className="text-center min-w-[70px]">
                           <div>{d}</div>
@@ -538,12 +538,12 @@ export default function AdminReports() {
                   <TableBody>
                     {weekGrid.map(row => (
                       <TableRow key={row.driver.id}>
-                        <TableCell className="sticky left-0 bg-card z-10">
+                        <TableCell className="sticky left-0 bg-card z-10 border-r border-border">
                           <div className="flex items-center gap-2">
-                            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0 ${avatarColor(row.driver.full_name)}`}>
+                            <div className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-white text-[9px] sm:text-[10px] font-bold shrink-0 ${avatarColor(row.driver.full_name)}`}>
                               {getInitials(row.driver.full_name)}
                             </div>
-                            <span className="text-sm font-medium truncate">{row.driver.full_name}</span>
+                            <span className="text-xs sm:text-sm font-medium truncate max-w-[90px] sm:max-w-none">{row.driver.full_name}</span>
                           </div>
                         </TableCell>
                         {row.dayCells.map((cell, i) => (
@@ -572,7 +572,7 @@ export default function AdminReports() {
                       </TableRow>
                     ))}
                     <TableRow className="bg-secondary/50 font-semibold">
-                      <TableCell className="sticky left-0 bg-secondary/50 z-10 text-sm">Totalt</TableCell>
+                      <TableCell className="sticky left-0 bg-secondary/50 z-10 text-sm border-r border-border">Totalt</TableCell>
                       {dailyTotals.map((t, i) => (
                         <TableCell key={i} className="text-center">
                           {t > 0 ? <span className="font-mono text-xs">{t.toFixed(1)}h</span> : <span className="text-slate-300">–</span>}
@@ -602,11 +602,11 @@ export default function AdminReports() {
                 <p className="text-sm font-medium text-muted-foreground">Inga rapporterade timmar denna månad</p>
               </div>
             ) : (
-              <div className="bg-card rounded-lg border border-border shadow-card overflow-x-auto">
+              <div className="bg-card rounded-lg border border-border shadow-card overflow-x-auto -mx-4 sm:mx-0">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="min-w-[100px]">Vecka</TableHead>
+                      <TableHead className="sticky left-0 bg-secondary z-10 min-w-[100px] border-r border-border">Vecka</TableHead>
                       <TableHead className="min-w-[140px]">Period</TableHead>
                       <TableHead className="text-right min-w-[80px]">Timmar</TableHead>
                       <TableHead className="text-right min-w-[80px]">Uppdrag</TableHead>
@@ -619,7 +619,7 @@ export default function AdminReports() {
                   <TableBody>
                     {monthWeekBreakdown.map(w => (
                       <TableRow key={w.weekNumber}>
-                        <TableCell className="font-medium">V{w.weekNumber}</TableCell>
+                        <TableCell className="sticky left-0 bg-card z-10 font-medium border-r border-border">V{w.weekNumber}</TableCell>
                         <TableCell className="text-sm text-muted-foreground">
                           {format(w.start, 'd MMM', { locale: sv })} – {format(w.end, 'd MMM', { locale: sv })}
                         </TableCell>
@@ -633,7 +633,8 @@ export default function AdminReports() {
                     ))}
                     {/* Month totals row */}
                     <TableRow className="bg-secondary/50 font-semibold">
-                      <TableCell colSpan={2}>Totalt</TableCell>
+                      <TableCell className="sticky left-0 bg-secondary/50 z-10 border-r border-border">Totalt</TableCell>
+                      <TableCell></TableCell>
                       <TableCell className="text-right font-mono text-sm">
                         {monthWeekBreakdown.reduce((s, w) => s + w.totalH, 0).toFixed(1)}h
                       </TableCell>
@@ -715,7 +716,7 @@ export default function AdminReports() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="sticky left-0 bg-secondary z-10 min-w-[130px]">Chaufför</TableHead>
+                    <TableHead className="sticky left-0 bg-secondary z-10 min-w-[130px] border-r border-border">Chaufför</TableHead>
                     <TableHead className="text-right whitespace-nowrap min-w-[80px]">Grundlön</TableHead>
                     <TableHead className="text-right whitespace-nowrap min-w-[80px]">OB</TableHead>
                     <TableHead className="text-right whitespace-nowrap min-w-[80px]">Trakt.</TableHead>
@@ -725,7 +726,7 @@ export default function AdminReports() {
                 <TableBody>
                   {salarySummary.rows.map(r => (
                     <TableRow key={r.name}>
-                      <TableCell className="sticky left-0 bg-card z-10">
+                      <TableCell className="sticky left-0 bg-card z-10 border-r border-border">
                         <div className="flex items-center gap-2">
                           <div className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-white text-[9px] sm:text-[10px] font-bold shrink-0 ${avatarColor(r.name)}`}>
                             {getInitials(r.name)}
@@ -740,7 +741,7 @@ export default function AdminReports() {
                     </TableRow>
                   ))}
                   <TableRow className="bg-secondary/50 font-semibold">
-                    <TableCell className="sticky left-0 bg-secondary/50 z-10">Totalt</TableCell>
+                    <TableCell className="sticky left-0 bg-secondary/50 z-10 border-r border-border">Totalt</TableCell>
                     <TableCell className="text-right font-mono text-sm">{salarySummary.totalGross.toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr</TableCell>
                     <TableCell className="text-right font-mono text-sm">{salarySummary.totalOb.toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr</TableCell>
                     <TableCell className="text-right font-mono text-sm">{salarySummary.totalPerDiem.toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr</TableCell>
