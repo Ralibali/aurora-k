@@ -523,9 +523,9 @@ export default function AdminReports() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="sticky left-0 bg-secondary z-10 min-w-[160px] border-r border-border">Chaufför</TableHead>
+                      <TableHead className="sticky left-0 bg-secondary z-10 min-w-[160px] border-r border-border whitespace-nowrap">Chaufför</TableHead>
                       {DAY_LABELS.map((d, i) => (
-                        <TableHead key={d} className="text-center min-w-[70px]">
+                        <TableHead key={d} className="text-center min-w-[70px] whitespace-nowrap">
                           <div>{d}</div>
                           <div className="text-[10px] font-normal text-muted-foreground">
                             {format(weekDays[i], 'd/M')}
