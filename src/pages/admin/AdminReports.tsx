@@ -486,6 +486,96 @@ export default function AdminReports() {
             </Table>
           </div>
         )}
+
+        {/* Salary summary with OB & per diem */}
+        {salarySummary && salarySummary.rows.length > 0 && (
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-foreground">Lönesammanfattning</h3>
+            {/* Summary cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <Card>
+                <CardHeader className="pb-2 pt-4 px-4">
+                  <CardTitle className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                    <Banknote className="h-3.5 w-3.5" /> Grundlön
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="px-4 pb-4">
+                  <p className="text-xl font-bold text-foreground">{salarySummary.totalGross.toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2 pt-4 px-4">
+                  <CardTitle className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                    <Moon className="h-3.5 w-3.5" /> OB-tillägg
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="px-4 pb-4">
+                  <p className="text-xl font-bold text-foreground">{salarySummary.totalOb.toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2 pt-4 px-4">
+                  <CardTitle className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                    <Coins className="h-3.5 w-3.5" /> Traktamente
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="px-4 pb-4">
+                  <p className="text-xl font-bold text-foreground">{salarySummary.totalPerDiem.toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr</p>
+                </CardContent>
+              </Card>
+              <Card className="border-primary/20 bg-primary/5">
+                <CardHeader className="pb-2 pt-4 px-4">
+                  <CardTitle className="text-xs font-medium text-primary flex items-center gap-1.5">
+                    Totalt
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="px-4 pb-4">
+                  <p className="text-xl font-bold text-primary">{salarySummary.grandTotal.toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Per-driver breakdown */}
+            <div className="bg-card rounded-lg border border-border shadow-card overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Chaufför</TableHead>
+                    <TableHead className="text-right">Grundlön</TableHead>
+                    <TableHead className="text-right">OB-tillägg</TableHead>
+                    <TableHead className="text-right">Traktamente</TableHead>
+                    <TableHead className="text-right font-bold">Totalt</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {salarySummary.rows.map(r => (
+                    <TableRow key={r.name}>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0 ${avatarColor(r.name)}`}>
+                            {getInitials(r.name)}
+                          </div>
+                          <span className="text-sm font-medium">{r.name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right font-mono text-sm">{r.grossPay.toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr</TableCell>
+                      <TableCell className="text-right font-mono text-sm">{r.obTotal > 0 ? `${r.obTotal.toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr` : '–'}</TableCell>
+                      <TableCell className="text-right font-mono text-sm">{r.perDiemTot > 0 ? `${r.perDiemTot.toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr` : '–'}</TableCell>
+                      <TableCell className="text-right font-mono text-sm font-semibold">{r.total.toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr</TableCell>
+                    </TableRow>
+                  ))}
+                  <TableRow className="bg-secondary/50 font-semibold">
+                    <TableCell>Totalt</TableCell>
+                    <TableCell className="text-right font-mono text-sm">{salarySummary.totalGross.toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr</TableCell>
+                    <TableCell className="text-right font-mono text-sm">{salarySummary.totalOb.toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr</TableCell>
+                    <TableCell className="text-right font-mono text-sm">{salarySummary.totalPerDiem.toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr</TableCell>
+                    <TableCell className="text-right font-mono text-sm font-bold text-primary">{salarySummary.grandTotal.toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        )}
       </div>
     </AdminLayout>
   );
