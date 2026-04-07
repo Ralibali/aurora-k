@@ -43,6 +43,11 @@ export function ScrollableTable({ children, className = '' }: ScrollableTablePro
       <div ref={ref} className="overflow-x-auto">
         {children}
       </div>
+      {canScrollRight && (
+        <p className="text-xs text-muted-foreground text-center mt-1.5 md:hidden animate-pulse">
+          Svep för att se mer →
+        </p>
+      )}
     </div>
   );
 }
