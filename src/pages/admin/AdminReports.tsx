@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useAssignments, useDrivers, useCustomers, useDriverCompensations } from '@/hooks/useData';
+import { useObRates, usePerDiemRates, ObRate, PerDiemRate } from '@/hooks/useNewFeatures';
 import { formatSwedishDate, formatSwedishTime, calculateDecimalHours } from '@/lib/format';
 import { FileText, FileSpreadsheet, Receipt, Banknote, ChevronLeft, ChevronRight, AlertTriangle, Clock } from 'lucide-react';
 import { toast } from 'sonner';
@@ -14,7 +15,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
-import { startOfWeek, endOfWeek, addWeeks, format, getISOWeek, eachDayOfInterval, isSameDay, parseISO } from 'date-fns';
+import { startOfWeek, endOfWeek, addWeeks, format, getISOWeek, eachDayOfInterval, isSameDay, parseISO, getDay } from 'date-fns';
 import { sv } from 'date-fns/locale';
 
 const AVATAR_COLORS = ['bg-blue-600', 'bg-emerald-600', 'bg-violet-600', 'bg-amber-600', 'bg-rose-600', 'bg-cyan-600'];
@@ -38,6 +39,8 @@ export default function AdminReports() {
   const { data: drivers } = useDrivers();
   const { data: customers } = useCustomers();
   const { data: compensations } = useDriverCompensations();
+  const { data: obRates } = useObRates();
+  const { data: perDiemRates } = usePerDiemRates();
 
   // Week range
   const currentMonday = startOfWeek(addWeeks(new Date(), weekOffset), { weekStartsOn: 1 });
@@ -162,6 +165,9 @@ export default function AdminReports() {
 
   const handleSalaryReport = () => {
     const compMap = Object.fromEntries((compensations ?? []).map(c => [c.driver_id, c]));
+    const activeObRates = (obRates ?? []).filter(r => r.active);
+    const activePerDiem = (perDiemRates ?? []).filter(r => r.active).sort((a, b) => b.min_hours - a.min_hours);
+
     const driverIds = [...new Set(weekAssignments.map(a => a.assigned_driver_id))];
     const salaryRows = driverIds.map(dId => {
       const driver = (drivers ?? []).find(d => d.id === dId);
@@ -169,6 +175,8 @@ export default function AdminReports() {
       const driverAssignments = weekAssignments.filter(a => a.assigned_driver_id === dId);
       const totalH = driverAssignments.reduce((sum, a) => sum + calculateDecimalHours(a.actual_start!, a.actual_stop!), 0);
       const count = driverAssignments.length;
+
+      // Base pay
       let grossPay = 0, payType = 'Ej angiven';
       if (comp) {
         switch (comp.compensation_type) {
@@ -177,16 +185,92 @@ export default function AdminReports() {
           case 'monthly': grossPay = Number(comp.monthly_salary); payType = `${Number(comp.monthly_salary).toFixed(0)} kr/mån`; break;
         }
       }
-      return { name: driver?.full_name ?? 'Okänd', type: payType, hours: totalH, assignments: count, grossPay, taxTable: comp?.tax_table ?? '' };
+
+      // OB calculation per assignment
+      let obTotal = 0;
+      driverAssignments.forEach(a => {
+        const start = parseISO(a.actual_start!);
+        const stop = parseISO(a.actual_stop!);
+        const dayOfWeek = getDay(start); // 0=Sun, 6=Sat
+
+        activeObRates.forEach(rate => {
+          const isSat = dayOfWeek === 6 && rate.applies_to_saturdays;
+          const isSun = dayOfWeek === 0 && rate.applies_to_sundays;
+          const isWeekday = dayOfWeek >= 1 && dayOfWeek <= 5 && rate.applies_to_weekdays;
+          if (!isSat && !isSun && !isWeekday) return;
+
+          // Parse rate time window
+          const [rStartH, rStartM] = rate.start_time.split(':').map(Number);
+          const [rEndH, rEndM] = rate.end_time.split(':').map(Number);
+          const rStartMin = rStartH * 60 + rStartM;
+          const rEndMin = rEndH * 60 + rEndM;
+
+          // Work time in minutes from midnight
+          const wStartMin = start.getHours() * 60 + start.getMinutes();
+          const wEndMin = stop.getHours() * 60 + stop.getMinutes();
+
+          let obMinutes = 0;
+          if (isSat || isSun) {
+            // Full day rates — all hours count
+            obMinutes = (wEndMin - wStartMin);
+          } else if (rStartMin > rEndMin) {
+            // Overnight window (e.g. 18:00–06:00)
+            if (wEndMin <= rEndMin) obMinutes += wEndMin;
+            if (wStartMin < rEndMin) obMinutes = Math.max(obMinutes, Math.min(wEndMin, rEndMin) - wStartMin);
+            if (wEndMin > rStartMin) obMinutes += wEndMin - Math.max(wStartMin, rStartMin);
+            else if (wStartMin >= rStartMin) obMinutes += wEndMin > wStartMin ? wEndMin - wStartMin : 0;
+          } else {
+            // Normal window
+            const overlapStart = Math.max(wStartMin, rStartMin);
+            const overlapEnd = Math.min(wEndMin, rEndMin);
+            if (overlapEnd > overlapStart) obMinutes = overlapEnd - overlapStart;
+          }
+
+          if (obMinutes > 0) {
+            obTotal += (obMinutes / 60) * Number(rate.rate_per_hour);
+          }
+        });
+      });
+
+      // Per diem — group by day, check if total hours meet threshold
+      let perDiemTotal = 0;
+      const dayMap = new Map<string, number>();
+      driverAssignments.forEach(a => {
+        const dayKey = format(parseISO(a.actual_start!), 'yyyy-MM-dd');
+        dayMap.set(dayKey, (dayMap.get(dayKey) ?? 0) + calculateDecimalHours(a.actual_start!, a.actual_stop!));
+      });
+      dayMap.forEach(dayHours => {
+        const matching = activePerDiem.find(r => dayHours >= r.min_hours);
+        if (matching) perDiemTotal += Number(matching.amount);
+      });
+
+      const totalPay = grossPay + obTotal + perDiemTotal;
+
+      return {
+        name: driver?.full_name ?? 'Okänd', type: payType, hours: totalH,
+        assignments: count, grossPay, obTotal, perDiemTotal, totalPay,
+        taxTable: comp?.tax_table ?? '',
+      };
     });
+
     const wsData = [
       ['Lönerapport', dateRangeLabel()], [],
-      ['Chaufför', 'Ersättningstyp', 'Timmar', 'Uppdrag', 'Bruttolön (kr)', 'Skattetabell'],
-      ...salaryRows.map(r => [r.name, r.type, r.hours.toFixed(1), r.assignments, r.grossPay.toFixed(0), r.taxTable]),
-      [], ['', '', '', 'Totalt', salaryRows.reduce((s, r) => s + r.grossPay, 0).toFixed(0), ''],
+      ['Chaufför', 'Ersättningstyp', 'Timmar', 'Uppdrag', 'Grundlön (kr)', 'OB-tillägg (kr)', 'Traktamente (kr)', 'Totalt (kr)', 'Skattetabell'],
+      ...salaryRows.map(r => [
+        r.name, r.type, r.hours.toFixed(1), r.assignments,
+        r.grossPay.toFixed(0), r.obTotal.toFixed(0), r.perDiemTotal.toFixed(0),
+        r.totalPay.toFixed(0), r.taxTable,
+      ]),
+      [], ['', '', '', 'Totalt',
+        salaryRows.reduce((s, r) => s + r.grossPay, 0).toFixed(0),
+        salaryRows.reduce((s, r) => s + r.obTotal, 0).toFixed(0),
+        salaryRows.reduce((s, r) => s + r.perDiemTotal, 0).toFixed(0),
+        salaryRows.reduce((s, r) => s + r.totalPay, 0).toFixed(0),
+        '',
+      ],
     ];
     const ws = XLSX.utils.aoa_to_sheet(wsData);
-    ws['!cols'] = [{ wch: 25 }, { wch: 18 }, { wch: 10 }, { wch: 10 }, { wch: 15 }, { wch: 18 }];
+    ws['!cols'] = [{ wch: 25 }, { wch: 18 }, { wch: 10 }, { wch: 10 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 18 }];
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Lönerapport');
     XLSX.writeFile(wb, `lonerapport_v${weekNumber}.xlsx`);
