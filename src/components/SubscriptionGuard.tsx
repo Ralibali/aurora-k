@@ -82,8 +82,8 @@ export function SubscriptionGuard({ children }: { children: React.ReactNode }) {
   // Pending — full overlay
   if (status === 'pending') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-        <div className="bg-white rounded-2xl border shadow-sm p-8 max-w-md text-center">
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <div className="bg-card rounded-2xl border shadow-sm p-8 max-w-md text-center">
           <div className="mx-auto w-14 h-14 rounded-full bg-muted flex items-center justify-center mb-4">
             <Lock className="h-7 w-7 text-muted-foreground" />
           </div>
@@ -102,9 +102,9 @@ export function SubscriptionGuard({ children }: { children: React.ReactNode }) {
   // Cancelled — overlay with reactivation
   if (status === 'cancelled') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-        <div className="bg-white rounded-2xl border shadow-sm p-8 max-w-md text-center">
-          <div className="mx-auto w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mb-4">
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <div className="bg-card rounded-2xl border shadow-sm p-8 max-w-md text-center">
+          <div className="mx-auto w-14 h-14 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
             <XCircle className="h-7 w-7 text-destructive" />
           </div>
           <h2 className="text-lg font-semibold mb-2">Prenumerationen avslutad</h2>
