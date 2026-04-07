@@ -328,8 +328,8 @@ export default function AdminDashboard() {
             <h2 className="text-sm font-semibold text-foreground">Aktivitetsflöde</h2>
 
             {isLoading ? (
-              <div className="space-y-2">
-                {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-10 w-full rounded-lg" />)}
+              <div className="bg-card rounded-lg border border-border shadow-card divide-y divide-border">
+                {[1, 2, 3, 4, 5].map(i => <ActivityItemSkeleton key={i} />)}
               </div>
             ) : activityItems.length === 0 ? (
               <div className="bg-card rounded-lg border border-dashed border-border p-10 text-center shadow-card">
