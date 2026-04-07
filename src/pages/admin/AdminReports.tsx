@@ -713,7 +713,7 @@ export default function AdminReports() {
             </div>
 
             {/* Per-driver breakdown */}
-            <div className="bg-card rounded-lg border border-border shadow-card overflow-x-auto -mx-4 sm:mx-0">
+            <ScrollableTable className="bg-card rounded-lg border border-border shadow-card -mx-4 sm:mx-0">
               <Table>
                 <TableHeader>
                   <TableRow>
