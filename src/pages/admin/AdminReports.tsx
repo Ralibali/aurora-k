@@ -8,7 +8,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useAssignments, useDrivers, useCustomers, useDriverCompensations } from '@/hooks/useData';
 import { useObRates, usePerDiemRates, ObRate, PerDiemRate } from '@/hooks/useNewFeatures';
 import { formatSwedishDate, formatSwedishTime, calculateDecimalHours } from '@/lib/format';
-import { FileText, FileSpreadsheet, Receipt, Banknote, ChevronLeft, ChevronRight, AlertTriangle, Clock } from 'lucide-react';
+import { FileText, FileSpreadsheet, Receipt, Banknote, ChevronLeft, ChevronRight, AlertTriangle, Clock, Moon, Coins } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
