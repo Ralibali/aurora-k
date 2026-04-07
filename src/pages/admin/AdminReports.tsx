@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollableTable } from '@/components/ScrollableTable';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
@@ -519,7 +520,7 @@ export default function AdminReports() {
                 <p className="text-sm font-medium text-muted-foreground">Inga rapporterade timmar denna vecka</p>
               </div>
             ) : (
-              <div className="bg-card rounded-lg border border-border shadow-card overflow-x-auto -mx-4 sm:mx-0">
+              <ScrollableTable className="bg-card rounded-lg border border-border shadow-card -mx-4 sm:mx-0">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -584,7 +585,7 @@ export default function AdminReports() {
                     </TableRow>
                   </TableBody>
                 </Table>
-              </div>
+              </ScrollableTable>
             )}
           </>
         )}
@@ -602,7 +603,7 @@ export default function AdminReports() {
                 <p className="text-sm font-medium text-muted-foreground">Inga rapporterade timmar denna månad</p>
               </div>
             ) : (
-              <div className="bg-card rounded-lg border border-border shadow-card overflow-x-auto -mx-4 sm:mx-0">
+              <ScrollableTable className="bg-card rounded-lg border border-border shadow-card -mx-4 sm:mx-0">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -656,7 +657,7 @@ export default function AdminReports() {
                     </TableRow>
                   </TableBody>
                 </Table>
-              </div>
+              </ScrollableTable>
             )}
           </>
         )}
@@ -712,7 +713,7 @@ export default function AdminReports() {
             </div>
 
             {/* Per-driver breakdown */}
-            <div className="bg-card rounded-lg border border-border shadow-card overflow-x-auto -mx-4 sm:mx-0">
+            <ScrollableTable className="bg-card rounded-lg border border-border shadow-card -mx-4 sm:mx-0">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -749,7 +750,7 @@ export default function AdminReports() {
                   </TableRow>
                 </TableBody>
               </Table>
-            </div>
+            </ScrollableTable>
           </div>
         )}
       </div>
