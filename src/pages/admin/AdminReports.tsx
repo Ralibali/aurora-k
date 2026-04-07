@@ -567,7 +567,7 @@ export default function AdminReports() {
                     </TableRow>
                   ))}
                   <TableRow className="bg-secondary/50 font-semibold">
-                    <TableCell>Totalt</TableCell>
+                    <TableCell className="sticky left-0 bg-secondary/50 z-10">Totalt</TableCell>
                     <TableCell className="text-right font-mono text-sm">{salarySummary.totalGross.toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr</TableCell>
                     <TableCell className="text-right font-mono text-sm">{salarySummary.totalOb.toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr</TableCell>
                     <TableCell className="text-right font-mono text-sm">{salarySummary.totalPerDiem.toLocaleString('sv-SE', { maximumFractionDigits: 0 })} kr</TableCell>
