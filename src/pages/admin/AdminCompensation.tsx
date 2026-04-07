@@ -1,20 +1,39 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AdminLayout } from '@/components/AdminLayout';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import {
-  useObRates, useCreateObRate, useUpdateObRate, useDeleteObRate,
-  usePerDiemRates, useCreatePerDiemRate, useUpdatePerDiemRate, useDeletePerDiemRate,
+  useObRates, useCreateObRate, useDeleteObRate,
+  usePerDiemRates, useCreatePerDiemRate, useDeletePerDiemRate,
 } from '@/hooks/useNewFeatures';
-import { Plus, Moon, Briefcase, Trash2 } from 'lucide-react';
+import { useDrivers, useDriverCompensations, useUpsertDriverCompensation } from '@/hooks/useData';
+import { Plus, Moon, Briefcase, Trash2, Wallet, Save, Users } from 'lucide-react';
+import { toast } from 'sonner';
+
+const COMP_LABELS: Record<string, string> = {
+  hourly: 'Timlön',
+  per_assignment: 'Per uppdrag',
+  monthly: 'Månadslön',
+};
+
+const AVATAR_COLORS = ['bg-blue-600', 'bg-emerald-600', 'bg-violet-600', 'bg-amber-600', 'bg-rose-600', 'bg-cyan-600'];
+function avatarColor(name: string) {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
+  return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
+}
+function getInitials(name: string) {
+  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+}
 
 export default function AdminCompensation() {
   const { data: obRates, isLoading: obLoading } = useObRates();
@@ -67,13 +86,18 @@ export default function AdminCompensation() {
   };
 
   return (
-    <AdminLayout title="OB & Traktamente" description="Hantera OB-tillägg och traktamenten för chaufförer">
-      <div className="max-w-3xl space-y-6">
-        <Tabs defaultValue="ob">
+    <AdminLayout title="Ersättningar" description="Hantera grundlön, OB-tillägg och traktamenten">
+      <div className="max-w-4xl space-y-6">
+        <Tabs defaultValue="base">
           <TabsList className="mb-4">
+            <TabsTrigger value="base" className="gap-1.5"><Wallet className="h-3.5 w-3.5" /> Grundlön</TabsTrigger>
             <TabsTrigger value="ob" className="gap-1.5"><Moon className="h-3.5 w-3.5" /> OB-tillägg</TabsTrigger>
             <TabsTrigger value="perdiem" className="gap-1.5"><Briefcase className="h-3.5 w-3.5" /> Traktamente</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="base">
+            <BasePayTab />
+          </TabsContent>
 
           <TabsContent value="ob" className="space-y-4">
             <div className="flex justify-between items-center">
@@ -248,5 +272,191 @@ export default function AdminCompensation() {
         </Tabs>
       </div>
     </AdminLayout>
+  );
+}
+
+/* ── Base Pay Tab ── */
+function BasePayTab() {
+  const { data: drivers, isLoading: driversLoading } = useDrivers();
+  const { data: compensations, isLoading: compLoading } = useDriverCompensations();
+  const [editingId, setEditingId] = useState<string | null>(null);
+
+  const isLoading = driversLoading || compLoading;
+  const compMap = Object.fromEntries((compensations ?? []).map(c => [c.driver_id, c]));
+
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-muted-foreground">
+        Ställ in ersättningstyp och belopp per chaufför. Dessa uppgifter används för att beräkna grundlön i tidrapporter.
+      </p>
+
+      <Card>
+        <CardContent className="p-0">
+          {isLoading ? (
+            <div className="p-6 space-y-3">{[1,2,3].map(i => <Skeleton key={i} className="h-14 w-full" />)}</div>
+          ) : !drivers?.length ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <Users className="h-10 w-10 mx-auto mb-3 opacity-30" />
+              <p>Inga chaufförer tillagda ännu</p>
+              <p className="text-sm">Bjud in förare under Chaufförer-sidan.</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Chaufför</TableHead>
+                  <TableHead>Ersättningstyp</TableHead>
+                  <TableHead className="text-right">Belopp</TableHead>
+                  <TableHead>Skattetabell</TableHead>
+                  <TableHead className="w-24" />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {drivers.map(driver => {
+                  const comp = compMap[driver.id];
+                  const isEditing = editingId === driver.id;
+
+                  return isEditing ? (
+                    <CompensationEditRow
+                      key={driver.id}
+                      driver={driver}
+                      existing={comp}
+                      onClose={() => setEditingId(null)}
+                    />
+                  ) : (
+                    <TableRow key={driver.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold ${avatarColor(driver.full_name)}`}>
+                            {getInitials(driver.full_name)}
+                          </div>
+                          <div>
+                            <p className="font-medium text-sm">{driver.full_name}</p>
+                            <p className="text-xs text-muted-foreground">{driver.email}</p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {comp ? (
+                          <Badge variant="secondary" className="text-xs">
+                            {COMP_LABELS[comp.compensation_type] ?? comp.compensation_type}
+                          </Badge>
+                        ) : (
+                          <span className="text-xs text-muted-foreground italic">Ej angiven</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right font-mono text-sm">
+                        {comp ? formatCompAmount(comp) : '–'}
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {comp?.tax_table || '–'}
+                      </TableCell>
+                      <TableCell>
+                        <Button variant="outline" size="sm" className="text-xs" onClick={() => setEditingId(driver.id)}>
+                          <Wallet className="h-3.5 w-3.5 mr-1" /> {comp ? 'Redigera' : 'Ange'}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function formatCompAmount(comp: any): string {
+  switch (comp.compensation_type) {
+    case 'hourly': return `${Number(comp.hourly_rate).toFixed(0)} kr/h`;
+    case 'per_assignment': return `${Number(comp.per_assignment_rate).toFixed(0)} kr/uppdrag`;
+    case 'monthly': return `${Number(comp.monthly_salary).toFixed(0)} kr/mån`;
+    default: return '–';
+  }
+}
+
+function CompensationEditRow({ driver, existing, onClose }: { driver: any; existing?: any; onClose: () => void }) {
+  const [compType, setCompType] = useState<'hourly' | 'per_assignment' | 'monthly'>(existing?.compensation_type ?? 'hourly');
+  const [hourlyRate, setHourlyRate] = useState(String(existing?.hourly_rate ?? ''));
+  const [perAssignmentRate, setPerAssignmentRate] = useState(String(existing?.per_assignment_rate ?? ''));
+  const [monthlySalary, setMonthlySalary] = useState(String(existing?.monthly_salary ?? ''));
+  const [taxTable, setTaxTable] = useState(existing?.tax_table ?? '');
+  const upsert = useUpsertDriverCompensation();
+
+  useEffect(() => {
+    if (existing) {
+      setCompType(existing.compensation_type ?? 'hourly');
+      setHourlyRate(String(existing.hourly_rate ?? ''));
+      setPerAssignmentRate(String(existing.per_assignment_rate ?? ''));
+      setMonthlySalary(String(existing.monthly_salary ?? ''));
+      setTaxTable(existing.tax_table ?? '');
+    }
+  }, [existing]);
+
+  const handleSave = () => {
+    upsert.mutate({
+      driver_id: driver.id,
+      compensation_type: compType,
+      hourly_rate: parseFloat(hourlyRate) || 0,
+      per_assignment_rate: parseFloat(perAssignmentRate) || 0,
+      monthly_salary: parseFloat(monthlySalary) || 0,
+      tax_table: taxTable || null,
+    }, {
+      onSuccess: () => { toast.success(`Ersättning sparad för ${driver.full_name}`); onClose(); },
+      onError: (err) => toast.error('Kunde inte spara: ' + err.message),
+    });
+  };
+
+  return (
+    <TableRow className="bg-muted/50">
+      <TableCell>
+        <div className="flex items-center gap-3">
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold ${avatarColor(driver.full_name)}`}>
+            {getInitials(driver.full_name)}
+          </div>
+          <p className="font-medium text-sm">{driver.full_name}</p>
+        </div>
+      </TableCell>
+      <TableCell>
+        <Select value={compType} onValueChange={(v) => setCompType(v as any)}>
+          <SelectTrigger className="h-8 w-[150px] text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="hourly">Timlön (kr/h)</SelectItem>
+            <SelectItem value="per_assignment">Per uppdrag</SelectItem>
+            <SelectItem value="monthly">Månadslön</SelectItem>
+          </SelectContent>
+        </Select>
+      </TableCell>
+      <TableCell>
+        {compType === 'hourly' && (
+          <Input type="number" min="0" step="1" value={hourlyRate} onChange={e => setHourlyRate(e.target.value)}
+            className="h-8 w-[120px] text-right text-sm" placeholder="0" />
+        )}
+        {compType === 'per_assignment' && (
+          <Input type="number" min="0" step="1" value={perAssignmentRate} onChange={e => setPerAssignmentRate(e.target.value)}
+            className="h-8 w-[120px] text-right text-sm" placeholder="0" />
+        )}
+        {compType === 'monthly' && (
+          <Input type="number" min="0" step="100" value={monthlySalary} onChange={e => setMonthlySalary(e.target.value)}
+            className="h-8 w-[120px] text-right text-sm" placeholder="0" />
+        )}
+      </TableCell>
+      <TableCell>
+        <Input value={taxTable} onChange={e => setTaxTable(e.target.value)}
+          className="h-8 w-[120px] text-sm" placeholder="T.ex. Tabell 30" />
+      </TableCell>
+      <TableCell>
+        <div className="flex gap-1">
+          <Button size="sm" className="h-7 text-xs" onClick={handleSave} disabled={upsert.isPending}>
+            <Save className="h-3 w-3 mr-1" /> Spara
+          </Button>
+          <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={onClose}>Avbryt</Button>
+        </div>
+      </TableCell>
+    </TableRow>
   );
 }
