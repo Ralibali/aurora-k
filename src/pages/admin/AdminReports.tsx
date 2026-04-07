@@ -198,8 +198,9 @@ export default function AdminReports() {
 
     return driverList.map(driver => {
       const dayCells = weekDays.map(day => {
+        const dayStr = format(day, 'yyyy-MM-dd');
         const dayAssignments = weekAssignments.filter(a =>
-          a.assigned_driver_id === driver.id && isSameDay(parseISO(a.actual_start!), day)
+          a.assigned_driver_id === driver.id && toUtcDateStr(a.actual_start!) === dayStr
         );
         const hours = dayAssignments.reduce((s, a) => s + calculateDecimalHours(a.actual_start!, a.actual_stop!), 0);
         const times = dayAssignments.map(a => `${formatSwedishTime(a.actual_start!)}–${formatSwedishTime(a.actual_stop!)}`);
