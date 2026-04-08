@@ -1,21 +1,30 @@
+## Plan
 
-## Förbättra mobil-UX för admin
+### 1. Ny databastabell: `leads`
+- Fält: företagsnamn, kontaktperson, e-post, telefon, org.nummer, antal fordon/förare, meddelande, status (new/contacted/converted/rejected), created_at
+- RLS: Anonym kan skapa leads, plattformsadmins kan läsa/uppdatera alla
 
-Kunden upplever att appen är krånglig på mobilen. Här är konkreta förbättringar inom de tre problemområdena:
+### 2. Intresseformulär-komponent
+- Återanvändbar komponent med alla fält
+- Sparar till `leads`-tabellen
+- Visas på:
+  - Ny sida `/kontakt`
+  - Inbäddad sektion på landningssidan
+  - Modal via CTA-knappar (ersätter nuvarande "Kom igång gratis"-knappar)
 
-### 1. Navigering – Enklare att hitta rätt
-- **Förbättra MobileTabBar** med tydligare ikoner och labels som matchar huvudfunktionerna
-- **Lägga till en snabbsökfunktion** (sökfält högst upp på dashboarden) som filtrerar uppdrag, kunder och förare
-- **Brödsmulestig** (breadcrumbs) på detaljsidor så man ser var man är och enkelt kan gå tillbaka
+### 3. Ta bort självregistrering
+- Ta bort `/register`-rutten och sidan
+- Uppdatera alla CTA-knappar som pekar på `/register` → öppna intressemodal eller länka till `/kontakt` istället
 
-### 2. Dashboard – Tydligare överblick  
-- **Förenkla dashboarden** – visa max 3-4 nyckeltal (KPI-kort) högst upp istället för för mycket info
-- **Snabbåtgärder** – tydliga knappar för vanligaste handlingarna (nytt uppdrag, se dagens schema)
-- **Bättre kortdesign** – större touch-targets, tydligare statusfärger och mer luft
+### 4. Leads-hantering i plattformsadmin
+- Ny flik/sida under `/platform` → "Leads"
+- Lista alla intresseanmälningar med status, filtrering och sortering
+- Möjlighet att markera som kontaktad/konverterad
+- Knapp "Skapa företag & skicka inbjudan" som:
+  - Skapar företaget i `companies`
+  - Genererar en inbjudningslänk
+  - Skickar välkomstmail med inbjudningslänken
 
-### 3. Inställningar – Mindre överväldigande
-- **Visa inställningar som en lista med undersidor** istället för flikar (bättre på mobil)
-- **Dölja avancerade inställningar** bakom en "Visa mer"-knapp
-- **Tydligare sektionsrubriker** och korta förklaringar
-
-Ska jag börja med alla tre eller fokusera på ett område först?
+### 5. E-postinbjudan till nya företag
+- Återanvänd befintlig inbjudningslogik (edge function) för att skicka en registreringslänk
+- Kunden registrerar sig via länken och kopplas automatiskt till sitt företag
