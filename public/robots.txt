@@ -1,16 +1,11 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /driver
+Disallow: /platform
+Disallow: /onboarding
+Disallow: /portal
+Disallow: /reset-password
+Disallow: /forgot-password
 
 Sitemap: https://auroratransport.se/sitemap.xml
