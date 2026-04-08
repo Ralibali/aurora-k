@@ -74,6 +74,9 @@ const BudtjanstAppPage = lazy(() => import("./pages/BudtjanstAppPage"));
 const AkeriSystemPage = lazy(() => import("./pages/AkeriSystemPage"));
 const DispatchSystemPage = lazy(() => import("./pages/DispatchSystemPage"));
 const AdsBudtjanstPage = lazy(() => import("./pages/AdsBudtjanstPage"));
+const AdsAkeriPage = lazy(() => import("./pages/AdsAkeriPage"));
+const AdsTransportPage = lazy(() => import("./pages/AdsTransportPage"));
+const AdsFlottaPage = lazy(() => import("./pages/AdsFlottaPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -117,6 +120,9 @@ const App = () => (
                 <Route path="/akeri-system" element={<AkeriSystemPage />} />
                 <Route path="/dispatch-system" element={<DispatchSystemPage />} />
                 <Route path="/ads/budtjanst" element={<AdsBudtjanstPage />} />
+                <Route path="/ads/akeri" element={<AdsAkeriPage />} />
+                <Route path="/ads/transport" element={<AdsTransportPage />} />
+                <Route path="/ads/flotta" element={<AdsFlottaPage />} />
 
                 {/* Admin routes — share a single sidebar shell */}
                 <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><SubscriptionGuard><AdminShell /></SubscriptionGuard></ProtectedRoute>}>
