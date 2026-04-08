@@ -16,8 +16,8 @@ interface InviteRow {
   name: string;
   email: string;
 }
-
-usePageMeta({ title: 'Onboarding | Aurora Transport', description: '', canonical: 'https://auroratransport.se/onboarding', noindex: true });
+export default function OnboardingPage() {
+  usePageMeta({ title: 'Onboarding | Aurora Transport', description: '', canonical: 'https://auroratransport.se/onboarding', noindex: true });
   const navigate = useNavigate();
   const { user, companyId } = useAuth();
   const [step, setStep] = useState(() => {
