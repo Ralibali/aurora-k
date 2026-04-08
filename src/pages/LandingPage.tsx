@@ -29,6 +29,7 @@ const fadeUp = {
 
 export default function LandingPage() {
   const { user, role, isPlatformAdmin } = useAuth();
+
   const { setTheme, theme } = useTheme();
   const navigate = useNavigate();
   const [demoLoading, setDemoLoading] = useState(false);
