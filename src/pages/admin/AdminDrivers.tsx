@@ -314,38 +314,6 @@ export default function AdminDrivers() {
   const { data: assignments } = useAssignments();
   const { data: compensations } = useDriverCompensations();
   const qc = useQueryClient();
-      if (!companyId) return null;
-      const { data } = await supabase.from('companies').select('name').eq('id', companyId).single();
-      return data;
-    },
-    enabled: !!companyId,
-  });
-  const { data: adminProfile } = useQuery({
-    queryKey: ['admin-profile', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return null;
-      const { data } = await supabase.from('profiles').select('full_name').eq('id', user.id).single();
-      return data;
-    },
-    enabled: !!user?.id,
-  });
-  const companyName = companyData?.name || 'Ditt företag';
-  const adminName = adminProfile?.full_name || 'Admin';
-
-  // Fetch pending invitations
-  const { data: invitations } = useQuery({
-    queryKey: ['invitations', companyId],
-    queryFn: async () => {
-      if (!companyId) return [];
-      const { data } = await supabase
-        .from('invitations')
-        .select('*')
-        .eq('company_id', companyId)
-        .order('created_at', { ascending: false });
-      return data ?? [];
-    },
-    enabled: !!companyId,
-  });
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -379,11 +347,6 @@ export default function AdminDrivers() {
 
   const getCompensation = (driverId: string) => (compensations ?? []).find(c => c.driver_id === driverId);
 
-  const copyInviteLink = (token: string) => {
-    navigator.clipboard.writeText(`${window.location.origin}/join?token=${token}`);
-    toast.success('Länk kopierad!');
-  };
-
   return (
     <AdminLayout title="Chaufförer" description="Hantera chaufförer och deras tillgänglighet">
       <div className="space-y-6">
@@ -396,7 +359,7 @@ export default function AdminDrivers() {
               <Input placeholder="Sök chaufför..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 w-[200px]" />
             </div>
             {companyId ? (
-              <InviteModal companyId={companyId} companyName={companyName} adminName={adminName} />
+              <CreateDriverModal companyId={companyId} />
             ) : (
               <Button disabled><Plus className="h-4 w-4 mr-1" /> Bjud in förare</Button>
             )}
