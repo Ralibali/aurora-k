@@ -209,31 +209,41 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* KPI cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Mobile quick actions */}
+        <div className="flex gap-2 md:hidden">
+          <Button size="sm" className="flex-1" asChild>
+            <Link to="/admin/assignments/new"><Plus className="h-4 w-4 mr-1.5" /> Nytt uppdrag</Link>
+          </Button>
+          <Button variant="outline" size="sm" className="flex-1" asChild>
+            <Link to="/admin/calendar"><Clock className="h-4 w-4 mr-1.5" /> Dagens schema</Link>
+          </Button>
+        </div>
+
+        {/* KPI cards — 2 on mobile, 4 on desktop */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           <KpiCard
             icon={Briefcase}
             value={activeCount}
             label="Aktiva uppdrag"
-            trend={`↑ ${todayAssignments.length} totalt idag`}
-            iconBg="bg-blue-50"
-            iconColor="text-blue-600"
+            trend={`${todayAssignments.length} totalt idag`}
+            iconBg="bg-primary/10"
+            iconColor="text-primary"
             isLoading={isLoading}
           />
           <KpiCard
             icon={Users}
             value={availableDrivers}
-            label="Tillgängliga chaufförer"
+            label="Tillgängliga"
             trend={`${(drivers ?? []).length} registrerade`}
-            iconBg="bg-green-50"
+            iconBg="bg-green-500/10"
             iconColor="text-green-600"
             isLoading={isLoading}
           />
           <KpiCard
             icon={Truck}
             value={activeRunning}
-            label="Pågående körningar"
-            iconBg="bg-amber-50"
+            label="Pågående"
+            iconBg="bg-amber-500/10"
             iconColor="text-amber-600"
             isLoading={isLoading}
           />
@@ -241,8 +251,8 @@ export default function AdminDashboard() {
             icon={AlertCircle}
             value={notReported}
             label="Ej tidrapporterade"
-            iconBg="bg-red-50"
-            iconColor="text-red-600"
+            iconBg="bg-destructive/10"
+            iconColor="text-destructive"
             isLoading={isLoading}
           />
         </div>
@@ -257,7 +267,7 @@ export default function AdminDashboard() {
                 <Button variant="ghost" size="sm" asChild>
                   <Link to="/admin/assignments">Visa alla <ArrowRight className="h-3.5 w-3.5 ml-1" /></Link>
                 </Button>
-                <Button size="sm" asChild>
+                <Button size="sm" className="hidden md:inline-flex" asChild>
                   <Link to="/admin/assignments/new"><Plus className="h-3.5 w-3.5 mr-1" /> Nytt</Link>
                 </Button>
               </div>
@@ -269,7 +279,7 @@ export default function AdminDashboard() {
               </div>
             ) : liveJobs.length === 0 ? (
               <div className="bg-card rounded-lg border border-dashed border-border p-10 text-center shadow-card">
-                <Inbox className="h-12 w-12 text-slate-200 mx-auto mb-3" />
+                <Inbox className="h-12 w-12 text-muted-foreground/20 mx-auto mb-3" />
                 <p className="text-sm font-medium text-muted-foreground">Inga uppdrag idag</p>
                 <p className="text-xs text-muted-foreground/60 mt-1">Skapa ett uppdrag för att komma igång</p>
                 <Button size="sm" className="mt-4" asChild>
@@ -281,20 +291,19 @@ export default function AdminDashboard() {
                 {liveJobs.map(a => (
                   <StaggeredItem key={a.id}>
                     <Link to={`/admin/assignments/${a.id}`} className="block group">
-                      <div className="flex items-stretch bg-card rounded-lg border border-border hover:border-blue-200 transition-colors duration-100 overflow-hidden shadow-card">
+                      <div className="flex items-stretch bg-card rounded-lg border border-border hover:border-primary/30 transition-colors duration-100 overflow-hidden shadow-card active:bg-muted/50">
                         <div className={`w-1 shrink-0 ${statusBarColor(a.status)}`} />
                         <div className="flex items-center gap-3 px-4 py-3 flex-1 min-w-0">
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
-                              <span className="font-mono text-[11px] text-muted-foreground">{a.id.slice(0, 6).toUpperCase()}</span>
                               <span className="text-sm font-semibold text-foreground truncate">{a.customer?.name}</span>
                               {a.priority !== 'normal' && <PriorityBadge priority={a.priority} />}
                             </div>
                             <div className="flex items-center gap-3 mt-1">
                               {a.driver && (
                                 <div className="flex items-center gap-1.5">
-                                  <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center">
-                                    <span className="text-[9px] font-bold text-blue-700">
+                                  <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
+                                    <span className="text-[9px] font-bold text-primary">
                                       {a.driver.full_name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
                                     </span>
                                   </div>
@@ -311,7 +320,7 @@ export default function AdminDashboard() {
                             </div>
                           </div>
                           <StatusBadge status={a.status} />
-                          <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-slate-500 transition-colors shrink-0" />
+                          <ChevronRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors shrink-0" />
                         </div>
                       </div>
                     </Link>
@@ -331,7 +340,7 @@ export default function AdminDashboard() {
               </div>
             ) : activityItems.length === 0 ? (
               <div className="bg-card rounded-lg border border-dashed border-border p-10 text-center shadow-card">
-                <Clock className="h-12 w-12 text-slate-200 mx-auto mb-3" />
+                <Clock className="h-12 w-12 text-muted-foreground/20 mx-auto mb-3" />
                 <p className="text-sm font-medium text-muted-foreground">Ingen aktivitet ännu idag</p>
               </div>
             ) : (
