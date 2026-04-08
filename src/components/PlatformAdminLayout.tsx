@@ -2,7 +2,7 @@ import { ReactNode, Suspense } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { PageTransition } from '@/components/PageTransition';
 import {
-  LayoutDashboard, Building2, HeadphonesIcon, Megaphone, LogOut, Truck,
+  LayoutDashboard, Building2, HeadphonesIcon, Megaphone, LogOut, Truck, TrendingUp,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
