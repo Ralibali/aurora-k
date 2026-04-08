@@ -30,16 +30,21 @@ export function MobileTabBar() {
     return location.pathname.startsWith(tab.to);
   };
 
+  // Only show FAB on pages where "new assignment" makes sense
+  const showFab = location.pathname === '/admin' || location.pathname.startsWith('/admin/assignments');
+
   return (
     <>
-      {/* Floating Action Button */}
-      <button
-        onClick={() => navigate('/admin/assignments/new')}
-        className="md:hidden fixed bottom-20 right-4 z-50 w-14 h-14 bg-primary rounded-full shadow-lg flex items-center justify-center active:scale-95 transition-transform"
-        aria-label="Nytt uppdrag"
-      >
-        <Plus className="h-6 w-6 text-primary-foreground" />
-      </button>
+      {/* Floating Action Button — only on dashboard/assignments */}
+      {showFab && (
+        <button
+          onClick={() => navigate('/admin/assignments/new')}
+          className="md:hidden fixed bottom-20 right-4 z-50 w-14 h-14 bg-primary rounded-full shadow-lg flex items-center justify-center active:scale-95 transition-transform"
+          aria-label="Nytt uppdrag"
+        >
+          <Plus className="h-6 w-6 text-primary-foreground" />
+        </button>
+      )}
 
       {/* Bottom Tab Bar */}
       <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-card border-t border-border h-16 flex items-center justify-around pb-safe">
