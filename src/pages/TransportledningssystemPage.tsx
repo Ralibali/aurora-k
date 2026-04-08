@@ -14,7 +14,7 @@ const fadeUp = {
 
 export default function TransportledningssystemPage() {
   usePageMeta({
-    title: 'Transportledningssystem för små och medelstora företag | Aurora Transport',
+    title: 'Transportledningssystem för SMF | Aurora Transport',
     description: 'Enkelt transportledningssystem som samlar uppdrag, förare och tidrapporter. Kom igång samma dag. 449 kr/mån.',
     canonical: 'https://auroratransport.se/transportledningssystem',
   });
@@ -35,6 +35,21 @@ export default function TransportledningssystemPage() {
       <FaqSection />
       <FinalCta />
       <Footer />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'SoftwareApplication',
+            name: 'Aurora Transport',
+            applicationCategory: 'BusinessApplication',
+            operatingSystem: 'Web',
+            description: 'Transportledningssystem för små och medelstora företag. Samlar uppdrag, förare och tidrapporter.',
+            offers: { '@type': 'Offer', price: '449', priceCurrency: 'SEK' },
+          }),
+        }}
+      />
     </div>
   );
 }
@@ -252,6 +267,7 @@ function FaqSection() {
             </AccordionItem>
           ))}
         </Accordion>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faqs.map(f => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) }) }} />
       </div>
     </section>
   );

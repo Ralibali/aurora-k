@@ -43,7 +43,7 @@ export default function AdsBudtjanstPage() {
   const [demoLoading, setDemoLoading] = useState(false);
 
   usePageMeta({
-    title: 'Budtjänst-app — Dispatch & spårning i realtid | Aurora Transport',
+    title: 'Budtjänst-app — Dispatch & realtidsspårning | Aurora',
     description: 'Hantera bud, leveranser och förare digitalt. Realtidsspårning, kvittens med foto & signatur, och automatisk tidrapportering. 449 kr/mån.',
     canonical: 'https://auroratransport.se/ads/budtjanst',
   });

@@ -14,7 +14,7 @@ const fadeUp = {
 
 export default function BudtjanstAppPage() {
   usePageMeta({
-    title: 'App för budtjänst och bud — hantera uppdrag digitalt | Aurora Transport',
+    title: 'Budtjänst-app — hantera uppdrag digitalt | Aurora',
     description: 'Perfekt app för budbilar och budföretag. Tilldela uppdrag, spåra förare och få signerade leveranskvitton. 449 kr/mån.',
     canonical: 'https://auroratransport.se/budtjanst-app',
   });

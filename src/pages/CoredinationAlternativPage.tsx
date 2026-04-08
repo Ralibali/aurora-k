@@ -14,7 +14,7 @@ const fadeUp = {
 
 export default function CoredinationAlternativPage() {
   usePageMeta({
-    title: 'Coredination alternativ — enklare och billigare | Aurora Transport',
+    title: 'Coredination-alternativ — enklare | Aurora Transport',
     description: 'Letar du efter alternativ till Coredination? Fast pris 449 kr/mån, obegränsat antal användare. Kom igång på 5 min.',
     canonical: 'https://auroratransport.se/coredination-alternativ',
   });
@@ -34,6 +34,21 @@ export default function CoredinationAlternativPage() {
       <FaqSection />
       <FinalCta />
       <Footer />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'SoftwareApplication',
+            name: 'Aurora Transport',
+            applicationCategory: 'BusinessApplication',
+            operatingSystem: 'Web',
+            description: 'Alternativ till Coredination. Enklare, billigare transportledningssystem med fast pris.',
+            offers: { '@type': 'Offer', price: '449', priceCurrency: 'SEK' },
+          }),
+        }}
+      />
     </div>
   );
 }
@@ -241,6 +256,7 @@ function FaqSection() {
             </AccordionItem>
           ))}
         </Accordion>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faqs.map(f => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) }) }} />
       </div>
     </section>
   );
