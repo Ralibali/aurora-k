@@ -35,7 +35,7 @@ export default function AboutPage() {
     if (theme !== 'light') setTheme('light');
   }, [theme, setTheme]);
   usePageMeta({
-    title: 'Om oss – Aurora Transport | Transportledningssystem',
+    title: 'Om Aurora Transport — Svenskt transportledningssystem',
     description: 'Aurora Transport utvecklas av Aurora Media AB (559272-0220). Läs om företaget, vår vision och varför vi bygger Sveriges smartaste transportledningssystem.',
     canonical: 'https://auroratransport.se/om-oss',
   });
