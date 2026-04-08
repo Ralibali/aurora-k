@@ -17,12 +17,6 @@ import { motion } from 'framer-motion';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -35,6 +29,9 @@ const fadeUp = {
 export default function LandingPage() {
   const { user, role } = useAuth();
   const { setTheme, theme } = useTheme();
+  const navigate = useNavigate();
+  const [demoLoading, setDemoLoading] = useState(false);
+  const [showStickyBar, setShowStickyBar] = useState(false);
 
   useBreadcrumbJsonLd(useMemo(() => [
     { name: 'Hem', url: 'https://auroratransport.se/' },
@@ -49,6 +46,36 @@ export default function LandingPage() {
   useEffect(() => {
     if (theme !== 'light') setTheme('light');
   }, [theme, setTheme]);
+
+  // Scroll tracking for sticky CTA
+  useEffect(() => {
+    const fn = () => setShowStickyBar(window.scrollY > 500);
+    window.addEventListener('scroll', fn, { passive: true });
+    return () => window.removeEventListener('scroll', fn);
+  }, []);
+
+  // Shared demo handler
+  const handleDemo = async (type: 'akeri' | 'bemanning') => {
+    setDemoLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('demo-login', {
+        body: { type },
+      });
+      if (error || !data?.email) throw new Error(data?.error || 'Kunde inte skapa demo');
+      
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
+      if (signInError) throw signInError;
+      
+      toast.success(`Inloggad som ${data.companyName} — omdirigerar...`);
+      setTimeout(() => navigate('/admin'), 500);
+    } catch (err: any) {
+      toast.error(err.message || 'Demo-inloggning misslyckades');
+      setDemoLoading(false);
+    }
+  };
 
   // JSON-LD structured data for SEO
   useEffect(() => {
@@ -111,90 +138,52 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-white">
-
-      {/* NAVBAR */}
-      <Navbar />
-
-      {/* HERO */}
-      <HeroSection />
-
-      {/* SOCIAL PROOF */}
+      <Navbar onDemo={handleDemo} demoLoading={demoLoading} />
+      <HeroSection onDemo={() => handleDemo('akeri')} demoLoading={demoLoading} />
       <SocialProofBar />
-
-      {/* PROBLEM */}
       <ProblemSection />
-
-      {/* HOW IT WORKS */}
       <HowItWorks />
-
-      {/* FEATURES */}
       <FeaturesSection />
-
-      {/* FULL PLATFORM SHOWCASE */}
       <PlatformShowcase />
-
-      {/* COMPARISON */}
       <ComparisonTable />
-
-      {/* TESTIMONIALS */}
       <TestimonialsSection />
-
-      {/* PRICING */}
       <PricingSection />
-
-      {/* FAQ */}
       <FaqSection />
-
-      {/* SEO CONTENT */}
       <SeoContent />
-
-      {/* INTERNAL LINKS */}
       <InternalLinks />
-
-      {/* FINAL CTA */}
       <FinalCta />
-
-      {/* FOOTER */}
       <Footer />
+      <StickyMobileCta visible={showStickyBar} onDemo={() => handleDemo('akeri')} demoLoading={demoLoading} />
+    </div>
+  );
+}
+
+/* ═══════════════════════ STICKY MOBILE CTA ═══════════════════════ */
+function StickyMobileCta({ visible, onDemo, demoLoading }: { visible: boolean; onDemo: () => void; demoLoading: boolean }) {
+  return (
+    <div className={`fixed bottom-0 left-0 right-0 z-50 md:hidden transition-transform duration-300 ${visible ? 'translate-y-0' : 'translate-y-full'}`}>
+      <div className="bg-white border-t border-slate-200 shadow-lg px-4 py-3 flex gap-3">
+        <Button className="flex-1 h-12 rounded-xl font-semibold" asChild>
+          <Link to="/register">Kom igång — 449 kr/mån</Link>
+        </Button>
+        <Button variant="outline" className="h-12 px-4 rounded-xl" onClick={onDemo} disabled={demoLoading}>
+          <Play className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 }
 
 /* ═══════════════════════ NAVBAR ═══════════════════════ */
-function Navbar() {
+function Navbar({ onDemo, demoLoading }: { onDemo: (type: 'akeri' | 'bemanning') => void; demoLoading: boolean }) {
   const { user, role } = useAuth();
   const [scrolled, setScrolled] = useState(false);
-  const [demoLoading, setDemoLoading] = useState(false);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', fn, { passive: true });
     return () => window.removeEventListener('scroll', fn);
   }, []);
-
-  const handleDemo = async (type: 'akeri' | 'bemanning') => {
-    setDemoLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('demo-login', {
-        body: { type },
-      });
-      if (error || !data?.email) throw new Error(data?.error || 'Kunde inte skapa demo');
-      
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: data.email,
-        password: data.password,
-      });
-      if (signInError) throw signInError;
-      
-      toast.success(`Inloggad som ${data.companyName} — omdirigerar...`);
-      // Give auth state a moment to propagate before navigating
-      setTimeout(() => navigate('/admin'), 500);
-    } catch (err: any) {
-      toast.error(err.message || 'Demo-inloggning misslyckades');
-      setDemoLoading(false);
-    }
-  };
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all ${scrolled ? 'bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm' : 'bg-white/80 backdrop-blur'}`}>
@@ -221,28 +210,16 @@ function Navbar() {
             </Button>
           ) : (
             <>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" disabled={demoLoading} className="gap-1.5 hidden sm:inline-flex">
-                    <Play className="h-3.5 w-3.5" />
-                    {demoLoading ? 'Laddar...' : 'Testa demo'}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuItem onClick={() => handleDemo('akeri')} className="cursor-pointer">
-                    <div>
-                      <p className="font-medium">Demo Åkeri AB</p>
-                      <p className="text-xs text-muted-foreground">Transport & logistik</p>
-                    </div>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleDemo('bemanning')} className="cursor-pointer">
-                    <div>
-                      <p className="font-medium">Demo Bemanning AB</p>
-                      <p className="text-xs text-muted-foreground">Bemanning & personal</p>
-                    </div>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onDemo('akeri')}
+                disabled={demoLoading}
+                className="hidden md:inline-flex gap-1.5"
+              >
+                <Play className="h-3.5 w-3.5" />
+                {demoLoading ? 'Laddar...' : 'Live-demo'}
+              </Button>
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/login">Logga in</Link>
               </Button>
@@ -258,14 +235,14 @@ function Navbar() {
 }
 
 /* ═══════════════════════ HERO ═══════════════════════ */
-function HeroSection() {
+function HeroSection({ onDemo, demoLoading }: { onDemo: () => void; demoLoading: boolean }) {
   return (
     <section className="relative min-h-screen flex items-center pt-16 overflow-hidden" style={{
       backgroundImage: 'radial-gradient(circle, #e2e8f0 1px, transparent 1px)',
       backgroundSize: '20px 20px',
     }}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 md:py-24">
-        <div className="grid lg:grid-cols-5 gap-12 lg:gap-16 items-center">
+        <div className="grid lg:grid-cols-5 gap-8 lg:gap-16 items-center">
           {/* Left */}
           <div className="lg:col-span-3">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
@@ -291,15 +268,32 @@ function HeroSection() {
 
             <motion.div
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.5 }}
-              className="flex flex-col sm:flex-row gap-3 mb-8"
+              className="flex flex-col sm:flex-row gap-3 mb-2"
             >
               <Button size="lg" asChild className="rounded-xl px-8 py-6 text-base font-semibold">
                 <Link to="/register">Kom igång idag — 449 kr/mån</Link>
               </Button>
-              <Button variant="ghost" size="lg" asChild className="rounded-xl px-6 py-6 text-base">
-                <a href="#funktioner">Se hur det fungerar ↓</a>
+              <Button
+                variant="outline"
+                size="lg"
+                className="rounded-xl px-6 py-6 text-base gap-2"
+                onClick={onDemo}
+                disabled={demoLoading}
+              >
+                {demoLoading ? (
+                  <span className="flex items-center gap-2"><span className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" /> Laddar demo...</span>
+                ) : (
+                  <><Play className="h-4 w-4" /> Testa live-demo</>
+                )}
               </Button>
             </motion.div>
+
+            <motion.p
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4, duration: 0.5 }}
+              className="text-xs text-slate-400 mb-6"
+            >
+              Live-demon loggar in dig direkt i ett exempelkonto — ingen registrering krävs.
+            </motion.p>
 
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5, duration: 0.5 }}
@@ -311,11 +305,11 @@ function HeroSection() {
             </motion.div>
           </div>
 
-          {/* Right — App mockup */}
+          {/* Right — App mockup (visible on all sizes) */}
           <motion.div
             initial={{ opacity: 0, x: 40, rotate: 0 }} animate={{ opacity: 1, x: 0, rotate: 1 }}
             transition={{ delay: 0.3, duration: 0.7 }}
-            className="lg:col-span-2 hidden lg:block"
+            className="lg:col-span-2 max-w-sm mx-auto w-full"
           >
             <div className="bg-white rounded-xl shadow-2xl border border-slate-200 p-5 transform rotate-1">
               <div className="flex items-center justify-between mb-4">
@@ -359,11 +353,26 @@ function HeroSection() {
 /* ═══════════════════════ SOCIAL PROOF ═══════════════════════ */
 function SocialProofBar() {
   return (
-    <div className="bg-slate-50 border-y border-slate-200 py-6">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
-        <p className="text-sm text-slate-400">
-          Byggd för svenska transport- och bemanningsföretag · <span className="text-slate-400 italic">Ditt företag nästa?</span>
-        </p>
+    <div className="bg-slate-50 border-y border-slate-200 py-5">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12 text-sm text-slate-500">
+          <span className="flex items-center gap-2">
+            <span className="text-green-500 font-bold text-base">✓</span>
+            Ingen bindningstid
+          </span>
+          <span className="flex items-center gap-2">
+            <span className="text-green-500 font-bold text-base">✓</span>
+            Obegränsat antal förare
+          </span>
+          <span className="flex items-center gap-2">
+            <span className="text-green-500 font-bold text-base">✓</span>
+            Support på svenska
+          </span>
+          <span className="flex items-center gap-2">
+            <span className="text-green-500 font-bold text-base">✓</span>
+            Driftsatt och klart på 5 min
+          </span>
+        </div>
       </div>
     </div>
   );
@@ -743,7 +752,10 @@ function PricingSection() {
             <div className="mb-1">
               <span className="text-5xl font-mono font-bold text-foreground">3 500 kr</span>
             </div>
-            <p className="text-muted-foreground mb-6">Setup & onboarding</p>
+            <p className="text-muted-foreground mb-4">Setup & onboarding</p>
+            <p className="text-sm text-muted-foreground mb-6 bg-slate-50 rounded-lg p-3 border border-slate-200">
+              Vi konfigurerar hela systemet åt dig — du loggar in och är igång direkt utan att behöva sätta upp något själv.
+            </p>
             <ul className="space-y-3 mb-6">
               {setupItems.map(item => (
                 <li key={item} className="flex items-start gap-2 text-sm text-foreground">
@@ -817,11 +829,31 @@ function TestimonialsSection() {
         >
           Vad våra användare säger
         </motion.h2>
+
+        {/* Featured quote */}
+        <motion.div
+          initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}
+          className="bg-primary text-primary-foreground rounded-2xl p-8 mb-6"
+        >
+          <p className="text-lg leading-relaxed mb-4 font-medium">
+            "Vi hanterade allt i WhatsApp-grupper innan. Nu har vi allt samlat — uppdrag, tidrapporter, kvitton. Förarna fattade systemet samma dag."
+          </p>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white font-bold text-sm">
+              CJ
+            </div>
+            <div>
+              <p className="font-semibold text-sm">CJ Bemanning</p>
+              <p className="text-xs text-primary-foreground/70">Bemanningsföretag, Sverige</p>
+            </div>
+          </div>
+        </motion.div>
+
         <div className="grid sm:grid-cols-2 gap-6">
           {testimonials.map((t, i) => (
             <motion.div
               key={i}
-              initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
+              initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i + 1}
               className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm"
             >
               <p className="text-muted-foreground mb-4 leading-relaxed italic">"{t.text}"</p>
