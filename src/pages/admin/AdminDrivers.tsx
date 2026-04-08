@@ -113,164 +113,71 @@ function CompensationDialog({ driverId, driverName, existing }: { driverId: stri
   );
 }
 
-/* ── Invite Modal ── */
-interface InviteRow { name: string; email: string }
-
-function InviteModal({ companyId, companyName, adminName }: { companyId: string; companyName: string; adminName: string }) {
+/* ── Create Driver Modal ── */
+function CreateDriverModal({ companyId }: { companyId: string }) {
   const [open, setOpen] = useState(false);
-  const [rows, setRows] = useState<InviteRow[]>([{ name: '', email: '' }]);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [results, setResults] = useState<{ email: string; token: string }[] | null>(null);
   const qc = useQueryClient();
 
-  const addRow = () => setRows(prev => [...prev, { name: '', email: '' }]);
-  const removeRow = (i: number) => setRows(prev => prev.filter((_, idx) => idx !== i));
-  const updateRow = (i: number, field: keyof InviteRow, val: string) => {
-    setRows(prev => prev.map((r, idx) => idx === i ? { ...r, [field]: val } : r));
-  };
-
   const handleSubmit = async () => {
-    const valid = rows
-      .map((row) => ({
-        name: row.name.trim(),
-        email: row.email.trim(),
-      }))
-      .filter((row) => row.email);
-
-    if (valid.length === 0) {
-      toast.error('Ange minst en e-postadress');
+    if (!name.trim() || !email.trim() || !password.trim()) {
+      toast.error('Fyll i alla fält');
+      return;
+    }
+    if (password.length < 6) {
+      toast.error('Lösenordet måste vara minst 6 tecken');
       return;
     }
 
     setSubmitting(true);
-
     try {
-      const inserted: { email: string; token: string }[] = [];
-      const emailFailures: string[] = [];
+      const { data, error } = await supabase.functions.invoke('create-driver', {
+        body: { email: email.trim(), full_name: name.trim(), password, company_id: companyId },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
 
-      for (const inv of valid) {
-        const { data, error } = await supabase.from('invitations').insert({
-          company_id: companyId,
-          email: inv.email,
-          name: inv.name || null,
-        }).select('email, token').single();
-
-        if (error) throw error;
-        if (!data?.token) continue;
-
-        inserted.push({ email: data.email, token: data.token });
-
-        const joinUrl = `${window.location.origin}/join?token=${data.token}`;
-        const { error: emailError } = await supabase.functions.invoke('send-email', {
-          body: {
-            to: data.email,
-            subject: `${companyName} har bjudit in dig till Aurora Transport`,
-            html: `
-              <h1 style="font-size:20px;font-weight:700;color:#0f172a;margin:0 0 16px">Du har blivit inbjuden! 🎉</h1>
-              <p style="font-size:14px;color:#334155;line-height:1.6;margin:0 0 16px"><strong>${adminName}</strong> på <strong>${companyName}</strong> har bjudit in dig att använda Aurora Transport.</p>
-              <div style="background:#f1f5f9;border-radius:8px;padding:16px 20px;margin:16px 0">
-                <div style="font-size:13px;color:#334155;line-height:1.8">
-                  ✅ Se och hantera dina uppdrag i realtid<br/>
-                  📍 Automatisk GPS-spårning och navigering<br/>
-                  📝 Digital signering och fotobevis
-                </div>
-              </div>
-              <div style="text-align:center;margin:24px 0">
-                <a href="${joinUrl}" style="display:inline-block;background:#2563eb;color:#ffffff;font-weight:600;font-size:14px;padding:12px 28px;border-radius:8px;text-decoration:none">Skapa ditt konto</a>
-              </div>
-              <p style="font-size:13px;color:#64748b;line-height:1.5;margin:0 0 12px">Länken är giltig i 7 dagar.</p>
-            `,
-          },
-        });
-
-        if (emailError) {
-          emailFailures.push(data.email);
-        }
-      }
-
-      setResults(inserted);
-      if (inserted.length === 0) {
-        toast.error('Kunde inte skapa några inbjudningar');
-      } else if (emailFailures.length === 0) {
-        toast.success(`Inbjudan skickad till ${inserted.length} förare`);
-      } else {
-        toast.warning(`Inbjudningar skapade för ${inserted.length} förare – ${emailFailures.length} mejl kunde inte skickas, så kopiera länkarna manuellt.`);
-      }
-      qc.invalidateQueries({ queryKey: ['invitations'] });
+      toast.success(`${name.trim()} har registrerats som förare`);
+      qc.invalidateQueries({ queryKey: ['drivers'] });
+      setOpen(false);
+      setName('');
+      setEmail('');
+      setPassword('');
     } catch (err: any) {
-      toast.error('Kunde inte skicka: ' + err.message);
+      toast.error('Kunde inte skapa förare: ' + err.message);
     } finally {
       setSubmitting(false);
     }
   };
 
-  const copyLink = (token: string) => {
-    const url = `${window.location.origin}/join?token=${token}`;
-    navigator.clipboard.writeText(url);
-    toast.success('Länk kopierad!');
-  };
-
-  const handleClose = (isOpen: boolean) => {
-    setOpen(isOpen);
-    if (!isOpen) {
-      setRows([{ name: '', email: '' }]);
-      setResults(null);
-    }
-  };
-
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button><Plus className="h-4 w-4 mr-1" /> Bjud in förare</Button>
+        <Button><Plus className="h-4 w-4 mr-1" /> Lägg till förare</Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg">
-        <DialogHeader><DialogTitle>Bjud in förare</DialogTitle></DialogHeader>
-
-        {results ? (
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">Dela länkarna nedan med dina förare:</p>
-            {results.map((r, i) => (
-              <div key={i} className="flex items-center gap-2 bg-muted/50 rounded-lg p-3">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{r.email}</p>
-                  <p className="text-xs text-muted-foreground truncate">{window.location.origin}/join?token={r.token}</p>
-                </div>
-                <Button variant="outline" size="sm" onClick={() => copyLink(r.token)}>
-                  <Copy className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            ))}
-            <Button variant="outline" className="w-full" onClick={() => handleClose(false)}>Stäng</Button>
+      <DialogContent className="max-w-md">
+        <DialogHeader><DialogTitle>Registrera ny förare</DialogTitle></DialogHeader>
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">Skapa ett konto åt föraren direkt. De kan logga in med uppgifterna du anger.</p>
+          <div className="space-y-2">
+            <Label>Namn</Label>
+            <Input placeholder="Förnamn Efternamn" value={name} onChange={e => setName(e.target.value)} />
           </div>
-        ) : (
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">Skicka inbjudningar via e-post så kan de registrera sig direkt.</p>
-            <div className="space-y-3">
-              {rows.map((row, i) => (
-                <div key={i} className="flex gap-2 items-start">
-                  <Input placeholder="Namn" value={row.name} onChange={e => updateRow(i, 'name', e.target.value)} className="flex-1 h-10" />
-                  <Input type="email" placeholder="E-post" value={row.email} onChange={e => updateRow(i, 'email', e.target.value)} className="flex-1 h-10" />
-                  {rows.length > 1 && (
-                    <button onClick={() => removeRow(i)} className="mt-2 text-muted-foreground hover:text-destructive">
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-            <button onClick={addRow} className="text-sm text-primary font-medium flex items-center gap-1 hover:underline">
-              <Plus className="h-3.5 w-3.5" /> Lägg till fler
-            </button>
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <Button onClick={handleSubmit} className="w-full" disabled={submitting}>
-                <Send className="h-4 w-4 mr-1" /> {submitting ? 'Skickar...' : 'Skicka inbjudningar'}
-              </Button>
-              <Button variant="outline" onClick={() => handleClose(false)} className="w-full sm:w-auto" disabled={submitting}>
-                Avbryt
-              </Button>
-            </div>
+          <div className="space-y-2">
+            <Label>E-post</Label>
+            <Input type="email" placeholder="forare@exempel.se" value={email} onChange={e => setEmail(e.target.value)} />
           </div>
-        )}
+          <div className="space-y-2">
+            <Label>Lösenord</Label>
+            <Input type="text" placeholder="Minst 6 tecken" value={password} onChange={e => setPassword(e.target.value)} />
+          </div>
+          <Button onClick={handleSubmit} className="w-full" disabled={submitting}>
+            <Plus className="h-4 w-4 mr-1" /> {submitting ? 'Skapar...' : 'Skapa förarkonto'}
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );
