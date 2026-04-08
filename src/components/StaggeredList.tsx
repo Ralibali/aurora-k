@@ -1,6 +1,7 @@
-import { motion } from 'framer-motion';
-import type { Variants } from 'framer-motion';
+import { motion, type Easing } from 'framer-motion';
 import { ReactNode } from 'react';
+
+const ease: Easing = [0.25, 0.1, 0.25, 1];
 
 const container = {
   hidden: {},
@@ -13,7 +14,7 @@ const container = {
 
 const item = {
   hidden: { opacity: 0, y: 8 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.25, ease: 'easeOut' } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.25, ease } },
 };
 
 export function StaggeredList({ children, className }: { children: ReactNode; className?: string }) {
@@ -37,7 +38,7 @@ export function StaggeredItem({ children, className }: { children: ReactNode; cl
   );
 }
 
-/** For use inside <TableBody> — renders as <tr> */
+/** For use inside <Table> — renders animated <tbody> */
 export function StaggeredTableBody({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <motion.tbody
