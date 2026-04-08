@@ -1537,6 +1537,51 @@ export type Database = {
         }
         Relationships: []
       }
+      portal_messages: {
+        Row: {
+          company_id: string
+          created_at: string
+          customer_id: string
+          id: string
+          message: string
+          sender_name: string
+          sender_type: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          customer_id: string
+          id?: string
+          message: string
+          sender_name: string
+          sender_type: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          customer_id?: string
+          id?: string
+          message?: string
+          sender_name?: string
+          sender_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portal_messages_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "portal_messages_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           company_id: string | null
@@ -1800,6 +1845,24 @@ export type Database = {
         Returns: undefined
       }
       get_my_company_id: { Args: never; Returns: string }
+      get_portal_messages: {
+        Args: { p_token: string }
+        Returns: {
+          company_id: string
+          created_at: string
+          customer_id: string
+          id: string
+          message: string
+          sender_name: string
+          sender_type: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "portal_messages"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1812,6 +1875,10 @@ export type Database = {
       next_invoice_number: { Args: never; Returns: number }
       register_company: {
         Args: { _name: string; _org_nr?: string; _user_full_name?: string }
+        Returns: string
+      }
+      send_portal_message: {
+        Args: { p_message: string; p_sender_name?: string; p_token: string }
         Returns: string
       }
       submit_satisfaction: {
