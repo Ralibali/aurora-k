@@ -135,6 +135,41 @@ export default function PlatformCompanies() {
     onError: () => toast.error('Kunde inte skicka mail'),
   });
 
+  const handleCreateCompany = async () => {
+    const { companyName, adminName, adminEmail, orgNr } = createForm;
+    if (!companyName.trim() || !adminName.trim() || !adminEmail.trim()) {
+      toast.error('Fyll i företagsnamn, kontaktperson och e-post');
+      return;
+    }
+    setCreatingCompany(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-onboarding-link', {
+        body: { company_name: companyName.trim(), org_nr: orgNr.trim() || null, admin_name: adminName.trim(), admin_email: adminEmail.trim() },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setCreateResult({ checkout_url: data.checkout_url, temp_password: data.temp_password });
+      queryClient.invalidateQueries({ queryKey: ['platform-companies-detail'] });
+      queryClient.invalidateQueries({ queryKey: ['platform-profiles-all'] });
+      toast.success(`${companyName} skapades!`);
+    } catch (err: any) {
+      toast.error('Kunde inte skapa: ' + err.message);
+    } finally {
+      setCreatingCompany(false);
+    }
+  };
+
+  const handleCloseCreate = () => {
+    setCreateOpen(false);
+    setCreateForm({ companyName: '', orgNr: '', adminName: '', adminEmail: '' });
+    setCreateResult(null);
+  };
+
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success(`${label} kopierad!`);
+  };
+
   const filters: { label: string; value: FilterStatus }[] = [
     { label: 'Alla', value: 'all' },
     { label: 'Aktiva', value: 'active' },
@@ -161,6 +196,9 @@ export default function PlatformCompanies() {
             </Button>
           ))}
         </div>
+        <Button onClick={() => setCreateOpen(true)} className="gap-2">
+          <Plus className="h-4 w-4" /> Skapa företag
+        </Button>
       </div>
 
       {isLoading && (
