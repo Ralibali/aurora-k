@@ -130,50 +130,72 @@ function InviteModal({ companyId, companyName, adminName }: { companyId: string;
   };
 
   const handleSubmit = async () => {
-    const valid = rows.filter(r => r.email.trim());
-    if (valid.length === 0) { toast.error('Ange minst en e-postadress'); return; }
+    const valid = rows
+      .map((row) => ({
+        name: row.name.trim(),
+        email: row.email.trim(),
+      }))
+      .filter((row) => row.email);
+
+    if (valid.length === 0) {
+      toast.error('Ange minst en e-postadress');
+      return;
+    }
+
     setSubmitting(true);
 
     try {
       const inserted: { email: string; token: string }[] = [];
+      const emailFailures: string[] = [];
+
       for (const inv of valid) {
         const { data, error } = await supabase.from('invitations').insert({
           company_id: companyId,
-          email: inv.email.trim(),
-          name: inv.name.trim() || null,
+          email: inv.email,
+          name: inv.name || null,
         }).select('email, token').single();
 
         if (error) throw error;
-        if (data) {
-          inserted.push({ email: data.email, token: data.token! });
-          // Send driver invite email via Brevo
-          const joinUrl = `${window.location.origin}/join?token=${data.token}`;
-          await supabase.functions.invoke('send-email', {
-            body: {
-              to: 'info@auroramedia.se',
-              subject: `${companyName} har bjudit in dig till Aurora Transport`,
-              html: `
-                <h1 style="font-size:20px;font-weight:700;color:#0f172a;margin:0 0 16px">Du har blivit inbjuden! 🎉</h1>
-                <p style="font-size:14px;color:#334155;line-height:1.6;margin:0 0 16px"><strong>${adminName}</strong> på <strong>${companyName}</strong> har bjudit in dig att använda Aurora Transport.</p>
-                <div style="background:#f1f5f9;border-radius:8px;padding:16px 20px;margin:16px 0">
-                  <div style="font-size:13px;color:#334155;line-height:1.8">
-                    ✅ Se och hantera dina uppdrag i realtid<br/>
-                    📍 Automatisk GPS-spårning och navigering<br/>
-                    📝 Digital signering och fotobevis
-                  </div>
+        if (!data?.token) continue;
+
+        inserted.push({ email: data.email, token: data.token });
+
+        const joinUrl = `${window.location.origin}/join?token=${data.token}`;
+        const { error: emailError } = await supabase.functions.invoke('send-email', {
+          body: {
+            to: data.email,
+            subject: `${companyName} har bjudit in dig till Aurora Transport`,
+            html: `
+              <h1 style="font-size:20px;font-weight:700;color:#0f172a;margin:0 0 16px">Du har blivit inbjuden! 🎉</h1>
+              <p style="font-size:14px;color:#334155;line-height:1.6;margin:0 0 16px"><strong>${adminName}</strong> på <strong>${companyName}</strong> har bjudit in dig att använda Aurora Transport.</p>
+              <div style="background:#f1f5f9;border-radius:8px;padding:16px 20px;margin:16px 0">
+                <div style="font-size:13px;color:#334155;line-height:1.8">
+                  ✅ Se och hantera dina uppdrag i realtid<br/>
+                  📍 Automatisk GPS-spårning och navigering<br/>
+                  📝 Digital signering och fotobevis
                 </div>
-                <div style="text-align:center;margin:24px 0">
-                  <a href="${joinUrl}" style="display:inline-block;background:#2563eb;color:#ffffff;font-weight:600;font-size:14px;padding:12px 28px;border-radius:8px;text-decoration:none">Skapa ditt konto</a>
-                </div>
-                <p style="font-size:13px;color:#64748b;line-height:1.5;margin:0 0 12px">Länken är giltig i 7 dagar.</p>
-              `,
-            },
-          });
+              </div>
+              <div style="text-align:center;margin:24px 0">
+                <a href="${joinUrl}" style="display:inline-block;background:#2563eb;color:#ffffff;font-weight:600;font-size:14px;padding:12px 28px;border-radius:8px;text-decoration:none">Skapa ditt konto</a>
+              </div>
+              <p style="font-size:13px;color:#64748b;line-height:1.5;margin:0 0 12px">Länken är giltig i 7 dagar.</p>
+            `,
+          },
+        });
+
+        if (emailError) {
+          emailFailures.push(data.email);
         }
       }
 
       setResults(inserted);
-      toast.success(`Inbjudan skickad till ${inserted.length} förare`);
+      if (inserted.length === 0) {
+        toast.error('Kunde inte skapa några inbjudningar');
+      } else if (emailFailures.length === 0) {
+        toast.success(`Inbjudan skickad till ${inserted.length} förare`);
+      } else {
+        toast.warning(`Inbjudningar skapade för ${inserted.length} förare – ${emailFailures.length} mejl kunde inte skickas, så kopiera länkarna manuellt.`);
+      }
       qc.invalidateQueries({ queryKey: ['invitations'] });
     } catch (err: any) {
       toast.error('Kunde inte skicka: ' + err.message);
@@ -181,67 +203,18 @@ function InviteModal({ companyId, companyName, adminName }: { companyId: string;
       setSubmitting(false);
     }
   };
-
-  const copyLink = (token: string) => {
-    const url = `${window.location.origin}/join?token=${token}`;
-    navigator.clipboard.writeText(url);
-    toast.success('Länk kopierad!');
-  };
-
-  const handleClose = (isOpen: boolean) => {
-    setOpen(isOpen);
-    if (!isOpen) {
-      setRows([{ name: '', email: '' }]);
-      setResults(null);
-    }
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogTrigger asChild>
-        <Button><Plus className="h-4 w-4 mr-1" /> Bjud in förare</Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-lg">
-        <DialogHeader><DialogTitle>Bjud in förare</DialogTitle></DialogHeader>
-
-        {results ? (
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">Dela länkarna nedan med dina förare:</p>
-            {results.map((r, i) => (
-              <div key={i} className="flex items-center gap-2 bg-muted/50 rounded-lg p-3">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{r.email}</p>
-                  <p className="text-xs text-muted-foreground truncate">{window.location.origin}/join?token={r.token}</p>
-                </div>
-                <Button variant="outline" size="sm" onClick={() => copyLink(r.token)}>
-                  <Copy className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            ))}
-            <Button variant="outline" className="w-full" onClick={() => handleClose(false)}>Stäng</Button>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">Skicka inbjudningar via e-post så kan de registrera sig direkt.</p>
-            <div className="space-y-3">
-              {rows.map((row, i) => (
-                <div key={i} className="flex gap-2 items-start">
-                  <Input placeholder="Namn" value={row.name} onChange={e => updateRow(i, 'name', e.target.value)} className="flex-1 h-10" />
-                  <Input type="email" placeholder="E-post" value={row.email} onChange={e => updateRow(i, 'email', e.target.value)} className="flex-1 h-10" />
-                  {rows.length > 1 && (
-                    <button onClick={() => removeRow(i)} className="mt-2 text-muted-foreground hover:text-destructive">
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
+...
             <button onClick={addRow} className="text-sm text-primary font-medium flex items-center gap-1 hover:underline">
               <Plus className="h-3.5 w-3.5" /> Lägg till fler
             </button>
-            <Button onClick={handleSubmit} className="w-full" disabled={submitting}>
-              <Send className="h-4 w-4 mr-1" /> {submitting ? 'Skickar...' : 'Skicka inbjudningar'}
-            </Button>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Button onClick={handleSubmit} className="w-full" disabled={submitting}>
+                <Send className="h-4 w-4 mr-1" /> {submitting ? 'Skickar...' : 'Skicka inbjudningar'}
+              </Button>
+              <Button variant="outline" onClick={() => handleClose(false)} className="w-full sm:w-auto" disabled={submitting}>
+                Avbryt
+              </Button>
+            </div>
           </div>
         )}
       </DialogContent>
