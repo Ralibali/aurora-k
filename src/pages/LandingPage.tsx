@@ -573,7 +573,7 @@ const platformCategories = [
   },
 ];
 
-function PlatformShowcase() {
+function PlatformShowcase({ onContact }: { onContact: () => void }) {
   return (
     <section className="py-20 bg-white">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -643,8 +643,8 @@ function PlatformShowcase() {
               <p className="text-primary-foreground/70 text-sm">Extrakostnad per förare</p>
             </div>
           </div>
-          <Button asChild className="mt-6 bg-white text-primary hover:bg-white/90 rounded-xl px-8 py-3 font-semibold">
-            <Link to="/register">Kom igång — ingen demo krävs</Link>
+          <Button className="mt-6 bg-white text-primary hover:bg-white/90 rounded-xl px-8 py-3 font-semibold" onClick={onContact}>
+            Kontakta oss
           </Button>
         </motion.div>
       </div>
@@ -711,7 +711,7 @@ function ComparisonTable() {
 }
 
 /* ═══════════════════════ PRICING ═══════════════════════ */
-function PricingSection() {
+function PricingSection({ onContact }: { onContact: () => void }) {
   const setupItems = [
     'Personlig onboarding',
     'Vi konfigurerar systemet',
@@ -790,8 +790,8 @@ function PricingSection() {
                 </li>
               ))}
             </ul>
-            <Button asChild className="w-full bg-white text-primary hover:bg-white/90 rounded-xl py-3.5 font-semibold">
-              <Link to="/register">Kom igång idag</Link>
+            <Button className="w-full bg-white text-primary hover:bg-white/90 rounded-xl py-3.5 font-semibold" onClick={onContact}>
+              Kontakta oss
             </Button>
             <p className="text-xs text-primary-foreground/60 text-center mt-3">Faktureras månadsvis. Avsluta när du vill.</p>
           </motion.div>
@@ -961,7 +961,7 @@ function SeoContent() {
 }
 
 /* ═══════════════════════ FINAL CTA ═══════════════════════ */
-function FinalCta() {
+function FinalCta({ onContact }: { onContact: () => void }) {
   return (
     <section className="py-20 bg-[#0F172A] text-white">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
@@ -978,8 +978,8 @@ function FinalCta() {
           449 kr/mån. Fast pris. Ingen bindningstid.
         </motion.p>
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} custom={2} variants={fadeUp}>
-          <Button size="lg" asChild className="rounded-xl px-10 py-6 text-base font-semibold bg-white text-[#0F172A] hover:bg-white/90">
-            <Link to="/register">Skapa ditt konto nu</Link>
+          <Button size="lg" className="rounded-xl px-10 py-6 text-base font-semibold bg-white text-[#0F172A] hover:bg-white/90" onClick={onContact}>
+            Kontakta oss
           </Button>
         </motion.div>
         <motion.p
