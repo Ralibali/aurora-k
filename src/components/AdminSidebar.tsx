@@ -1,16 +1,18 @@
+import { useState } from 'react';
 import {
   LayoutDashboard, Briefcase, Calendar, Map, Navigation,
   Users, UserX, CheckSquare, Building, ShoppingCart, Inbox,
   Star, FileText, Package, Leaf, BarChart, TrendingUp,
   Bell, Globe, Code, Settings, LogOut, Truck, Car,
-  ClipboardList, FileImage, Smartphone, Shield,
+  ClipboardList, FileImage, Smartphone, Shield, ChevronDown,
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { usePlatformAdmin } from '@/hooks/usePlatformAdmin';
 
-const navSections = [
+/* Primary items — always visible */
+const primarySections = [
   {
     label: 'Dispatch',
     items: [
@@ -18,16 +20,12 @@ const navSections = [
       { title: 'Uppdrag', url: '/admin/assignments', icon: Briefcase },
       { title: 'Kalender', url: '/admin/calendar', icon: Calendar },
       { title: 'Live-karta', url: '/admin/live-map', icon: Map },
-      { title: 'Ruttoptimering', url: '/admin/routes', icon: Navigation },
-      { title: 'Fordon', url: '/admin/vehicles', icon: Car },
     ],
   },
   {
     label: 'Personal',
     items: [
       { title: 'Chaufförer', url: '/admin/drivers', icon: Users },
-      { title: 'Frånvaro', url: '/admin/absences', icon: UserX },
-      { title: 'Godkännanden', url: '/admin/approvals', icon: CheckSquare },
     ],
   },
   {
@@ -35,6 +33,48 @@ const navSections = [
     items: [
       { title: 'Kunder', url: '/admin/customers', icon: Building },
       { title: 'Ordrar', url: '/admin/orders', icon: ShoppingCart },
+    ],
+  },
+  {
+    label: 'Ekonomi',
+    items: [
+      { title: 'Fakturor', url: '/admin/invoices', icon: FileText },
+      { title: 'OB & Traktamente', url: '/admin/compensation', icon: Briefcase },
+    ],
+  },
+  {
+    label: 'Rapporter',
+    items: [
+      { title: 'Tidrapporter', url: '/admin/reports', icon: BarChart },
+    ],
+  },
+  {
+    label: 'System',
+    items: [
+      { title: 'Inställningar', url: '/admin/settings', icon: Settings },
+    ],
+  },
+];
+
+/* Secondary items — hidden behind "More" toggle */
+const secondarySections = [
+  {
+    label: 'Dispatch',
+    items: [
+      { title: 'Ruttoptimering', url: '/admin/routes', icon: Navigation },
+      { title: 'Fordon', url: '/admin/vehicles', icon: Car },
+    ],
+  },
+  {
+    label: 'Personal',
+    items: [
+      { title: 'Frånvaro', url: '/admin/absences', icon: UserX },
+      { title: 'Godkännanden', url: '/admin/approvals', icon: CheckSquare },
+    ],
+  },
+  {
+    label: 'Kunder & Order',
+    items: [
       { title: 'Ordermallar', url: '/admin/order-templates', icon: ClipboardList },
       { title: 'Bokningsförfrågningar', url: '/admin/booking-requests', icon: Inbox },
       { title: 'Kundnöjdhet', url: '/admin/satisfaction', icon: Star },
@@ -43,17 +83,14 @@ const navSections = [
   {
     label: 'Ekonomi',
     items: [
-      { title: 'Fakturor', url: '/admin/invoices', icon: FileText },
       { title: 'Fakturamallar', url: '/admin/invoice-templates', icon: FileImage },
       { title: 'Artiklar', url: '/admin/articles', icon: Package },
-      { title: 'OB & Traktamente', url: '/admin/compensation', icon: Briefcase },
       { title: 'Miljöuppföljning', url: '/admin/environment', icon: Leaf },
     ],
   },
   {
     label: 'Rapporter',
     items: [
-      { title: 'Rapporter', url: '/admin/reports', icon: BarChart },
       { title: 'Statistik', url: '/admin/statistics', icon: TrendingUp },
     ],
   },
@@ -64,7 +101,6 @@ const navSections = [
       { title: 'Förarapp-inställningar', url: '/admin/driver-settings', icon: Smartphone },
       { title: 'Externa resurser', url: '/admin/external-resources', icon: Globe },
       { title: 'API', url: '/admin/api', icon: Code },
-      { title: 'Inställningar', url: '/admin/settings', icon: Settings },
     ],
   },
 ];
@@ -73,6 +109,12 @@ export function AdminSidebar() {
   const { user, signOut } = useAuth();
   const { isPlatformAdmin } = usePlatformAdmin();
   const navigate = useNavigate();
+  const [showMore, setShowMore] = useState(() => localStorage.getItem('sidebar-expanded') === 'true');
+
+  const toggle = () => setShowMore(v => {
+    localStorage.setItem('sidebar-expanded', String(!v));
+    return !v;
+  });
 
   const handleLogout = async () => {
     await signOut();
@@ -87,6 +129,13 @@ export function AdminSidebar() {
     .toUpperCase()
     .slice(0, 2);
 
+  // Merge primary + secondary items per section label when expanded
+  const sections = primarySections.map(ps => {
+    if (!showMore) return ps;
+    const extra = secondarySections.find(ss => ss.label === ps.label);
+    return extra ? { ...ps, items: [...ps.items, ...extra.items] } : ps;
+  });
+
   return (
     <aside className="hidden md:flex flex-col fixed inset-y-0 left-0 w-60 bg-[#0F172A] z-40">
       {/* Header */}
@@ -99,7 +148,7 @@ export function AdminSidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-3 scrollbar-thin">
-        {navSections.map((section) => (
+        {sections.map((section) => (
           <div key={section.label}>
             <p className="text-[10px] font-semibold text-slate-600 uppercase tracking-widest px-5 mt-4 mb-1">
               {section.label}
@@ -118,6 +167,17 @@ export function AdminSidebar() {
             ))}
           </div>
         ))}
+
+        {/* Toggle more/less */}
+        <div className="px-2 mt-3">
+          <button
+            onClick={toggle}
+            className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-[#1E293B] hover:text-slate-200 transition-colors w-full"
+          >
+            <ChevronDown className={`h-4 w-4 transition-transform ${showMore ? 'rotate-180' : ''}`} />
+            {showMore ? 'Visa mindre' : 'Fler funktioner'}
+          </button>
+        </div>
       </nav>
 
       {/* Platform Admin Link */}
