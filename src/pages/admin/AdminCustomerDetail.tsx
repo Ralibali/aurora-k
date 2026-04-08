@@ -15,7 +15,8 @@ import { useCustomer, useUpdateCustomer, useAssignments, useInvoices } from '@/h
 import { useCustomerPriceList, useUpsertCustomerPrice, useDeleteCustomerPrice, useArticles } from '@/hooks/useNewFeatures';
 import { pricingTypeLabels } from '@/lib/types';
 import { formatSwedishDate, calculateDecimalHours } from '@/lib/format';
-import { ArrowLeft, Save, Plus, Trash2, Link2, Copy, ExternalLink, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save, Plus, Trash2, Link2, Copy, ExternalLink, Loader2, MessageCircle } from 'lucide-react';
+import { AdminCustomerChat } from '@/components/admin/AdminCustomerChat';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -69,6 +70,7 @@ export default function AdminCustomerDetail() {
             <TabsTrigger value="prices">Prislistor</TabsTrigger>
             <TabsTrigger value="deliveries">Leveranser</TabsTrigger>
             <TabsTrigger value="invoices">Fakturor</TabsTrigger>
+            <TabsTrigger value="chat" className="gap-1.5"><MessageCircle className="h-3.5 w-3.5" /> Chatt</TabsTrigger>
           </TabsList>
 
           <TabsContent value="details" className="mt-4">
@@ -269,6 +271,10 @@ export default function AdminCustomerDetail() {
                 </Table>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="chat" className="mt-4">
+            <AdminCustomerChat customerId={id!} customerName={customer.name} />
           </TabsContent>
         </Tabs>
       </div>
