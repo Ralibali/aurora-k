@@ -10,6 +10,7 @@ import { NavLink } from '@/components/NavLink';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { usePlatformAdmin } from '@/hooks/usePlatformAdmin';
+import { useUnreadPortalMessages } from '@/hooks/useUnreadPortalMessages';
 
 /* Primary items — always visible */
 const primarySections = [
