@@ -17,7 +17,7 @@ import {
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { session, role, loading } = useAuth();
+  const { session, role, isPlatformAdmin, loading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -52,10 +52,11 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!loading && session && role) {
-      if (role === 'admin') navigate('/admin', { replace: true });
+      if (isPlatformAdmin) navigate('/platform', { replace: true });
+      else if (role === 'admin') navigate('/admin', { replace: true });
       else navigate('/driver', { replace: true });
     }
-  }, [loading, session, role, navigate]);
+  }, [loading, session, role, isPlatformAdmin, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
