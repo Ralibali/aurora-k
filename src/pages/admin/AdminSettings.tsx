@@ -121,13 +121,13 @@ export default function AdminSettings() {
     <AdminLayout title="Inställningar" description="Företagsinformation och systemkonfiguration">
       <div className="max-w-3xl">
         <Tabs defaultValue="company">
-          <TabsList className="mb-6">
-            <TabsTrigger value="company">Företag</TabsTrigger>
-            <TabsTrigger value="features" className="gap-1.5">
+          <TabsList className="mb-6 w-full max-w-full overflow-x-auto scrollbar-hide snap-x snap-mandatory flex justify-start md:inline-flex md:w-auto">
+            <TabsTrigger value="company" className="snap-start shrink-0 data-[state=active]:shadow-md data-[state=active]:ring-2 data-[state=active]:ring-primary/30 transition-all duration-200">Företag</TabsTrigger>
+            <TabsTrigger value="features" className="snap-start shrink-0 gap-1.5 data-[state=active]:shadow-md data-[state=active]:ring-2 data-[state=active]:ring-primary/30 transition-all duration-200">
               <ToggleLeft className="h-3.5 w-3.5" /> Funktioner
             </TabsTrigger>
-            <TabsTrigger value="appearance">Utseende</TabsTrigger>
-            <TabsTrigger value="subscription">Prenumeration</TabsTrigger>
+            <TabsTrigger value="appearance" className="snap-start shrink-0 data-[state=active]:shadow-md data-[state=active]:ring-2 data-[state=active]:ring-primary/30 transition-all duration-200">Utseende</TabsTrigger>
+            <TabsTrigger value="subscription" className="snap-start shrink-0 data-[state=active]:shadow-md data-[state=active]:ring-2 data-[state=active]:ring-primary/30 transition-all duration-200">Prenumeration</TabsTrigger>
           </TabsList>
 
           <TabsContent value="company" className="space-y-6">
