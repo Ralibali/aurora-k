@@ -135,9 +135,65 @@ export default function AdminAssignments() {
 
         {/* Desktop table */}
         {isLoading ? (
-          <div className="space-y-2">
-            {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-14 w-full rounded-lg" />)}
-          </div>
+          <>
+            {/* Desktop table skeleton */}
+            <div className="hidden md:block bg-card rounded-lg border border-border shadow-card overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-10"><Skeleton className="h-4 w-4 rounded" /></TableHead>
+                    <TableHead><Skeleton className="h-3 w-8" /></TableHead>
+                    <TableHead><Skeleton className="h-3 w-16" /></TableHead>
+                    <TableHead><Skeleton className="h-3 w-20" /></TableHead>
+                    <TableHead><Skeleton className="h-3 w-24" /></TableHead>
+                    <TableHead><Skeleton className="h-3 w-16" /></TableHead>
+                    <TableHead><Skeleton className="h-3 w-12" /></TableHead>
+                    <TableHead className="w-10" />
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {[1, 2, 3, 4, 5].map(i => (
+                    <TableRow key={i}>
+                      <TableCell><Skeleton className="h-4 w-4 rounded" /></TableCell>
+                      <TableCell><Skeleton className="h-3 w-14 rounded" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-28 rounded" /></TableCell>
+                      <TableCell><Skeleton className="h-3 w-24 rounded" /></TableCell>
+                      <TableCell><Skeleton className="h-3 w-32 rounded" /></TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Skeleton className="h-6 w-6 rounded-full" />
+                          <Skeleton className="h-3 w-20 rounded" />
+                        </div>
+                      </TableCell>
+                      <TableCell><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
+                      <TableCell><Skeleton className="h-8 w-8 rounded" /></TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            {/* Mobile card skeleton */}
+            <div className="md:hidden space-y-3">
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} className="bg-card rounded-lg border border-border p-4 shadow-card space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 space-y-1.5">
+                      <Skeleton className="h-4 w-3/4 rounded" />
+                      <Skeleton className="h-3 w-1/2 rounded" />
+                    </div>
+                    <Skeleton className="h-5 w-16 rounded-full" />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Skeleton className="h-3 w-16 rounded" />
+                    <div className="flex items-center gap-1.5">
+                      <Skeleton className="h-5 w-5 rounded-full" />
+                      <Skeleton className="h-3 w-20 rounded" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         ) : filtered.length === 0 ? (
           <div className="bg-card rounded-lg border border-dashed border-border p-16 text-center shadow-card">
             <Inbox className="h-12 w-12 text-slate-200 mx-auto mb-3" />

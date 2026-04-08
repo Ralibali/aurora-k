@@ -65,8 +65,15 @@ export default function AdminCustomers() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {isLoading && [1, 2, 3].map(i => (
-                  <TableRow key={i}><TableCell colSpan={6}><Skeleton className="h-8 w-full" /></TableCell></TableRow>
+                {isLoading && [1, 2, 3, 4, 5].map(i => (
+                  <TableRow key={i}>
+                    <TableCell><Skeleton className="h-4 w-28 rounded" /></TableCell>
+                    <TableCell className="hidden md:table-cell"><Skeleton className="h-3 w-20 rounded" /></TableCell>
+                    <TableCell className="hidden md:table-cell"><Skeleton className="h-3 w-24 rounded" /></TableCell>
+                    <TableCell className="hidden sm:table-cell"><Skeleton className="h-3 w-32 rounded" /></TableCell>
+                    <TableCell className="hidden sm:table-cell"><Skeleton className="h-3 w-20 rounded" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
+                  </TableRow>
                 ))}
                 {!isLoading && filtered.map(c => (
                   <TableRow key={c.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/admin/customers/${c.id}`)}>
