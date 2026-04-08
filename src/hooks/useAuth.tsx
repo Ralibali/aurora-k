@@ -82,11 +82,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const apply = async (s: Session | null, source: string) => {
       if (ignore) return;
-      console.log('[Auth] apply called from', source, 'session:', !!s, 'user:', s?.user?.email);
+      if (import.meta.env.DEV) console.log('[Auth] apply called from', source, 'session:', !!s);
       setSession(s);
       if (s?.user) {
         const profile = await fetchProfile(s.user.id);
-        console.log('[Auth] profile resolved:', profile, 'ignore:', ignore);
+        if (import.meta.env.DEV) console.log('[Auth] profile resolved:', profile, 'ignore:', ignore);
         if (!ignore) {
           setRole(profile.role);
           setCompanyId(profile.companyId);
@@ -101,7 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, newSession) => {
-        console.log('[Auth] onAuthStateChange event:', _event);
+        if (import.meta.env.DEV) console.log('[Auth] onAuthStateChange event:', _event);
         if (_event === 'INITIAL_SESSION') return;
         apply(newSession, 'onAuthStateChange:' + _event);
       }
@@ -122,12 +122,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signOut = useCallback(async () => {
+    const currentUserId = session?.user?.id;
     await supabase.auth.signOut();
-    delete profileCache[Object.keys(profileCache)[0]];
+    if (currentUserId) delete profileCache[currentUserId];
     setSession(null);
     setRole(null);
     setCompanyId(null);
-  }, []);
+  }, [session]);
 
   return (
     <AuthContext.Provider value={{ session, user: session?.user ?? null, role, companyId, loading, signOut }}>
