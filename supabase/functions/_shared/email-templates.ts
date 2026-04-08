@@ -30,7 +30,7 @@ const layout = (content: string) => `
         <tr><td align="center" style="padding-bottom:32px">
           <table role="presentation" cellpadding="0" cellspacing="0">
             <tr>
-              <td style="background:${BRAND.primary};width:44px;height:44px;border-radius:12px;text-align:center;vertical-align:middle;font-size:22px;line-height:44px">🚛</td>
+              <td style="background:${BRAND.primary};width:44px;height:44px;border-radius:12px;text-align:center;vertical-align:middle;font-size:16px;font-weight:700;line-height:44px;color:#ffffff;letter-spacing:0.5px">AT</td>
               <td style="padding-left:12px;font-size:18px;font-weight:700;color:${BRAND.primary};letter-spacing:-0.3px">Aurora Transport</td>
             </tr>
           </table>
@@ -88,10 +88,10 @@ const detailRow = (label: string, value: string) =>
 const divider = () =>
   `<hr style="border:none;border-top:1px solid ${BRAND.border};margin:24px 0">`;
 
-const featureItem = (emoji: string, text: string) =>
+const featureItem = (text: string) =>
   `<table role="presentation" width="100%" cellpadding="0" cellspacing="0">
     <tr>
-      <td style="width:28px;vertical-align:top;padding:4px 0;font-size:16px">${emoji}</td>
+      <td style="width:20px;vertical-align:top;padding:4px 0;font-size:14px;color:${BRAND.muted}">•</td>
       <td style="padding:4px 0;font-size:14px;color:${BRAND.text};line-height:1.5">${text}</td>
     </tr>
   </table>`;
@@ -116,7 +116,7 @@ export function welcomeEmail(data: {
 }) {
   const nextBilling = new Date(Date.now() + 30 * 86400000).toLocaleDateString('sv-SE');
   const html = `
-    ${heading(`Välkommen, ${data.firstName}! 👋`)}
+    ${heading(`Välkommen, ${data.firstName}!`)}
     ${subheading('Ditt konto är aktivt och redo att användas.')}
     ${paragraph('Du kan nu börja använda Aurora Transport för att hantera dina uppdrag, förare och fakturor – allt på ett ställe.')}
     ${infoBox(`
@@ -125,12 +125,12 @@ export function welcomeEmail(data: {
       ${detailRow('Pris', '449 kr/mån')}
       ${detailRow('Nästa faktura', nextBilling)}
     `)}
-    ${button('Öppna dashboarden →', data.dashboardUrl)}
+    ${button('Öppna dashboarden', data.dashboardUrl)}
     ${divider()}
     ${smallText('Har du frågor? Svara på detta mail så hjälper vi dig.')}
   `;
   return {
-    subject: 'Välkommen till Aurora Transport! 🚛',
+    subject: 'Välkommen till Aurora Transport',
     html: layout(html),
   };
 }
@@ -141,16 +141,16 @@ export function driverInviteEmail(data: {
   joinUrl: string;
 }) {
   const html = `
-    ${heading('Du har blivit inbjuden! 🎉')}
+    ${heading('Du har blivit inbjuden')}
     ${subheading(`${data.adminName} på ${data.companyName} vill att du använder Aurora Transport.`)}
     ${paragraph('Med Aurora Transport kan du enkelt hantera dina leveranser direkt i mobilen:')}
     ${infoBox(`
-      ${featureItem('📋', 'Se och hantera dina uppdrag i realtid')}
-      ${featureItem('📍', 'Automatisk GPS-navigering till leveransadressen')}
-      ${featureItem('✍️', 'Digital signering och fotobevis')}
-      ${featureItem('📊', 'Tidrapportering och körsträcka')}
+      ${featureItem('Se och hantera dina uppdrag i realtid')}
+      ${featureItem('Automatisk GPS-navigering till leveransadressen')}
+      ${featureItem('Digital signering och fotobevis')}
+      ${featureItem('Tidrapportering och körsträcka')}
     `)}
-    ${button('Skapa ditt konto →', data.joinUrl)}
+    ${button('Skapa ditt konto', data.joinUrl)}
     ${smallText('Länken är giltig i 7 dagar. Kontakta din arbetsgivare om den gått ut.')}
   `;
   return {
@@ -164,16 +164,16 @@ export function paymentFailedEmail(data: {
   portalUrl: string;
 }) {
   const html = `
-    ${heading('Betalning misslyckades ⚠️')}
+    ${heading('Betalning misslyckades')}
     ${subheading(`Hej ${data.firstName}, vi kunde inte genomföra din betalning.`)}
     ${paragraph('Vi försökte debitera 449 kr för din Aurora Transport-prenumeration, men betalningen gick inte igenom.')}
-    ${alertBox('⏰ Ditt konto förblir aktivt i <strong>7 dagar</strong>. Uppdatera dina betalningsuppgifter innan dess för att undvika avbrott.', BRAND.warning)}
-    ${button('Uppdatera betalningsuppgifter →', data.portalUrl)}
+    ${alertBox('Ditt konto förblir aktivt i <strong>7 dagar</strong>. Uppdatera dina betalningsuppgifter innan dess för att undvika avbrott.', BRAND.warning)}
+    ${button('Uppdatera betalningsuppgifter', data.portalUrl)}
     ${divider()}
     ${smallText('Om du redan har uppdaterat dina uppgifter kan du ignorera detta meddelande.')}
   `;
   return {
-    subject: '⚠️ Betalning misslyckades – Aurora Transport',
+    subject: 'Betalning misslyckades – Aurora Transport',
     html: layout(html),
   };
 }
@@ -189,9 +189,9 @@ export function assignmentConfirmationEmail(data: {
   adminComment?: string | null;
   appUrl: string;
 }) {
-  const priorityLabel: Record<string, string> = { low: '🟢 Låg', normal: '🔵 Normal', urgent: '🔴 Brådskande' };
+  const priorityLabel: Record<string, string> = { low: 'Låg', normal: 'Normal', urgent: 'Brådskande' };
   const html = `
-    ${heading('Nytt uppdrag tilldelat! 📋')}
+    ${heading('Nytt uppdrag tilldelat')}
     ${subheading(`Hej ${data.driverName}, du har fått ett nytt uppdrag.`)}
     ${infoBox(`
       ${detailRow('Uppdrag', data.title)}
@@ -200,9 +200,9 @@ export function assignmentConfirmationEmail(data: {
       ${detailRow('Datum & tid', data.scheduledStart)}
       ${detailRow('Prioritet', priorityLabel[data.priority] || data.priority)}
     `)}
-    ${data.instructions ? alertBox(`📝 <strong>Instruktioner:</strong> ${data.instructions}`, BRAND.primary) : ''}
-    ${data.adminComment ? alertBox(`💬 <strong>Kommentar från admin:</strong> ${data.adminComment}`, BRAND.primaryLight) : ''}
-    ${button('Öppna i appen →', data.appUrl)}
+    ${data.instructions ? alertBox(`<strong>Instruktioner:</strong> ${data.instructions}`, BRAND.primary) : ''}
+    ${data.adminComment ? alertBox(`<strong>Kommentar från admin:</strong> ${data.adminComment}`, BRAND.primaryLight) : ''}
+    ${button('Öppna i appen', data.appUrl)}
     ${divider()}
     ${smallText('Du kan se alla dina uppdrag i Aurora Transport-appen.')}
   `;
@@ -218,21 +218,21 @@ export function driverWelcomeEmail(data: {
   appUrl: string;
 }) {
   const html = `
-    ${heading(`Välkommen ombord, ${data.driverName}! 🎉`)}
+    ${heading(`Välkommen ombord, ${data.driverName}!`)}
     ${subheading(`Du är nu en del av ${data.companyName} i Aurora Transport.`)}
     ${paragraph('Ditt konto är aktivt och redo att användas. Här är vad du kan göra direkt:')}
     ${infoBox(`
-      ${featureItem('📋', 'Se och hantera dina tilldelade uppdrag')}
-      ${featureItem('📍', 'Navigera till leveransadresser med ett klick')}
-      ${featureItem('✍️', 'Signera och fotografera leveranser digitalt')}
-      ${featureItem('⏱️', 'Rapportera tid och körsträcka')}
+      ${featureItem('Se och hantera dina tilldelade uppdrag')}
+      ${featureItem('Navigera till leveransadresser med ett klick')}
+      ${featureItem('Signera och fotografera leveranser digitalt')}
+      ${featureItem('Rapportera tid och körsträcka')}
     `)}
-    ${button('Öppna appen →', data.appUrl)}
+    ${button('Öppna appen', data.appUrl)}
     ${divider()}
     ${smallText('Har du frågor? Kontakta din arbetsgivare eller svara på detta mail.')}
   `;
   return {
-    subject: `Välkommen till ${data.companyName} – Aurora Transport 🚛`,
+    subject: `Välkommen till ${data.companyName} – Aurora Transport`,
     html: layout(html),
   };
 }
@@ -245,8 +245,8 @@ export function subscriptionCancelledEmail(data: {
     ${heading('Prenumeration avslutad')}
     ${subheading(`Hej ${data.firstName}, vi är ledsna att se dig gå.`)}
     ${paragraph('Din Aurora Transport-prenumeration har nu avslutats. Vi hoppas att tjänsten har varit till nytta för ditt företag.')}
-    ${alertBox('📦 Din data sparas i <strong>30 dagar</strong>. Under den perioden kan du återaktivera ditt konto och behålla all data.', BRAND.primary)}
-    ${button('Återaktivera mitt konto →', data.reactivateUrl)}
+    ${alertBox('Din data sparas i <strong>30 dagar</strong>. Under den perioden kan du återaktivera ditt konto och behålla all data.', BRAND.primary)}
+    ${button('Återaktivera mitt konto', data.reactivateUrl)}
     ${divider()}
     ${smallText('Tack för att du använde Aurora Transport. Vi finns här om du vill komma tillbaka.')}
   `;
@@ -265,7 +265,7 @@ export function newLeadNotificationEmail(data: {
   message?: string | null;
 }) {
   const html = `
-    ${heading('Ny intresseanmälan! 🎯')}
+    ${heading('Ny intresseanmälan')}
     ${subheading('En ny potentiell kund har skickat en intresseanmälan.')}
     ${infoBox(`
       ${detailRow('Företag', data.companyName)}
@@ -274,8 +274,8 @@ export function newLeadNotificationEmail(data: {
       ${data.phone ? detailRow('Telefon', data.phone) : ''}
       ${data.fleetSize ? detailRow('Fordon/förare', data.fleetSize) : ''}
     `)}
-    ${data.message ? alertBox(`💬 <strong>Meddelande:</strong> ${data.message}`, BRAND.primary) : ''}
-    ${button('Se alla leads →', 'https://aurora-k.lovable.app/platform/leads')}
+    ${data.message ? alertBox(`<strong>Meddelande:</strong> ${data.message}`, BRAND.primary) : ''}
+    ${button('Se alla leads', 'https://aurora-k.lovable.app/platform/leads')}
     ${divider()}
     ${smallText('Detta mail skickades automatiskt från Aurora Transport.')}
   `;
@@ -291,13 +291,13 @@ export function newCustomerMessageEmail(data: {
   customerUrl: string;
 }) {
   const html = `
-    ${heading('Nytt kundmeddelande! 💬')}
+    ${heading('Nytt kundmeddelande')}
     ${subheading(`${data.customerName} har skickat ett meddelande via kundportalen.`)}
     ${infoBox(`
       ${detailRow('Kund', data.customerName)}
     `)}
-    ${alertBox(`💬 "${data.message}"`, BRAND.primary)}
-    ${button('Svara i admin →', data.customerUrl)}
+    ${alertBox(`"${data.message}"`, BRAND.primary)}
+    ${button('Svara i admin', data.customerUrl)}
     ${divider()}
     ${smallText('Detta mail skickades automatiskt från Aurora Transport.')}
   `;
