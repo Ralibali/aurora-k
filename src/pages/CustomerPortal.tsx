@@ -6,8 +6,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ClipboardList, ShoppingCart, Receipt, Building2, CalendarPlus } from 'lucide-react';
+import { ClipboardList, ShoppingCart, Receipt, Building2, CalendarPlus, MessageCircle } from 'lucide-react';
 import { BookingRequestForm } from '@/components/portal/BookingRequestForm';
+import { PortalChat } from '@/components/portal/PortalChat';
 
 const statusLabels: Record<string, string> = {
   pending: 'Väntande', active: 'Aktiv', in_progress: 'Pågår', completed: 'Slutförd',
@@ -101,6 +102,7 @@ export default function CustomerPortal() {
             <TabsTrigger value="orders" className="gap-1"><ShoppingCart className="h-3.5 w-3.5" /> Beställningar</TabsTrigger>
             <TabsTrigger value="invoices" className="gap-1"><Receipt className="h-3.5 w-3.5" /> Fakturor</TabsTrigger>
             <TabsTrigger value="booking" className="gap-1"><CalendarPlus className="h-3.5 w-3.5" /> Ny förfrågan</TabsTrigger>
+            <TabsTrigger value="chat" className="gap-1"><MessageCircle className="h-3.5 w-3.5" /> Chatt</TabsTrigger>
           </TabsList>
 
           <TabsContent value="assignments" className="mt-4">
@@ -195,6 +197,10 @@ export default function CustomerPortal() {
 
           <TabsContent value="booking" className="mt-4">
             <BookingRequestForm token={token!} bookings={bookings} onCreated={handleBookingCreated} />
+          </TabsContent>
+
+          <TabsContent value="chat" className="mt-4">
+            <PortalChat token={token!} customerName={customer?.name || 'Kund'} />
           </TabsContent>
         </Tabs>
       </main>
