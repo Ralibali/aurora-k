@@ -96,6 +96,22 @@ export function PortalChat({ token, customerName }: PortalChatProps) {
         p_sender_name: customerName,
       });
       if (error) throw error;
+
+      // Notify admin via email (fire and forget)
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      fetch(`https://${projectId}.supabase.co/functions/v1/notify-admin`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'new-customer-message',
+          data: {
+            customerName,
+            message: newMessage.trim(),
+            customerUrl: `${window.location.origin}/admin/customers/${customerIdRef.current}`,
+          },
+        }),
+      }).catch((err) => console.error('[PortalChat] email notify failed:', err));
+
       setNewMessage('');
     } catch (err: any) {
       toast.error('Kunde inte skicka meddelandet');
