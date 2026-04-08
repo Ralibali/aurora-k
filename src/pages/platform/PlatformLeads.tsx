@@ -158,7 +158,7 @@ export default function PlatformLeads() {
 
       {/* Table */}
       {filtered.length === 0 && !isLoading ? (
-        <EmptyState title="Inga leads" description="Det finns inga intresseanmälningar ännu." />
+        <EmptyState icon={Building2} title="Inga leads" description="Det finns inga intresseanmälningar ännu." />
       ) : (
         <ScrollableTable>
           <Table>
