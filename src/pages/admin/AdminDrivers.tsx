@@ -202,8 +202,60 @@ function InviteModal({ companyId, companyName, adminName }: { companyId: string;
     } finally {
       setSubmitting(false);
     }
+  const copyLink = (token: string) => {
+    const url = `${window.location.origin}/join?token=${token}`;
+    navigator.clipboard.writeText(url);
+    toast.success('Länk kopierad!');
   };
-...
+
+  const handleClose = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (!isOpen) {
+      setRows([{ name: '', email: '' }]);
+      setResults(null);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogTrigger asChild>
+        <Button><Plus className="h-4 w-4 mr-1" /> Bjud in förare</Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-lg">
+        <DialogHeader><DialogTitle>Bjud in förare</DialogTitle></DialogHeader>
+
+        {results ? (
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">Dela länkarna nedan med dina förare:</p>
+            {results.map((r, i) => (
+              <div key={i} className="flex items-center gap-2 bg-muted/50 rounded-lg p-3">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{r.email}</p>
+                  <p className="text-xs text-muted-foreground truncate">{window.location.origin}/join?token={r.token}</p>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => copyLink(r.token)}>
+                  <Copy className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            ))}
+            <Button variant="outline" className="w-full" onClick={() => handleClose(false)}>Stäng</Button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">Skicka inbjudningar via e-post så kan de registrera sig direkt.</p>
+            <div className="space-y-3">
+              {rows.map((row, i) => (
+                <div key={i} className="flex gap-2 items-start">
+                  <Input placeholder="Namn" value={row.name} onChange={e => updateRow(i, 'name', e.target.value)} className="flex-1 h-10" />
+                  <Input type="email" placeholder="E-post" value={row.email} onChange={e => updateRow(i, 'email', e.target.value)} className="flex-1 h-10" />
+                  {rows.length > 1 && (
+                    <button onClick={() => removeRow(i)} className="mt-2 text-muted-foreground hover:text-destructive">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
             <button onClick={addRow} className="text-sm text-primary font-medium flex items-center gap-1 hover:underline">
               <Plus className="h-3.5 w-3.5" /> Lägg till fler
             </button>
