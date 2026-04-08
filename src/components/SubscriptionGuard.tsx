@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Lock, AlertTriangle, XCircle } from 'lucide-react';
+import { Lock, AlertTriangle, XCircle, RefreshCw } from 'lucide-react';
 
 type SubStatus = 'active' | 'pending' | 'past_due' | 'cancelled' | null;
 
@@ -10,6 +10,7 @@ export function SubscriptionGuard({ children }: { children: React.ReactNode }) {
   const { companyId, loading: authLoading } = useAuth();
   const [status, setStatus] = useState<SubStatus>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
 
   const loadStatus = useCallback(async () => {
@@ -18,16 +19,19 @@ export function SubscriptionGuard({ children }: { children: React.ReactNode }) {
       setLoading(false);
       return;
     }
+    setLoadError(false);
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('companies')
         .select('subscription_status')
         .eq('id', companyId)
         .single();
+      if (error) throw error;
       setStatus((data?.subscription_status as SubStatus) || 'pending');
-    } catch {
-      // On error, allow access rather than blocking forever
-      setStatus('active');
+    } catch (err) {
+      console.error('[SubscriptionGuard] Failed to load subscription status:', err);
+      setLoadError(true);
+      setStatus(null);
     } finally {
       setLoading(false);
     }
@@ -65,6 +69,33 @@ export function SubscriptionGuard({ children }: { children: React.ReactNode }) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    );
+  }
+
+  // Error loading subscription status — don't grant access
+  if (loadError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <div className="bg-card rounded-2xl border shadow-sm p-8 max-w-md text-center">
+          <div className="mx-auto w-14 h-14 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
+            <AlertTriangle className="h-7 w-7 text-destructive" />
+          </div>
+          <h2 className="text-lg font-semibold mb-2">Kunde inte ladda kontostatus</h2>
+          <p className="text-sm text-muted-foreground mb-6">
+            Det gick inte att verifiera din prenumeration. Kontrollera din internetanslutning och försök igen.
+          </p>
+          <Button
+            onClick={() => {
+              setLoading(true);
+              loadStatus();
+            }}
+            className="w-full h-12 rounded-xl font-semibold"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Försök igen
+          </Button>
+        </div>
       </div>
     );
   }

@@ -1,3 +1,4 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.100.1";
 import { corsHeaders } from "npm:@supabase/supabase-js@2.100.1/cors";
 import { assignmentConfirmationEmail, driverWelcomeEmail } from "../_shared/email-templates.ts";
 
@@ -14,6 +15,36 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Authenticate the caller — only authenticated users or internal service calls
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+
+    const callerClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: claimsData, error: claimsError } = await callerClient.auth.getClaims(
+      authHeader.replace("Bearer ", "")
+    );
+
+    // Allow if it's a valid user JWT OR if it's the service_role key (internal calls)
+    const isServiceRole = claimsData?.claims?.role === "service_role";
+    const isAuthenticated = !claimsError && claimsData?.claims?.sub;
+
+    if (!isServiceRole && !isAuthenticated) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -76,7 +107,7 @@ Deno.serve(async (req) => {
     });
   } catch (err) {
     console.error("[send-email] Error:", err);
-    return new Response(JSON.stringify({ error: err.message }), {
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

@@ -23,7 +23,7 @@ async function sendEmail(to: string, template: { subject: string; html: string }
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${Deno.env.get("SUPABASE_ANON_KEY")}`,
+      Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
     },
     body: JSON.stringify({ to, subject: template.subject, html: template.html }),
   });
@@ -62,7 +62,7 @@ serve(async (req) => {
           stripe_subscription_id: session.subscription as string,
         }).eq("id", companyId);
 
-        // Send welcome email
+        // Send welcome email to the admin
         const { data: profile } = await supabase
           .from("profiles")
           .select("email, full_name")
@@ -77,14 +77,14 @@ serve(async (req) => {
           .eq("id", companyId)
           .single();
 
-        if (profile) {
+        if (profile?.email) {
           const firstName = profile.full_name?.split(" ")[0] || "där";
           const tmpl = welcomeEmail({
             firstName,
             companyName: company?.name || "Ditt företag",
             dashboardUrl: `https://aurora-k.lovable.app/admin`,
           });
-          await sendEmail("info@auroramedia.se", tmpl);
+          await sendEmail(profile.email, tmpl);
         }
 
         console.log(`[stripe-webhook] Company ${companyId} activated`);
@@ -109,12 +109,12 @@ serve(async (req) => {
             .limit(1)
             .single();
 
-          if (profile) {
+          if (profile?.email) {
             const tmpl = paymentFailedEmail({
               firstName: profile.full_name?.split(" ")[0] || "där",
               portalUrl: `https://aurora-k.lovable.app/admin/settings`,
             });
-            await sendEmail("info@auroramedia.se", tmpl);
+            await sendEmail(profile.email, tmpl);
           }
 
           console.log(`[stripe-webhook] Company ${company.id} set to past_due`);
@@ -140,12 +140,12 @@ serve(async (req) => {
             .limit(1)
             .single();
 
-          if (profile) {
+          if (profile?.email) {
             const tmpl = subscriptionCancelledEmail({
               firstName: profile.full_name?.split(" ")[0] || "där",
               reactivateUrl: `https://aurora-k.lovable.app/admin/settings`,
             });
-            await sendEmail("info@auroramedia.se", tmpl);
+            await sendEmail(profile.email, tmpl);
           }
 
           console.log(`[stripe-webhook] Company ${company.id} cancelled`);

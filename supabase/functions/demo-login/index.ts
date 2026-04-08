@@ -19,7 +19,7 @@ const DEMO_COMPANIES = [
     ],
     assignments: [
       { title: "Leverans betongblock", address: "Byggvägen 8, Mölndal", status: "completed", priority: "high" },
-      { title: "Hämta pallgods", address: "Hamnen, Göteborg", status: "in_progress", priority: "normal" },
+      { title: "Hämta pallgods", address: "Hamnen, Göteborg", status: "active", priority: "normal" },
       { title: "Expressleverans kyl", address: "Kungsgatan 22, Stockholm", status: "pending", priority: "urgent" },
     ],
   },
@@ -46,6 +46,18 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Validate demo secret if configured (optional gate against abuse)
+    const expectedSecret = Deno.env.get("DEMO_SECRET");
+    if (expectedSecret) {
+      const secret = req.headers.get("x-demo-secret");
+      if (secret !== expectedSecret) {
+        return new Response(
+          JSON.stringify({ error: "Unauthorized" }),
+          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
     const { type } = await req.json().catch(() => ({ type: "akeri" }));
     const demo = type === "bemanning" ? DEMO_COMPANIES[1] : DEMO_COMPANIES[0];
 

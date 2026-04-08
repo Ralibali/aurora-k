@@ -26,12 +26,21 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Verify JWT
-    const anonClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!);
-    const { data: { user }, error: authError } = await anonClient.auth.getUser(authHeader.replace('Bearer ', ''));
+    // Verify JWT and get caller
+    const anonClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: { user }, error: authError } = await anonClient.auth.getUser();
     if (authError || !user) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
+
+    // Get caller's company_id
+    const { data: callerProfile } = await anonClient
+      .from('profiles')
+      .select('company_id')
+      .eq('id', user.id)
+      .maybeSingle();
 
     const parsed = BodySchema.safeParse(await req.json());
     if (!parsed.success) {
@@ -51,18 +60,26 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Assignment not found' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    // Fetch company settings
-    const { data: settings } = await supabase.from('settings').select('*').limit(1).single();
+    // Verify caller belongs to the same company as the assignment
+    if (!callerProfile?.company_id || callerProfile.company_id !== assignment.company_id) {
+      return new Response(
+        JSON.stringify({ error: 'Forbidden' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Fetch company settings scoped by company_id
+    const { data: settings } = await supabase
+      .from('settings')
+      .select('*')
+      .eq('company_id', assignment.company_id)
+      .maybeSingle();
 
     const companyName = settings?.company_name || 'Transport';
     const scheduledDate = new Date(assignment.scheduled_start).toLocaleDateString('sv-SE');
     const scheduledTime = new Date(assignment.scheduled_start).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
 
-    // For now, we log the email intent. In production, integrate with an email service.
     console.log(`[share-assignment] Sharing assignment ${assignment_id} to ${recipient_email}`);
-    console.log(`Subject: Uppdrag: ${assignment.title} - ${companyName}`);
-    console.log(`Assignment details: ${assignment.title}, ${assignment.address}, ${scheduledDate} ${scheduledTime}`);
-    console.log(`Message: ${message || '(none)'}`);
 
     return new Response(JSON.stringify({
       success: true,

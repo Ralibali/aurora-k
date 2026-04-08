@@ -39,8 +39,9 @@ Deno.serve(async (req) => {
     // Check admin role
     const { data: roleData } = await callerClient
       .from("user_roles")
-      .select("role")
+      .select("role, company_id")
       .eq("user_id", caller.id)
+      .eq("role", "admin")
       .maybeSingle();
 
     if (roleData?.role !== "admin") {
@@ -61,6 +62,20 @@ Deno.serve(async (req) => {
     const admin = createClient(supabaseUrl, serviceRoleKey, {
       auth: { autoRefreshToken: false, persistSession: false },
     });
+
+    // Cross-tenant check: verify target user belongs to same company
+    const { data: targetProfile } = await admin
+      .from("profiles")
+      .select("company_id")
+      .eq("id", user_id)
+      .maybeSingle();
+
+    if (!roleData?.company_id || !targetProfile?.company_id || roleData.company_id !== targetProfile.company_id) {
+      return new Response(JSON.stringify({ error: "Forbidden — user belongs to a different company" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const { error } = await admin.auth.admin.updateUserById(user_id, { password });
     if (error) {
