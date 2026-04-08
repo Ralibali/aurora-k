@@ -7,6 +7,7 @@ interface AuthContextType {
   user: User | null;
   role: 'admin' | 'driver' | null;
   companyId: string | null;
+  isPlatformAdmin: boolean;
   loading: boolean;
   signOut: () => Promise<void>;
 }
@@ -16,16 +17,17 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   role: null,
   companyId: null,
+  isPlatformAdmin: false,
   loading: true,
   signOut: async () => {},
 });
 
-const profileCache: Record<string, { role: 'admin' | 'driver' | null; companyId: string | null }> = {};
+const profileCache: Record<string, { role: 'admin' | 'driver' | null; companyId: string | null; isPlatformAdmin: boolean }> = {};
 
-async function fetchProfile(userId: string): Promise<{ role: 'admin' | 'driver' | null; companyId: string | null }> {
+async function fetchProfile(userId: string): Promise<{ role: 'admin' | 'driver' | null; companyId: string | null; isPlatformAdmin: boolean }> {
   if (profileCache[userId]) return profileCache[userId];
 
-  const [{ data: roleRows, error: rolesError }, { data: profileData, error: profileError }] = await Promise.all([
+  const [{ data: roleRows, error: rolesError }, { data: profileData, error: profileError }, { data: platformData }] = await Promise.all([
     supabase
       .from('user_roles')
       .select('role, company_id')
@@ -35,6 +37,7 @@ async function fetchProfile(userId: string): Promise<{ role: 'admin' | 'driver' 
       .select('company_id, role')
       .eq('id', userId)
       .maybeSingle(),
+    supabase.rpc('is_platform_admin', { _user_id: userId }),
   ]);
 
   if (rolesError) {
@@ -58,6 +61,7 @@ async function fetchProfile(userId: string): Promise<{ role: 'admin' | 'driver' 
   const result = {
     role: resolvedRole,
     companyId: companyIdFromRoles ?? profileData?.company_id ?? null,
+    isPlatformAdmin: !!platformData,
   };
 
   if (result.role || result.companyId) {
@@ -71,6 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<'admin' | 'driver' | null>(null);
   const [companyId, setCompanyId] = useState<string | null>(null);
+  const [isPlatformAdmin, setIsPlatformAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const mounted = useRef(true);
 
@@ -90,11 +95,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!ignore) {
           setRole(profile.role);
           setCompanyId(profile.companyId);
+          setIsPlatformAdmin(profile.isPlatformAdmin);
           setLoading(false);
         }
       } else {
         setRole(null);
         setCompanyId(null);
+        setIsPlatformAdmin(false);
         setLoading(false);
       }
     };
@@ -132,10 +139,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(null);
     setRole(null);
     setCompanyId(null);
+    setIsPlatformAdmin(false);
   }, [session]);
 
   return (
-    <AuthContext.Provider value={{ session, user: session?.user ?? null, role, companyId, loading, signOut }}>
+    <AuthContext.Provider value={{ session, user: session?.user ?? null, role, companyId, isPlatformAdmin, loading, signOut }}>
       {children}
     </AuthContext.Provider>
   );

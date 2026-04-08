@@ -28,7 +28,7 @@ const fadeUp = {
 };
 
 export default function LandingPage() {
-  const { user, role } = useAuth();
+  const { user, role, isPlatformAdmin } = useAuth();
   const { setTheme, theme } = useTheme();
   const navigate = useNavigate();
   const [demoLoading, setDemoLoading] = useState(false);
@@ -211,7 +211,7 @@ function Navbar({ onDemo, demoLoading, onContact }: { onDemo: (type: 'akeri' | '
         <div className="flex items-center gap-3">
           {user ? (
             <Button size="sm" asChild>
-              <Link to={role === 'admin' ? '/admin' : '/driver'}>Gå till dashboard</Link>
+              <Link to={isPlatformAdmin ? '/platform' : role === 'admin' ? '/admin' : '/driver'}>Gå till dashboard</Link>
             </Button>
           ) : (
             <>

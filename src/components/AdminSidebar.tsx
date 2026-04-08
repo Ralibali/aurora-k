@@ -9,7 +9,7 @@ import {
 import { NavLink } from '@/components/NavLink';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { usePlatformAdmin } from '@/hooks/usePlatformAdmin';
+
 import { useUnreadPortalMessages } from '@/hooks/useUnreadPortalMessages';
 
 /* Primary items — always visible */
@@ -107,8 +107,7 @@ const secondarySections = [
 ];
 
 export function AdminSidebar() {
-  const { user, signOut } = useAuth();
-  const { isPlatformAdmin } = usePlatformAdmin();
+  const { user, isPlatformAdmin, signOut } = useAuth();
   const { unreadCount } = useUnreadPortalMessages();
   const navigate = useNavigate();
   const [showMore, setShowMore] = useState(() => localStorage.getItem('sidebar-expanded') === 'true');
