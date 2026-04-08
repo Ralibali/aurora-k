@@ -42,9 +42,9 @@ export default defineConfig(({ mode }) => ({
       },
       includeAssets: ["icon-192x192.png", "icon-512x512.png"],
       manifest: {
-        name: "Aurora Medias Transport AB",
-        short_name: "Transport",
-        description: "Transporthantering för Aurora Medias Transport AB",
+        name: "Aurora Transport",
+        short_name: "Aurora",
+        description: "Transportledningssystem för moderna åkerier",
         start_url: "/",
         display: "standalone",
         background_color: "#ffffff",
