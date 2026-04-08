@@ -12,6 +12,7 @@ const navItems = [
   { to: '/platform/companies', icon: Building2, label: 'Företag' },
   { to: '/platform/support', icon: HeadphonesIcon, label: 'Support' },
   { to: '/platform/announcements', icon: Megaphone, label: 'Meddelanden' },
+  { to: '/platform/revenue', icon: TrendingUp, label: 'Intäkter' },
 ];
 
 export function PlatformAdminShell() {

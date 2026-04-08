@@ -149,6 +149,7 @@ const App = () => (
                   <Route path="companies" element={<PlatformCompanies />} />
                   <Route path="support" element={<PlatformSupport />} />
                   <Route path="announcements" element={<PlatformAnnouncements />} />
+                  <Route path="revenue" element={<PlatformRevenue />} />
                 </Route>
 
 {/* Driver routes — share a single layout shell */}

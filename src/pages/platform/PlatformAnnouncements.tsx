@@ -20,6 +20,7 @@ interface Announcement {
   type: string;
   active: boolean;
   created_at: string;
+  target?: string;
 }
 
 export default function PlatformAnnouncements() {
@@ -29,6 +30,8 @@ export default function PlatformAnnouncements() {
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
   const [type, setType] = useState('info');
+  const [target, setTarget] = useState('all');
+  const [targetCompany, setTargetCompany] = useState('');
 
   const { data: announcements } = useQuery({
     queryKey: ['platform-announcements'],
@@ -41,11 +44,20 @@ export default function PlatformAnnouncements() {
     },
   });
 
+  const { data: companies } = useQuery({
+    queryKey: ['platform-companies'],
+    queryFn: async () => {
+      const { data } = await supabase.from('companies').select('id, name').order('name');
+      return data || [];
+    },
+  });
+
   const createMutation = useMutation({
     mutationFn: async () => {
+      const finalTarget = target === 'company' ? targetCompany : target;
       const { error } = await supabase
         .from('platform_announcements' as any)
-        .insert({ title, message, type, created_by: user?.id });
+        .insert({ title, message, type, created_by: user?.id, target: finalTarget });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -54,6 +66,8 @@ export default function PlatformAnnouncements() {
       setTitle('');
       setMessage('');
       setType('info');
+      setTarget('all');
+      setTargetCompany('');
       toast.success('Meddelande skapat');
     },
     onError: () => toast.error('Kunde inte skapa meddelande'),
@@ -81,8 +95,15 @@ export default function PlatformAnnouncements() {
     }
   };
 
+  const getTargetLabel = (t: string | undefined) => {
+    if (!t || t === 'all') return 'Alla';
+    if (t === 'active') return 'Aktiva';
+    const company = companies?.find((c: any) => c.id === t);
+    return company?.name || t;
+  };
+
   return (
-    <PlatformLayout title="Systemmeddelanden" description="Meddelanden som visas för alla kunder">
+    <PlatformLayout title="Systemmeddelanden" description="Meddelanden som visas för kunder">
       <div className="mb-6">
         <Button onClick={() => setShowForm(!showForm)} className="gap-2">
           <Plus className="h-4 w-4" />
@@ -95,18 +116,45 @@ export default function PlatformAnnouncements() {
           <div className="space-y-4">
             <Input placeholder="Rubrik" value={title} onChange={(e) => setTitle(e.target.value)} />
             <Textarea placeholder="Meddelande..." value={message} onChange={(e) => setMessage(e.target.value)} rows={3} />
-            <Select value={type} onValueChange={setType}>
-              <SelectTrigger className="w-40">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="info">Info</SelectItem>
-                <SelectItem value="warning">Varning</SelectItem>
-                <SelectItem value="update">Uppdatering</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex flex-wrap gap-3">
+              <Select value={type} onValueChange={setType}>
+                <SelectTrigger className="w-40">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="info">Info</SelectItem>
+                  <SelectItem value="warning">Varning</SelectItem>
+                  <SelectItem value="update">Uppdatering</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={target} onValueChange={(v) => { setTarget(v); if (v !== 'company') setTargetCompany(''); }}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Målgrupp" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Alla kunder</SelectItem>
+                  <SelectItem value="active">Endast aktiva</SelectItem>
+                  <SelectItem value="company">Specifikt företag</SelectItem>
+                </SelectContent>
+              </Select>
+              {target === 'company' && (
+                <Select value={targetCompany} onValueChange={setTargetCompany}>
+                  <SelectTrigger className="w-56">
+                    <SelectValue placeholder="Välj företag..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {companies?.map((c: any) => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
             <div className="flex gap-2">
-              <Button onClick={() => createMutation.mutate()} disabled={!title.trim() || !message.trim() || createMutation.isPending}>
+              <Button
+                onClick={() => createMutation.mutate()}
+                disabled={!title.trim() || !message.trim() || (target === 'company' && !targetCompany) || createMutation.isPending}
+              >
                 Publicera
               </Button>
               <Button variant="ghost" onClick={() => setShowForm(false)}>Avbryt</Button>
@@ -124,9 +172,12 @@ export default function PlatformAnnouncements() {
                 <div>
                   <h3 className="font-semibold text-sm text-foreground">{a.title}</h3>
                   <p className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap">{a.message}</p>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    {new Date(a.created_at).toLocaleDateString('sv-SE')}
-                  </p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(a.created_at).toLocaleDateString('sv-SE')}
+                    </p>
+                    <Badge variant="outline" className="text-[10px]">{getTargetLabel(a.target)}</Badge>
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-3 shrink-0">

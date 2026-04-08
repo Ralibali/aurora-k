@@ -7,8 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { MessageSquare, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { MessageSquare, Clock, CheckCircle, AlertCircle, Headphones } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+
+type StatusFilter = 'all' | 'open' | 'answered' | 'closed';
 
 interface Ticket {
   id: string;
@@ -28,6 +30,7 @@ export default function PlatformSupport() {
   const queryClient = useQueryClient();
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('open');
 
   const { data: tickets } = useQuery({
     queryKey: ['platform-support-tickets'],
@@ -48,8 +51,17 @@ export default function PlatformSupport() {
     },
   });
 
+  const { data: profiles } = useQuery({
+    queryKey: ['platform-profiles-all'],
+    queryFn: async () => {
+      const { data } = await supabase.from('profiles').select('id, email, full_name');
+      return data || [];
+    },
+  });
+
   const replyMutation = useMutation({
     mutationFn: async ({ ticketId, reply }: { ticketId: string; reply: string }) => {
+      const ticket = tickets?.find((t) => t.id === ticketId);
       const { error } = await supabase
         .from('support_tickets' as any)
         .update({
@@ -60,6 +72,24 @@ export default function PlatformSupport() {
         })
         .eq('id', ticketId);
       if (error) throw error;
+
+      // Send email notification to ticket creator
+      if (ticket) {
+        const creatorProfile = profiles?.find((p: any) => p.id === ticket.created_by);
+        if (creatorProfile?.email) {
+          try {
+            await supabase.functions.invoke('send-email', {
+              body: {
+                to: creatorProfile.email,
+                subject: `Svar på ditt supportärende: ${ticket.subject}`,
+                html: `<p>Hej,</p><p>Vi har svarat på ditt supportärende <strong>${ticket.subject}</strong>:</p><blockquote style="border-left:3px solid #1e3a5f;padding-left:12px;color:#555">${reply}</blockquote><p>Logga in på Aurora Transport för att se hela ärendet.</p>`,
+              },
+            });
+          } catch {
+            // Email notification is best-effort
+          }
+        }
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['platform-support-tickets'] });
@@ -96,12 +126,33 @@ export default function PlatformSupport() {
     }
   };
 
+  const filteredTickets = tickets?.filter((t) => statusFilter === 'all' || t.status === statusFilter) || [];
   const openCount = tickets?.filter((t) => t.status === 'open').length || 0;
+
+  const filterTabs: { label: string; value: StatusFilter }[] = [
+    { label: 'Alla', value: 'all' },
+    { label: 'Öppna', value: 'open' },
+    { label: 'Besvarade', value: 'answered' },
+    { label: 'Stängda', value: 'closed' },
+  ];
 
   return (
     <PlatformLayout title="Supportärenden" description={`${openCount} öppna ärenden`}>
+      <div className="flex gap-1 mb-6">
+        {filterTabs.map((tab) => (
+          <Button
+            key={tab.value}
+            variant={statusFilter === tab.value ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setStatusFilter(tab.value)}
+          >
+            {tab.label}
+          </Button>
+        ))}
+      </div>
+
       <div className="space-y-4">
-        {tickets?.map((ticket) => (
+        {filteredTickets.map((ticket) => (
           <Card key={ticket.id} className="p-5">
             <div className="flex items-start justify-between gap-3 mb-3">
               <div className="flex items-start gap-3">
@@ -134,56 +185,33 @@ export default function PlatformSupport() {
 
             {replyingTo === ticket.id ? (
               <div className="space-y-2">
-                <Textarea
-                  placeholder="Skriv ditt svar..."
-                  value={replyText}
-                  onChange={(e) => setReplyText(e.target.value)}
-                  rows={3}
-                />
+                <Textarea placeholder="Skriv ditt svar..." value={replyText} onChange={(e) => setReplyText(e.target.value)} rows={3} />
                 <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    onClick={() => replyMutation.mutate({ ticketId: ticket.id, reply: replyText })}
-                    disabled={!replyText.trim() || replyMutation.isPending}
-                  >
+                  <Button size="sm" onClick={() => replyMutation.mutate({ ticketId: ticket.id, reply: replyText })} disabled={!replyText.trim() || replyMutation.isPending}>
                     Skicka svar
                   </Button>
-                  <Button size="sm" variant="ghost" onClick={() => { setReplyingTo(null); setReplyText(''); }}>
-                    Avbryt
-                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => { setReplyingTo(null); setReplyText(''); }}>Avbryt</Button>
                 </div>
               </div>
             ) : (
               <div className="flex gap-2">
                 {ticket.status !== 'closed' && (
                   <>
-                    <Button size="sm" variant="outline" onClick={() => setReplyingTo(ticket.id)}>
-                      Svara
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={() => closeMutation.mutate(ticket.id)}>
-                      Stäng
-                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => setReplyingTo(ticket.id)}>Svara</Button>
+                    <Button size="sm" variant="ghost" onClick={() => closeMutation.mutate(ticket.id)}>Stäng</Button>
                   </>
                 )}
               </div>
             )}
           </Card>
         ))}
-        {!tickets?.length && (
+        {filteredTickets.length === 0 && (
           <div className="text-center py-12">
-            <HeadphonesIcon className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-            <p className="text-sm text-muted-foreground">Inga supportärenden ännu.</p>
+            <Headphones className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+            <p className="text-sm text-muted-foreground">Inga supportärenden matchar filtret.</p>
           </div>
         )}
       </div>
     </PlatformLayout>
-  );
-}
-
-function HeadphonesIcon(props: any) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M3 18v-6a9 9 0 0 1 18 0v6" /><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
-    </svg>
   );
 }
