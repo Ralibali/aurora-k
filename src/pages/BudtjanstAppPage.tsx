@@ -276,6 +276,7 @@ function Footer() {
           <Link to="/" className="hover:text-white transition-colors">Hem</Link>
           <Link to="/tjanster" className="hover:text-white transition-colors">Tjänster</Link>
           <Link to="/akeri-system" className="hover:text-white transition-colors">Åkerisystem</Link>
+          <Link to="/budtjanst-app" className="hover:text-white transition-colors">Budtjänst-app</Link>
           <Link to="/dispatch-system" className="hover:text-white transition-colors">Dispatch-system</Link>
           <Link to="/transportledningssystem" className="hover:text-white transition-colors">Transportledningssystem</Link>
           <Link to="/coredination-alternativ" className="hover:text-white transition-colors">Coredination-alternativ</Link>
