@@ -7,8 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Truck, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-
-usePageMeta({ title: 'Återställ lösenord | Aurora Transport', description: '', canonical: 'https://auroratransport.se/reset-password', noindex: true });
+export default function ResetPasswordPage() {
+  usePageMeta({ title: 'Återställ lösenord | Aurora Transport', description: '', canonical: 'https://auroratransport.se/reset-password', noindex: true });
   const navigate = useNavigate();
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');

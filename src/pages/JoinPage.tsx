@@ -15,8 +15,8 @@ interface Invitation {
   company_id: string;
   company_name?: string;
 }
-
-usePageMeta({ title: 'Gå med | Aurora Transport', description: '', canonical: 'https://auroratransport.se/join', noindex: true });
+export default function JoinPage() {
+  usePageMeta({ title: 'Gå med | Aurora Transport', description: '', canonical: 'https://auroratransport.se/join', noindex: true });
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
