@@ -1,24 +1,28 @@
 
 
-## Plan: Ta bort alla emojis från e-postmallar
+## Plan: Ta bort företagsnamn från testimonials
 
-### Sammanfattning
-Rensa bort samtliga emojis från e-postmallarna i `supabase/functions/_shared/email-templates.ts` för ett professionellt utseende. Ersätt `featureItem`-funktionens emoji-parameter med en enkel punkt/streck, och ta bort emojis från rubriker, ämnesrader, alertboxar och logo-headern.
+Ändra `role`-fältet i alla testimonials så att bara titeln visas, utan företagsnamn.
 
-### Ändringar
+### Ändringar per fil
 
-**Fil: `supabase/functions/_shared/email-templates.ts`**
+**1. `src/pages/LandingPage.tsx` (rad 820-825)**
+- `'VD, budföretag'` → `'VD'`
+- Övriga (`'Åkeriägare'`, `'Transportledare'`, `'Ekonomiansvarig'`) har redan inga företagsnamn
 
-1. **Logo-header (rad 33):** Byt ut `🚛`-emojin mot bokstaven "AT" eller en ren cirkel-ikon i text
-2. **`featureItem`-funktionen (rad 91-97):** Ändra så den renderar en punkt (•) istället för emoji-parametern, alternativt ta bort emoji-kolumnen helt
-3. **welcomeEmail:** `Välkommen, ${name}! 👋` → `Välkommen, ${name}!` och subject `🚛` borttagen
-4. **driverInviteEmail:** `Du har blivit inbjuden! 🎉` → `Du har blivit inbjuden` och byt `📋📍✍️📊` till `•`
-5. **paymentFailedEmail:** `⚠️` i heading och subject, `⏰` i alertBox — alla borttagna
-6. **assignmentConfirmationEmail:** `📋` i heading, `🟢🔵🔴` i priorityLabel → "Låg/Normal/Brådskande" utan emoji, `📝💬` i alertboxar borttagna
-7. **driverWelcomeEmail:** `🎉` i heading, `🚛` i subject, `📋📍✍️⏱️` i featureItems → alla borttagna
-8. **subscriptionCancelledEmail:** `📦` i alertBox borttagen
-9. **newLeadNotificationEmail:** `🎯` i heading, `💬` i alertBox borttagna
-10. **newCustomerMessageEmail:** `💬` i heading och alertBox borttagna
+**2. `src/pages/AdsBudtjanstPage.tsx` (rad 591)**
+- `'VD, Stockholms Bud AB'` → `'VD'`
 
-Totalt ca 25 emojis att ta bort/ersätta i en enda fil. Inga andra filer påverkas.
+**3. `src/pages/AdsAkeriPage.tsx` (rad 257)**
+- `'Åkeriägare, Turesson Transport'` → `'Åkeriägare'`
+
+**4. `src/pages/AdsTransportPage.tsx` (rad 261-262)**
+- `'VD, Pålssons Transport'` → `'VD'`
+- `'Transportledare, Express Logistik'` → `'Transportledare'`
+
+**5. `src/pages/AdsFlottaPage.tsx` (rad 259-260)**
+- `'Flottachef, Expressbud Syd'` → `'Flottachef'`
+- `'Driftansvarig, Bergström Logistik'` → `'Driftansvarig'`
+
+Totalt 6 strängar att uppdatera i 5 filer. Inga strukturella ändringar.
 
