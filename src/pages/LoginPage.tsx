@@ -176,7 +176,7 @@ export default function LoginPage() {
 
         <p className="text-center text-xs text-sidebar-foreground/40 mt-4">
           Inget konto?{' '}
-          <Link to="/kontakt" className="text-primary hover:underline">Skapa konto</Link>
+          <Link to="/kontakt" className="text-primary hover:underline">Kontakta oss</Link>
         </p>
         <p className="text-center text-xs text-sidebar-foreground/40 mt-2">
           © {new Date().getFullYear()} Aurora Medias Transport
