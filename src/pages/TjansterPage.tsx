@@ -172,7 +172,7 @@ function Navbar() {
             <Link to="/login">Logga in</Link>
           </Button>
           <Button size="sm" asChild>
-            <Link to="/register">Kom igång</Link>
+            <Link to="/kontakt">Kom igång</Link>
           </Button>
         </div>
       </div>
@@ -195,7 +195,7 @@ function Hero() {
         </motion.p>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="flex flex-col sm:flex-row gap-3 justify-center">
           <Button size="lg" asChild className="rounded-xl px-8 py-6 text-base font-semibold">
-            <Link to="/register">Kom igång idag — 449 kr/mån</Link>
+            <Link to="/kontakt">Kom igång idag — 449 kr/mån</Link>
           </Button>
           <Button size="lg" variant="outline" asChild className="rounded-xl px-8 py-6 text-base font-semibold">
             <Link to="/login">Testa demo</Link>
@@ -274,7 +274,7 @@ function PricingSection() {
           </div>
           <div className="p-6 text-center">
             <Button size="lg" asChild className="rounded-xl px-10 py-5 text-base font-semibold">
-              <Link to="/register">Kom igång nu <ArrowRight className="ml-2 h-4 w-4" /></Link>
+              <Link to="/kontakt">Kom igång nu <ArrowRight className="ml-2 h-4 w-4" /></Link>
             </Button>
             <p className="text-xs text-muted-foreground mt-3">Ingen bindningstid. Avsluta när du vill.</p>
           </div>
@@ -436,7 +436,7 @@ function FinalCta() {
         </motion.p>
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} custom={2} variants={fadeUp}>
           <Button size="lg" asChild className="rounded-xl px-10 py-6 text-base font-semibold bg-white text-[hsl(222,47%,11%)] hover:bg-white/90">
-            <Link to="/register">Skapa ditt konto nu</Link>
+            <Link to="/kontakt">Skapa ditt konto nu</Link>
           </Button>
         </motion.div>
       </div>

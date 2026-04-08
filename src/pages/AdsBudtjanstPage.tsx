@@ -140,7 +140,7 @@ function TopBar({ onDemo, demoLoading }: { onDemo: () => void; demoLoading: bool
             {demoLoading ? 'Laddar...' : 'Live-demo'}
           </Button>
           <Button size="sm" asChild className="bg-blue-600 hover:bg-blue-500 text-white rounded-lg shadow-lg shadow-blue-600/20 hover:shadow-blue-500/30 transition-all">
-            <Link to="/register">Kom igång</Link>
+            <Link to="/kontakt">Kom igång</Link>
           </Button>
         </div>
       </div>
@@ -193,7 +193,7 @@ function HeroSection({ onDemo, demoLoading }: { onDemo: () => void; demoLoading:
               className="flex flex-col sm:flex-row gap-3 mb-4"
             >
               <Button size="lg" asChild className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-xl px-8 py-6 text-base font-semibold shadow-2xl shadow-blue-600/25 hover:shadow-blue-500/40 transition-all duration-300 border-0">
-                <Link to="/register">
+                <Link to="/kontakt">
                   Kom igång — 449 kr/mån
                   <ArrowRight className="h-4 w-4 ml-1" />
                 </Link>
@@ -545,7 +545,7 @@ function Pricing({ onDemo, demoLoading }: { onDemo: () => void; demoLoading: boo
                 <p className="text-sm text-white/25 mt-2">+ 3 500 kr engångsavgift (setup & onboarding)</p>
               </div>
               <Button size="lg" asChild className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-xl px-8 py-6 font-semibold shadow-2xl shadow-blue-600/25 border-0 shrink-0">
-                <Link to="/register">Kom igång nu <ArrowRight className="h-4 w-4 ml-1" /></Link>
+                <Link to="/kontakt">Kom igång nu <ArrowRight className="h-4 w-4 ml-1" /></Link>
               </Button>
             </div>
 
@@ -662,7 +662,7 @@ function FinalCta() {
           initial="hidden" whileInView="visible" viewport={{ once: true }} custom={2} variants={fadeUp}
         >
           <Button size="lg" asChild className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-xl px-10 py-6 text-lg font-semibold shadow-2xl shadow-blue-600/25 border-0">
-            <Link to="/register">
+            <Link to="/kontakt">
               Skapa ditt konto nu
               <ArrowRight className="h-5 w-5 ml-2" />
             </Link>

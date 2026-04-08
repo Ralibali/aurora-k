@@ -63,7 +63,7 @@ function Navbar() {
         </Link>
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="sm" asChild className="hidden md:inline-flex"><Link to="/login">Logga in</Link></Button>
-          <Button size="sm" asChild><Link to="/register">Kom igång</Link></Button>
+          <Button size="sm" asChild><Link to="/kontakt">Kom igång</Link></Button>
         </div>
       </div>
     </nav>
@@ -85,7 +85,7 @@ function Hero() {
         </motion.p>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
           <Button size="lg" asChild className="rounded-xl px-8 py-6 text-base font-semibold">
-            <Link to="/register">Kom igång idag — 449 kr/mån</Link>
+            <Link to="/kontakt">Kom igång idag — 449 kr/mån</Link>
           </Button>
         </motion.div>
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="flex justify-center flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground mt-8">
@@ -165,7 +165,7 @@ function PricingInfo() {
         </motion.p>
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} custom={2} variants={fadeUp}>
           <Button size="lg" asChild className="rounded-xl px-8 py-6 text-base font-semibold">
-            <Link to="/register">Testa nu — 449 kr/mån</Link>
+            <Link to="/kontakt">Testa nu — 449 kr/mån</Link>
           </Button>
         </motion.div>
       </div>
@@ -214,7 +214,7 @@ function FinalCta() {
         </motion.p>
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} custom={2} variants={fadeUp}>
           <Button size="lg" asChild className="rounded-xl px-10 py-6 text-base font-semibold bg-white text-[hsl(222,47%,11%)] hover:bg-white/90">
-            <Link to="/register">Skapa ditt konto nu</Link>
+            <Link to="/kontakt">Skapa ditt konto nu</Link>
           </Button>
         </motion.div>
       </div>
