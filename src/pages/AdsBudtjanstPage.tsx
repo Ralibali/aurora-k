@@ -17,7 +17,7 @@ const fadeUp = {
   hidden: { opacity: 0, y: 32 },
   visible: (i: number) => ({
     opacity: 1, y: 0,
-    transition: { delay: i * 0.1, duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+    transition: { delay: i * 0.1, duration: 0.6, ease: [0.22, 1, 0.36, 1] as const },
   }),
 };
 
@@ -33,7 +33,7 @@ const glowPulse = {
       '0 0 40px rgba(59,130,246,0.25)',
       '0 0 20px rgba(59,130,246,0.15)',
     ],
-    transition: { duration: 3, repeat: Infinity, ease: 'easeInOut' },
+    transition: { duration: 3, repeat: Infinity, ease: 'easeInOut' as const },
   },
 };
 
