@@ -190,8 +190,22 @@ export default function AdminInvoices() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {isLoading && [1, 2].map(i => (
-                  <TableRow key={i}><TableCell colSpan={7}><Skeleton className="h-8 w-full" /></TableCell></TableRow>
+                {isLoading && [1, 2, 3, 4].map(i => (
+                  <TableRow key={i}>
+                    <TableCell><Skeleton className="h-4 w-12 rounded" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-28 rounded" /></TableCell>
+                    <TableCell><Skeleton className="h-3 w-20 rounded" /></TableCell>
+                    <TableCell><Skeleton className="h-3 w-20 rounded" /></TableCell>
+                    <TableCell className="text-right"><Skeleton className="h-4 w-16 rounded ml-auto" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
+                    <TableCell>
+                      <div className="flex gap-1">
+                        <Skeleton className="h-8 w-8 rounded" />
+                        <Skeleton className="h-8 w-8 rounded" />
+                        <Skeleton className="h-8 w-14 rounded" />
+                      </div>
+                    </TableCell>
+                  </TableRow>
                 ))}
                 {!isLoading && filtered.length === 0 && (
                   <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">Inga fakturor</TableCell></TableRow>
