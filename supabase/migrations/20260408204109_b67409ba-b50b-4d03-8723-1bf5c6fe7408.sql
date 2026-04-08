@@ -1,0 +1,1 @@
+UPDATE companies SET subscription_status = 'active' WHERE id IN ('31f2a2a7-d8e4-4523-be7a-f333d41af180', 'c5229fea-3cad-4abf-812c-6a47a93343fc') AND subscription_status = 'pending';
