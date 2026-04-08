@@ -17,6 +17,7 @@ import { motion } from 'framer-motion';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { LeadFormModal } from '@/components/LeadFormModal';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -32,6 +33,7 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const [demoLoading, setDemoLoading] = useState(false);
   const [showStickyBar, setShowStickyBar] = useState(false);
+  const [leadModalOpen, setLeadModalOpen] = useState(false);
 
   useBreadcrumbJsonLd(useMemo(() => [
     { name: 'Hem', url: 'https://auroratransport.se/' },
@@ -136,35 +138,38 @@ export default function LandingPage() {
     };
   }, []);
 
+  const openLead = () => setLeadModalOpen(true);
+
   return (
     <div className="min-h-screen bg-white">
-      <Navbar onDemo={handleDemo} demoLoading={demoLoading} />
-      <HeroSection onDemo={() => handleDemo('akeri')} demoLoading={demoLoading} />
+      <Navbar onDemo={handleDemo} demoLoading={demoLoading} onContact={openLead} />
+      <HeroSection onDemo={() => handleDemo('akeri')} demoLoading={demoLoading} onContact={openLead} />
       <SocialProofBar />
       <ProblemSection />
       <HowItWorks />
       <FeaturesSection />
-      <PlatformShowcase />
+      <PlatformShowcase onContact={openLead} />
       <ComparisonTable />
       <TestimonialsSection />
-      <PricingSection />
+      <PricingSection onContact={openLead} />
       <FaqSection />
       <SeoContent />
       <InternalLinks />
-      <FinalCta />
+      <FinalCta onContact={openLead} />
       <Footer />
-      <StickyMobileCta visible={showStickyBar} onDemo={() => handleDemo('akeri')} demoLoading={demoLoading} />
+      <StickyMobileCta visible={showStickyBar} onDemo={() => handleDemo('akeri')} demoLoading={demoLoading} onContact={openLead} />
+      <LeadFormModal open={leadModalOpen} onOpenChange={setLeadModalOpen} />
     </div>
   );
 }
 
 /* ═══════════════════════ STICKY MOBILE CTA ═══════════════════════ */
-function StickyMobileCta({ visible, onDemo, demoLoading }: { visible: boolean; onDemo: () => void; demoLoading: boolean }) {
+function StickyMobileCta({ visible, onDemo, demoLoading, onContact }: { visible: boolean; onDemo: () => void; demoLoading: boolean; onContact: () => void }) {
   return (
     <div className={`fixed bottom-0 left-0 right-0 z-50 md:hidden transition-transform duration-300 ${visible ? 'translate-y-0' : 'translate-y-full'}`}>
       <div className="bg-white border-t border-slate-200 shadow-lg px-4 py-3 flex gap-3">
-        <Button className="flex-1 h-12 rounded-xl font-semibold" asChild>
-          <Link to="/register">Kom igång — 449 kr/mån</Link>
+        <Button className="flex-1 h-12 rounded-xl font-semibold" onClick={onContact}>
+          Kontakta oss
         </Button>
         <Button variant="outline" className="h-12 px-4 rounded-xl" onClick={onDemo} disabled={demoLoading}>
           <Play className="h-4 w-4" />
@@ -175,7 +180,7 @@ function StickyMobileCta({ visible, onDemo, demoLoading }: { visible: boolean; o
 }
 
 /* ═══════════════════════ NAVBAR ═══════════════════════ */
-function Navbar({ onDemo, demoLoading }: { onDemo: (type: 'akeri' | 'bemanning') => void; demoLoading: boolean }) {
+function Navbar({ onDemo, demoLoading, onContact }: { onDemo: (type: 'akeri' | 'bemanning') => void; demoLoading: boolean; onContact: () => void }) {
   const { user, role } = useAuth();
   const [scrolled, setScrolled] = useState(false);
 
@@ -223,8 +228,8 @@ function Navbar({ onDemo, demoLoading }: { onDemo: (type: 'akeri' | 'bemanning')
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/login">Logga in</Link>
               </Button>
-              <Button size="sm" asChild>
-                <Link to="/register">Kom igång</Link>
+              <Button size="sm" onClick={onContact}>
+                Kontakta oss
               </Button>
             </>
           )}
@@ -235,7 +240,7 @@ function Navbar({ onDemo, demoLoading }: { onDemo: (type: 'akeri' | 'bemanning')
 }
 
 /* ═══════════════════════ HERO ═══════════════════════ */
-function HeroSection({ onDemo, demoLoading }: { onDemo: () => void; demoLoading: boolean }) {
+function HeroSection({ onDemo, demoLoading, onContact }: { onDemo: () => void; demoLoading: boolean; onContact: () => void }) {
   return (
     <section className="relative min-h-screen flex items-center pt-16 overflow-hidden" style={{
       backgroundImage: 'radial-gradient(circle, #e2e8f0 1px, transparent 1px)',
@@ -270,8 +275,8 @@ function HeroSection({ onDemo, demoLoading }: { onDemo: () => void; demoLoading:
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.5 }}
               className="flex flex-col sm:flex-row gap-3 mb-2"
             >
-              <Button size="lg" asChild className="rounded-xl px-8 py-6 text-base font-semibold">
-                <Link to="/register">Kom igång idag — 449 kr/mån</Link>
+              <Button size="lg" className="rounded-xl px-8 py-6 text-base font-semibold" onClick={onContact}>
+                Kontakta oss — 449 kr/mån
               </Button>
               <Button
                 variant="outline"
@@ -568,7 +573,7 @@ const platformCategories = [
   },
 ];
 
-function PlatformShowcase() {
+function PlatformShowcase({ onContact }: { onContact: () => void }) {
   return (
     <section className="py-20 bg-white">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -638,8 +643,8 @@ function PlatformShowcase() {
               <p className="text-primary-foreground/70 text-sm">Extrakostnad per förare</p>
             </div>
           </div>
-          <Button asChild className="mt-6 bg-white text-primary hover:bg-white/90 rounded-xl px-8 py-3 font-semibold">
-            <Link to="/register">Kom igång — ingen demo krävs</Link>
+          <Button className="mt-6 bg-white text-primary hover:bg-white/90 rounded-xl px-8 py-3 font-semibold" onClick={onContact}>
+            Kontakta oss
           </Button>
         </motion.div>
       </div>
@@ -706,7 +711,7 @@ function ComparisonTable() {
 }
 
 /* ═══════════════════════ PRICING ═══════════════════════ */
-function PricingSection() {
+function PricingSection({ onContact }: { onContact: () => void }) {
   const setupItems = [
     'Personlig onboarding',
     'Vi konfigurerar systemet',
@@ -785,8 +790,8 @@ function PricingSection() {
                 </li>
               ))}
             </ul>
-            <Button asChild className="w-full bg-white text-primary hover:bg-white/90 rounded-xl py-3.5 font-semibold">
-              <Link to="/register">Kom igång idag</Link>
+            <Button className="w-full bg-white text-primary hover:bg-white/90 rounded-xl py-3.5 font-semibold" onClick={onContact}>
+              Kontakta oss
             </Button>
             <p className="text-xs text-primary-foreground/60 text-center mt-3">Faktureras månadsvis. Avsluta när du vill.</p>
           </motion.div>
@@ -956,7 +961,7 @@ function SeoContent() {
 }
 
 /* ═══════════════════════ FINAL CTA ═══════════════════════ */
-function FinalCta() {
+function FinalCta({ onContact }: { onContact: () => void }) {
   return (
     <section className="py-20 bg-[#0F172A] text-white">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
@@ -973,8 +978,8 @@ function FinalCta() {
           449 kr/mån. Fast pris. Ingen bindningstid.
         </motion.p>
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} custom={2} variants={fadeUp}>
-          <Button size="lg" asChild className="rounded-xl px-10 py-6 text-base font-semibold bg-white text-[#0F172A] hover:bg-white/90">
-            <Link to="/register">Skapa ditt konto nu</Link>
+          <Button size="lg" className="rounded-xl px-10 py-6 text-base font-semibold bg-white text-[#0F172A] hover:bg-white/90" onClick={onContact}>
+            Kontakta oss
           </Button>
         </motion.div>
         <motion.p

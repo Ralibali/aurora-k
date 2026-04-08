@@ -20,7 +20,7 @@ const TransportledningssystemPage = lazy(() => import("./pages/Transportlednings
 const CoredinationAlternativPage = lazy(() => import("./pages/CoredinationAlternativPage"));
 const TjansterPage = lazy(() => import("./pages/TjansterPage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
-const RegisterPage = lazy(() => import("./pages/RegisterPage"));
+const ContactPage = lazy(() => import("./pages/ContactPage"));
 const OnboardingPage = lazy(() => import("./pages/OnboardingPage"));
 const JoinPage = lazy(() => import("./pages/JoinPage"));
 const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage"));
@@ -67,6 +67,7 @@ const PlatformCompanies = lazy(() => import("./pages/platform/PlatformCompanies"
 const PlatformSupport = lazy(() => import("./pages/platform/PlatformSupport"));
 const PlatformAnnouncements = lazy(() => import("./pages/platform/PlatformAnnouncements"));
 const PlatformRevenue = lazy(() => import("./pages/platform/PlatformRevenue"));
+const PlatformLeads = lazy(() => import("./pages/platform/PlatformLeads"));
 const AboutPage = lazy(() => import("./pages/AboutPage"));
 const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
 const BudtjanstAppPage = lazy(() => import("./pages/BudtjanstAppPage"));
@@ -104,7 +105,7 @@ const App = () => (
                 <Route path="/coredination-alternativ" element={<CoredinationAlternativPage />} />
                 <Route path="/tjanster" element={<TjansterPage />} />
                 <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/kontakt" element={<ContactPage />} />
                 <Route path="/onboarding" element={<OnboardingPage />} />
                 <Route path="/join" element={<JoinPage />} />
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
@@ -159,6 +160,7 @@ const App = () => (
                   <Route path="support" element={<PlatformSupport />} />
                   <Route path="announcements" element={<PlatformAnnouncements />} />
                   <Route path="revenue" element={<PlatformRevenue />} />
+                  <Route path="leads" element={<PlatformLeads />} />
                 </Route>
 
 {/* Driver routes — share a single layout shell */}
