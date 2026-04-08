@@ -361,7 +361,7 @@ export default function AdminDrivers() {
             {companyId ? (
               <CreateDriverModal companyId={companyId} />
             ) : (
-              <Button disabled><Plus className="h-4 w-4 mr-1" /> Bjud in förare</Button>
+              <Button disabled><Plus className="h-4 w-4 mr-1" /> Lägg till förare</Button>
             )}
           </div>
         </div>
