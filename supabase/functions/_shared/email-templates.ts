@@ -255,3 +255,54 @@ export function subscriptionCancelledEmail(data: {
     html: layout(html),
   };
 }
+
+export function newLeadNotificationEmail(data: {
+  companyName: string;
+  contactPerson: string;
+  email: string;
+  phone?: string | null;
+  fleetSize?: string | null;
+  message?: string | null;
+}) {
+  const html = `
+    ${heading('Ny intresseanmälan! 🎯')}
+    ${subheading('En ny potentiell kund har skickat en intresseanmälan.')}
+    ${infoBox(`
+      ${detailRow('Företag', data.companyName)}
+      ${detailRow('Kontaktperson', data.contactPerson)}
+      ${detailRow('E-post', data.email)}
+      ${data.phone ? detailRow('Telefon', data.phone) : ''}
+      ${data.fleetSize ? detailRow('Fordon/förare', data.fleetSize) : ''}
+    `)}
+    ${data.message ? alertBox(`💬 <strong>Meddelande:</strong> ${data.message}`, BRAND.primary) : ''}
+    ${button('Se alla leads →', 'https://aurora-k.lovable.app/platform/leads')}
+    ${divider()}
+    ${smallText('Detta mail skickades automatiskt från Aurora Transport.')}
+  `;
+  return {
+    subject: `Ny lead: ${data.companyName}`,
+    html: layout(html),
+  };
+}
+
+export function newCustomerMessageEmail(data: {
+  customerName: string;
+  message: string;
+  customerUrl: string;
+}) {
+  const html = `
+    ${heading('Nytt kundmeddelande! 💬')}
+    ${subheading(`${data.customerName} har skickat ett meddelande via kundportalen.`)}
+    ${infoBox(`
+      ${detailRow('Kund', data.customerName)}
+    `)}
+    ${alertBox(`💬 "${data.message}"`, BRAND.primary)}
+    ${button('Svara i admin →', data.customerUrl)}
+    ${divider()}
+    ${smallText('Detta mail skickades automatiskt från Aurora Transport.')}
+  `;
+  return {
+    subject: `Nytt meddelande från ${data.customerName}`,
+    html: layout(html),
+  };
+}
