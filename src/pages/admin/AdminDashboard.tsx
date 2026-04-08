@@ -7,7 +7,7 @@ import { useAssignments, useDrivers } from '@/hooks/useData';
 import { formatSwedishDateTime, formatSwedishTime } from '@/lib/format';
 import {
   Briefcase, Users, Truck, AlertCircle, Plus, ArrowRight,
-  MapPin, Clock, ChevronRight, ClipboardList, Inbox,
+  MapPin, Clock, ChevronRight, ClipboardList, Inbox, CalendarDays,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
@@ -15,6 +15,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { StaggeredList, StaggeredItem } from '@/components/StaggeredList';
+import { OnboardingChecklist } from '@/components/OnboardingChecklist';
 
 /* ── Elapsed timer ── */
 function ElapsedSince({ since }: { since: string }) {
@@ -198,6 +199,8 @@ export default function AdminDashboard() {
   return (
     <AdminLayout title="Dashboard" description="Översikt över dagens aktivitet">
       <div className="space-y-6">
+        {/* Onboarding checklist */}
+        <OnboardingChecklist />
         {/* Live indicator */}
         {isLive && (
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -281,10 +284,15 @@ export default function AdminDashboard() {
               <div className="bg-card rounded-lg border border-dashed border-border p-10 text-center shadow-card">
                 <Inbox className="h-12 w-12 text-muted-foreground/20 mx-auto mb-3" />
                 <p className="text-sm font-medium text-muted-foreground">Inga uppdrag idag</p>
-                <p className="text-xs text-muted-foreground/60 mt-1">Skapa ett uppdrag för att komma igång</p>
-                <Button size="sm" className="mt-4" asChild>
-                  <Link to="/admin/assignments/new"><Plus className="h-3.5 w-3.5 mr-1" /> Skapa uppdrag</Link>
-                </Button>
+                <p className="text-xs text-muted-foreground/60 mt-1 mb-4">Skapa ett uppdrag eller se kalendern</p>
+                <div className="flex gap-2 justify-center">
+                  <Button size="sm" asChild>
+                    <Link to="/admin/assignments/new"><Plus className="h-3.5 w-3.5 mr-1" /> Skapa uppdrag</Link>
+                  </Button>
+                  <Button size="sm" variant="outline" asChild>
+                    <Link to="/admin/calendar"><CalendarDays className="h-3.5 w-3.5 mr-1" /> Kalender</Link>
+                  </Button>
+                </div>
               </div>
             ) : (
               <StaggeredList className="space-y-2">
