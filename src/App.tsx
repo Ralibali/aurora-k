@@ -66,6 +66,7 @@ const PlatformDashboard = lazy(() => import("./pages/platform/PlatformDashboard"
 const PlatformCompanies = lazy(() => import("./pages/platform/PlatformCompanies"));
 const PlatformSupport = lazy(() => import("./pages/platform/PlatformSupport"));
 const PlatformAnnouncements = lazy(() => import("./pages/platform/PlatformAnnouncements"));
+const PlatformRevenue = lazy(() => import("./pages/platform/PlatformRevenue"));
 const AboutPage = lazy(() => import("./pages/AboutPage"));
 const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -149,6 +150,7 @@ const App = () => (
                   <Route path="companies" element={<PlatformCompanies />} />
                   <Route path="support" element={<PlatformSupport />} />
                   <Route path="announcements" element={<PlatformAnnouncements />} />
+                  <Route path="revenue" element={<PlatformRevenue />} />
                 </Route>
 
 {/* Driver routes — share a single layout shell */}

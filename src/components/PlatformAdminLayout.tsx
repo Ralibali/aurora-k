@@ -2,7 +2,7 @@ import { ReactNode, Suspense } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { PageTransition } from '@/components/PageTransition';
 import {
-  LayoutDashboard, Building2, HeadphonesIcon, Megaphone, LogOut, Truck,
+  LayoutDashboard, Building2, HeadphonesIcon, Megaphone, LogOut, Truck, TrendingUp,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
@@ -12,6 +12,7 @@ const navItems = [
   { to: '/platform/companies', icon: Building2, label: 'Företag' },
   { to: '/platform/support', icon: HeadphonesIcon, label: 'Support' },
   { to: '/platform/announcements', icon: Megaphone, label: 'Meddelanden' },
+  { to: '/platform/revenue', icon: TrendingUp, label: 'Intäkter' },
 ];
 
 export function PlatformAdminShell() {
