@@ -588,7 +588,7 @@ function Testimonials() {
     {
       text: 'Vi hade bud som missade leveranser dagligen. Nu ser alla vad som ska göras — direkt i telefonen. Enkelt.',
       name: 'Erik R.',
-      role: 'VD, Stockholms Bud AB',
+      role: 'VD',
       initials: 'ER',
     },
     {

@@ -254,7 +254,7 @@ export default function AdsAkeriPage() {
             </motion.h2>
             <div className="grid sm:grid-cols-2 gap-6">
               {[
-                { text: 'Vi gick från whiteboard till digitalt på en vecka. Nu har vi full koll på alla fordon och förare.', name: 'Magnus T.', role: 'Åkeriägare, Turesson Transport', initials: 'MT' },
+                { text: 'Vi gick från whiteboard till digitalt på en vecka. Nu har vi full koll på alla fordon och förare.', name: 'Magnus T.', { text: 'Vi gick från whiteboard till digitalt på en vecka. Nu har vi full koll på alla fordon och förare.', name: 'Magnus T.', role: 'Åkeriägare', initials: 'MT' }, initials: 'MT' },
                 { text: 'GPS-spårningen och automatiska tidrapporterna sparar oss timmar varje vecka.', name: 'Sara B.', role: 'Transportledare', initials: 'SB' },
               ].map((q, i) => (
                 <motion.div key={i} custom={i + 1} variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="bg-white/[0.02] border border-white/[0.05] rounded-2xl p-7 hover:border-white/[0.08] transition-colors">
