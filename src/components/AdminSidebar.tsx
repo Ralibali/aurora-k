@@ -10,6 +10,7 @@ import { NavLink } from '@/components/NavLink';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { usePlatformAdmin } from '@/hooks/usePlatformAdmin';
+import { useUnreadPortalMessages } from '@/hooks/useUnreadPortalMessages';
 
 /* Primary items — always visible */
 const primarySections = [
@@ -108,6 +109,7 @@ const secondarySections = [
 export function AdminSidebar() {
   const { user, signOut } = useAuth();
   const { isPlatformAdmin } = usePlatformAdmin();
+  const { unreadCount } = useUnreadPortalMessages();
   const navigate = useNavigate();
   const [showMore, setShowMore] = useState(() => localStorage.getItem('sidebar-expanded') === 'true');
 
@@ -162,7 +164,12 @@ export function AdminSidebar() {
                 activeClassName="!bg-[#1E3A8A] !text-white !border-l-2 !border-[#3B82F6]"
               >
                 <item.icon className="h-4 w-4 shrink-0" />
-                <span>{item.title}</span>
+                <span className="flex-1">{item.title}</span>
+                {item.url === '/admin/customers' && unreadCount > 0 && (
+                  <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white animate-pulse">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
               </NavLink>
             ))}
           </div>
