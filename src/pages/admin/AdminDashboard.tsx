@@ -14,6 +14,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
+import { StaggeredList, StaggeredItem } from '@/components/StaggeredList';
 
 /* ── Elapsed timer ── */
 function ElapsedSince({ since }: { since: string }) {

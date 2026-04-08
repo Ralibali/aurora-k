@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Link } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
+import { StaggeredTableBody, StaggeredTableRow } from '@/components/StaggeredList';
 
 function useInvoicePdfData() {
   const { data: allAssignments } = useAssignments();

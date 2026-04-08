@@ -10,6 +10,7 @@ import { pricingTypeLabels } from '@/lib/types';
 import { Plus, Search } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
+import { StaggeredTableBody, StaggeredTableRow } from '@/components/StaggeredList';
 
 export default function AdminCustomers() {
   const [search, setSearch] = useState('');

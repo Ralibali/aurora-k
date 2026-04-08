@@ -22,6 +22,7 @@ import {
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
+import { StaggeredTableBody, StaggeredTableRow, StaggeredList, StaggeredItem } from '@/components/StaggeredList';
 
 const filterTabs = [
   { key: 'all', label: 'Alla' },
