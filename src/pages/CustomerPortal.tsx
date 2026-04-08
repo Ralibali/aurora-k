@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { usePageMeta } from '@/lib/use-page-meta';
 import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -20,7 +21,7 @@ const statusVariant = (s: string): 'default' | 'secondary' | 'destructive' | 'ou
   return 'outline';
 };
 
-export default function CustomerPortal() {
+usePageMeta({ title: 'Kundportal | Aurora Transport', description: '', canonical: 'https://auroratransport.se/portal', noindex: true });
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
   const [data, setData] = useState<any>(null);
