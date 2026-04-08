@@ -421,6 +421,71 @@ export default function PlatformCompanies() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Create company dialog */}
+      <Dialog open={createOpen} onOpenChange={(open) => { if (!open) handleCloseCreate(); else setCreateOpen(true); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{createResult ? 'Företag skapat!' : 'Skapa nytt företag'}</DialogTitle>
+          </DialogHeader>
+
+          {createResult ? (
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">Företaget och admin-kontot har skapats. Dela uppgifterna nedan med kunden.</p>
+
+              {createResult.checkout_url && (
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold">Betalningslänk (Stripe)</Label>
+                  <div className="flex items-center gap-2 bg-muted/50 rounded-lg p-3">
+                    <Link2 className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <span className="text-xs truncate flex-1">{createResult.checkout_url}</span>
+                    <Button variant="outline" size="sm" onClick={() => copyToClipboard(createResult.checkout_url!, 'Betalningslänk')}>
+                      <Copy className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold">Tillfälligt lösenord</Label>
+                <div className="flex items-center gap-2 bg-muted/50 rounded-lg p-3">
+                  <KeyRound className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <code className="text-sm font-mono flex-1">{createResult.temp_password}</code>
+                  <Button variant="outline" size="sm" onClick={() => copyToClipboard(createResult.temp_password, 'Lösenord')}>
+                    <Copy className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+                <p className="text-[11px] text-muted-foreground">Kunden loggar in med sin e-post och detta lösenord. Be dem byta lösenord efter första inloggning.</p>
+              </div>
+
+              <Button variant="outline" className="w-full" onClick={handleCloseCreate}>Stäng</Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">Skapar företag, admin-konto och genererar en betalningslänk via Stripe.</p>
+              <div className="space-y-2">
+                <Label>Företagsnamn *</Label>
+                <Input placeholder="AB Företaget" value={createForm.companyName} onChange={(e) => setCreateForm(f => ({ ...f, companyName: e.target.value }))} />
+              </div>
+              <div className="space-y-2">
+                <Label>Organisationsnummer</Label>
+                <Input placeholder="556XXX-XXXX" value={createForm.orgNr} onChange={(e) => setCreateForm(f => ({ ...f, orgNr: e.target.value }))} />
+              </div>
+              <div className="space-y-2">
+                <Label>Kontaktperson (admin) *</Label>
+                <Input placeholder="Förnamn Efternamn" value={createForm.adminName} onChange={(e) => setCreateForm(f => ({ ...f, adminName: e.target.value }))} />
+              </div>
+              <div className="space-y-2">
+                <Label>E-post *</Label>
+                <Input type="email" placeholder="admin@foretaget.se" value={createForm.adminEmail} onChange={(e) => setCreateForm(f => ({ ...f, adminEmail: e.target.value }))} />
+              </div>
+              <Button onClick={handleCreateCompany} className="w-full" disabled={creatingCompany}>
+                <Plus className="h-4 w-4 mr-1" /> {creatingCompany ? 'Skapar...' : 'Skapa företag & generera länk'}
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </PlatformLayout>
   );
 }
