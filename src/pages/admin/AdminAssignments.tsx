@@ -308,39 +308,40 @@ export default function AdminAssignments() {
             </div>
 
             {/* Mobile card view */}
-            <div className="md:hidden space-y-3">
+            <StaggeredList className="md:hidden space-y-3">
               {filtered.map(a => (
-                <Link
-                  key={a.id}
-                  to={`/admin/assignments/${a.id}`}
-                  className="block bg-card rounded-lg border border-border p-4 shadow-card active:bg-secondary transition-colors"
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0 flex-1">
-                      <p className="font-semibold text-sm text-foreground truncate">{a.title}</p>
-                      <p className="text-sm text-muted-foreground mt-0.5">{a.customer?.name}</p>
-                    </div>
-                    <StatusBadge status={a.status} />
-                  </div>
-                  <div className="flex items-center justify-between mt-3">
-                    <div className="flex items-center gap-1.5 text-muted-foreground">
-                      <Clock className="h-3.5 w-3.5" />
-                      <span className="font-mono text-xs">{formatSwedishTime(a.scheduled_start)}</span>
-                    </div>
-                    {a.driver && (
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center">
-                          <span className="text-[8px] font-bold text-blue-700">
-                            {a.driver.full_name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
-                          </span>
-                        </div>
-                        <span className="text-xs text-muted-foreground">{a.driver.full_name}</span>
+                <StaggeredItem key={a.id}>
+                  <Link
+                    to={`/admin/assignments/${a.id}`}
+                    className="block bg-card rounded-lg border border-border p-4 shadow-card active:bg-secondary transition-colors"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-sm text-foreground truncate">{a.title}</p>
+                        <p className="text-sm text-muted-foreground mt-0.5">{a.customer?.name}</p>
                       </div>
-                    )}
-                  </div>
-                </Link>
+                      <StatusBadge status={a.status} />
+                    </div>
+                    <div className="flex items-center justify-between mt-3">
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <Clock className="h-3.5 w-3.5" />
+                        <span className="font-mono text-xs">{formatSwedishTime(a.scheduled_start)}</span>
+                      </div>
+                      {a.driver && (
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center">
+                            <span className="text-[8px] font-bold text-blue-700">
+                              {a.driver.full_name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
+                            </span>
+                          </div>
+                          <span className="text-xs text-muted-foreground">{a.driver.full_name}</span>
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                </StaggeredItem>
               ))}
-            </div>
+            </StaggeredList>
           </>
         )}
 
