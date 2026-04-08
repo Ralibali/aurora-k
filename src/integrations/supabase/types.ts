@@ -1202,6 +1202,51 @@ export type Database = {
           },
         ]
       }
+      leads: {
+        Row: {
+          admin_notes: string | null
+          company_name: string
+          contact_person: string
+          created_at: string
+          email: string
+          fleet_size: string | null
+          id: string
+          message: string | null
+          org_number: string | null
+          phone: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          company_name: string
+          contact_person: string
+          created_at?: string
+          email: string
+          fleet_size?: string | null
+          id?: string
+          message?: string | null
+          org_number?: string | null
+          phone?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          company_name?: string
+          contact_person?: string
+          created_at?: string
+          email?: string
+          fleet_size?: string | null
+          id?: string
+          message?: string | null
+          org_number?: string | null
+          phone?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           company_id: string | null
