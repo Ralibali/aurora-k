@@ -9,6 +9,27 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+
+    // Authenticate the caller
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const callerClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: { user: caller }, error: callerError } = await callerClient.auth.getUser();
+    if (callerError || !caller) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     const { userId, companyName, orgNr, fullName } = await req.json();
 
@@ -19,16 +40,15 @@ Deno.serve(async (req) => {
       );
     }
 
-    const adminClient = createClient(supabaseUrl, serviceRoleKey);
-
-    // Verify user exists
-    const { data: userData, error: userError } = await adminClient.auth.admin.getUserById(userId);
-    if (userError || !userData?.user) {
+    // Ensure the caller can only register themselves
+    if (caller.id !== userId) {
       return new Response(
-        JSON.stringify({ error: "User not found" }),
-        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: "Forbidden — you can only register your own account" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
     // Check user doesn't already belong to a company
     const { data: existingProfile } = await adminClient
@@ -62,8 +82,8 @@ Deno.serve(async (req) => {
     // Update profile
     await adminClient.from("profiles").upsert({
       id: userId,
-      email: userData.user.email,
-      full_name: fullName || userData.user.user_metadata?.full_name || "Admin",
+      email: caller.email,
+      full_name: fullName || caller.user_metadata?.full_name || "Admin",
       role: "admin",
       company_id: company.id,
     }, { onConflict: "id" });
@@ -84,7 +104,7 @@ Deno.serve(async (req) => {
   } catch (err) {
     console.error("[register-company] Error:", err);
     return new Response(
-      JSON.stringify({ error: err.message }),
+      JSON.stringify({ error: "Internal server error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

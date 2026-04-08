@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-demo-secret",
 };
 
 const DEMO_COMPANIES = [
@@ -19,7 +19,7 @@ const DEMO_COMPANIES = [
     ],
     assignments: [
       { title: "Leverans betongblock", address: "Byggvägen 8, Mölndal", status: "completed", priority: "high" },
-      { title: "Hämta pallgods", address: "Hamnen, Göteborg", status: "in_progress", priority: "normal" },
+      { title: "Hämta pallgods", address: "Hamnen, Göteborg", status: "active", priority: "normal" },
       { title: "Expressleverans kyl", address: "Kungsgatan 22, Stockholm", status: "pending", priority: "urgent" },
     ],
   },
@@ -46,6 +46,16 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Validate demo secret
+    const secret = req.headers.get("x-demo-secret");
+    const expectedSecret = Deno.env.get("DEMO_SECRET");
+    if (!expectedSecret || secret !== expectedSecret) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const { type } = await req.json().catch(() => ({ type: "akeri" }));
     const demo = type === "bemanning" ? DEMO_COMPANIES[1] : DEMO_COMPANIES[0];
 
