@@ -17,6 +17,7 @@ import { motion } from 'framer-motion';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { LeadFormModal } from '@/components/LeadFormModal';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -32,6 +33,7 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const [demoLoading, setDemoLoading] = useState(false);
   const [showStickyBar, setShowStickyBar] = useState(false);
+  const [leadModalOpen, setLeadModalOpen] = useState(false);
 
   useBreadcrumbJsonLd(useMemo(() => [
     { name: 'Hem', url: 'https://auroratransport.se/' },
