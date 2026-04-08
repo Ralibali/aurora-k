@@ -1,14 +1,13 @@
 import { LayoutDashboard, Briefcase, Map, Users, Menu, Plus, X, ChevronRight } from 'lucide-react';
-import { NavLink } from '@/components/NavLink';
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const tabs = [
-  { label: 'Hem', icon: LayoutDashboard, to: '/admin', end: true },
-  { label: 'Uppdrag', icon: Briefcase, to: '/admin/assignments' },
-  { label: 'Karta', icon: Map, to: '/admin/live-map' },
-  { label: 'Personal', icon: Users, to: '/admin/drivers' },
+  { label: 'Hem', icon: LayoutDashboard, to: '/admin', exact: true },
+  { label: 'Uppdrag', icon: Briefcase, to: '/admin/assignments', exact: false },
+  { label: 'Karta', icon: Map, to: '/admin/live-map', exact: false },
+  { label: 'Personal', icon: Users, to: '/admin/drivers', exact: false },
 ];
 
 const moreLinks = [
@@ -23,7 +22,13 @@ const moreLinks = [
 
 export function MobileTabBar() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const isTabActive = (tab: typeof tabs[number]) => {
+    if (tab.exact) return location.pathname === tab.to;
+    return location.pathname.startsWith(tab.to);
+  };
 
   return (
     <>
@@ -38,29 +43,28 @@ export function MobileTabBar() {
 
       {/* Bottom Tab Bar */}
       <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-card border-t border-border h-16 flex items-center justify-around pb-safe">
-        {tabs.map((tab) => (
-          <NavLink
-            key={tab.to}
-            to={tab.to}
-            end={tab.end}
-            className="relative flex flex-col items-center justify-center gap-0.5 text-muted-foreground min-w-[56px] py-1 transition-colors"
-            activeClassName="!text-primary"
-          >
-            {({ isActive }: { isActive: boolean }) => (
-              <>
-                {isActive && (
-                  <motion.span
-                    layoutId="mobile-tab-indicator"
-                    className="absolute -top-px left-2 right-2 h-0.5 rounded-full bg-primary"
-                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                  />
-                )}
-                <tab.icon className="h-5 w-5" />
-                <span className="text-[10px] font-medium">{tab.label}</span>
-              </>
-            )}
-          </NavLink>
-        ))}
+        {tabs.map((tab) => {
+          const active = isTabActive(tab);
+          return (
+            <Link
+              key={tab.to}
+              to={tab.to}
+              className={`relative flex flex-col items-center justify-center gap-0.5 min-w-[56px] py-1 transition-colors ${
+                active ? 'text-primary' : 'text-muted-foreground'
+              }`}
+            >
+              {active && (
+                <motion.span
+                  layoutId="mobile-tab-indicator"
+                  className="absolute -top-px left-2 right-2 h-0.5 rounded-full bg-primary"
+                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                />
+              )}
+              <tab.icon className="h-5 w-5" />
+              <span className="text-[10px] font-medium">{tab.label}</span>
+            </Link>
+          );
+        })}
         <button
           onClick={() => setMenuOpen(true)}
           className="flex flex-col items-center justify-center gap-0.5 text-muted-foreground min-w-[56px] py-1"
