@@ -164,7 +164,12 @@ export function AdminSidebar() {
                 activeClassName="!bg-[#1E3A8A] !text-white !border-l-2 !border-[#3B82F6]"
               >
                 <item.icon className="h-4 w-4 shrink-0" />
-                <span>{item.title}</span>
+                <span className="flex-1">{item.title}</span>
+                {item.url === '/admin/customers' && unreadCount > 0 && (
+                  <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white animate-pulse">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
               </NavLink>
             ))}
           </div>
