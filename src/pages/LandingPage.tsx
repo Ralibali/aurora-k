@@ -820,7 +820,7 @@ function PricingSection({ onContact }: { onContact: () => void }) {
 const testimonials = [
   { name: 'Marcus L.', role: 'Åkeriägare', text: 'Vi bytte från papper och Excel till Aurora på en eftermiddag. Nu har vi koll på alla uppdrag i realtid.' },
   { name: 'Anna K.', role: 'Transportledare', text: 'Äntligen ett system som inte kräver en veckas utbildning. Förarna fattade direkt.' },
-  { name: 'Johan S.', role: 'VD, budföretag', text: 'Priset var det som avgjorde — 449 kr oavsett hur många förare vi har. Otroligt bra deal.' },
+  { name: 'Johan S.', role: 'VD', text: 'Priset var det som avgjorde — 449 kr oavsett hur många förare vi har. Otroligt bra deal.' },
   { name: 'Sara M.', role: 'Ekonomiansvarig', text: 'Tidrapporterna exporteras rakt in i Fortnox. Sparar mig timmar varje månad.' },
 ];
 

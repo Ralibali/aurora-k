@@ -256,8 +256,8 @@ export default function AdsFlottaPage() {
             </motion.h2>
             <div className="grid sm:grid-cols-2 gap-6">
               {[
-                { text: 'Äntligen slipper vi ringa och fråga förarna var de är. Live-kartan ger oss full kontroll.', name: 'Niklas H.', role: 'Flottachef, Expressbud Syd', initials: 'NH' },
-                { text: 'Vi märkte direkt att vi missade serviceintervall på flera bilar. Nu har vi koll på allt.', name: 'Maria E.', role: 'Driftansvarig, Bergström Logistik', initials: 'ME' },
+                { text: 'Äntligen slipper vi ringa och fråga förarna var de är. Live-kartan ger oss full kontroll.', name: 'Niklas H.', role: 'Flottachef', initials: 'NH' },
+                { text: 'Vi märkte direkt att vi missade serviceintervall på flera bilar. Nu har vi koll på allt.', name: 'Maria E.', role: 'Driftansvarig', initials: 'ME' },
               ].map((q, i) => (
                 <motion.div key={i} custom={i + 1} variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="bg-white/[0.02] border border-white/[0.05] rounded-2xl p-7 hover:border-white/[0.08] transition-colors">
                   <p className="text-white/50 mb-5 leading-relaxed italic">"{q.text}"</p>
