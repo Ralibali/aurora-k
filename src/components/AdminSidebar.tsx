@@ -157,7 +157,7 @@ export function AdminSidebar() {
               <NavLink
                 key={item.url}
                 to={item.url}
-                end={item.end}
+                end={'end' in item ? item.end : undefined}
                 className="flex items-center gap-3 text-slate-400 text-sm px-4 py-2 rounded-md mx-2 transition-colors duration-100 hover:bg-[#1E293B] hover:text-slate-200 border-l-2 border-transparent"
                 activeClassName="!bg-[#1E3A8A] !text-white !border-l-2 !border-[#3B82F6]"
               >
