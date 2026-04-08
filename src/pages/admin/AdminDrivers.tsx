@@ -493,7 +493,11 @@ export default function AdminDrivers() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input placeholder="Sök chaufför..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 w-[200px]" />
             </div>
-            {companyId && <InviteModal companyId={companyId} companyName={companyName} adminName={adminName} />}
+            {companyId ? (
+              <InviteModal companyId={companyId} companyName={companyName} adminName={adminName} />
+            ) : (
+              <Button disabled><Plus className="h-4 w-4 mr-1" /> Bjud in förare</Button>
+            )}
           </div>
         </div>
 
