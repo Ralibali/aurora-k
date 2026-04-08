@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTheme } from 'next-themes';
+import { useAuth } from '@/hooks/useAuth';
 const SubscriptionTab = lazy(() => import('@/components/SubscriptionTab'));
 
 function AppearanceTab() {
@@ -46,6 +47,7 @@ function AppearanceTab() {
 }
 
 export default function AdminSettings() {
+  const { companyId, loading: authLoading } = useAuth();
   const { data: settings, isLoading } = useSettings();
   const updateSettings = useUpdateSettings();
   const createSettings = useCreateSettings();
@@ -56,8 +58,27 @@ export default function AdminSettings() {
   const toggleFeature = useToggleFeature();
   const resetFeatures = useResetAllFeatures();
 
-  if (isLoading) {
+  if (authLoading || isLoading) {
     return <AdminLayout title="Inställningar"><div className="max-w-2xl space-y-6"><Skeleton className="h-64 w-full" /></div></AdminLayout>;
+  }
+
+  if (!companyId) {
+    return (
+      <AdminLayout title="Inställningar" description="Företagsinformation och systemkonfiguration">
+        <div className="max-w-2xl">
+          <Card>
+            <CardHeader>
+              <CardTitle>Inställningarna kunde inte visas</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Kontot är inte kopplat till något företag ännu. Ladda om sidan eller logga in igen.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </AdminLayout>
+    );
   }
 
   const f = form || settings || {};
@@ -206,7 +227,7 @@ export default function AdminSettings() {
           </TabsContent>
 
           <TabsContent value="features" className="space-y-6">
-            <div className="flex items-center justify-between mb-4">
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="space-y-1">
                 <h2 className="text-sm font-semibold">Aktiva funktioner</h2>
                 <p className="text-xs text-muted-foreground">Välj vilka moduler som ska vara synliga i sidomenyn. Avaktiverade funktioner döljs men data raderas inte.</p>
@@ -214,7 +235,7 @@ export default function AdminSettings() {
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-1.5 shrink-0"
+                className="w-full gap-1.5 shrink-0 sm:w-auto"
                 disabled={resetFeatures.isPending}
                 onClick={() => {
                   resetFeatures.mutate(undefined, {
@@ -248,7 +269,15 @@ export default function AdminSettings() {
                           </div>
                           <Switch
                             checked={feat.enabled}
-                            onCheckedChange={(checked) => toggleFeature.mutate({ id: feat.id, enabled: checked })}
+                            onCheckedChange={(checked) => toggleFeature.mutate({
+                              id: feat.id,
+                              enabled: checked,
+                              featureKey: feat.feature_key,
+                              label: feat.label,
+                              description: feat.description,
+                              category: feat.category,
+                              sortOrder: feat.sort_order,
+                            })}
                             disabled={toggleFeature.isPending}
                           />
                         </div>

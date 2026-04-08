@@ -20,33 +20,51 @@ const AuthContext = createContext<AuthContextType>({
   signOut: async () => {},
 });
 
-const profileCache: Record<string, { role: 'admin' | 'driver'; companyId: string | null }> = {};
+const profileCache: Record<string, { role: 'admin' | 'driver' | null; companyId: string | null }> = {};
 
 async function fetchProfile(userId: string): Promise<{ role: 'admin' | 'driver' | null; companyId: string | null }> {
   if (profileCache[userId]) return profileCache[userId];
 
-  // Fetch role from user_roles
-  const { data: roleData } = await supabase
-    .from('user_roles')
-    .select('role')
-    .eq('user_id', userId)
-    .single();
+  const [{ data: roleRows, error: rolesError }, { data: profileData, error: profileError }] = await Promise.all([
+    supabase
+      .from('user_roles')
+      .select('role, company_id')
+      .eq('user_id', userId),
+    supabase
+      .from('profiles')
+      .select('company_id, role')
+      .eq('id', userId)
+      .maybeSingle(),
+  ]);
 
-  // Fetch company_id from profiles
-  const { data: profileData } = await supabase
-    .from('profiles')
-    .select('company_id')
-    .eq('id', userId)
-    .single();
-
-  const role = (roleData?.role as 'admin' | 'driver') ?? null;
-  const companyId = profileData?.company_id ?? null;
-
-  if (role) {
-    profileCache[userId] = { role, companyId };
+  if (rolesError) {
+    console.warn('[Auth] failed to load user roles:', rolesError.message);
   }
 
-  return { role, companyId };
+  if (profileError) {
+    console.warn('[Auth] failed to load profile:', profileError.message);
+  }
+
+  const resolvedRole = roleRows?.some((row) => row.role === 'admin')
+    ? 'admin'
+    : (roleRows?.[0]?.role as 'admin' | 'driver' | undefined) ??
+      (profileData?.role === 'admin' || profileData?.role === 'driver' ? profileData.role : null);
+
+  const companyIdFromRoles =
+    roleRows?.find((row) => row.role === resolvedRole)?.company_id ??
+    roleRows?.find((row) => !!row.company_id)?.company_id ??
+    null;
+
+  const result = {
+    role: resolvedRole,
+    companyId: companyIdFromRoles ?? profileData?.company_id ?? null,
+  };
+
+  if (result.role || result.companyId) {
+    profileCache[userId] = result;
+  }
+
+  return result;
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
