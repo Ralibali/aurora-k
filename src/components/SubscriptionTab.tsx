@@ -21,7 +21,7 @@ export default function SubscriptionTab() {
   const [error, setError] = useState<string | null>(null);
 
   const loadSubscription = useCallback(async () => {
-    if (authLoading) return;
+    if (authLoading && !companyId) return;
 
     if (!companyId) {
       setError('Det finns inget företag kopplat till kontot ännu. Koppla användaren till ett företag för att visa prenumerationen här.');
@@ -59,7 +59,7 @@ export default function SubscriptionTab() {
 
   // Safety: if auth stays loading for >5s, stop showing spinner
   useEffect(() => {
-    if (!authLoading) return;
+    if (!authLoading || companyId) return;
     const timer = setTimeout(() => {
       if (loading) {
         setLoading(false);
@@ -81,7 +81,7 @@ export default function SubscriptionTab() {
     }
   };
 
-  if (authLoading || loading) {
+  if ((authLoading && !companyId) || loading) {
     return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
   }
 
