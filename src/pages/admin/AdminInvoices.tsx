@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Link } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
+import { StaggeredTableBody, StaggeredTableRow } from '@/components/StaggeredList';
 
 function useInvoicePdfData() {
   const { data: allAssignments } = useAssignments();
@@ -210,32 +211,36 @@ export default function AdminInvoices() {
                 {!isLoading && filtered.length === 0 && (
                   <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">Inga fakturor</TableCell></TableRow>
                 )}
-                {filtered.map(inv => (
-                  <TableRow key={inv.id}>
-                    <TableCell className="font-mono text-sm">#{inv.invoice_number}</TableCell>
-                    <TableCell>{inv.customer?.name}</TableCell>
-                    <TableCell className="font-mono text-sm">{inv.invoice_date}</TableCell>
-                    <TableCell className="font-mono text-sm">{inv.due_date}</TableCell>
-                    <TableCell className="text-right font-mono text-sm">{inv.total_inc_vat.toFixed(0)} kr</TableCell>
-                    <TableCell><InvoiceStatusBadge status={inv.status} /></TableCell>
-                    <TableCell>
-                      <div className="flex gap-1">
-                        <Button variant="ghost" size="icon" title="Förhandsgranska" onClick={() => handlePreview(inv)}>
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" title="Ladda ner PDF" onClick={() => handleDownloadPdf(inv)}>
-                          <Download className="h-4 w-4" />
-                        </Button>
-                        {inv.status === 'draft' && (
-                          <Button variant="ghost" size="sm" onClick={() => updateStatus.mutate({ id: inv.id, status: 'sent' })}>Skicka</Button>
-                        )}
-                        {(inv.status === 'sent' || inv.status === 'overdue') && (
-                          <Button variant="ghost" size="sm" onClick={() => updateStatus.mutate({ id: inv.id, status: 'paid' })}>Betald</Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {!isLoading && filtered.length > 0 && (
+                  <StaggeredTableBody>
+                    {filtered.map(inv => (
+                      <StaggeredTableRow key={inv.id}>
+                        <TableCell className="font-mono text-sm">#{inv.invoice_number}</TableCell>
+                        <TableCell>{inv.customer?.name}</TableCell>
+                        <TableCell className="font-mono text-sm">{inv.invoice_date}</TableCell>
+                        <TableCell className="font-mono text-sm">{inv.due_date}</TableCell>
+                        <TableCell className="text-right font-mono text-sm">{inv.total_inc_vat.toFixed(0)} kr</TableCell>
+                        <TableCell><InvoiceStatusBadge status={inv.status} /></TableCell>
+                        <TableCell>
+                          <div className="flex gap-1">
+                            <Button variant="ghost" size="icon" title="Förhandsgranska" onClick={() => handlePreview(inv)}>
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" title="Ladda ner PDF" onClick={() => handleDownloadPdf(inv)}>
+                              <Download className="h-4 w-4" />
+                            </Button>
+                            {inv.status === 'draft' && (
+                              <Button variant="ghost" size="sm" onClick={() => updateStatus.mutate({ id: inv.id, status: 'sent' })}>Skicka</Button>
+                            )}
+                            {(inv.status === 'sent' || inv.status === 'overdue') && (
+                              <Button variant="ghost" size="sm" onClick={() => updateStatus.mutate({ id: inv.id, status: 'paid' })}>Betald</Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </StaggeredTableRow>
+                    ))}
+                  </StaggeredTableBody>
+                )}
               </TableBody>
             </Table>
           </div>

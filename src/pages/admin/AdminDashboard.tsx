@@ -14,6 +14,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
+import { StaggeredList, StaggeredItem } from '@/components/StaggeredList';
 
 /* ── Elapsed timer ── */
 function ElapsedSince({ since }: { since: string }) {
@@ -276,50 +277,47 @@ export default function AdminDashboard() {
                 </Button>
               </div>
             ) : (
-              <div className="space-y-2">
+              <StaggeredList className="space-y-2">
                 {liveJobs.map(a => (
-                  <Link key={a.id} to={`/admin/assignments/${a.id}`} className="block group">
-                    <div className="flex items-stretch bg-card rounded-lg border border-border hover:border-blue-200 transition-colors duration-100 overflow-hidden shadow-card">
-                      {/* Color bar */}
-                      <div className={`w-1 shrink-0 ${statusBarColor(a.status)}`} />
-
-                      <div className="flex items-center gap-3 px-4 py-3 flex-1 min-w-0">
-                        {/* Info */}
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-mono text-[11px] text-muted-foreground">{a.id.slice(0, 6).toUpperCase()}</span>
-                            <span className="text-sm font-semibold text-foreground truncate">{a.customer?.name}</span>
-                            {a.priority !== 'normal' && <PriorityBadge priority={a.priority} />}
-                          </div>
-                          <div className="flex items-center gap-3 mt-1">
-                            {a.driver && (
-                              <div className="flex items-center gap-1.5">
-                                <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center">
-                                  <span className="text-[9px] font-bold text-blue-700">
-                                    {a.driver.full_name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
-                                  </span>
-                                </div>
-                                <span className="text-xs text-muted-foreground">{a.driver.full_name}</span>
-                              </div>
-                            )}
-                            <div className="flex items-center gap-1 text-muted-foreground">
-                              <Clock className="h-3 w-3" />
-                              <span className="font-mono text-[11px]">{formatSwedishTime(a.scheduled_start)}</span>
+                  <StaggeredItem key={a.id}>
+                    <Link to={`/admin/assignments/${a.id}`} className="block group">
+                      <div className="flex items-stretch bg-card rounded-lg border border-border hover:border-blue-200 transition-colors duration-100 overflow-hidden shadow-card">
+                        <div className={`w-1 shrink-0 ${statusBarColor(a.status)}`} />
+                        <div className="flex items-center gap-3 px-4 py-3 flex-1 min-w-0">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-mono text-[11px] text-muted-foreground">{a.id.slice(0, 6).toUpperCase()}</span>
+                              <span className="text-sm font-semibold text-foreground truncate">{a.customer?.name}</span>
+                              {a.priority !== 'normal' && <PriorityBadge priority={a.priority} />}
                             </div>
-                            {a.actual_start && a.status === 'active' && (
-                              <ElapsedSince since={a.actual_start} />
-                            )}
+                            <div className="flex items-center gap-3 mt-1">
+                              {a.driver && (
+                                <div className="flex items-center gap-1.5">
+                                  <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center">
+                                    <span className="text-[9px] font-bold text-blue-700">
+                                      {a.driver.full_name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
+                                    </span>
+                                  </div>
+                                  <span className="text-xs text-muted-foreground">{a.driver.full_name}</span>
+                                </div>
+                              )}
+                              <div className="flex items-center gap-1 text-muted-foreground">
+                                <Clock className="h-3 w-3" />
+                                <span className="font-mono text-[11px]">{formatSwedishTime(a.scheduled_start)}</span>
+                              </div>
+                              {a.actual_start && a.status === 'active' && (
+                                <ElapsedSince since={a.actual_start} />
+                              )}
+                            </div>
                           </div>
+                          <StatusBadge status={a.status} />
+                          <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-slate-500 transition-colors shrink-0" />
                         </div>
-
-                        {/* Badge + chevron */}
-                        <StatusBadge status={a.status} />
-                        <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-slate-500 transition-colors shrink-0" />
                       </div>
-                    </div>
-                  </Link>
+                    </Link>
+                  </StaggeredItem>
                 ))}
-              </div>
+              </StaggeredList>
             )}
           </div>
 
@@ -337,23 +335,25 @@ export default function AdminDashboard() {
                 <p className="text-sm font-medium text-muted-foreground">Ingen aktivitet ännu idag</p>
               </div>
             ) : (
-              <div className="bg-card rounded-lg border border-border shadow-card divide-y divide-border">
+              <StaggeredList className="bg-card rounded-lg border border-border shadow-card divide-y divide-border">
                 {activityItems.map(item => (
-                  <div key={item.key} className="flex items-start gap-3 px-4 py-3">
-                    <div className="mt-1.5 shrink-0">
-                      <span className={`block h-2 w-2 rounded-full ${item.isComplete ? 'bg-green-500' : 'bg-amber-500'}`} />
+                  <StaggeredItem key={item.key}>
+                    <div className="flex items-start gap-3 px-4 py-3">
+                      <div className="mt-1.5 shrink-0">
+                        <span className={`block h-2 w-2 rounded-full ${item.isComplete ? 'bg-green-500' : 'bg-amber-500'}`} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs leading-relaxed">
+                          <span className="font-medium text-foreground">{item.driver}</span>
+                          <span className="text-muted-foreground"> {item.action} </span>
+                          <span className="text-muted-foreground">{item.title}</span>
+                        </p>
+                      </div>
+                      <span className="font-mono text-[11px] text-muted-foreground shrink-0 mt-0.5">{item.time}</span>
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs leading-relaxed">
-                        <span className="font-medium text-foreground">{item.driver}</span>
-                        <span className="text-muted-foreground"> {item.action} </span>
-                        <span className="text-muted-foreground">{item.title}</span>
-                      </p>
-                    </div>
-                    <span className="font-mono text-[11px] text-muted-foreground shrink-0 mt-0.5">{item.time}</span>
-                  </div>
+                  </StaggeredItem>
                 ))}
-              </div>
+              </StaggeredList>
             )}
 
             {/* Quick links */}
