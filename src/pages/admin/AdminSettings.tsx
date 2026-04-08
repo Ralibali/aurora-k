@@ -94,13 +94,28 @@ export default function AdminSettings() {
 
   const f = form || settings || {};
   const setField = (key: string, value: any) => setForm(prev => ({ ...(prev || settings || {}), [key]: value }));
+  const settingsPayload = {
+    company_name: f.company_name || 'Aurora Medias Transport AB',
+    org_number: f.org_number || null,
+    address: f.address || null,
+    zip_city: f.zip_city || null,
+    email: f.email || null,
+    phone: f.phone || null,
+    bankgiro: f.bankgiro || null,
+    plusgiro: f.plusgiro || null,
+    vat_number: f.vat_number || null,
+    invoice_mode: f.invoice_mode || 'invoice',
+    logo_url: f.logo_url || null,
+  };
+  const isSavingSettings = updateSettings.isPending || createSettings.isPending;
 
   const handleSave = () => {
     if (settings?.id) {
-      updateSettings.mutate({ id: settings.id, ...form });
-    } else {
-      createSettings.mutate({ company_name: f.company_name || 'Aurora Medias Transport AB', ...form });
+      updateSettings.mutate({ id: settings.id, ...settingsPayload });
+      return;
     }
+
+    createSettings.mutate(settingsPayload);
   };
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -187,8 +202,8 @@ export default function AdminSettings() {
           )}
         </CardContent>
       </Card>
-      <Button onClick={handleSave} disabled={updateSettings.isPending} className="w-full sm:w-auto">
-        <Save className="h-4 w-4 mr-1" /> {updateSettings.isPending ? 'Sparar...' : 'Spara inställningar'}
+      <Button onClick={handleSave} disabled={isSavingSettings} className="w-full sm:w-auto">
+        <Save className="h-4 w-4 mr-1" /> {isSavingSettings ? 'Sparar...' : 'Spara inställningar'}
       </Button>
     </div>
   );

@@ -130,50 +130,72 @@ function InviteModal({ companyId, companyName, adminName }: { companyId: string;
   };
 
   const handleSubmit = async () => {
-    const valid = rows.filter(r => r.email.trim());
-    if (valid.length === 0) { toast.error('Ange minst en e-postadress'); return; }
+    const valid = rows
+      .map((row) => ({
+        name: row.name.trim(),
+        email: row.email.trim(),
+      }))
+      .filter((row) => row.email);
+
+    if (valid.length === 0) {
+      toast.error('Ange minst en e-postadress');
+      return;
+    }
+
     setSubmitting(true);
 
     try {
       const inserted: { email: string; token: string }[] = [];
+      const emailFailures: string[] = [];
+
       for (const inv of valid) {
         const { data, error } = await supabase.from('invitations').insert({
           company_id: companyId,
-          email: inv.email.trim(),
-          name: inv.name.trim() || null,
+          email: inv.email,
+          name: inv.name || null,
         }).select('email, token').single();
 
         if (error) throw error;
-        if (data) {
-          inserted.push({ email: data.email, token: data.token! });
-          // Send driver invite email via Brevo
-          const joinUrl = `${window.location.origin}/join?token=${data.token}`;
-          await supabase.functions.invoke('send-email', {
-            body: {
-              to: 'info@auroramedia.se',
-              subject: `${companyName} har bjudit in dig till Aurora Transport`,
-              html: `
-                <h1 style="font-size:20px;font-weight:700;color:#0f172a;margin:0 0 16px">Du har blivit inbjuden! 🎉</h1>
-                <p style="font-size:14px;color:#334155;line-height:1.6;margin:0 0 16px"><strong>${adminName}</strong> på <strong>${companyName}</strong> har bjudit in dig att använda Aurora Transport.</p>
-                <div style="background:#f1f5f9;border-radius:8px;padding:16px 20px;margin:16px 0">
-                  <div style="font-size:13px;color:#334155;line-height:1.8">
-                    ✅ Se och hantera dina uppdrag i realtid<br/>
-                    📍 Automatisk GPS-spårning och navigering<br/>
-                    📝 Digital signering och fotobevis
-                  </div>
+        if (!data?.token) continue;
+
+        inserted.push({ email: data.email, token: data.token });
+
+        const joinUrl = `${window.location.origin}/join?token=${data.token}`;
+        const { error: emailError } = await supabase.functions.invoke('send-email', {
+          body: {
+            to: data.email,
+            subject: `${companyName} har bjudit in dig till Aurora Transport`,
+            html: `
+              <h1 style="font-size:20px;font-weight:700;color:#0f172a;margin:0 0 16px">Du har blivit inbjuden! 🎉</h1>
+              <p style="font-size:14px;color:#334155;line-height:1.6;margin:0 0 16px"><strong>${adminName}</strong> på <strong>${companyName}</strong> har bjudit in dig att använda Aurora Transport.</p>
+              <div style="background:#f1f5f9;border-radius:8px;padding:16px 20px;margin:16px 0">
+                <div style="font-size:13px;color:#334155;line-height:1.8">
+                  ✅ Se och hantera dina uppdrag i realtid<br/>
+                  📍 Automatisk GPS-spårning och navigering<br/>
+                  📝 Digital signering och fotobevis
                 </div>
-                <div style="text-align:center;margin:24px 0">
-                  <a href="${joinUrl}" style="display:inline-block;background:#2563eb;color:#ffffff;font-weight:600;font-size:14px;padding:12px 28px;border-radius:8px;text-decoration:none">Skapa ditt konto</a>
-                </div>
-                <p style="font-size:13px;color:#64748b;line-height:1.5;margin:0 0 12px">Länken är giltig i 7 dagar.</p>
-              `,
-            },
-          });
+              </div>
+              <div style="text-align:center;margin:24px 0">
+                <a href="${joinUrl}" style="display:inline-block;background:#2563eb;color:#ffffff;font-weight:600;font-size:14px;padding:12px 28px;border-radius:8px;text-decoration:none">Skapa ditt konto</a>
+              </div>
+              <p style="font-size:13px;color:#64748b;line-height:1.5;margin:0 0 12px">Länken är giltig i 7 dagar.</p>
+            `,
+          },
+        });
+
+        if (emailError) {
+          emailFailures.push(data.email);
         }
       }
 
       setResults(inserted);
-      toast.success(`Inbjudan skickad till ${inserted.length} förare`);
+      if (inserted.length === 0) {
+        toast.error('Kunde inte skapa några inbjudningar');
+      } else if (emailFailures.length === 0) {
+        toast.success(`Inbjudan skickad till ${inserted.length} förare`);
+      } else {
+        toast.warning(`Inbjudningar skapade för ${inserted.length} förare – ${emailFailures.length} mejl kunde inte skickas, så kopiera länkarna manuellt.`);
+      }
       qc.invalidateQueries({ queryKey: ['invitations'] });
     } catch (err: any) {
       toast.error('Kunde inte skicka: ' + err.message);
@@ -239,9 +261,14 @@ function InviteModal({ companyId, companyName, adminName }: { companyId: string;
             <button onClick={addRow} className="text-sm text-primary font-medium flex items-center gap-1 hover:underline">
               <Plus className="h-3.5 w-3.5" /> Lägg till fler
             </button>
-            <Button onClick={handleSubmit} className="w-full" disabled={submitting}>
-              <Send className="h-4 w-4 mr-1" /> {submitting ? 'Skickar...' : 'Skicka inbjudningar'}
-            </Button>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Button onClick={handleSubmit} className="w-full" disabled={submitting}>
+                <Send className="h-4 w-4 mr-1" /> {submitting ? 'Skickar...' : 'Skicka inbjudningar'}
+              </Button>
+              <Button variant="outline" onClick={() => handleClose(false)} className="w-full sm:w-auto" disabled={submitting}>
+                Avbryt
+              </Button>
+            </div>
           </div>
         )}
       </DialogContent>

@@ -464,8 +464,26 @@ export function useUpdateSettings() {
   return useMutation({
     mutationFn: async (updates: { id: string; [key: string]: any }) => {
       const { id, ...rest } = updates;
-      const { data, error } = await supabase.from('settings').update(rest).eq('id', id).select().single();
+      const payload = Object.fromEntries(
+        Object.entries(rest).filter(([, value]) => value !== undefined)
+      );
+
+      if (Object.keys(payload).length === 0) {
+        const { data, error } = await supabase.from('settings').select('*').eq('id', id).maybeSingle();
+        if (error) throw error;
+        if (!data) throw new Error('Inställningarna kunde inte hittas');
+        return data;
+      }
+
+      const { data, error } = await supabase
+        .from('settings')
+        .update(payload)
+        .eq('id', id)
+        .select()
+        .maybeSingle();
+
       if (error) throw error;
+      if (!data) throw new Error('Inställningarna kunde inte sparas');
       return data;
     },
     onSuccess: () => {
@@ -481,13 +499,19 @@ export function useCreateSettings() {
   const { companyId } = useAuth();
   return useMutation({
     mutationFn: async (settings: { company_name: string; [key: string]: any }) => {
-      const { data, error } = await supabase.from('settings').insert({ ...settings, company_id: companyId }).select().single();
+      const payload = Object.fromEntries(
+        Object.entries({ ...settings, company_id: companyId }).filter(([, value]) => value !== undefined)
+      );
+      const { data, error } = await supabase.from('settings').insert(payload).select().maybeSingle();
       if (error) throw error;
+      if (!data) throw new Error('Inställningarna kunde inte skapas');
       return data;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['settings'] });
+      toast.success('Inställningar sparade!');
     },
+    onError: (e: Error) => toast.error('Kunde inte spara: ' + e.message),
   });
 }
 
