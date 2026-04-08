@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { ArrowRight, Mail, Building2, Globe, Shield, Users, Truck, Heart, Send, Loader2 } from 'lucide-react';
 import { useBreadcrumbJsonLd } from '@/lib/breadcrumb-jsonld';
-import { useCanonical } from '@/lib/use-canonical';
+import { usePageMeta } from '@/lib/use-page-meta';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -34,15 +34,13 @@ export default function AboutPage() {
   useEffect(() => {
     if (theme !== 'light') setTheme('light');
   }, [theme, setTheme]);
-  useCanonical('https://auroratransport.se/om-oss');
+  usePageMeta({
+    title: 'Om oss – Aurora Transport | Transportledningssystem',
+    description: 'Aurora Transport utvecklas av Aurora Media AB (559272-0220). Läs om företaget, vår vision och varför vi bygger Sveriges smartaste transportledningssystem.',
+    canonical: 'https://auroratransport.se/om-oss',
+  });
 
   useEffect(() => {
-    document.title = 'Om oss – Aurora Transport | Transportledningssystem';
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) {
-      meta.setAttribute('content', 'Aurora Transport utvecklas av Aurora Media AB (559272-0220). Läs om företaget, vår vision och varför vi bygger Sveriges smartaste transportledningssystem.');
-    }
-
     const jsonLd = {
       "@context": "https://schema.org",
       "@type": "Organization",

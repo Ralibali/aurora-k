@@ -5,7 +5,7 @@ import { Truck, Zap, Clock, Users, MapPin, Smartphone, FileText, MessageSquare, 
 import { motion } from 'framer-motion';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { useBreadcrumbJsonLd } from '@/lib/breadcrumb-jsonld';
-import { useCanonical } from '@/lib/use-canonical';
+import { usePageMeta } from '@/lib/use-page-meta';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -13,12 +13,11 @@ const fadeUp = {
 };
 
 export default function TransportledningssystemPage() {
-  useEffect(() => {
-    document.title = 'Transportledningssystem för små och medelstora företag | Aurora Transport';
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute('content', 'Enkelt transportledningssystem som samlar uppdrag, förare och tidrapporter. Kom igång samma dag. 449 kr/mån.');
-  }, []);
-  useCanonical('https://auroratransport.se/transportledningssystem');
+  usePageMeta({
+    title: 'Transportledningssystem för små och medelstora företag | Aurora Transport',
+    description: 'Enkelt transportledningssystem som samlar uppdrag, förare och tidrapporter. Kom igång samma dag. 449 kr/mån.',
+    canonical: 'https://auroratransport.se/transportledningssystem',
+  });
 
   useBreadcrumbJsonLd(useMemo(() => [
     { name: 'Hem', url: 'https://auroratransport.se/' },
