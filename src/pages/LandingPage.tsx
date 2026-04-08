@@ -138,24 +138,27 @@ export default function LandingPage() {
     };
   }, []);
 
+  const openLead = () => setLeadModalOpen(true);
+
   return (
     <div className="min-h-screen bg-white">
-      <Navbar onDemo={handleDemo} demoLoading={demoLoading} />
-      <HeroSection onDemo={() => handleDemo('akeri')} demoLoading={demoLoading} />
+      <Navbar onDemo={handleDemo} demoLoading={demoLoading} onContact={openLead} />
+      <HeroSection onDemo={() => handleDemo('akeri')} demoLoading={demoLoading} onContact={openLead} />
       <SocialProofBar />
       <ProblemSection />
       <HowItWorks />
       <FeaturesSection />
-      <PlatformShowcase />
+      <PlatformShowcase onContact={openLead} />
       <ComparisonTable />
       <TestimonialsSection />
-      <PricingSection />
+      <PricingSection onContact={openLead} />
       <FaqSection />
       <SeoContent />
       <InternalLinks />
-      <FinalCta />
+      <FinalCta onContact={openLead} />
       <Footer />
-      <StickyMobileCta visible={showStickyBar} onDemo={() => handleDemo('akeri')} demoLoading={demoLoading} />
+      <StickyMobileCta visible={showStickyBar} onDemo={() => handleDemo('akeri')} demoLoading={demoLoading} onContact={openLead} />
+      <LeadFormModal open={leadModalOpen} onOpenChange={setLeadModalOpen} />
     </div>
   );
 }
