@@ -63,7 +63,7 @@ export function PlatformAdminShell() {
             className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
           >
             <LayoutDashboard className="h-4 w-4" />
-            Tenant Admin
+            Företagsadmin
           </Link>
           <button
             onClick={signOut}
