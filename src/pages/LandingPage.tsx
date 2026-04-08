@@ -28,7 +28,10 @@ const fadeUp = {
 };
 
 export default function LandingPage() {
-  const { user, role, isPlatformAdmin } = useAuth();
+  const auth = useAuth();
+  const { user, role } = auth;
+  const isPlatformAdmin = auth.isPlatformAdmin;
+
   const { setTheme, theme } = useTheme();
   const navigate = useNavigate();
   const [demoLoading, setDemoLoading] = useState(false);
@@ -181,7 +184,7 @@ function StickyMobileCta({ visible, onDemo, demoLoading, onContact }: { visible:
 
 /* ═══════════════════════ NAVBAR ═══════════════════════ */
 function Navbar({ onDemo, demoLoading, onContact }: { onDemo: (type: 'akeri' | 'bemanning') => void; demoLoading: boolean; onContact: () => void }) {
-  const { user, role } = useAuth();
+  const { user, role, isPlatformAdmin } = useAuth();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
