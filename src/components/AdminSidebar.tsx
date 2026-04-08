@@ -109,6 +109,7 @@ const secondarySections = [
 export function AdminSidebar() {
   const { user, signOut } = useAuth();
   const { isPlatformAdmin } = usePlatformAdmin();
+  const { unreadCount } = useUnreadPortalMessages();
   const navigate = useNavigate();
   const [showMore, setShowMore] = useState(() => localStorage.getItem('sidebar-expanded') === 'true');
 
