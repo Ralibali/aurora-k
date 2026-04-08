@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { Truck, Zap, Clock, Users, MapPin, Smartphone, FileText, MessageSquare, FileSpreadsheet, Phone } from 'lucide-react';
+import { Truck, Zap, Bell, Users, MapPin, Clock, Phone, Check, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { useBreadcrumbJsonLd } from '@/lib/breadcrumb-jsonld';
@@ -12,16 +12,16 @@ const fadeUp = {
   visible: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.08, duration: 0.5, ease: 'easeOut' as const } }),
 };
 
-export default function TransportledningssystemPage() {
+export default function DispatchSystemPage() {
   usePageMeta({
-    title: 'Transportledningssystem för små och medelstora företag | Aurora Transport',
-    description: 'Enkelt transportledningssystem som samlar uppdrag, förare och tidrapporter. Kom igång samma dag. 449 kr/mån.',
-    canonical: 'https://auroratransport.se/transportledningssystem',
+    title: 'Dispatch-system för transportföretag | Aurora Transport',
+    description: 'Modernt dispatch-system för att tilldela uppdrag, följa förare i realtid och kommunicera med chaufförerna. Prova gratis.',
+    canonical: 'https://auroratransport.se/dispatch-system',
   });
 
   useBreadcrumbJsonLd(useMemo(() => [
     { name: 'Hem', url: 'https://auroratransport.se/' },
-    { name: 'Transportledningssystem', url: 'https://auroratransport.se/transportledningssystem' },
+    { name: 'Dispatch-system', url: 'https://auroratransport.se/dispatch-system' },
   ], []));
 
   return (
@@ -35,6 +35,21 @@ export default function TransportledningssystemPage() {
       <FaqSection />
       <FinalCta />
       <Footer />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'SoftwareApplication',
+            name: 'Aurora Transport',
+            applicationCategory: 'BusinessApplication',
+            operatingSystem: 'Web',
+            description: 'Dispatch-system för transportföretag. Tilldela uppdrag, spåra förare och kommunicera digitalt.',
+            offers: { '@type': 'Offer', price: '449', priceCurrency: 'SEK' },
+          }),
+        }}
+      />
     </div>
   );
 }
@@ -44,18 +59,12 @@ function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur border-b border-border">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-            <Truck className="h-4 w-4 text-primary-foreground" />
-          </div>
+          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center"><Truck className="h-4 w-4 text-primary-foreground" /></div>
           <span className="font-bold text-foreground">Aurora Transport</span>
         </Link>
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="sm" asChild className="hidden md:inline-flex">
-            <Link to="/login">Logga in</Link>
-          </Button>
-          <Button size="sm" asChild>
-            <Link to="/register">Kom igång</Link>
-          </Button>
+          <Button variant="ghost" size="sm" asChild className="hidden md:inline-flex"><Link to="/login">Logga in</Link></Button>
+          <Button size="sm" asChild><Link to="/register">Kom igång</Link></Button>
         </div>
       </div>
     </nav>
@@ -66,14 +75,14 @@ function Hero() {
   return (
     <section className="pt-32 pb-20 bg-background" style={{ backgroundImage: 'radial-gradient(circle, hsl(var(--border)) 1px, transparent 1px)', backgroundSize: '20px 20px' }}>
       <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
-        <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="inline-flex px-4 py-1.5 rounded-full bg-primary/10 text-sm font-medium text-primary mb-6">
-          Enkelt · Svenskt · Fast pris
+        <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="inline-flex px-4 py-1.5 rounded-full bg-blue-500/10 text-sm font-medium text-blue-700 mb-6">
+          ⚡ Snabbare dispatch = fler leveranser per dag
         </motion.span>
         <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-4xl sm:text-5xl font-bold text-foreground leading-tight mb-6">
-          Transportledningssystem som faktiskt används i fält
+          Dispatch-system som ersätter telefon och whiteboard
         </motion.h1>
         <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-xl text-muted-foreground leading-relaxed mb-8 max-w-2xl mx-auto">
-          Tilldela uppdrag, spåra förare och hantera tidrapporter — allt i en app.
+          Tilldela uppdrag digitalt, följ förare i realtid och slipp ringa runt. Aurora Transport ger dispatchern full kontroll.
         </motion.p>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
           <Button size="lg" asChild className="rounded-xl px-8 py-6 text-base font-semibold">
@@ -81,9 +90,9 @@ function Hero() {
           </Button>
         </motion.div>
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="flex justify-center flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground mt-8">
-          <span>✓ Ingen bindningstid</span>
-          <span>✓ Gratis onboarding</span>
-          <span>✓ Support på svenska</span>
+          <span>✓ Tilldelning med ett klick</span>
+          <span>✓ Live-karta</span>
+          <span>✓ Push-notiser till förare</span>
         </motion.div>
       </div>
     </section>
@@ -92,22 +101,20 @@ function Hero() {
 
 function ProblemSection() {
   const cards = [
-    { icon: MessageSquare, title: 'Uppdrag via SMS', desc: 'Förare missar jobb när allt sköts via meddelanden och telefonsamtal.' },
-    { icon: FileSpreadsheet, title: 'Kalkylark istället för system', desc: 'Tidrapporter, uppdrag och löneunderlag blandas i olika filer.' },
-    { icon: Phone, title: 'Planering via telefon', desc: 'Du ringer runt för att hitta ledig förare. Varje gång.' },
+    { icon: Phone, title: 'Telefon-dispatch', desc: 'Du ringer runt till förare för att hitta vem som är ledig. 10 minuter per uppdrag.' },
+    { icon: MapPin, title: 'Ingen realtidsöversikt', desc: 'Du vet inte var fordonen befinner sig. Kunden ringer och frågar — du vet inte svaret.' },
+    { icon: Bell, title: 'Missade uppdrag', desc: 'Föraren missade SMS:et. Uppdraget blev inte utfört. Kunden blev inte informerad.' },
   ];
   return (
     <section className="py-20 bg-muted">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <motion.h2 initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp} className="text-3xl sm:text-4xl font-bold text-foreground text-center mb-12 max-w-2xl mx-auto">
-          Kör du fortfarande uppdrag via SMS och Excel?
+          Dispatcherns vardag — utan system.
         </motion.h2>
         <div className="grid md:grid-cols-3 gap-6">
           {cards.map((c, i) => (
             <motion.div key={c.title} custom={i} variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="bg-background rounded-xl border border-border p-6">
-              <div className="w-11 h-11 rounded-lg bg-destructive/10 flex items-center justify-center mb-4">
-                <c.icon className="h-5 w-5 text-destructive" />
-              </div>
+              <div className="w-11 h-11 rounded-lg bg-destructive/10 flex items-center justify-center mb-4"><c.icon className="h-5 w-5 text-destructive" /></div>
               <h3 className="font-semibold text-foreground mb-2">{c.title}</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">{c.desc}</p>
             </motion.div>
@@ -120,21 +127,20 @@ function ProblemSection() {
 
 function HowItWorks() {
   const steps = [
-    { num: '01', title: 'Skapa konto', desc: '2 minuter' },
-    { num: '02', title: 'Bjud in förare', desc: 'De får mail' },
-    { num: '03', title: 'Skapa uppdrag', desc: 'Föraren ser det direkt' },
-    { num: '04', title: 'Rapportera', desc: 'Tidrapport automatiskt' },
+    { num: '1', title: 'Skapa uppdrag', desc: 'Fyll i kund, adress, tid och instruktioner. Under 30 sekunder.' },
+    { num: '2', title: 'Tilldela förare', desc: 'Välj rätt förare från listan. De får notifiering direkt i mobilen.' },
+    { num: '3', title: 'Följ i realtid', desc: 'Se status, position och tidsrapport live på dashboarden.' },
   ];
   return (
     <section className="py-20 bg-background">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <motion.h2 initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp} className="text-3xl sm:text-4xl font-bold text-foreground text-center mb-14">
-          Igång på fyra steg.
+          Så fungerar det
         </motion.h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid md:grid-cols-3 gap-8">
           {steps.map((s, i) => (
             <motion.div key={s.num} custom={i} variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center">
-              <div className="text-5xl font-mono font-bold text-primary/15 mb-3">{s.num}</div>
+              <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-xl mx-auto mb-4">{s.num}</div>
               <h3 className="font-semibold text-foreground text-lg mb-1">{s.title}</h3>
               <p className="text-sm text-muted-foreground">{s.desc}</p>
             </motion.div>
@@ -147,25 +153,23 @@ function HowItWorks() {
 
 function FeaturesGrid() {
   const features = [
-    { icon: Zap, title: 'Jobbdispatch i realtid', desc: 'Skapa uppdrag och tilldela till rätt förare. Notifiering direkt i mobilen.' },
-    { icon: Clock, title: 'Automatisk tidrapportering', desc: 'Förare stämplar in och ut. Timmar beräknas automatiskt.' },
-    { icon: Users, title: 'Obegränsat antal förare', desc: 'Lägg till hela teamet. Ingen extra kostnad oavsett storlek.' },
-    { icon: MapPin, title: 'GPS-spårning', desc: 'Se var dina förare befinner sig och vilka uppdrag som pågår just nu.' },
-    { icon: Smartphone, title: 'Mobilapp utan installation', desc: 'PWA — fungerar direkt i webbläsaren. Inga app-installationer.' },
-    { icon: FileText, title: 'Fortnox-export', desc: 'Exportera tidrapporter och faktureringsunderlag med ett klick.' },
+    { icon: Zap, title: 'Snabb tilldelning', desc: 'Skapa och tilldela uppdrag på under en minut. Dra-och-släpp-planering i kalendervyn.' },
+    { icon: MapPin, title: 'Live-karta', desc: 'Se alla fordon i realtid. Position, hastighet, riktning och senaste uppdatering.' },
+    { icon: Bell, title: 'Push-notiser', desc: 'Föraren får direkt besked när ett nytt uppdrag tilldelats. Ingen risk att missa.' },
+    { icon: Users, title: 'Prioritering', desc: 'Markera brådskande uppdrag som kritiska. Föraren ser prioriteten direkt i sin lista.' },
+    { icon: Clock, title: 'Statusuppdatering', desc: 'Föraren uppdaterar status: accepterat → pågående → slutfört. Du ser det direkt.' },
+    { icon: Truck, title: 'Fordonsöversikt', desc: 'Se vilka fordon som är ute, vilka som är lediga och vilka som behöver underhåll.' },
   ];
   return (
     <section className="py-20 bg-muted">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <motion.h2 initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp} className="text-3xl sm:text-4xl font-bold text-foreground text-center mb-14">
-          Allt ett transportföretag behöver.
+          Funktioner som gör dispatch snabbt
         </motion.h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map((f, i) => (
             <motion.div key={f.title} custom={i} variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="bg-background rounded-xl border border-border p-6 hover:shadow-md transition-shadow">
-              <div className="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-                <f.icon className="h-5 w-5 text-primary" />
-              </div>
+              <div className="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center mb-4"><f.icon className="h-5 w-5 text-primary" /></div>
               <h3 className="font-semibold text-foreground mb-2">{f.title}</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
             </motion.div>
@@ -178,23 +182,18 @@ function FeaturesGrid() {
 
 function ComparisonTable() {
   const rows = [
-    { feature: 'Jobbdispatch i realtid', aurora: true, sheet: false, big: true },
-    { feature: 'Mobilapp för förare', aurora: true, sheet: false, big: true },
-    { feature: 'Fast pris oavsett användare', aurora: true, sheet: true, big: false },
-    { feature: 'Kom igång samma dag', aurora: true, sheet: true, big: false },
-    { feature: 'Automatisk tidrapportering', aurora: true, sheet: false, big: true },
-    { feature: 'Support på svenska', aurora: true, sheet: false, big: '?' },
+    { feature: 'Digital uppdragstilldelning', aurora: true, old: false },
+    { feature: 'Föraren ser uppdraget direkt', aurora: true, old: false },
+    { feature: 'GPS-spårning i realtid', aurora: true, old: false },
+    { feature: 'Automatisk statusuppdatering', aurora: true, old: false },
+    { feature: 'Prioritetsnivåer', aurora: true, old: false },
+    { feature: 'Historik och loggning', aurora: true, old: false },
   ];
-  const Cell = ({ val }: { val: boolean | string }) =>
-    val === true ? <span className="text-green-600 font-bold">✓</span> :
-    val === false ? <span className="text-muted-foreground/30">✗</span> :
-    <span className="text-muted-foreground">?</span>;
-
   return (
     <section className="py-20 bg-background">
       <div className="max-w-3xl mx-auto px-4 sm:px-6">
         <motion.h2 initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp} className="text-3xl sm:text-4xl font-bold text-foreground text-center mb-12">
-          Aurora Transport vs alternativen
+          Dispatch-system vs telefon + whiteboard
         </motion.h2>
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="overflow-x-auto rounded-xl border border-border">
           <table className="w-full text-sm">
@@ -202,42 +201,34 @@ function ComparisonTable() {
               <tr>
                 <th className="text-left px-5 py-3.5 text-muted-foreground font-medium bg-muted">Funktion</th>
                 <th className="px-5 py-3.5 text-center font-semibold text-primary-foreground bg-primary">Aurora Transport</th>
-                <th className="px-5 py-3.5 text-center text-muted-foreground font-medium bg-muted">Kalkylark</th>
-                <th className="px-5 py-3.5 text-center text-muted-foreground font-medium bg-muted">Stora system</th>
+                <th className="px-5 py-3.5 text-center text-muted-foreground font-medium bg-muted">Telefon + whiteboard</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((r, i) => (
                 <tr key={r.feature} className={i % 2 === 0 ? 'bg-background' : 'bg-muted/50'}>
                   <td className="px-5 py-3 text-foreground font-medium">{r.feature}</td>
-                  <td className="px-5 py-3 text-center bg-primary/5"><span className="text-green-600 font-bold">✓</span></td>
-                  <td className="px-5 py-3 text-center"><Cell val={r.sheet} /></td>
-                  <td className="px-5 py-3 text-center"><Cell val={r.big} /></td>
+                  <td className="px-5 py-3 text-center bg-primary/5"><Check className="h-4 w-4 text-green-600 mx-auto" /></td>
+                  <td className="px-5 py-3 text-center"><X className="h-4 w-4 text-muted-foreground/30 mx-auto" /></td>
                 </tr>
               ))}
-              <tr className="border-t border-border">
-                <td className="px-5 py-3 text-foreground font-semibold">Pris per månad</td>
-                <td className="px-5 py-3 text-center bg-primary/5 font-mono font-bold text-primary">449 kr</td>
-                <td className="px-5 py-3 text-center font-mono text-muted-foreground">0 kr*</td>
-                <td className="px-5 py-3 text-center font-mono text-muted-foreground">800–3 000 kr+</td>
-              </tr>
             </tbody>
           </table>
         </motion.div>
-        <p className="text-xs text-muted-foreground mt-3 text-center">*Kalkylark kostar dig timmar varje vecka i administration.</p>
       </div>
     </section>
   );
 }
 
+const faqs = [
+  { q: 'Vad är ett dispatch-system?', a: 'Ett digitalt verktyg som hjälper trafikledare att tilldela, schemalägga och följa upp transportuppdrag — istället för att ringa, SMSa eller använda whiteboard.' },
+  { q: 'Hur snabbt kan jag tilldela ett uppdrag?', a: 'Under 30 sekunder. Fyll i kund, adress och tid, välj förare — klart. Föraren får besked direkt.' },
+  { q: 'Kan jag se var alla fordon befinner sig?', a: 'Ja. Live-kartan visar alla aktiva förare med position, hastighet och riktning i realtid.' },
+  { q: 'Fungerar det med min befintliga bilflotta?', a: 'Ja. Aurora Transport kräver inga hårdvaruinstallationer. Allt fungerar via mobilens webbläsare.' },
+  { q: 'Vad kostar det?', a: '449 kr/mån fast pris. Obegränsat antal förare, fordon och uppdrag. Ingen bindningstid.' },
+];
+
 function FaqSection() {
-  const faqs = [
-    { q: 'Vad är ett transportledningssystem?', a: 'Ett system som hjälper transportföretag att planera, tilldela och följa upp uppdrag digitalt — istället för via telefon, SMS eller kalkylark.' },
-    { q: 'Passar det för mitt lilla åkeri?', a: 'Absolut. Aurora Transport är byggt specifikt för små och medelstora transport- och bemanningsföretag. Fast pris oavsett storlek.' },
-    { q: 'Vad skiljer er från Coredination?', a: 'Enklare, billigare och snabbare. 449 kr/mån fast pris oavsett antal användare. Kom igång på 5 minuter utan att kontakta oss.' },
-    { q: 'Behöver mina förare ladda ner en app?', a: 'Nej. Aurora Transport är en PWA som fungerar direkt i mobilens webbläsare utan installation.' },
-    { q: 'Kan jag testa innan jag bestämmer mig?', a: 'Du kan komma igång direkt och avsluta när du vill. Ingen bindningstid.' },
-  ];
   return (
     <section className="py-20 bg-muted">
       <div className="max-w-2xl mx-auto px-4 sm:px-6">
@@ -252,6 +243,7 @@ function FaqSection() {
             </AccordionItem>
           ))}
         </Accordion>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faqs.map(f => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) }) }} />
       </div>
     </section>
   );
@@ -262,10 +254,10 @@ function FinalCta() {
     <section className="py-20 bg-[hsl(222,47%,11%)] text-white">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
         <motion.h2 initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp} className="text-3xl sm:text-4xl font-bold mb-4">
-          Redo att digitalisera din transportplanering?
+          Redo att ersätta whiteboarden?
         </motion.h2>
         <motion.p initial="hidden" whileInView="visible" viewport={{ once: true }} custom={1} variants={fadeUp} className="text-slate-400 mb-8">
-          449 kr/mån. Fast pris. Ingen bindningstid.
+          449 kr/mån. Digital dispatch. Realtidsspårning. Ingen bindningstid.
         </motion.p>
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} custom={2} variants={fadeUp}>
           <Button size="lg" asChild className="rounded-xl px-10 py-6 text-base font-semibold bg-white text-[hsl(222,47%,11%)] hover:bg-white/90">
@@ -287,7 +279,13 @@ function Footer() {
         </div>
         <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-400">
           <Link to="/" className="hover:text-white transition-colors">Hem</Link>
+          <Link to="/tjanster" className="hover:text-white transition-colors">Tjänster</Link>
+          <Link to="/akeri-system" className="hover:text-white transition-colors">Åkerisystem</Link>
+          <Link to="/budtjanst-app" className="hover:text-white transition-colors">Budtjänst-app</Link>
+          <Link to="/transportledningssystem" className="hover:text-white transition-colors">Transportledningssystem</Link>
           <Link to="/coredination-alternativ" className="hover:text-white transition-colors">Coredination-alternativ</Link>
+          <Link to="/om-oss" className="hover:text-white transition-colors">Om oss</Link>
+          <Link to="/privacy" className="hover:text-white transition-colors">Integritetspolicy</Link>
           <a href="mailto:info@auroramedia.se" className="hover:text-white transition-colors">Kontakt</a>
         </div>
       </div>

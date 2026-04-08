@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useBreadcrumbJsonLd } from '@/lib/breadcrumb-jsonld';
-import { useCanonical } from '@/lib/use-canonical';
+import { usePageMeta } from '@/lib/use-page-meta';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -44,17 +43,12 @@ export default function LoginPage() {
     }
   };
 
-  useEffect(() => {
-    document.title = 'Logga in – Aurora Transport';
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute('content', 'Logga in på Aurora Transport för att hantera uppdrag, förare och fakturor.');
-  }, []);
-  useCanonical('https://auroratransport.se/login');
-
-  useBreadcrumbJsonLd(useMemo(() => [
-    { name: 'Hem', url: 'https://auroratransport.se/' },
-    { name: 'Logga in', url: 'https://auroratransport.se/login' },
-  ], []));
+  usePageMeta({
+    title: 'Logga in | Aurora Transport',
+    description: 'Logga in på Aurora Transport för att hantera uppdrag, förare och fakturor.',
+    canonical: 'https://auroratransport.se/login',
+    noindex: true,
+  });
 
   useEffect(() => {
     if (!loading && session && role) {

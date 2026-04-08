@@ -3,7 +3,7 @@ import { useTheme } from 'next-themes';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useMemo, useState } from 'react';
 import { useBreadcrumbJsonLd } from '@/lib/breadcrumb-jsonld';
-import { useCanonical } from '@/lib/use-canonical';
+import { usePageMeta } from '@/lib/use-page-meta';
 import { Button } from '@/components/ui/button';
 import {
   Truck, Clock, Users, MapPin, Smartphone, Zap, FileText,
@@ -39,7 +39,12 @@ export default function LandingPage() {
   useBreadcrumbJsonLd(useMemo(() => [
     { name: 'Hem', url: 'https://auroratransport.se/' },
   ], []));
-  useCanonical('https://auroratransport.se/');
+  usePageMeta({
+    title: 'Aurora Transport – Enklaste dispatch-appen för transportföretag',
+    description: 'Hantera uppdrag, personal och tidrapporter enkelt. 449 kr/mån fast pris. Kom igång på 5 minuter.',
+    canonical: 'https://auroratransport.se/',
+    ogImage: 'https://auroratransport.se/og-image.png',
+  });
 
   useEffect(() => {
     if (theme !== 'light') setTheme('light');
@@ -62,11 +67,6 @@ export default function LandingPage() {
           "priceCurrency": "SEK",
           "priceValidUntil": "2027-12-31",
           "availability": "https://schema.org/InStock"
-        },
-        "aggregateRating": {
-          "@type": "AggregateRating",
-          "ratingValue": "4.8",
-          "ratingCount": "24"
         },
         "featureList": "Uppdragshantering, GPS-spårning, Tidrapporter, Fakturering, OB-tillägg, Traktamente, Fakturaunderlag, Kundportal, Ruttoptimering"
       },
@@ -147,6 +147,9 @@ export default function LandingPage() {
 
       {/* SEO CONTENT */}
       <SeoContent />
+
+      {/* INTERNAL LINKS */}
+      <InternalLinks />
 
       {/* FINAL CTA */}
       <FinalCta />
@@ -955,6 +958,34 @@ function FinalCta() {
   );
 }
 
+/* ═══════════════════════ INTERNAL LINKS ═══════════════════════ */
+const internalLinks = [
+  { to: '/transportledningssystem', title: 'Transportledningssystem', desc: 'Vad är ett TLS och varför behöver ditt företag ett?' },
+  { to: '/akeri-system', title: 'System för åkerier', desc: 'Skräddarsytt för åkeriägare som vill ha koll.' },
+  { to: '/dispatch-system', title: 'Dispatch-system', desc: 'Ersätt whiteboard och telefonsamtal.' },
+  { to: '/budtjanst-app', title: 'App för budtjänst', desc: 'Signerade kvitton och realtidsspårning.' },
+  { to: '/coredination-alternativ', title: 'Alternativ till Coredination', desc: 'Fast pris, inga bindningstider.' },
+  { to: '/tjanster', title: 'Alla funktioner', desc: 'Se hela funktionslistan.' },
+];
+
+function InternalLinks() {
+  return (
+    <section className="py-16 bg-white border-t border-slate-200">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        <h2 className="text-2xl font-bold text-foreground mb-8 text-center">Läs mer</h2>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {internalLinks.map((link) => (
+            <Link key={link.to} to={link.to} className="block rounded-xl border border-slate-200 p-5 hover:shadow-md transition-shadow bg-slate-50">
+              <h3 className="font-semibold text-foreground mb-1">{link.title}</h3>
+              <p className="text-sm text-muted-foreground">{link.desc}</p>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ═══════════════════════ FOOTER ═══════════════════════ */
 function Footer() {
   return (
@@ -973,6 +1004,10 @@ function Footer() {
             <Link to="/tjanster" className="hover:text-white transition-colors">Tjänster</Link>
             <Link to="/transportledningssystem" className="hover:text-white transition-colors">Transportledningssystem</Link>
             <Link to="/coredination-alternativ" className="hover:text-white transition-colors">Coredination-alternativ</Link>
+            <Link to="/akeri-system" className="hover:text-white transition-colors">Åkerisystem</Link>
+            <Link to="/dispatch-system" className="hover:text-white transition-colors">Dispatch-system</Link>
+            <Link to="/budtjanst-app" className="hover:text-white transition-colors">Budtjänst-app</Link>
+            <Link to="/om-oss" className="hover:text-white transition-colors">Om oss</Link>
             <Link to="/privacy" className="hover:text-white transition-colors">Integritetspolicy</Link>
             <a href="mailto:info@auroramedia.se" className="hover:text-white transition-colors">Kontakt</a>
           </div>

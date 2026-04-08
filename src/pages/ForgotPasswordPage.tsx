@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { usePageMeta } from '@/lib/use-page-meta';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,8 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Truck, ArrowLeft, CheckCircle2, Mail } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-
 export default function ForgotPasswordPage() {
+  usePageMeta({ title: 'Glömt lösenord | Aurora Transport', description: '', canonical: 'https://auroratransport.se/forgot-password', noindex: true });
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [sent, setSent] = useState(false);

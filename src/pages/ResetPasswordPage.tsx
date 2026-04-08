@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { usePageMeta } from '@/lib/use-page-meta';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,8 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Truck, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-
 export default function ResetPasswordPage() {
+  usePageMeta({ title: 'Återställ lösenord | Aurora Transport', description: '', canonical: 'https://auroratransport.se/reset-password', noindex: true });
   const navigate = useNavigate();
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');

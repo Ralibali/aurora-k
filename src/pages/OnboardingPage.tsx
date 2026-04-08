@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { usePageMeta } from '@/lib/use-page-meta';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,8 +16,8 @@ interface InviteRow {
   name: string;
   email: string;
 }
-
 export default function OnboardingPage() {
+  usePageMeta({ title: 'Onboarding | Aurora Transport', description: '', canonical: 'https://auroratransport.se/onboarding', noindex: true });
   const navigate = useNavigate();
   const { user, companyId } = useAuth();
   const [step, setStep] = useState(() => {

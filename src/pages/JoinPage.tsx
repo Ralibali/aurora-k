@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { usePageMeta } from '@/lib/use-page-meta';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,8 +15,8 @@ interface Invitation {
   company_id: string;
   company_name?: string;
 }
-
 export default function JoinPage() {
+  usePageMeta({ title: 'Gå med | Aurora Transport', description: '', canonical: 'https://auroratransport.se/join', noindex: true });
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
