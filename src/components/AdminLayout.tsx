@@ -58,7 +58,7 @@ export function AdminLayout({ children, title, description }: AdminLayoutProps) 
         </div>
         <LogoutButton />
       </header>
-      <main className="flex-1 p-4 md:p-6 overflow-auto">
+      <main className="flex-1 p-4 md:p-6 pb-24 md:pb-6 overflow-auto">
         <PageTransition>{children}</PageTransition>
       </main>
     </>
