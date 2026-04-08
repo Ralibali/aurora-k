@@ -2,23 +2,7 @@ import { ReactNode, Suspense } from 'react';
 import { PageTransition } from '@/components/PageTransition';
 import { AdminSidebar } from '@/components/AdminSidebar';
 import { MobileTabBar } from '@/components/MobileTabBar';
-import { Outlet, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
-import { LogOut } from 'lucide-react';
-
-function LogoutButton() {
-  const { signOut } = useAuth();
-  const navigate = useNavigate();
-  return (
-    <button
-      onClick={async () => { await signOut(); navigate('/'); }}
-      className="md:hidden text-muted-foreground hover:text-foreground p-2 rounded-md transition-colors"
-      title="Logga ut"
-    >
-      <LogOut className="h-4 w-4" />
-    </button>
-  );
-}
+import { Outlet } from 'react-router-dom';
 
 /** Shared shell — rendered once, sidebar stays mounted across route changes */
 export function AdminShell() {
@@ -56,7 +40,6 @@ export function AdminLayout({ children, title, description }: AdminLayoutProps) 
           <h1 className="text-sm font-semibold text-foreground truncate leading-tight">{title}</h1>
           {description && <p className="text-[11px] text-muted-foreground truncate">{description}</p>}
         </div>
-        <LogoutButton />
       </header>
       <main className="flex-1 p-4 md:p-6 pb-24 md:pb-6 overflow-auto">
         <PageTransition>{children}</PageTransition>

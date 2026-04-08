@@ -1,7 +1,8 @@
-import { LayoutDashboard, Briefcase, Map, Users, Menu, Plus, X, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Briefcase, Map, Users, Menu, Plus, X, ChevronRight, LogOut } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '@/hooks/useAuth';
 
 const tabs = [
   { label: 'Hem', icon: LayoutDashboard, to: '/admin', exact: true },
@@ -24,6 +25,7 @@ export function MobileTabBar() {
   const navigate = useNavigate();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const { signOut } = useAuth();
 
   const isTabActive = (tab: typeof tabs[number]) => {
     if (tab.exact) return location.pathname === tab.to;
@@ -32,6 +34,12 @@ export function MobileTabBar() {
 
   // Only show FAB on pages where "new assignment" makes sense
   const showFab = location.pathname === '/admin' || location.pathname.startsWith('/admin/assignments');
+
+  const handleLogout = async () => {
+    setMenuOpen(false);
+    await signOut();
+    navigate('/');
+  };
 
   return (
     <>
@@ -115,6 +123,15 @@ export function MobileTabBar() {
                     <ChevronRight className="h-4 w-4 text-muted-foreground" />
                   </Link>
                 ))}
+              </div>
+              <div className="border-t border-border px-5 py-3">
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-3 w-full py-3 text-sm text-destructive active:bg-muted rounded-lg transition-colors"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Logga ut
+                </button>
               </div>
             </motion.div>
           </>

@@ -240,7 +240,7 @@ function Navbar() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <Button variant="ghost" size="sm" asChild className="hidden md:inline-flex">
+              <Button variant="ghost" size="sm" asChild>
                 <Link to="/login">Logga in</Link>
               </Button>
               <Button size="sm" asChild>
