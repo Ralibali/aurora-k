@@ -184,7 +184,7 @@ function StickyMobileCta({ visible, onDemo, demoLoading, onContact }: { visible:
 
 /* ═══════════════════════ NAVBAR ═══════════════════════ */
 function Navbar({ onDemo, demoLoading, onContact }: { onDemo: (type: 'akeri' | 'bemanning') => void; demoLoading: boolean; onContact: () => void }) {
-  const { user, role } = useAuth();
+  const { user, role, isPlatformAdmin } = useAuth();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
