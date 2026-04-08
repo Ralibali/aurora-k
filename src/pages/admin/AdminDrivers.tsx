@@ -309,16 +309,11 @@ export default function AdminDrivers() {
   const [filter, setFilter] = useState('all');
   const [selectedDriver, setSelectedDriver] = useState<any>(null);
 
-  const { companyId, user } = useAuth();
+  const { companyId } = useAuth();
   const { data: drivers, isLoading } = useDrivers();
   const { data: assignments } = useAssignments();
   const { data: compensations } = useDriverCompensations();
   const qc = useQueryClient();
-
-  // Fetch company name and admin name for invite emails
-  const { data: companyData } = useQuery({
-    queryKey: ['company-name', companyId],
-    queryFn: async () => {
       if (!companyId) return null;
       const { data } = await supabase.from('companies').select('name').eq('id', companyId).single();
       return data;
