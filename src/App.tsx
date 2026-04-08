@@ -72,6 +72,7 @@ const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
 const BudtjanstAppPage = lazy(() => import("./pages/BudtjanstAppPage"));
 const AkeriSystemPage = lazy(() => import("./pages/AkeriSystemPage"));
 const DispatchSystemPage = lazy(() => import("./pages/DispatchSystemPage"));
+const AdsBudtjanstPage = lazy(() => import("./pages/AdsBudtjanstPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -114,6 +115,7 @@ const App = () => (
                 <Route path="/budtjanst-app" element={<BudtjanstAppPage />} />
                 <Route path="/akeri-system" element={<AkeriSystemPage />} />
                 <Route path="/dispatch-system" element={<DispatchSystemPage />} />
+                <Route path="/ads/budtjanst" element={<AdsBudtjanstPage />} />
 
                 {/* Admin routes — share a single sidebar shell */}
                 <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><SubscriptionGuard><AdminShell /></SubscriptionGuard></ProtectedRoute>}>
