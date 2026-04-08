@@ -52,6 +52,23 @@ export function LeadForm({ onSuccess, compact = false }: LeadFormProps) {
       console.error('[LeadForm]', error);
       return;
     }
+
+    // Send admin notification email (fire and forget)
+    supabase.functions.invoke('send-email', {
+      body: {
+        to: 'info@auroramedia.se',
+        templateName: 'new-lead-notification',
+        templateData: {
+          companyName: form.company_name.trim(),
+          contactPerson: form.contact_person.trim(),
+          email: form.email.trim(),
+          phone: form.phone.trim() || null,
+          fleetSize: form.fleet_size.trim() || null,
+          message: form.message.trim() || null,
+        },
+      },
+    }).catch((err) => console.error('[LeadForm] email notification failed:', err));
+
     setSubmitted(true);
     toast.success('Tack! Vi hör av oss inom kort.');
     onSuccess?.();
