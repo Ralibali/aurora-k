@@ -454,54 +454,6 @@ export default function AdminDrivers() {
           </div>
         )}
 
-        {/* Pending Invitations */}
-        {(invitations ?? []).length > 0 && (
-          <div>
-            <h3 className="text-lg font-semibold mb-3">Väntande inbjudningar</h3>
-            <div className="bg-card rounded-lg border overflow-hidden">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Namn</TableHead>
-                    <TableHead>E-post</TableHead>
-                    <TableHead>Skickad</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Åtgärd</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {(invitations ?? []).map(inv => {
-                    const accepted = !!inv.accepted_at;
-                    return (
-                      <TableRow key={inv.id}>
-                        <TableCell className="font-medium">{inv.name || '–'}</TableCell>
-                        <TableCell>{inv.email}</TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {inv.created_at ? format(new Date(inv.created_at), 'd MMM yyyy', { locale: sv }) : '–'}
-                        </TableCell>
-                        <TableCell>
-                          {accepted ? (
-                            <Badge variant="default" className="bg-green-100 text-green-700 hover:bg-green-100 border-0">Accepterad</Badge>
-                          ) : (
-                            <Badge variant="secondary" className="bg-amber-100 text-amber-700 hover:bg-amber-100 border-0">Väntar</Badge>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {!accepted && inv.token && (
-                            <Button variant="ghost" size="sm" className="text-xs" onClick={() => copyInviteLink(inv.token!)}>
-                              <Copy className="h-3.5 w-3.5 mr-1" /> Kopiera länk
-                            </Button>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
-          </div>
-        )}
-      </div>
 
       {/* Driver Detail Sheet */}
       {selectedDriver && (
