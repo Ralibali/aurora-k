@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
@@ -14,7 +15,7 @@ import {
 } from '@/components/ui/dialog';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { Search, Building2, Users, ChevronDown, ChevronUp, ExternalLink, KeyRound, Power, PowerOff, Mail, Gift } from 'lucide-react';
+import { Search, Building2, Users, ChevronDown, ChevronUp, ExternalLink, KeyRound, Power, PowerOff, Mail, Gift, Plus, Copy, Link2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 type FilterStatus = 'all' | 'active' | 'pending' | 'cancelled';
@@ -27,6 +28,10 @@ export default function PlatformCompanies() {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [resetDialog, setResetDialog] = useState<{ userId: string; name: string } | null>(null);
   const [newPassword, setNewPassword] = useState('');
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createForm, setCreateForm] = useState({ companyName: '', orgNr: '', adminName: '', adminEmail: '' });
+  const [createResult, setCreateResult] = useState<{ checkout_url: string | null; temp_password: string } | null>(null);
+  const [creatingCompany, setCreatingCompany] = useState(false);
 
   const { data: companies, isLoading } = useQuery({
     queryKey: ['platform-companies-detail'],
@@ -130,6 +135,41 @@ export default function PlatformCompanies() {
     onError: () => toast.error('Kunde inte skicka mail'),
   });
 
+  const handleCreateCompany = async () => {
+    const { companyName, adminName, adminEmail, orgNr } = createForm;
+    if (!companyName.trim() || !adminName.trim() || !adminEmail.trim()) {
+      toast.error('Fyll i företagsnamn, kontaktperson och e-post');
+      return;
+    }
+    setCreatingCompany(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-onboarding-link', {
+        body: { company_name: companyName.trim(), org_nr: orgNr.trim() || null, admin_name: adminName.trim(), admin_email: adminEmail.trim() },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setCreateResult({ checkout_url: data.checkout_url, temp_password: data.temp_password });
+      queryClient.invalidateQueries({ queryKey: ['platform-companies-detail'] });
+      queryClient.invalidateQueries({ queryKey: ['platform-profiles-all'] });
+      toast.success(`${companyName} skapades!`);
+    } catch (err: any) {
+      toast.error('Kunde inte skapa: ' + err.message);
+    } finally {
+      setCreatingCompany(false);
+    }
+  };
+
+  const handleCloseCreate = () => {
+    setCreateOpen(false);
+    setCreateForm({ companyName: '', orgNr: '', adminName: '', adminEmail: '' });
+    setCreateResult(null);
+  };
+
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success(`${label} kopierad!`);
+  };
+
   const filters: { label: string; value: FilterStatus }[] = [
     { label: 'Alla', value: 'all' },
     { label: 'Aktiva', value: 'active' },
@@ -156,6 +196,9 @@ export default function PlatformCompanies() {
             </Button>
           ))}
         </div>
+        <Button onClick={() => setCreateOpen(true)} className="gap-2">
+          <Plus className="h-4 w-4" /> Skapa företag
+        </Button>
       </div>
 
       {isLoading && (
@@ -376,6 +419,71 @@ export default function PlatformCompanies() {
               Återställ
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create company dialog */}
+      <Dialog open={createOpen} onOpenChange={(open) => { if (!open) handleCloseCreate(); else setCreateOpen(true); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{createResult ? 'Företag skapat!' : 'Skapa nytt företag'}</DialogTitle>
+          </DialogHeader>
+
+          {createResult ? (
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">Företaget och admin-kontot har skapats. Dela uppgifterna nedan med kunden.</p>
+
+              {createResult.checkout_url && (
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold">Betalningslänk (Stripe)</Label>
+                  <div className="flex items-center gap-2 bg-muted/50 rounded-lg p-3">
+                    <Link2 className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <span className="text-xs truncate flex-1">{createResult.checkout_url}</span>
+                    <Button variant="outline" size="sm" onClick={() => copyToClipboard(createResult.checkout_url!, 'Betalningslänk')}>
+                      <Copy className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold">Tillfälligt lösenord</Label>
+                <div className="flex items-center gap-2 bg-muted/50 rounded-lg p-3">
+                  <KeyRound className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <code className="text-sm font-mono flex-1">{createResult.temp_password}</code>
+                  <Button variant="outline" size="sm" onClick={() => copyToClipboard(createResult.temp_password, 'Lösenord')}>
+                    <Copy className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+                <p className="text-[11px] text-muted-foreground">Kunden loggar in med sin e-post och detta lösenord. Be dem byta lösenord efter första inloggning.</p>
+              </div>
+
+              <Button variant="outline" className="w-full" onClick={handleCloseCreate}>Stäng</Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">Skapar företag, admin-konto och genererar en betalningslänk via Stripe.</p>
+              <div className="space-y-2">
+                <Label>Företagsnamn *</Label>
+                <Input placeholder="AB Företaget" value={createForm.companyName} onChange={(e) => setCreateForm(f => ({ ...f, companyName: e.target.value }))} />
+              </div>
+              <div className="space-y-2">
+                <Label>Organisationsnummer</Label>
+                <Input placeholder="556XXX-XXXX" value={createForm.orgNr} onChange={(e) => setCreateForm(f => ({ ...f, orgNr: e.target.value }))} />
+              </div>
+              <div className="space-y-2">
+                <Label>Kontaktperson (admin) *</Label>
+                <Input placeholder="Förnamn Efternamn" value={createForm.adminName} onChange={(e) => setCreateForm(f => ({ ...f, adminName: e.target.value }))} />
+              </div>
+              <div className="space-y-2">
+                <Label>E-post *</Label>
+                <Input type="email" placeholder="admin@foretaget.se" value={createForm.adminEmail} onChange={(e) => setCreateForm(f => ({ ...f, adminEmail: e.target.value }))} />
+              </div>
+              <Button onClick={handleCreateCompany} className="w-full" disabled={creatingCompany}>
+                <Plus className="h-4 w-4 mr-1" /> {creatingCompany ? 'Skapar...' : 'Skapa företag & generera länk'}
+              </Button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </PlatformLayout>
