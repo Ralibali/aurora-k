@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-demo-secret",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
 const DEMO_COMPANIES = [
@@ -46,14 +46,16 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Validate demo secret
-    const secret = req.headers.get("x-demo-secret");
+    // Validate demo secret if configured (optional gate against abuse)
     const expectedSecret = Deno.env.get("DEMO_SECRET");
-    if (!expectedSecret || secret !== expectedSecret) {
-      return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    if (expectedSecret) {
+      const secret = req.headers.get("x-demo-secret");
+      if (secret !== expectedSecret) {
+        return new Response(
+          JSON.stringify({ error: "Unauthorized" }),
+          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
     }
 
     const { type } = await req.json().catch(() => ({ type: "akeri" }));
