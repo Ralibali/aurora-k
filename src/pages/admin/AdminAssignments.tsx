@@ -226,9 +226,9 @@ export default function AdminAssignments() {
                     <TableHead className="w-10"></TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
+                <StaggeredTableBody>
                   {filtered.map(a => (
-                    <TableRow
+                    <StaggeredTableRow
                       key={a.id}
                       className="cursor-pointer hover:bg-secondary/50"
                       onClick={() => navigate(`/admin/assignments/${a.id}`)}
@@ -301,9 +301,9 @@ export default function AdminAssignments() {
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
-                    </TableRow>
+                    </StaggeredTableRow>
                   ))}
-                </TableBody>
+                </StaggeredTableBody>
               </Table>
             </div>
 

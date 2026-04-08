@@ -76,16 +76,20 @@ export default function AdminCustomers() {
                     <TableCell><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
                   </TableRow>
                 ))}
-                {!isLoading && filtered.map(c => (
-                  <TableRow key={c.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/admin/customers/${c.id}`)}>
-                    <TableCell className="font-medium">{c.name}</TableCell>
-                    <TableCell className="hidden md:table-cell text-muted-foreground font-mono">{c.org_number || '–'}</TableCell>
-                    <TableCell className="hidden md:table-cell">{c.contact_person || '–'}</TableCell>
-                    <TableCell className="hidden sm:table-cell text-muted-foreground">{c.email || '–'}</TableCell>
-                    <TableCell className="hidden sm:table-cell text-muted-foreground">{c.phone || '–'}</TableCell>
-                    <TableCell><span className="status-badge status-pending">{pricingTypeLabels[c.pricing_type as keyof typeof pricingTypeLabels] || c.pricing_type}</span></TableCell>
-                  </TableRow>
-                ))}
+                {!isLoading && filtered.length > 0 && (
+                  <StaggeredTableBody>
+                    {filtered.map(c => (
+                      <StaggeredTableRow key={c.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/admin/customers/${c.id}`)}>
+                        <TableCell className="font-medium">{c.name}</TableCell>
+                        <TableCell className="hidden md:table-cell text-muted-foreground font-mono">{c.org_number || '–'}</TableCell>
+                        <TableCell className="hidden md:table-cell">{c.contact_person || '–'}</TableCell>
+                        <TableCell className="hidden sm:table-cell text-muted-foreground">{c.email || '–'}</TableCell>
+                        <TableCell className="hidden sm:table-cell text-muted-foreground">{c.phone || '–'}</TableCell>
+                        <TableCell><span className="status-badge status-pending">{pricingTypeLabels[c.pricing_type as keyof typeof pricingTypeLabels] || c.pricing_type}</span></TableCell>
+                      </StaggeredTableRow>
+                    ))}
+                  </StaggeredTableBody>
+                )}
                 {!isLoading && filtered.length === 0 && (
                   <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Inga kunder hittades</TableCell></TableRow>
                 )}
