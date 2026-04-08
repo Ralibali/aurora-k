@@ -28,6 +28,10 @@ export default function PlatformCompanies() {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [resetDialog, setResetDialog] = useState<{ userId: string; name: string } | null>(null);
   const [newPassword, setNewPassword] = useState('');
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createForm, setCreateForm] = useState({ companyName: '', orgNr: '', adminName: '', adminEmail: '' });
+  const [createResult, setCreateResult] = useState<{ checkout_url: string | null; temp_password: string } | null>(null);
+  const [creatingCompany, setCreatingCompany] = useState(false);
 
   const { data: companies, isLoading } = useQuery({
     queryKey: ['platform-companies-detail'],
