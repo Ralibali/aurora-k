@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useDrivers, useAssignments, useDriverCompensations, useUpsertDriverCompensation } from '@/hooks/useData';
-import { Plus, Trash2, DollarSign, Save, Search, Phone, Briefcase, Users, Copy, Send, X, Clock, Mail, Calendar } from 'lucide-react';
+import { Plus, DollarSign, Save, Search, Briefcase, Users, Mail, Calendar } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
