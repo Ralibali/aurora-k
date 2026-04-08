@@ -1,18 +1,29 @@
-import { LayoutDashboard, Briefcase, Map, Users, MoreHorizontal, Plus } from 'lucide-react';
+import { LayoutDashboard, Briefcase, Map, Users, Menu, Plus, X, ChevronRight } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const tabs = [
   { label: 'Hem', icon: LayoutDashboard, to: '/admin', end: true },
   { label: 'Uppdrag', icon: Briefcase, to: '/admin/assignments' },
   { label: 'Karta', icon: Map, to: '/admin/live-map' },
   { label: 'Personal', icon: Users, to: '/admin/drivers' },
-  { label: 'Mer', icon: MoreHorizontal, to: '/admin/settings' },
+];
+
+const moreLinks = [
+  { label: 'Kunder', to: '/admin/customers' },
+  { label: 'Fakturor', to: '/admin/invoices' },
+  { label: 'Kalender', to: '/admin/calendar' },
+  { label: 'Ordrar', to: '/admin/orders' },
+  { label: 'Rapporter', to: '/admin/reports' },
+  { label: 'Fordon', to: '/admin/vehicles' },
+  { label: 'Inställningar', to: '/admin/settings' },
 ];
 
 export function MobileTabBar() {
   const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <>
@@ -22,24 +33,84 @@ export function MobileTabBar() {
         className="md:hidden fixed bottom-20 right-4 z-50 w-14 h-14 bg-primary rounded-full shadow-lg flex items-center justify-center active:scale-95 transition-transform"
         aria-label="Nytt uppdrag"
       >
-        <Plus className="h-6 w-6 text-white" />
+        <Plus className="h-6 w-6 text-primary-foreground" />
       </button>
 
       {/* Bottom Tab Bar */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-border h-16 flex items-center justify-around pb-safe">
+      <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-card border-t border-border h-16 flex items-center justify-around pb-safe">
         {tabs.map((tab) => (
           <NavLink
             key={tab.to}
             to={tab.to}
             end={tab.end}
-            className="flex flex-col items-center justify-center gap-0.5 text-muted-foreground min-w-[56px] py-1"
+            className="relative flex flex-col items-center justify-center gap-0.5 text-muted-foreground min-w-[56px] py-1 transition-colors"
             activeClassName="!text-primary"
           >
-            <tab.icon className="h-5 w-5" />
-            <span className="text-[10px] font-medium">{tab.label}</span>
+            {({ isActive }: { isActive: boolean }) => (
+              <>
+                {isActive && (
+                  <motion.span
+                    layoutId="mobile-tab-indicator"
+                    className="absolute -top-px left-2 right-2 h-0.5 rounded-full bg-primary"
+                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                  />
+                )}
+                <tab.icon className="h-5 w-5" />
+                <span className="text-[10px] font-medium">{tab.label}</span>
+              </>
+            )}
           </NavLink>
         ))}
+        <button
+          onClick={() => setMenuOpen(true)}
+          className="flex flex-col items-center justify-center gap-0.5 text-muted-foreground min-w-[56px] py-1"
+        >
+          <Menu className="h-5 w-5" />
+          <span className="text-[10px] font-medium">Mer</span>
+        </button>
       </nav>
+
+      {/* "More" slide-up sheet */}
+      <AnimatePresence>
+        {menuOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="md:hidden fixed inset-0 z-50 bg-black/40"
+              onClick={() => setMenuOpen(false)}
+            />
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+              className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-card rounded-t-2xl border-t border-border max-h-[60vh] overflow-y-auto pb-safe"
+            >
+              <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+                <h3 className="text-sm font-semibold text-foreground">Mer</h3>
+                <button onClick={() => setMenuOpen(false)} className="p-1 text-muted-foreground">
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              <div className="py-2">
+                {moreLinks.map((link) => (
+                  <Link
+                    key={link.to}
+                    to={link.to}
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center justify-between px-5 py-3.5 text-sm text-foreground active:bg-muted transition-colors"
+                  >
+                    {link.label}
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  </Link>
+                ))}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
 }
