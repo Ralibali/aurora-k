@@ -202,6 +202,8 @@ function InviteModal({ companyId, companyName, adminName }: { companyId: string;
     } finally {
       setSubmitting(false);
     }
+  };
+
   const copyLink = (token: string) => {
     const url = `${window.location.origin}/join?token=${token}`;
     navigator.clipboard.writeText(url);
