@@ -78,6 +78,17 @@ const AdsBudtjanstPage = lazy(() => import("./pages/AdsBudtjanstPage"));
 const AdsAkeriPage = lazy(() => import("./pages/AdsAkeriPage"));
 const AdsTransportPage = lazy(() => import("./pages/AdsTransportPage"));
 const AdsFlottaPage = lazy(() => import("./pages/AdsFlottaPage"));
+const BlogIndex = lazy(() => import("./pages/BlogIndex"));
+const BlogBastaDispatch = lazy(() => import("./pages/blog/BlogBastaDispatch"));
+const BlogDigitaliseraBudtjanst = lazy(() => import("./pages/blog/BlogDigitaliseraBudtjanst"));
+const BlogVadKostarTms = lazy(() => import("./pages/blog/BlogVadKostarTms"));
+const BlogTmsSmaaAkerier = lazy(() => import("./pages/blog/BlogTmsSmaaAkerier"));
+const BlogDispatchAppForare = lazy(() => import("./pages/blog/BlogDispatchAppForare"));
+const BlogBemanningsbolag = lazy(() => import("./pages/blog/BlogBemanningsbolag"));
+const BlogTmsVsDispatch = lazy(() => import("./pages/blog/BlogTmsVsDispatch"));
+const BlogUtanBindningstid = lazy(() => import("./pages/blog/BlogUtanBindningstid"));
+const BlogDigitaltKororder = lazy(() => import("./pages/blog/BlogDigitaltKororder"));
+const BlogBytaDispatch = lazy(() => import("./pages/blog/BlogBytaDispatch"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -125,6 +136,19 @@ const App = () => (
                 <Route path="/ads/akeri" element={<AdsAkeriPage />} />
                 <Route path="/ads/transport" element={<AdsTransportPage />} />
                 <Route path="/ads/flotta" element={<AdsFlottaPage />} />
+
+                {/* Blog routes */}
+                <Route path="/blogg" element={<BlogIndex />} />
+                <Route path="/blogg/basta-dispatchsystemet-for-akeri-2026" element={<BlogBastaDispatch />} />
+                <Route path="/blogg/hur-digitaliserar-man-sin-budtjanst" element={<BlogDigitaliseraBudtjanst />} />
+                <Route path="/blogg/vad-kostar-ett-transportledningssystem" element={<BlogVadKostarTms />} />
+                <Route path="/blogg/transportledningssystem-for-sma-akeries" element={<BlogTmsSmaaAkerier />} />
+                <Route path="/blogg/dispatch-app-forare-transport" element={<BlogDispatchAppForare />} />
+                <Route path="/blogg/bemanningsbolag-transport-system" element={<BlogBemanningsbolag />} />
+                <Route path="/blogg/skillnad-tms-dispatch-system" element={<BlogTmsVsDispatch />} />
+                <Route path="/blogg/transportapp-utan-bindningstid" element={<BlogUtanBindningstid />} />
+                <Route path="/blogg/digitalt-korordrersystem-fordelar" element={<BlogDigitaltKororder />} />
+                <Route path="/blogg/byta-dispatchsystem-guide" element={<BlogBytaDispatch />} />
 
                 {/* Admin routes — share a single sidebar shell */}
                 <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><SubscriptionGuard><AdminShell /></SubscriptionGuard></ProtectedRoute>}>
