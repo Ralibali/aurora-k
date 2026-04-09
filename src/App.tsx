@@ -78,6 +78,17 @@ const AdsBudtjanstPage = lazy(() => import("./pages/AdsBudtjanstPage"));
 const AdsAkeriPage = lazy(() => import("./pages/AdsAkeriPage"));
 const AdsTransportPage = lazy(() => import("./pages/AdsTransportPage"));
 const AdsFlottaPage = lazy(() => import("./pages/AdsFlottaPage"));
+const BlogIndex = lazy(() => import("./pages/BlogIndex"));
+const BlogBastaDispatch = lazy(() => import("./pages/blog/BlogBastaDispatch"));
+const BlogDigitaliseraBudtjanst = lazy(() => import("./pages/blog/BlogDigitaliseraBudtjanst"));
+const BlogVadKostarTms = lazy(() => import("./pages/blog/BlogVadKostarTms"));
+const BlogTmsSmaaAkerier = lazy(() => import("./pages/blog/BlogTmsSmaaAkerier"));
+const BlogDispatchAppForare = lazy(() => import("./pages/blog/BlogDispatchAppForare"));
+const BlogBemanningsbolag = lazy(() => import("./pages/blog/BlogBemanningsbolag"));
+const BlogTmsVsDispatch = lazy(() => import("./pages/blog/BlogTmsVsDispatch"));
+const BlogUtanBindningstid = lazy(() => import("./pages/blog/BlogUtanBindningstid"));
+const BlogDigitaltKororder = lazy(() => import("./pages/blog/BlogDigitaltKororder"));
+const BlogBytaDispatch = lazy(() => import("./pages/blog/BlogBytaDispatch"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
