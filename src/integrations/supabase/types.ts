@@ -1211,11 +1211,16 @@ export type Database = {
           email: string
           fleet_size: string | null
           id: string
+          lead_score: number
           message: string | null
           org_number: string | null
           phone: string | null
           status: string
           updated_at: string
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
         }
         Insert: {
           admin_notes?: string | null
@@ -1225,11 +1230,16 @@ export type Database = {
           email: string
           fleet_size?: string | null
           id?: string
+          lead_score?: number
           message?: string | null
           org_number?: string | null
           phone?: string | null
           status?: string
           updated_at?: string
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
         }
         Update: {
           admin_notes?: string | null
@@ -1239,11 +1249,16 @@ export type Database = {
           email?: string
           fleet_size?: string | null
           id?: string
+          lead_score?: number
           message?: string | null
           org_number?: string | null
           phone?: string | null
           status?: string
           updated_at?: string
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
         }
         Relationships: []
       }

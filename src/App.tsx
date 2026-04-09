@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { PwaInstallPrompt } from "@/components/PwaInstallPrompt";
 import { CookieConsent } from "@/components/CookieConsent";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { SubscriptionGuard } from "@/components/SubscriptionGuard";
@@ -101,6 +102,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AuthProvider>
+          <ErrorBoundary>
               <Suspense fallback={<PageLoader />}>
                 <Routes>
                 <Route path="/" element={<LandingPage />} />
@@ -169,7 +171,7 @@ const App = () => (
                   <Route path="leads" element={<PlatformLeads />} />
                 </Route>
 
-{/* Driver routes — share a single layout shell */}
+                {/* Driver routes — share a single layout shell */}
                 <Route path="/driver" element={<ProtectedRoute requiredRole="driver"><DriverLayout /></ProtectedRoute>}>
                   <Route index element={<DriverAssignments />} />
                   <Route path="assignments" element={<DriverAssignments />} />
@@ -181,6 +183,7 @@ const App = () => (
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
+          </ErrorBoundary>
           </AuthProvider>
         </BrowserRouter>
         <PwaInstallPrompt />

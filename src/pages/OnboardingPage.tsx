@@ -21,14 +21,14 @@ export default function OnboardingPage() {
   const navigate = useNavigate();
   const { user, companyId } = useAuth();
   const [step, setStep] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
+    const saved = sessionStorage.getItem(STORAGE_KEY);
     return saved ? parseInt(saved, 10) : 1;
   });
   const [submitting, setSubmitting] = useState(false);
 
   // Step 1
-  const [companyName, setCompanyName] = useState(() => localStorage.getItem('onboarding_company_name') || '');
-  const [orgNr, setOrgNr] = useState(() => localStorage.getItem('onboarding_org_nr') || '');
+  const [companyName, setCompanyName] = useState(() => sessionStorage.getItem('onboarding_company_name') || '');
+  const [orgNr, setOrgNr] = useState(() => sessionStorage.getItem('onboarding_org_nr') || '');
 
   // Step 2
   const [invites, setInvites] = useState<InviteRow[]>([{ name: '', email: '' }]);
@@ -41,10 +41,10 @@ export default function OnboardingPage() {
   const [selectedDriver, setSelectedDriver] = useState('');
   const [availableDrivers, setAvailableDrivers] = useState<{ id: string; full_name: string }[]>([]);
 
-  const resolvedCompanyId = companyId || localStorage.getItem('onboarding_company_id');
+  const resolvedCompanyId = companyId || sessionStorage.getItem('onboarding_company_id');
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, String(step));
+    sessionStorage.setItem(STORAGE_KEY, String(step));
   }, [step]);
 
   // Load drivers for step 3
@@ -68,8 +68,8 @@ export default function OnboardingPage() {
     setSubmitting(true);
     try {
       await supabase.from('companies').update({ name: companyName, org_nr: orgNr || null }).eq('id', resolvedCompanyId);
-      localStorage.setItem('onboarding_company_name', companyName);
-      localStorage.setItem('onboarding_org_nr', orgNr);
+      sessionStorage.setItem('onboarding_company_name', companyName);
+      sessionStorage.setItem('onboarding_org_nr', orgNr);
       goNext();
     } catch {
       toast.error('Kunde inte spara');
@@ -99,7 +99,7 @@ export default function OnboardingPage() {
         // Send invite email
         const joinUrl = `${window.location.origin}/join?token=${inserted.token}`;
         const adminName = user?.user_metadata?.full_name || 'Admin';
-        const storedCompanyName = localStorage.getItem('onboarding_company_name') || 'Ditt företag';
+        const storedCompanyName = sessionStorage.getItem('onboarding_company_name') || 'Ditt företag';
 
         await supabase.functions.invoke('send-email', {
           body: {
@@ -166,10 +166,10 @@ export default function OnboardingPage() {
     if (resolvedCompanyId) {
       await supabase.from('companies').update({ onboarding_completed: true }).eq('id', resolvedCompanyId);
     }
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem('onboarding_company_id');
-    localStorage.removeItem('onboarding_company_name');
-    localStorage.removeItem('onboarding_org_nr');
+    sessionStorage.removeItem(STORAGE_KEY);
+    sessionStorage.removeItem('onboarding_company_id');
+    sessionStorage.removeItem('onboarding_company_name');
+    sessionStorage.removeItem('onboarding_org_nr');
     toast.success('Välkommen! Ditt konto är redo.', { duration: 5000 });
     navigate('/admin', { replace: true });
   };

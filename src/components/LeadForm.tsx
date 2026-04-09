@@ -30,6 +30,34 @@ export function LeadForm({ onSuccess, compact = false }: LeadFormProps) {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
+  // Calculate lead score based on fleet size and completeness
+  const calcLeadScore = (data: typeof form): number => {
+    let score = 0;
+    if (data.phone.trim()) score += 10;
+    if (data.org_number.trim()) score += 10;
+    if (data.message.trim()) score += 5;
+    const fleet = data.fleet_size.trim().toLowerCase();
+    const fleetNum = parseInt(fleet, 10);
+    if (!isNaN(fleetNum)) {
+      if (fleetNum >= 20) score += 30;
+      else if (fleetNum >= 10) score += 20;
+      else if (fleetNum >= 5) score += 10;
+      else score += 5;
+    }
+    return score;
+  };
+
+  // Extract UTM params from URL
+  const getUtmParams = () => {
+    const params = new URLSearchParams(window.location.search);
+    return {
+      utm_source: params.get('utm_source') || null,
+      utm_medium: params.get('utm_medium') || null,
+      utm_campaign: params.get('utm_campaign') || null,
+      utm_content: params.get('utm_content') || null,
+    };
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.company_name.trim() || !form.contact_person.trim() || !form.email.trim()) {
@@ -37,6 +65,8 @@ export function LeadForm({ onSuccess, compact = false }: LeadFormProps) {
       return;
     }
     setSubmitting(true);
+    const utmParams = getUtmParams();
+    const leadScore = calcLeadScore(form);
     const { error } = await supabase.from('leads').insert({
       company_name: form.company_name.trim(),
       contact_person: form.contact_person.trim(),
@@ -45,7 +75,9 @@ export function LeadForm({ onSuccess, compact = false }: LeadFormProps) {
       org_number: form.org_number.trim() || null,
       fleet_size: form.fleet_size.trim() || null,
       message: form.message.trim() || null,
-    });
+      ...utmParams,
+      lead_score: leadScore,
+    } as any);
     setSubmitting(false);
     if (error) {
       toast.error('Något gick fel. Försök igen.');
