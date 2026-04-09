@@ -178,7 +178,7 @@ export default function PlatformLeads() {
             </TableHeader>
             <TableBody>
               {filtered.map((lead: any) => {
-                const s = statusMap[lead.status] || statusMap.new;
+                const s = statusMap[lead.status] || fallbackStatus;
                 return (
                   <TableRow key={lead.id} className="cursor-pointer hover:bg-muted/50" onClick={() => setSelectedLead(lead)}>
                     <TableCell className="font-medium">{lead.company_name}</TableCell>
