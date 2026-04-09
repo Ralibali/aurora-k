@@ -11,6 +11,7 @@ export default function ContactPage() {
     title: 'Kontakta oss – Aurora Transport',
     description: 'Intresserad av Aurora Transport? Fyll i formuläret så kontaktar vi dig för en personlig demo och genomgång.',
     canonical: 'https://auroratransport.se/kontakt',
+    ogImage: 'https://auroratransport.se/og-image.png',
   });
 
   useBreadcrumbJsonLd(useMemo(() => [

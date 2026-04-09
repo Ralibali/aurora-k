@@ -94,6 +94,7 @@ export default function TjansterPage() {
     title: 'Tjänster — Transportledning & GPS | Aurora Transport',
     description: 'Komplett transportledningssystem: uppdragshantering, förarapp, GPS-spårning, fakturering och kundportal. 449 kr/mån, obegränsat antal förare.',
     canonical: 'https://auroratransport.se/tjanster',
+    ogImage: 'https://auroratransport.se/og-image.png',
   });
 
   useBreadcrumbJsonLd(useMemo(() => [
