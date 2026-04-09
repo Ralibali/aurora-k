@@ -101,6 +101,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <AuthProvider>
           <ErrorBoundary>
               <Suspense fallback={<PageLoader />}>
                 <Routes>
@@ -170,7 +171,7 @@ const App = () => (
                   <Route path="leads" element={<PlatformLeads />} />
                 </Route>
 
-{/* Driver routes — share a single layout shell */}
+                {/* Driver routes — share a single layout shell */}
                 <Route path="/driver" element={<ProtectedRoute requiredRole="driver"><DriverLayout /></ProtectedRoute>}>
                   <Route index element={<DriverAssignments />} />
                   <Route path="assignments" element={<DriverAssignments />} />
