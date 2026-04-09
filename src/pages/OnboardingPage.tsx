@@ -21,14 +21,14 @@ export default function OnboardingPage() {
   const navigate = useNavigate();
   const { user, companyId } = useAuth();
   const [step, setStep] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
+    const saved = sessionStorage.getItem(STORAGE_KEY);
     return saved ? parseInt(saved, 10) : 1;
   });
   const [submitting, setSubmitting] = useState(false);
 
   // Step 1
-  const [companyName, setCompanyName] = useState(() => localStorage.getItem('onboarding_company_name') || '');
-  const [orgNr, setOrgNr] = useState(() => localStorage.getItem('onboarding_org_nr') || '');
+  const [companyName, setCompanyName] = useState(() => sessionStorage.getItem('onboarding_company_name') || '');
+  const [orgNr, setOrgNr] = useState(() => sessionStorage.getItem('onboarding_org_nr') || '');
 
   // Step 2
   const [invites, setInvites] = useState<InviteRow[]>([{ name: '', email: '' }]);

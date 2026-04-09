@@ -25,6 +25,8 @@ const statusMap: Record<string, { label: string; variant: 'default' | 'secondary
   rejected: { label: 'Avvisad', variant: 'destructive' },
 };
 
+const fallbackStatus = { label: 'Okänd', variant: 'secondary' as const };
+
 export default function PlatformLeads() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
