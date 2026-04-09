@@ -593,22 +593,34 @@ export default function AdminDrivers() {
           </div>
         </div>
 
-        {/* Filter pills */}
-        <div className="flex gap-2 flex-wrap">
-          {filters.map(f => (
-            <button
-              key={f.key}
-              onClick={() => setFilter(f.key)}
-              className={`px-3 py-1 text-sm rounded-full transition-colors ${
-                filter === f.key
-                  ? 'bg-foreground text-background'
-                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
+        {/* Tabs: Drivers / Invitations */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList>
+            <TabsTrigger value="drivers" className="gap-1.5">
+              <Users className="h-4 w-4" /> Chaufförer
+            </TabsTrigger>
+            <TabsTrigger value="invitations" className="gap-1.5">
+              <Mail className="h-4 w-4" /> Inbjudningar
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="drivers" className="mt-4">
+            {/* Filter pills */}
+            <div className="flex gap-2 flex-wrap mb-4">
+              {filters.map(f => (
+                <button
+                  key={f.key}
+                  onClick={() => setFilter(f.key)}
+                  className={`px-3 py-1 text-sm rounded-full transition-colors ${
+                    filter === f.key
+                      ? 'bg-foreground text-background'
+                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
 
         {/* Driver grid */}
         {isLoading ? (
