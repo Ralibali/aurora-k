@@ -137,6 +137,19 @@ const App = () => (
                 <Route path="/ads/transport" element={<AdsTransportPage />} />
                 <Route path="/ads/flotta" element={<AdsFlottaPage />} />
 
+                {/* Blog routes */}
+                <Route path="/blogg" element={<BlogIndex />} />
+                <Route path="/blogg/basta-dispatchsystemet-for-akeri-2026" element={<BlogBastaDispatch />} />
+                <Route path="/blogg/hur-digitaliserar-man-sin-budtjanst" element={<BlogDigitaliseraBudtjanst />} />
+                <Route path="/blogg/vad-kostar-ett-transportledningssystem" element={<BlogVadKostarTms />} />
+                <Route path="/blogg/transportledningssystem-for-sma-akeries" element={<BlogTmsSmaaAkerier />} />
+                <Route path="/blogg/dispatch-app-forare-transport" element={<BlogDispatchAppForare />} />
+                <Route path="/blogg/bemanningsbolag-transport-system" element={<BlogBemanningsbolag />} />
+                <Route path="/blogg/skillnad-tms-dispatch-system" element={<BlogTmsVsDispatch />} />
+                <Route path="/blogg/transportapp-utan-bindningstid" element={<BlogUtanBindningstid />} />
+                <Route path="/blogg/digitalt-korordrersystem-fordelar" element={<BlogDigitaltKororder />} />
+                <Route path="/blogg/byta-dispatchsystem-guide" element={<BlogBytaDispatch />} />
+
                 {/* Admin routes — share a single sidebar shell */}
                 <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><SubscriptionGuard><AdminShell /></SubscriptionGuard></ProtectedRoute>}>
                   <Route index element={<AdminDashboard />} />
