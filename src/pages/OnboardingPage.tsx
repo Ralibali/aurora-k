@@ -19,7 +19,7 @@ interface InviteRow {
 export default function OnboardingPage() {
   usePageMeta({ title: 'Onboarding | Aurora Transport', description: '', canonical: 'https://auroratransport.se/onboarding', noindex: true });
   const navigate = useNavigate();
-  const { user, companyId, profile } = useAuth();
+  const { user, companyId } = useAuth();
   const [step, setStep] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     return saved ? parseInt(saved, 10) : 1;
@@ -98,7 +98,7 @@ export default function OnboardingPage() {
 
         // Send invite email
         const joinUrl = `${window.location.origin}/join?token=${inserted.token}`;
-        const adminName = profile?.full_name || 'Admin';
+        const adminName = user?.user_metadata?.full_name || 'Admin';
         const storedCompanyName = localStorage.getItem('onboarding_company_name') || 'Ditt företag';
 
         await supabase.functions.invoke('send-email', {
