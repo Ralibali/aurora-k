@@ -392,10 +392,146 @@ const filters = [
   { key: 'inactive', label: 'Ej inloggad idag' },
 ] as const;
 
+/* ── Invitations List ── */
+function InvitationsList({ companyId }: { companyId: string }) {
+  const [invitations, setInvitations] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [resending, setResending] = useState<string | null>(null);
+  const { user } = useAuth();
+
+  const fetchInvitations = async () => {
+    setLoading(true);
+    const { data } = await supabase
+      .from('invitations')
+      .select('*')
+      .eq('company_id', companyId)
+      .order('created_at', { ascending: false });
+    setInvitations(data ?? []);
+    setLoading(false);
+  };
+
+  useEffect(() => { fetchInvitations(); }, [companyId]);
+
+  const handleResend = async (inv: any) => {
+    setResending(inv.id);
+    try {
+      const joinUrl = `${window.location.origin}/join?token=${inv.token}`;
+      const adminName = user?.user_metadata?.full_name || 'Admin';
+      const { data: settings } = await supabase
+        .from('settings')
+        .select('company_name')
+        .eq('company_id', companyId)
+        .maybeSingle();
+
+      await supabase.functions.invoke('send-email', {
+        body: {
+          to: inv.email,
+          templateName: 'driver-invite',
+          templateData: {
+            adminName,
+            companyName: settings?.company_name || 'Ditt företag',
+            joinUrl,
+          },
+        },
+      });
+      toast.success(`Inbjudan skickad igen till ${inv.email}`);
+    } catch {
+      toast.error('Kunde inte skicka om inbjudan');
+    } finally {
+      setResending(null);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-3">
+        {[1, 2, 3].map(i => <Skeleton key={i} className="h-16 rounded-lg" />)}
+      </div>
+    );
+  }
+
+  if (invitations.length === 0) {
+    return (
+      <div className="bg-card rounded-lg border border-dashed border-border p-12 text-center">
+        <Mail className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
+        <p className="text-sm font-medium text-muted-foreground">Inga inbjudningar skickade ännu</p>
+      </div>
+    );
+  }
+
+  const pending = invitations.filter(i => !i.accepted_at);
+  const accepted = invitations.filter(i => i.accepted_at);
+
+  return (
+    <div className="space-y-6">
+      {pending.length > 0 && (
+        <div>
+          <h4 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
+            <Clock className="h-4 w-4" /> Väntande ({pending.length})
+          </h4>
+          <div className="space-y-2">
+            {pending.map(inv => (
+              <div key={inv.id} className="bg-card border border-border rounded-lg p-4 flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium truncate">{inv.name || inv.email}</p>
+                  {inv.name && <p className="text-xs text-muted-foreground truncate">{inv.email}</p>}
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Skickad {format(new Date(inv.created_at), 'd MMM yyyy, HH:mm', { locale: sv })}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <Badge variant="outline" className="text-xs text-amber-600 border-amber-300 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800">
+                    Väntande
+                  </Badge>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleResend(inv)}
+                    disabled={resending === inv.id}
+                    className="text-xs"
+                  >
+                    <RefreshCw className={`h-3.5 w-3.5 mr-1 ${resending === inv.id ? 'animate-spin' : ''}`} />
+                    Skicka igen
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {accepted.length > 0 && (
+        <div>
+          <h4 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
+            <CheckCircle2 className="h-4 w-4" /> Accepterade ({accepted.length})
+          </h4>
+          <div className="space-y-2">
+            {accepted.map(inv => (
+              <div key={inv.id} className="bg-card border border-border rounded-lg p-4 flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium truncate">{inv.name || inv.email}</p>
+                  {inv.name && <p className="text-xs text-muted-foreground truncate">{inv.email}</p>}
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Accepterad {format(new Date(inv.accepted_at), 'd MMM yyyy, HH:mm', { locale: sv })}
+                  </p>
+                </div>
+                <Badge variant="outline" className="text-xs text-green-600 border-green-300 bg-green-50 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800">
+                  Accepterad
+                </Badge>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function AdminDrivers() {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
   const [selectedDriver, setSelectedDriver] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState('drivers');
 
   const { companyId } = useAuth();
   const { data: drivers, isLoading } = useDrivers();
