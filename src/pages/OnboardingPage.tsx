@@ -19,7 +19,7 @@ interface InviteRow {
 export default function OnboardingPage() {
   usePageMeta({ title: 'Onboarding | Aurora Transport', description: '', canonical: 'https://auroratransport.se/onboarding', noindex: true });
   const navigate = useNavigate();
-  const { user, companyId } = useAuth();
+  const { user, companyId, profile } = useAuth();
   const [step, setStep] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     return saved ? parseInt(saved, 10) : 1;
