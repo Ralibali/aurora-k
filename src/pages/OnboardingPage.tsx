@@ -85,10 +85,32 @@ export default function OnboardingPage() {
     setSubmitting(true);
     try {
       for (const inv of valid) {
-        await supabase.from('invitations').insert({
+        const { data: inserted, error: insertErr } = await supabase.from('invitations').insert({
           company_id: resolvedCompanyId!,
           email: inv.email.trim(),
           name: inv.name.trim() || null,
+        }).select('token').single();
+
+        if (insertErr || !inserted?.token) {
+          console.error('Could not create invitation:', insertErr);
+          continue;
+        }
+
+        // Send invite email
+        const joinUrl = `${window.location.origin}/join?token=${inserted.token}`;
+        const adminName = profile?.full_name || 'Admin';
+        const storedCompanyName = localStorage.getItem('onboarding_company_name') || 'Ditt företag';
+
+        await supabase.functions.invoke('send-email', {
+          body: {
+            to: inv.email.trim(),
+            templateName: 'driver-invite',
+            templateData: {
+              adminName,
+              companyName: storedCompanyName,
+              joinUrl,
+            },
+          },
         });
       }
       toast.success(`${valid.length} inbjudan(ar) skickade!`);
