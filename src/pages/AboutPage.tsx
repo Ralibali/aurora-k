@@ -44,7 +44,7 @@ export default function AboutPage() {
   useEffect(() => {
     const jsonLd = {
       "@context": "https://schema.org",
-      "@type": "Organization",
+      "@type": "LocalBusiness",
       "name": "Aurora Media AB",
       "url": "https://auroratransport.se",
       "logo": "https://auroratransport.se/icon-512x512.png",
@@ -52,14 +52,24 @@ export default function AboutPage() {
       "foundingDate": "2022",
       "address": {
         "@type": "PostalAddress",
+        "streetAddress": "Linköping",
+        "addressLocality": "Linköping",
+        "addressRegion": "Östergötland",
+        "postalCode": "582 00",
         "addressCountry": "SE"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 58.4108,
+        "longitude": 15.6214
       },
       "contactPoint": {
         "@type": "ContactPoint",
         "email": "info@auroramedia.se",
         "contactType": "customer service"
       },
-      "taxID": "559272-0220"
+      "taxID": "559272-0220",
+      "priceRange": "449 kr/mån"
     };
 
     const script = document.createElement('script');
