@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { PwaInstallPrompt } from "@/components/PwaInstallPrompt";
 import { CookieConsent } from "@/components/CookieConsent";
+import { ExitIntentPopup } from "@/components/ExitIntentPopup";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
@@ -212,6 +213,7 @@ const App = () => (
         </BrowserRouter>
         <PwaInstallPrompt />
         <CookieConsent />
+        <ExitIntentPopup />
       </TooltipProvider>
     </QueryClientProvider>
   </ThemeProvider>
