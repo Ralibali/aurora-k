@@ -1,7 +1,17 @@
 import { createRoot } from "react-dom/client";
 import { Capacitor } from "@capacitor/core";
+import * as Sentry from "@sentry/react";
 import App from "./App.tsx";
 import "./index.css";
+
+Sentry.init({
+  dsn: "https://d838e2cf945e668ad9d1f63d7586ba00@o4511191910383616.ingest.de.sentry.io/4511191916675152",
+  sendDefaultPii: true,
+  enabled: import.meta.env.PROD,
+  tracesSampleRate: 0.2,
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1.0,
+});
 
 // PWA: Guard service worker registration against preview/iframe and Capacitor native contexts
 const isInIframe = (() => {
