@@ -97,7 +97,12 @@ const queryClient = new QueryClient();
 
 function PageLoader() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
+    <div
+      className="min-h-screen flex items-center justify-center bg-background"
+      role="status"
+      aria-live="polite"
+      aria-label="Laddar sida"
+    >
       <div className="space-y-4 w-full max-w-md px-4">
         <div className="h-8 w-2/3 mx-auto rounded bg-muted animate-pulse" />
         <div className="h-4 w-full rounded bg-muted animate-pulse" />
