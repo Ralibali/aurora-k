@@ -692,6 +692,16 @@ export default function AdminDrivers() {
             })}
           </div>
         )}
+          </TabsContent>
+
+          <TabsContent value="invitations" className="mt-4">
+            {companyId ? (
+              <InvitationsList companyId={companyId} />
+            ) : (
+              <p className="text-sm text-muted-foreground">Inget företag kopplat</p>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
 
       {/* Driver Detail Sheet */}
