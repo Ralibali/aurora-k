@@ -185,6 +185,7 @@ const App = () => (
                   <Route path="api" element={<AdminApiDocs />} />
                   <Route path="routes" element={<AdminRouteOptimizer />} />
                   <Route path="compensation" element={<AdminCompensation />} />
+                  <Route path="audit-log" element={<AdminAuditLog />} />
                 </Route>
 
                 {/* Platform admin routes */}
