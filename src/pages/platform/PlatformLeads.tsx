@@ -171,6 +171,8 @@ export default function PlatformLeads() {
                 <TableHead>E-post</TableHead>
                 <TableHead>Telefon</TableHead>
                 <TableHead>Storlek</TableHead>
+                <TableHead>Poäng</TableHead>
+                <TableHead>Källa</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Datum</TableHead>
                 <TableHead className="w-10" />
@@ -186,6 +188,8 @@ export default function PlatformLeads() {
                     <TableCell className="text-muted-foreground">{lead.email}</TableCell>
                     <TableCell className="text-muted-foreground">{lead.phone || '—'}</TableCell>
                     <TableCell className="text-muted-foreground">{lead.fleet_size || '—'}</TableCell>
+                    <TableCell className="text-muted-foreground font-mono text-xs">{lead.lead_score ?? 0}</TableCell>
+                    <TableCell className="text-muted-foreground text-xs">{lead.utm_source || '—'}</TableCell>
                     <TableCell><Badge variant={s.variant}>{s.label}</Badge></TableCell>
                     <TableCell className="text-muted-foreground text-xs">
                       {format(new Date(lead.created_at), 'd MMM yyyy', { locale: sv })}
