@@ -111,8 +111,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       (_event, newSession) => {
         if (import.meta.env.DEV) console.log('[Auth] onAuthStateChange event:', _event);
         if (_event === 'INITIAL_SESSION') return;
-        // Clear profile cache on sign-in so fresh data is fetched
-        if (_event === 'SIGNED_IN' && newSession?.user?.id) {
+        // Clear profile cache on sign-in or token refresh so fresh data is fetched
+        if ((_event === 'SIGNED_IN' || _event === 'TOKEN_REFRESHED') && newSession?.user?.id) {
           delete profileCache[newSession.user.id];
         }
         apply(newSession, 'onAuthStateChange:' + _event);
