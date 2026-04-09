@@ -71,25 +71,39 @@ Deno.serve(async (req) => {
       });
     }
 
-    // 2. Create admin user account
+    // 2. Create or reuse admin user account
     const tempPassword = crypto.randomUUID().slice(0, 12);
-    const { data: userData, error: userErr } = await adminClient.auth.admin.createUser({
-      email: admin_email,
-      password: tempPassword,
-      email_confirm: true,
-      user_metadata: { full_name: admin_name, role: "admin" },
-    });
+    let userId: string;
 
-    if (userErr) {
-      // Clean up company if user creation fails
-      await adminClient.from("companies").delete().eq("id", company.id);
-      return new Response(JSON.stringify({ error: "Could not create user: " + userErr.message }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+    // Check if user already exists
+    const { data: listData } = await adminClient.auth.admin.listUsers();
+    const existingUser = listData?.users?.find((u: any) => u.email === admin_email);
+
+    if (existingUser) {
+      userId = existingUser.id;
+      // Update password so we can share it
+      await adminClient.auth.admin.updateUserById(userId, {
+        password: tempPassword,
+        email_confirm: true,
+        user_metadata: { full_name: admin_name, role: "admin" },
       });
-    }
+    } else {
+      const { data: userData, error: userErr } = await adminClient.auth.admin.createUser({
+        email: admin_email,
+        password: tempPassword,
+        email_confirm: true,
+        user_metadata: { full_name: admin_name, role: "admin" },
+      });
 
-    const userId = userData.user.id;
+      if (userErr) {
+        await adminClient.from("companies").delete().eq("id", company.id);
+        return new Response(JSON.stringify({ error: "Could not create user: " + userErr.message }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      userId = userData.user.id;
+    }
 
     // Update profile with company
     await adminClient.from("profiles").upsert({
