@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useDrivers, useAssignments, useDriverCompensations, useUpsertDriverCompensation } from '@/hooks/useData';
-import { Plus, DollarSign, Save, Search, Briefcase, Users, Mail, Calendar } from 'lucide-react';
+import { Plus, DollarSign, Save, Search, Briefcase, Users, Mail, Calendar, Send } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -176,6 +176,93 @@ function CreateDriverModal({ companyId }: { companyId: string }) {
           </div>
           <Button onClick={handleSubmit} className="w-full" disabled={submitting}>
             <Plus className="h-4 w-4 mr-1" /> {submitting ? 'Skapar...' : 'Skapa förarkonto'}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/* ── Invite Driver Modal ── */
+function InviteDriverModal({ companyId }: { companyId: string }) {
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const { user } = useAuth();
+
+  const handleSubmit = async () => {
+    if (!email.trim()) {
+      toast.error('Ange en e-postadress');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const { data: inserted, error: insertErr } = await supabase
+        .from('invitations')
+        .insert({
+          company_id: companyId,
+          email: email.trim(),
+          name: name.trim() || null,
+        })
+        .select('token')
+        .single();
+
+      if (insertErr || !inserted?.token) throw insertErr || new Error('Kunde inte skapa inbjudan');
+
+      const joinUrl = `${window.location.origin}/join?token=${inserted.token}`;
+      const adminName = user?.user_metadata?.full_name || 'Admin';
+
+      // Get company name
+      const { data: settings } = await supabase
+        .from('settings')
+        .select('company_name')
+        .eq('company_id', companyId)
+        .maybeSingle();
+
+      await supabase.functions.invoke('send-email', {
+        body: {
+          to: email.trim(),
+          templateName: 'driver-invite',
+          templateData: {
+            adminName,
+            companyName: settings?.company_name || 'Ditt företag',
+            joinUrl,
+          },
+        },
+      });
+
+      toast.success(`Inbjudan skickad till ${email.trim()}`);
+      setOpen(false);
+      setName('');
+      setEmail('');
+    } catch (err: any) {
+      toast.error('Kunde inte skicka inbjudan: ' + (err?.message || 'Okänt fel'));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline"><Send className="h-4 w-4 mr-1" /> Bjud in</Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-md">
+        <DialogHeader><DialogTitle>Bjud in förare via e-post</DialogTitle></DialogHeader>
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">Skicka en inbjudningslänk via e-post. Föraren skapar sitt eget konto.</p>
+          <div className="space-y-2">
+            <Label>Namn (valfritt)</Label>
+            <Input placeholder="Förnamn Efternamn" value={name} onChange={e => setName(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label>E-post</Label>
+            <Input type="email" placeholder="forare@exempel.se" value={email} onChange={e => setEmail(e.target.value)} />
+          </div>
+          <Button onClick={handleSubmit} className="w-full" disabled={submitting}>
+            <Send className="h-4 w-4 mr-1" /> {submitting ? 'Skickar...' : 'Skicka inbjudan'}
           </Button>
         </div>
       </DialogContent>
@@ -359,7 +446,10 @@ export default function AdminDrivers() {
               <Input placeholder="Sök chaufför..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 w-[200px]" />
             </div>
             {companyId ? (
-              <CreateDriverModal companyId={companyId} />
+              <>
+                <InviteDriverModal companyId={companyId} />
+                <CreateDriverModal companyId={companyId} />
+              </>
             ) : (
               <Button disabled><Plus className="h-4 w-4 mr-1" /> Lägg till förare</Button>
             )}
