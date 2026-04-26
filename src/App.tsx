@@ -1,6 +1,6 @@
 import { lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -112,6 +112,26 @@ function PageLoader() {
   );
 }
 
+function PublicSiteEnhancements() {
+  const location = useLocation();
+  const isAppRoute =
+    location.pathname.startsWith("/admin") ||
+    location.pathname.startsWith("/driver") ||
+    location.pathname.startsWith("/platform") ||
+    location.pathname.startsWith("/portal") ||
+    location.pathname.startsWith("/onboarding");
+
+  if (isAppRoute) return null;
+
+  return (
+    <>
+      <PwaInstallPrompt />
+      <CookieConsent />
+      <ExitIntentPopup />
+    </>
+  );
+}
+
 const App = () => (
   <ThemeProvider attribute="class" defaultTheme="system" enableSystem={true}>
     <QueryClientProvider client={queryClient}>
@@ -149,6 +169,8 @@ const App = () => (
                 <Route path="/blogg/basta-dispatchsystemet-for-akeri-2026" element={<BlogBastaDispatch />} />
                 <Route path="/blogg/hur-digitaliserar-man-sin-budtjanst" element={<BlogDigitaliseraBudtjanst />} />
                 <Route path="/blogg/vad-kostar-ett-transportledningssystem" element={<BlogVadKostarTms />} />
+                <Route path="/blogg/transportledningssystem-for-sma-akerier" element={<BlogTmsSmaaAkerier />} />
+                {/* Backward-compat redirect for old misspelled slug */}
                 <Route path="/blogg/transportledningssystem-for-sma-akeries" element={<BlogTmsSmaaAkerier />} />
                 <Route path="/blogg/dispatch-app-forare-transport" element={<BlogDispatchAppForare />} />
                 <Route path="/blogg/bemanningsbolag-transport-system" element={<BlogBemanningsbolag />} />
@@ -217,10 +239,8 @@ const App = () => (
             </Suspense>
           </ErrorBoundary>
           </AuthProvider>
+          <PublicSiteEnhancements />
         </BrowserRouter>
-        <PwaInstallPrompt />
-        <CookieConsent />
-        <ExitIntentPopup />
       </TooltipProvider>
     </QueryClientProvider>
   </ThemeProvider>
