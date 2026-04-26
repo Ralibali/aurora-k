@@ -1,13 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import { AdminLayout } from '@/components/AdminLayout';
-import { Card, CardContent } from '@/components/ui/card';
 import { StatusBadge } from '@/components/StatusBadge';
 import { PriorityBadge } from '@/components/PriorityBadge';
 import { useAssignments, useDrivers } from '@/hooks/useData';
-import { formatSwedishDateTime, formatSwedishTime } from '@/lib/format';
+import { formatSwedishTime } from '@/lib/format';
 import {
   Briefcase, Users, Truck, AlertCircle, Plus, ArrowRight,
-  MapPin, Clock, ChevronRight, ClipboardList, Inbox, CalendarDays,
+  MapPin, Clock, ChevronRight, Inbox, CalendarDays, Wallet,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
@@ -16,6 +15,18 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { StaggeredList, StaggeredItem } from '@/components/StaggeredList';
 import { OnboardingChecklist } from '@/components/OnboardingChecklist';
+import { useAuth } from '@/hooks/useAuth';
+import { useDemoMode } from '@/hooks/useDemoMode';
+import { demoAssignments, demoActivity, demoKpis } from '@/lib/demo-data';
+
+function greeting() {
+  const h = new Date().getHours();
+  if (h < 5) return 'God natt';
+  if (h < 10) return 'God morgon';
+  if (h < 17) return 'Hej';
+  if (h < 22) return 'God kväll';
+  return 'God natt';
+}
 
 /* ── Elapsed timer ── */
 function ElapsedSince({ since }: { since: string }) {
@@ -130,9 +141,15 @@ function statusBarColor(status: string) {
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { data: assignments, isLoading } = useAssignments();
+  const { user } = useAuth();
+  const { enabled: demoOn } = useDemoMode();
+  const { data: realAssignments, isLoading: realLoading } = useAssignments();
   const { data: drivers } = useDrivers();
   const [isLive, setIsLive] = useState(false);
+
+  // Overlay demo data when demo mode is on. No DB writes.
+  const assignments = demoOn ? (demoAssignments as any) : realAssignments;
+  const isLoading = demoOn ? false : realLoading;
 
   useEffect(() => {
     const channelName = `dashboard-realtime-${Math.random().toString(36).slice(2)}`;
@@ -150,22 +167,23 @@ export default function AdminDashboard() {
   const today = new Date().toISOString().split('T')[0];
 
   const todayAssignments = useMemo(() =>
-    (assignments ?? []).filter(a => a.scheduled_start.startsWith(today)),
+    (assignments ?? []).filter((a: any) => a.scheduled_start.startsWith(today)),
     [assignments, today]
   );
 
-  const activeCount = todayAssignments.filter(a => a.status === 'active' || a.status === 'pending').length;
-  const activeRunning = todayAssignments.filter(a => a.status === 'active').length;
-  const completed = todayAssignments.filter(a => a.status === 'completed').length;
-  const availableDrivers = (drivers ?? []).filter(d => d.is_available).length;
-
-  // "Not time reported" — completed but no actual_stop
-  const notReported = todayAssignments.filter(a => a.status === 'completed' && !a.actual_stop).length;
+  const activeCount = demoOn
+    ? demoKpis.activeAssignments
+    : todayAssignments.filter((a: any) => a.status === 'active' || a.status === 'pending').length;
+  const activeRunning = todayAssignments.filter((a: any) => a.status === 'active').length;
+  const availableDrivers = demoOn ? demoKpis.availableDrivers : (drivers ?? []).filter(d => d.is_available).length;
+  const reportedHours = demoOn ? demoKpis.reportedHoursWeek : 0;
+  const invoiceable = demoOn ? demoKpis.invoiceableAmount : 0;
 
   // Activity feed
   const activityItems = useMemo(() => {
+    if (demoOn) return demoActivity.map((d) => ({ ...d, sortTime: 0 }));
     const items: { key: string; driver: string; title: string; action: string; time: string; sortTime: number; isComplete: boolean }[] = [];
-    (assignments ?? []).forEach(a => {
+    (assignments ?? []).forEach((a: any) => {
       if (a.actual_start?.startsWith(today)) {
         items.push({
           key: `${a.id}-start`, driver: a.driver?.full_name ?? 'Okänd',
@@ -183,12 +201,12 @@ export default function AdminDashboard() {
     });
     items.sort((a, b) => b.sortTime - a.sortTime);
     return items.slice(0, 12);
-  }, [assignments, today]);
+  }, [assignments, today, demoOn]);
 
   // Today's assignments sorted
   const liveJobs = useMemo(() =>
-    todayAssignments
-      .sort((a, b) => {
+    [...todayAssignments]
+      .sort((a: any, b: any) => {
         const order: Record<string, number> = { active: 0, pending: 1, delayed: 2, completed: 3 };
         const diff = (order[a.status] ?? 9) - (order[b.status] ?? 9);
         return diff !== 0 ? diff : a.scheduled_start.localeCompare(b.scheduled_start);
@@ -196,11 +214,26 @@ export default function AdminDashboard() {
     [todayAssignments]
   );
 
+  const fullName = user?.user_metadata?.full_name?.split(' ')[0] ?? 'där';
+
   return (
     <AdminLayout title="Dashboard" description="Översikt över dagens aktivitet">
       <div className="space-y-6">
+        {/* Welcome */}
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+          <div>
+            <h2 className="text-xl md:text-2xl font-semibold tracking-tight text-foreground">
+              {greeting()}, {fullName}
+            </h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              Här är läget i din transportverksamhet idag.
+            </p>
+          </div>
+        </div>
+
         {/* Onboarding checklist */}
-        <OnboardingChecklist />
+        {!demoOn && <OnboardingChecklist />}
+
         {/* Live indicator */}
         {isLive && (
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -228,7 +261,7 @@ export default function AdminDashboard() {
             icon={Briefcase}
             value={activeCount}
             label="Aktiva uppdrag"
-            trend={`${todayAssignments.length} totalt idag`}
+            trend={demoOn ? '+3 sedan igår' : `${todayAssignments.length} totalt idag`}
             iconBg="bg-primary/10"
             iconColor="text-primary"
             isLoading={isLoading}
@@ -236,26 +269,28 @@ export default function AdminDashboard() {
           <KpiCard
             icon={Users}
             value={availableDrivers}
-            label="Tillgängliga"
-            trend={`${(drivers ?? []).length} registrerade`}
-            iconBg="bg-green-500/10"
-            iconColor="text-green-600"
+            label="Lediga förare"
+            trend={demoOn ? 'Av 12 totalt' : `${(drivers ?? []).length} registrerade`}
+            iconBg="bg-success/10"
+            iconColor="text-success"
             isLoading={isLoading}
           />
           <KpiCard
-            icon={Truck}
-            value={activeRunning}
-            label="Pågående"
+            icon={Clock}
+            value={demoOn ? `${reportedHours} h` : activeRunning}
+            label={demoOn ? 'Rapporterade timmar (v)' : 'Pågående'}
+            trend={demoOn ? 'Senaste 7 dagar' : undefined}
             iconBg="bg-amber-500/10"
             iconColor="text-amber-600"
             isLoading={isLoading}
           />
           <KpiCard
-            icon={AlertCircle}
-            value={notReported}
-            label="Ej tidrapporterade"
-            iconBg="bg-destructive/10"
-            iconColor="text-destructive"
+            icon={Wallet}
+            value={demoOn ? `${invoiceable.toLocaleString('sv-SE')} kr` : '0 kr'}
+            label="Fakturerbart belopp"
+            trend={demoOn ? 'Klar för fakturering' : 'Skapa uppdrag för att se'}
+            iconBg="bg-emerald-500/10"
+            iconColor="text-emerald-600"
             isLoading={isLoading}
           />
         </div>
@@ -281,16 +316,20 @@ export default function AdminDashboard() {
                 {[1, 2, 3, 4].map(i => <AssignmentCardSkeleton key={i} />)}
               </div>
             ) : liveJobs.length === 0 ? (
-              <div className="bg-card rounded-lg border border-dashed border-border p-10 text-center shadow-card">
-                <Inbox className="h-12 w-12 text-muted-foreground/20 mx-auto mb-3" />
-                <p className="text-sm font-medium text-muted-foreground">Inga uppdrag idag</p>
-                <p className="text-xs text-muted-foreground/60 mt-1 mb-4">Skapa ett uppdrag eller se kalendern</p>
+              <div className="bg-card rounded-xl border border-dashed border-border p-10 text-center shadow-sm">
+                <div className="h-12 w-12 rounded-2xl bg-primary/5 border border-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <Inbox className="h-6 w-6 text-primary/70" />
+                </div>
+                <p className="text-sm font-semibold text-foreground">Inga uppdrag idag</p>
+                <p className="text-xs text-muted-foreground mt-1 mb-5 max-w-xs mx-auto leading-relaxed">
+                  Lägg upp dagens första körning så hamnar den här direkt — och föraren ser den i mobilen.
+                </p>
                 <div className="flex gap-2 justify-center">
                   <Button size="sm" asChild>
                     <Link to="/admin/assignments/new"><Plus className="h-3.5 w-3.5 mr-1" /> Skapa uppdrag</Link>
                   </Button>
                   <Button size="sm" variant="outline" asChild>
-                    <Link to="/admin/calendar"><CalendarDays className="h-3.5 w-3.5 mr-1" /> Kalender</Link>
+                    <Link to="/admin/calendar"><CalendarDays className="h-3.5 w-3.5 mr-1" /> Öppna kalender</Link>
                   </Button>
                 </div>
               </div>
@@ -298,7 +337,7 @@ export default function AdminDashboard() {
               <StaggeredList className="space-y-2">
                 {liveJobs.map(a => (
                   <StaggeredItem key={a.id}>
-                    <Link to={`/admin/assignments/${a.id}`} className="block group">
+                    <Link to={demoOn ? '#' : `/admin/assignments/${a.id}`} onClick={(e) => demoOn && e.preventDefault()} className="block group">
                       <div className="flex items-stretch bg-card rounded-lg border border-border hover:border-primary/30 transition-colors duration-100 overflow-hidden shadow-card active:bg-muted/50">
                         <div className={`w-1 shrink-0 ${statusBarColor(a.status)}`} />
                         <div className="flex items-center gap-3 px-4 py-3 flex-1 min-w-0">
@@ -347,9 +386,14 @@ export default function AdminDashboard() {
                 {[1, 2, 3, 4, 5].map(i => <ActivityItemSkeleton key={i} />)}
               </div>
             ) : activityItems.length === 0 ? (
-              <div className="bg-card rounded-lg border border-dashed border-border p-10 text-center shadow-card">
-                <Clock className="h-12 w-12 text-muted-foreground/20 mx-auto mb-3" />
-                <p className="text-sm font-medium text-muted-foreground">Ingen aktivitet ännu idag</p>
+              <div className="bg-card rounded-xl border border-dashed border-border p-10 text-center shadow-sm">
+                <div className="h-12 w-12 rounded-2xl bg-primary/5 border border-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <Clock className="h-6 w-6 text-primary/70" />
+                </div>
+                <p className="text-sm font-semibold text-foreground">Tyst på fältet — ännu</p>
+                <p className="text-xs text-muted-foreground mt-1 max-w-xs mx-auto leading-relaxed">
+                  När förare startar och slutför uppdrag visas det live här i tidsordning.
+                </p>
               </div>
             ) : (
               <StaggeredList className="bg-card rounded-lg border border-border shadow-card divide-y divide-border">
