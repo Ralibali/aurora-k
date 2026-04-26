@@ -4,7 +4,7 @@ import { BlogCta } from '@/components/BlogCta';
 export default function BlogTmsSmaaAkerier() {
   return (
     <BlogLayout
-      slug="transportledningssystem-for-sma-akeries"
+      slug="transportledningssystem-for-sma-akerier"
       title="Transportledningssystem för små åkerier – vad passar dig?"
       seoTitle="Transportledningssystem för små åkerier – vad passar dig?"
       metaDescription="Är du ett litet åkeri på 1–20 fordon? Här är vad du ska tänka på när du väljer ett transportledningssystem – och vilka system som faktiskt passar din storlek."
