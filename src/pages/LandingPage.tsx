@@ -7,11 +7,11 @@ import { usePageMeta } from '@/lib/use-page-meta';
 import { Button } from '@/components/ui/button';
 import {
   Truck, Clock, Users, MapPin, Zap, FileText,
-  MessageSquare, FileSpreadsheet, Phone, Check,
-  Play, Shield, BarChart3, CalendarDays,
-  Route, Bell, Camera, PenTool, Package, Globe, Headphones,
-  RefreshCw, FileDown, Settings, TrendingUp, Layers, Wallet,
-  Eye, Moon, Coins,
+  MessageSquare, FileSpreadsheet, Phone, Check, X,
+  BarChart3, Route, Bell, Package, Headphones,
+  Wallet, LayoutDashboard, ClipboardList, UserCog,
+  Settings, Search, Plus, ArrowRight, Mail, Shield,
+  Sparkles, Map as MapIcon, CheckCircle2, Minus,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -23,7 +23,7 @@ const fadeUp = {
   hidden: { opacity: 0, y: 24 },
   visible: (i: number) => ({
     opacity: 1, y: 0,
-    transition: { delay: i * 0.08, duration: 0.5, ease: 'easeOut' as const },
+    transition: { delay: i * 0.06, duration: 0.5, ease: 'easeOut' as const },
   }),
 };
 
@@ -35,7 +35,6 @@ export default function LandingPage() {
   const { setTheme, theme } = useTheme();
   const navigate = useNavigate();
   const [demoLoading, setDemoLoading] = useState(false);
-  const [showStickyBar, setShowStickyBar] = useState(false);
   const [leadModalOpen, setLeadModalOpen] = useState(false);
 
   useBreadcrumbJsonLd(useMemo(() => [
@@ -52,1010 +51,889 @@ export default function LandingPage() {
     if (theme !== 'light') setTheme('light');
   }, [theme, setTheme]);
 
-  // Scroll tracking for sticky CTA
-  useEffect(() => {
-    const fn = () => setShowStickyBar(window.scrollY > 500);
-    window.addEventListener('scroll', fn, { passive: true });
-    return () => window.removeEventListener('scroll', fn);
-  }, []);
-
-  // Shared demo handler
-  const handleDemo = async (type: 'akeri' | 'bemanning') => {
+  const handleDemo = async () => {
     setDemoLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('demo-login', {
-        body: { type },
+        body: { type: 'akeri' },
       });
       if (error || !data?.email) throw new Error(data?.error || 'Kunde inte skapa demo');
-      
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
       });
       if (signInError) throw signInError;
-      
       toast.success(`Inloggad som ${data.companyName} — omdirigerar...`);
       setTimeout(() => navigate('/admin'), 500);
     } catch (err: any) {
       toast.error(err.message || 'Demo-inloggning misslyckades');
+    } finally {
       setDemoLoading(false);
     }
   };
 
-  // JSON-LD structured data for SEO
-  useEffect(() => {
-    const jsonLd = [
-      {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Aurora Transport",
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": "Web, iOS, Android",
-        "description": "Transportledningssystem för åkerier och transportföretag. Hantera uppdrag, personal, tidrapporter och fakturering i en app.",
-        "url": "https://auroratransport.se",
-        "offers": {
-          "@type": "Offer",
-          "price": "449",
-          "priceCurrency": "SEK",
-          "priceValidUntil": "2027-12-31",
-          "availability": "https://schema.org/InStock"
-        },
-        "featureList": "Uppdragshantering, GPS-spårning, Tidrapporter, Fakturering, OB-tillägg, Traktamente, Fakturaunderlag, Kundportal, Ruttoptimering"
-      },
-      {
-        "@context": "https://schema.org",
-        "@type": "Organization",
-        "name": "Aurora Transport",
-        "url": "https://auroratransport.se",
-        "logo": "https://auroratransport.se/icon-512x512.png",
-        "description": "Dispatch- och transportledningssystem för svenska åkerier och budföretag.",
-        "address": {
-          "@type": "PostalAddress",
-          "addressCountry": "SE"
-        },
-        "sameAs": []
-      },
-      {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": faqs.map(f => ({
-          "@type": "Question",
-          "name": f.q,
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": f.a
-          }
-        }))
-      }
-    ];
+  const dashboardHref = user
+    ? (isPlatformAdmin ? '/platform' : role === 'driver' ? '/driver' : '/admin')
+    : '/login';
+  const dashboardLabel = user ? 'Gå till dashboard' : 'Logga in';
 
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.textContent = JSON.stringify(jsonLd);
-    script.id = 'aurora-jsonld';
-    document.head.appendChild(script);
-
-    return () => {
-      const el = document.getElementById('aurora-jsonld');
-      if (el) el.remove();
-    };
-  }, []);
-
-  const openLead = () => setLeadModalOpen(true);
+  const scrollTo = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   return (
-    <div className="min-h-screen bg-white">
-      <Navbar onDemo={handleDemo} demoLoading={demoLoading} onContact={openLead} />
-      <HeroSection onDemo={() => handleDemo('akeri')} demoLoading={demoLoading} onContact={openLead} />
-      <SocialProofBar />
-      <ProblemSection />
-      <HowItWorks />
-      <FeaturesSection />
-      <PricingSection onContact={openLead} />
-      <FaqSection />
-      <ComparisonTable />
-      <TestimonialsSection />
-      <PlatformShowcase onContact={openLead} />
-      <SeoContent />
-      <InternalLinks />
-      <FinalCta onContact={openLead} />
-      <Footer />
-      <StickyMobileCta visible={showStickyBar} onDemo={() => handleDemo('akeri')} demoLoading={demoLoading} onContact={openLead} />
-      <LeadFormModal open={leadModalOpen} onOpenChange={setLeadModalOpen} />
-    </div>
-  );
-}
-
-/* ═══════════════════════ STICKY MOBILE CTA ═══════════════════════ */
-function StickyMobileCta({ visible, onDemo, demoLoading, onContact }: { visible: boolean; onDemo: () => void; demoLoading: boolean; onContact: () => void }) {
-  return (
-    <div className={`fixed bottom-0 left-0 right-0 z-50 md:hidden transition-transform duration-300 ${visible ? 'translate-y-0' : 'translate-y-full'}`}>
-      <div className="bg-white border-t border-slate-200 shadow-lg px-4 py-3 flex gap-3">
-        <Button className="flex-1 h-12 rounded-xl font-semibold" onClick={onContact}>
-          Kontakta oss
-        </Button>
-        <Button variant="outline" className="h-12 px-4 rounded-xl" onClick={onDemo} disabled={demoLoading}>
-          <Play className="h-4 w-4" />
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-/* ═══════════════════════ NAVBAR ═══════════════════════ */
-function Navbar({ onDemo, demoLoading, onContact }: { onDemo: (type: 'akeri' | 'bemanning') => void; demoLoading: boolean; onContact: () => void }) {
-  const { user, role, isPlatformAdmin } = useAuth();
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 10);
-    window.addEventListener('scroll', fn, { passive: true });
-    return () => window.removeEventListener('scroll', fn);
-  }, []);
-
-  return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all ${scrolled ? 'bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm' : 'bg-white/80 backdrop-blur'}`}>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-            <Truck className="h-4 w-4 text-primary-foreground" />
-          </div>
-          <span className="font-bold text-foreground">Aurora Transport</span>
-        </Link>
-
-        {/* Desktop nav */}
-        <div className="hidden md:flex items-center gap-8">
-          <Link to="/tjanster" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Tjänster</Link>
-          <a href="#funktioner" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Funktioner</a>
-          <a href="#pris" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Pris</a>
-          <a href="#faq" className="text-sm text-muted-foreground hover:text-foreground transition-colors">FAQ</a>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {user ? (
-            <Button size="sm" asChild>
-              <Link to={isPlatformAdmin ? '/platform' : role === 'admin' ? '/admin' : '/driver'}>Gå till dashboard</Link>
-            </Button>
-          ) : (
-            <>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onDemo('akeri')}
-                disabled={demoLoading}
-                className="hidden md:inline-flex gap-1.5"
-              >
-                <Play className="h-3.5 w-3.5" />
-                {demoLoading ? 'Laddar...' : 'Live-demo'}
-              </Button>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/login">Logga in</Link>
-              </Button>
-              <Button size="sm" onClick={onContact}>
-                Kontakta oss
-              </Button>
-            </>
-          )}
-        </div>
-      </div>
-    </nav>
-  );
-}
-
-/* ═══════════════════════ HERO ═══════════════════════ */
-function HeroSection({ onDemo, demoLoading, onContact }: { onDemo: () => void; demoLoading: boolean; onContact: () => void }) {
-  return (
-    <section className="relative min-h-screen flex items-center pt-16 overflow-hidden" style={{
-      backgroundImage: 'radial-gradient(circle, #e2e8f0 1px, transparent 1px)',
-      backgroundSize: '20px 20px',
-    }}>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 md:py-24">
-        <div className="grid lg:grid-cols-5 gap-8 lg:gap-16 items-center">
-          {/* Left */}
-          <div className="lg:col-span-3">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-sm font-medium text-blue-700 mb-6">
-                🚛 Byggd för svenska transport- och bemanningsföretag
-              </span>
-            </motion.div>
-
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.5 }}
-              className="text-4xl sm:text-5xl font-bold text-foreground leading-tight mb-6"
-            >
-              Full kontroll på uppdrag, förare och tidrapporter —
-              <span className="text-primary"> utan Excel-kaos.</span>
-            </motion.h1>
-
-            <motion.p
-              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }}
-              className="text-xl text-slate-500 leading-relaxed mb-8 max-w-xl"
-            >
-              Aurora Transport är ett enkelt transportledningssystem för åkerier, budföretag och bemanningsteam som vill planera snabbare, rapportera enklare och fakturera med bättre underlag.
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.5 }}
-              className="flex flex-col sm:flex-row gap-3 mb-2"
-            >
-              <Button size="lg" className="rounded-xl px-8 py-6 text-base font-semibold" onClick={onContact}>
-                Boka genomgång
-              </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                className="rounded-xl px-6 py-6 text-base gap-2"
-                onClick={onDemo}
-                disabled={demoLoading}
-              >
-                {demoLoading ? (
-                  <span className="flex items-center gap-2"><span className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" /> Laddar demo...</span>
-                ) : (
-                  <><Play className="h-4 w-4" /> Testa demo</>
-                )}
-              </Button>
-            </motion.div>
-
-            <motion.p
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4, duration: 0.5 }}
-              className="text-xs text-slate-400 mb-6"
-            >
-              Live-demon loggar in dig direkt i ett exempelkonto — ingen registrering krävs.
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5, duration: 0.5 }}
-              className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-400"
-            >
-              <span>✓ Ingen bindningstid</span>
-              <span>✓ Gratis onboarding</span>
-              <span>✓ Support på svenska</span>
-            </motion.div>
-          </div>
-
-          {/* Right — App mockup (visible on all sizes) */}
-          <motion.div
-            initial={{ opacity: 0, x: 40, rotate: 0 }} animate={{ opacity: 1, x: 0, rotate: 1 }}
-            transition={{ delay: 0.3, duration: 0.7 }}
-            className="lg:col-span-2 max-w-sm mx-auto w-full"
-          >
-            <div className="bg-white rounded-xl shadow-2xl border border-slate-200 p-5 transform rotate-1">
-              <div className="flex items-center justify-between mb-4">
-                <span className="font-mono text-xs text-muted-foreground">Uppdrag #1042</span>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                  <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-                  Pågående
-                </span>
-              </div>
-              <p className="font-semibold text-lg text-foreground mb-3">Nilsson Åkeri AB</p>
-              <div className="space-y-2 mb-4">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Clock className="h-4 w-4" />
-                  <span className="font-mono">Upphämtning 08:30</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <MapPin className="h-4 w-4" />
-                  <span>Göteborg → Stockholm</span>
-                </div>
-              </div>
-              <div className="border-t border-slate-100 pt-4 mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-xs">JS</div>
-                  <div>
-                    <p className="text-sm font-medium text-foreground">Johan Svensson</p>
-                    <p className="text-xs text-muted-foreground">Tilldelad</p>
-                  </div>
-                </div>
-              </div>
-              <button className="w-full bg-primary text-primary-foreground text-sm font-semibold py-2.5 rounded-lg">
-                Markera som slutförd
-              </button>
+    <div className="min-h-screen bg-background text-foreground">
+      {/* HEADER */}
+      <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/80 backdrop-blur-xl">
+        <div className="container mx-auto flex h-16 items-center justify-between px-4">
+          <Link to="/" className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary-hover shadow-sm">
+              <Truck className="h-5 w-5 text-primary-foreground" strokeWidth={2.4} />
             </div>
-          </motion.div>
+            <span className="text-base font-semibold tracking-tight text-foreground">Aurora Transport</span>
+          </Link>
+          <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-muted-foreground">
+            <button onClick={() => scrollTo('tjanster')} className="hover:text-foreground transition-colors">Tjänster</button>
+            <button onClick={() => scrollTo('funktioner')} className="hover:text-foreground transition-colors">Funktioner</button>
+            <button onClick={() => scrollTo('pris')} className="hover:text-foreground transition-colors">Pris</button>
+            <button onClick={() => scrollTo('faq')} className="hover:text-foreground transition-colors">FAQ</button>
+          </nav>
+          <div className="flex items-center gap-2">
+            <Button asChild size="sm" className="hidden sm:inline-flex bg-primary hover:bg-primary-hover text-primary-foreground shadow-sm">
+              <Link to={dashboardHref}>{dashboardLabel}</Link>
+            </Button>
+            <Button asChild size="sm" variant="outline" className="sm:hidden">
+              <Link to={dashboardHref}>Logga in</Link>
+            </Button>
+          </div>
         </div>
-      </div>
-    </section>
-  );
-}
+      </header>
 
-/* ═══════════════════════ SOCIAL PROOF ═══════════════════════ */
-function SocialProofBar() {
-  return (
-    <div className="bg-slate-50 border-y border-slate-200 py-5">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12 text-sm text-slate-500">
-          <span className="flex items-center gap-2">
-            <span className="text-green-500 font-bold text-base">✓</span>
-            Ingen bindningstid
-          </span>
-          <span className="flex items-center gap-2">
-            <span className="text-green-500 font-bold text-base">✓</span>
-            Obegränsat antal förare
-          </span>
-          <span className="flex items-center gap-2">
-            <span className="text-green-500 font-bold text-base">✓</span>
-            Support på svenska
-          </span>
-          <span className="flex items-center gap-2">
-            <span className="text-green-500 font-bold text-base">✓</span>
-            Driftsatt och klart på 5 min
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-}
+      {/* HERO */}
+      <section className="relative overflow-hidden">
+        {/* Soft gradient background */}
+        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-[hsl(214_60%_97%)] via-background to-background" />
+        <div className="absolute -top-40 left-1/2 -z-10 h-[480px] w-[820px] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
 
-/* ═══════════════════════ PROBLEM ═══════════════════════ */
-const painCards = [
-  { icon: MessageSquare, title: 'Uppdrag i chatten', desc: 'Förare missar jobb. WhatsApp-gruppen är ett kaos.' },
-  { icon: FileSpreadsheet, title: 'Tidrapporter i Excel', desc: 'Timmar räknas ihop för hand. Fel uppstår. Löner försenas.' },
-  { icon: Phone, title: 'Planering via telefon', desc: 'Du ringer runt för att hitta ledig förare. 10 minuter per tilldelning.' },
-];
-
-function ProblemSection() {
-  return (
-    <section className="py-20 bg-slate-50">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <motion.h2
-          initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp}
-          className="text-3xl sm:text-4xl font-bold text-foreground text-center mb-12 max-w-2xl mx-auto"
-        >
-          De flesta transportföretag förlorar tid på administration varje dag.
-        </motion.h2>
-        <div className="grid md:grid-cols-3 gap-6">
-          {painCards.map((card, i) => (
-            <motion.div
-              key={card.title} custom={i} variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}
-              className="bg-white rounded-xl border border-slate-200 p-6"
-            >
-              <div className="w-11 h-11 rounded-lg bg-red-50 flex items-center justify-center mb-4">
-                <card.icon className="h-5 w-5 text-red-500" />
+        <div className="container mx-auto px-4 pt-16 pb-20 md:pt-24 md:pb-28">
+          <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 items-center">
+            {/* LEFT */}
+            <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
+              <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1.5 text-xs font-medium text-primary">
+                <Sparkles className="h-3.5 w-3.5" />
+                Byggd för svenska transport- och bemanningsföretag
               </div>
-              <h3 className="font-semibold text-foreground mb-2">{card.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{card.desc}</p>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ═══════════════════════ HOW IT WORKS ═══════════════════════ */
-const steps = [
-  { num: '01', title: 'Skapa ditt konto', desc: 'Under 2 minuter' },
-  { num: '02', title: 'Bjud in din personal', desc: 'De får mail direkt' },
-  { num: '03', title: 'Börja tilldela uppdrag', desc: 'Föraren ser det direkt' },
-];
-
-function HowItWorks() {
-  return (
-    <section className="py-20 bg-white">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <motion.h2
-          initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp}
-          className="text-3xl sm:text-4xl font-bold text-foreground text-center mb-14"
-        >
-          Igång på tre steg.
-        </motion.h2>
-        <div className="grid md:grid-cols-3 gap-8">
-          {steps.map((s, i) => (
-            <motion.div
-              key={s.num} custom={i} variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}
-              className="text-center"
-            >
-              <div className="text-5xl font-mono font-bold text-primary/15 mb-3">{s.num}</div>
-              <h3 className="font-semibold text-foreground text-lg mb-1">{s.title}</h3>
-              <p className="text-sm text-muted-foreground">{s.desc}</p>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ═══════════════════════ FEATURES ═══════════════════════ */
-const features = [
-  { icon: Zap, title: 'Jobbdispatch på sekunder', desc: 'Skapa och tilldela uppdrag med några klick. Föraren notifieras direkt.' },
-  { icon: Clock, title: 'Digital tidrapportering', desc: 'Förare stämplar in/ut. Automatisk beräkning. Exportera till Fortnox.' },
-  { icon: Wallet, title: 'OB-tillägg & traktamente', desc: 'Konfigurera OB-scheman för kväll, natt och helg. Automatisk traktamentsberäkning.' },
-  { icon: MapPin, title: 'Realtidsöversikt', desc: 'Se var dina förare befinner sig och vilka uppdrag som pågår.' },
-  { icon: Users, title: 'Obegränsat antal förare', desc: 'Bjud in hela teamet. Ingen extra kostnad per användare.' },
-  { icon: FileText, title: 'Fakturaunderlag & Fortnox', desc: 'Generera fullständiga fakturor eller fakturaunderlag för Fortnox — du väljer.' },
-];
-
-function FeaturesSection() {
-  return (
-    <section id="funktioner" className="py-20 bg-slate-50">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <motion.h2
-          initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp}
-          className="text-3xl sm:text-4xl font-bold text-foreground text-center mb-4"
-        >
-          Allt du behöver. Inget du inte behöver.
-        </motion.h2>
-        <motion.p
-          initial="hidden" whileInView="visible" viewport={{ once: true }} custom={1} variants={fadeUp}
-          className="text-center text-muted-foreground mb-14 max-w-lg mx-auto"
-        >
-          Ett fokuserat verktyg för transportföretag som vill slippa administration.
-        </motion.p>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {features.map((f, i) => (
-            <motion.div
-              key={f.title} custom={i} variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}
-              className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-md transition-shadow"
-            >
-              <div className="w-11 h-11 rounded-lg bg-blue-50 flex items-center justify-center mb-4">
-                <f.icon className="h-5 w-5 text-primary" />
+              <h1 className="mt-6 text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-foreground leading-[1.05]">
+                Slipp Excel. Få <span className="text-primary">full kontroll</span> på dina uppdrag.
+              </h1>
+              <p className="mt-6 text-lg text-muted-foreground leading-relaxed max-w-xl">
+                Aurora Transport samlar jobb, förare, tider och rapportering i ett enkelt system — klart att använda på 5 minuter.
+              </p>
+              <div className="mt-8 flex flex-col sm:flex-row gap-3">
+                <Button
+                  size="lg"
+                  onClick={() => setLeadModalOpen(true)}
+                  className="bg-primary hover:bg-primary-hover text-primary-foreground shadow-lg shadow-primary/20 h-12 px-6 text-base"
+                >
+                  Kontakta oss — 449 kr/mån
+                  <ArrowRight className="ml-1 h-4 w-4" />
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={handleDemo}
+                  disabled={demoLoading}
+                  className="h-12 px-6 text-base"
+                >
+                  {demoLoading ? 'Loggar in...' : 'Testa live-demo'}
+                </Button>
               </div>
-              <h3 className="font-semibold text-foreground mb-2">{f.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ═══════════════════════ PLATFORM SHOWCASE ═══════════════════════ */
-const platformCategories = [
-  {
-    title: 'Order & Dispatch',
-    icon: Package,
-    color: 'bg-blue-50 text-blue-600',
-    items: [
-      { icon: Zap, text: 'Skapa och tilldela uppdrag på sekunder' },
-      { icon: Bell, text: 'Föraren notifieras direkt i appen' },
-      { icon: Layers, text: 'Hantera ordrar med status-flöde' },
-      { icon: RefreshCw, text: 'Ordermallar för återkommande uppdrag' },
-      { icon: CalendarDays, text: 'Kalendervy för översikt & planering' },
-    ],
-  },
-  {
-    title: 'Realtid & Karta',
-    icon: MapPin,
-    color: 'bg-emerald-50 text-emerald-600',
-    items: [
-      { icon: MapPin, text: 'Live-karta med förarpositioner' },
-      { icon: Route, text: 'Ruttoptimering för effektiva körningar' },
-      { icon: Globe, text: 'Geofencing — automatisk incheckning' },
-      { icon: TrendingUp, text: 'Hastighet, riktning & uppdragsstatus' },
-    ],
-  },
-  {
-    title: 'Tidrapportering & Lön',
-    icon: Clock,
-    color: 'bg-violet-50 text-violet-600',
-    items: [
-      { icon: Clock, text: 'In/ut-stämpling per uppdrag' },
-      { icon: Moon, text: 'OB-tillägg: kväll, natt, helg — konfigurerbart' },
-      { icon: Coins, text: 'Traktamente baserat på arbetade timmar' },
-      { icon: BarChart3, text: 'Lönemodeller: tim, fast, per uppdrag' },
-      { icon: FileDown, text: 'Export till Fortnox med ett klick' },
-      { icon: CalendarDays, text: 'Frånvarohantering & semester' },
-    ],
-  },
-  {
-    title: 'Kund & Faktura',
-    icon: FileText,
-    color: 'bg-amber-50 text-amber-600',
-    items: [
-      { icon: Users, text: 'Kundregister med prislistor' },
-      { icon: FileText, text: 'Fakturering direkt från uppdrag' },
-      { icon: FileDown, text: 'Fakturaunderlag för Fortnox-användare' },
-      { icon: Settings, text: 'Anpassningsbara fakturamallar' },
-      { icon: FileDown, text: 'Bokföringsexport (SIE/CSV)' },
-    ],
-  },
-  {
-    title: 'Personal & Fordon',
-    icon: Users,
-    color: 'bg-rose-50 text-rose-600',
-    items: [
-      { icon: Users, text: 'Obegränsat antal förare & admins' },
-      { icon: Eye, text: 'Styr vad förare ser — dölj timmar, visa/dölj funktioner' },
-      { icon: Truck, text: 'Fordonsregister med status' },
-      { icon: Shield, text: 'Rollbaserad behörighet' },
-      { icon: Headphones, text: 'Extern resurshantering' },
-    ],
-  },
-  {
-    title: 'Avrapportering & Dokumentation',
-    icon: Camera,
-    color: 'bg-cyan-50 text-cyan-600',
-    items: [
-      { icon: Camera, text: 'Fotodokumentation per uppdrag' },
-      { icon: PenTool, text: 'Digital signatur vid leverans' },
-      { icon: FileText, text: 'Fraktprotokoll & anteckningar' },
-      { icon: BarChart3, text: 'Miljöuppföljning (CO₂, bränsle)' },
-    ],
-  },
-];
-
-function PlatformShowcase({ onContact }: { onContact: () => void }) {
-  return (
-    <section className="py-20 bg-white">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <motion.div
-          initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp}
-          className="text-center mb-4"
-        >
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-sm font-medium text-blue-700 mb-4">
-            Från order till faktura
-          </span>
-        </motion.div>
-        <motion.h2
-          initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp}
-          className="text-3xl sm:text-4xl font-bold text-foreground text-center mb-3"
-        >
-          Allt som ingår — i ett fast pris.
-        </motion.h2>
-        <motion.p
-          initial="hidden" whileInView="visible" viewport={{ once: true }} custom={1} variants={fadeUp}
-          className="text-center text-muted-foreground mb-14 max-w-2xl mx-auto"
-        >
-          Medan konkurrenterna tar betalt per användare och kräver en säljdemo så ingår allt hos oss. Punkt.
-        </motion.p>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {platformCategories.map((cat, i) => (
-            <motion.div
-              key={cat.title} custom={i} variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}
-              className="bg-slate-50 rounded-2xl border border-slate-200 p-6 hover:shadow-lg hover:border-primary/20 transition-all duration-300 group"
-            >
-              <div className="flex items-center gap-3 mb-5">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${cat.color} group-hover:scale-110 transition-transform`}>
-                  <cat.icon className="h-5 w-5" />
-                </div>
-                <h3 className="font-bold text-foreground text-lg">{cat.title}</h3>
-              </div>
-              <ul className="space-y-3">
-                {cat.items.map((item, j) => (
-                  <li key={j} className="flex items-start gap-2.5 text-sm text-muted-foreground">
-                    <item.icon className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    <span>{item.text}</span>
+              <ul className="mt-8 grid grid-cols-2 gap-x-6 gap-y-2.5 text-sm text-muted-foreground max-w-lg">
+                {[
+                  'Ingen bindningstid',
+                  'Obegränsat antal förare',
+                  'Support på svenska',
+                  'Driftklart på 5 minuter',
+                ].map((t) => (
+                  <li key={t} className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
+                    <span>{t}</span>
                   </li>
                 ))}
               </ul>
             </motion.div>
-          ))}
-        </div>
 
-        {/* Bottom highlight strip */}
-        <motion.div
-          initial="hidden" whileInView="visible" viewport={{ once: true }} custom={6} variants={fadeUp}
-          className="mt-10 bg-primary rounded-2xl p-6 sm:p-8 text-center text-primary-foreground"
-        >
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12">
-            <div>
-              <p className="text-3xl sm:text-4xl font-mono font-bold">449 kr/mån</p>
-              <p className="text-primary-foreground/70 text-sm">Allt ovan inkluderat</p>
-            </div>
-            <div className="hidden sm:block w-px h-12 bg-primary-foreground/20" />
-            <div>
-              <p className="text-3xl sm:text-4xl font-mono font-bold">∞</p>
-              <p className="text-primary-foreground/70 text-sm">Användare inkluderade</p>
-            </div>
-            <div className="hidden sm:block w-px h-12 bg-primary-foreground/20" />
-            <div>
-              <p className="text-3xl sm:text-4xl font-mono font-bold">0 kr</p>
-              <p className="text-primary-foreground/70 text-sm">Extrakostnad per förare</p>
-            </div>
-          </div>
-          <Button className="mt-6 bg-white text-primary hover:bg-white/90 rounded-xl px-8 py-3 font-semibold" onClick={onContact}>
-            Kontakta oss
-          </Button>
-        </motion.div>
-      </div>
-    </section>
-  );
-}
-
-/* ═══════════════════════ COMPARISON TABLE ═══════════════════════ */
-const compRows = [
-  { feature: 'Jobbdispatch i realtid', aurora: true, excel: false, core: true },
-  { feature: 'Mobilapp för förare', aurora: true, excel: false, core: true },
-  { feature: 'Fast pris per månad', aurora: true, excel: true, core: false },
-  { feature: 'Obegränsat antal användare', aurora: true, excel: true, core: false },
-  { feature: 'Kom igång utan demo', aurora: true, excel: true, core: false },
-  { feature: 'Support på svenska', aurora: true, excel: false, core: true },
-];
-
-function ComparisonTable() {
-  return (
-    <section className="py-20 bg-white">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <motion.h2
-          initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp}
-          className="text-3xl sm:text-4xl font-bold text-foreground text-center mb-12"
-        >
-          Varför Aurora Transport?
-        </motion.h2>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-          className="overflow-x-auto rounded-xl border border-slate-200"
-        >
-          <table className="w-full text-sm">
-            <thead>
-              <tr>
-                <th className="text-left px-5 py-3.5 text-muted-foreground font-medium bg-slate-50">Funktion</th>
-                <th className="px-5 py-3.5 text-center font-semibold text-primary-foreground bg-primary">Aurora Transport</th>
-                <th className="px-5 py-3.5 text-center text-muted-foreground font-medium bg-slate-50">Excel/WhatsApp</th>
-                <th className="px-5 py-3.5 text-center text-muted-foreground font-medium bg-slate-50">Traditionella system</th>
-              </tr>
-            </thead>
-            <tbody>
-              {compRows.map((r, i) => (
-                <tr key={r.feature} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
-                  <td className="px-5 py-3 text-foreground font-medium">{r.feature}</td>
-                  <td className="px-5 py-3 text-center bg-blue-50/50"><span className="text-green-600 font-bold">✓</span></td>
-                  <td className="px-5 py-3 text-center">{r.excel ? <span className="text-green-600 font-bold">✓</span> : <span className="text-slate-300">✗</span>}</td>
-                  <td className="px-5 py-3 text-center">{r.core ? <span className="text-green-600 font-bold">✓</span> : <span className="text-slate-300">✗</span>}</td>
-                </tr>
-              ))}
-              {/* Price row */}
-              <tr className="border-t border-slate-200">
-                <td className="px-5 py-3 text-foreground font-semibold">Pris per månad</td>
-                <td className="px-5 py-3 text-center bg-blue-50/50 font-mono font-bold text-primary">449 kr</td>
-                <td className="px-5 py-3 text-center font-mono text-muted-foreground">0 kr*</td>
-                <td className="px-5 py-3 text-center font-mono text-muted-foreground">~800 kr+</td>
-              </tr>
-            </tbody>
-          </table>
-        </motion.div>
-        <p className="text-xs text-slate-400 mt-3 text-center">*Excel kostar dig timmar varje vecka.</p>
-      </div>
-    </section>
-  );
-}
-
-/* ═══════════════════════ PRICING ═══════════════════════ */
-function PricingSection({ onContact }: { onContact: () => void }) {
-  const setupItems = [
-    'Personlig onboarding',
-    'Vi konfigurerar systemet',
-    'Genomgång med teamet',
-    'Import av personal',
-    'Support under uppstart',
-  ];
-  const monthlyItems = [
-    'Obegränsat förare och admins',
-    'Obegränsat antal uppdrag',
-    'iOS, Android & webb (PWA)',
-    'Tidrapportering & export',
-    'OB-tillägg & traktamente',
-    'Fakturaunderlag / Fortnox-export',
-    'Support på svenska',
-    'Alla framtida uppdateringar',
-    'Ingen bindningstid',
-  ];
-
-  return (
-    <section id="pris" className="py-20 bg-slate-50">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <motion.h2
-          initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp}
-          className="text-3xl sm:text-4xl font-bold text-foreground text-center mb-3"
-        >
-          Ett pris. Allt inkluderat.
-        </motion.h2>
-        <motion.p
-          initial="hidden" whileInView="visible" viewport={{ once: true }} custom={1} variants={fadeUp}
-          className="text-center text-muted-foreground mb-12"
-        >
-          Inga dolda avgifter. Inga per-användare-kostnader.
-        </motion.p>
-
-        <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-          {/* Setup card */}
-          <motion.div
-            initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp}
-            className="bg-white border border-slate-200 rounded-2xl p-8"
-          >
-            <span className="inline-block px-3 py-1 rounded-full bg-slate-100 text-xs font-medium text-muted-foreground mb-4">En gång</span>
-            <div className="mb-1">
-              <span className="text-5xl font-mono font-bold text-foreground">3 500 kr</span>
-            </div>
-            <p className="text-muted-foreground mb-4">Setup & onboarding</p>
-            <p className="text-sm text-muted-foreground mb-6 bg-slate-50 rounded-lg p-3 border border-slate-200">
-              Vi konfigurerar hela systemet åt dig — du loggar in och är igång direkt utan att behöva sätta upp något själv.
-            </p>
-            <ul className="space-y-3 mb-6">
-              {setupItems.map(item => (
-                <li key={item} className="flex items-start gap-2 text-sm text-foreground">
-                  <Check className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-            <p className="text-xs text-muted-foreground">Betalas en gång. Aldrig igen.</p>
-          </motion.div>
-
-          {/* Monthly card */}
-          <motion.div
-            initial="hidden" whileInView="visible" viewport={{ once: true }} custom={1} variants={fadeUp}
-            className="bg-primary text-primary-foreground rounded-2xl p-8"
-          >
-            <span className="inline-block px-3 py-1 rounded-full bg-white/20 text-xs font-medium mb-4">Löpande</span>
-            <div className="mb-1">
-              <span className="text-5xl font-mono font-bold">449 kr/mån</span>
-            </div>
-            <p className="text-primary-foreground/70 mb-6">Obegränsat antal användare</p>
-            <ul className="space-y-3 mb-6">
-              {monthlyItems.map(item => (
-                <li key={item} className="flex items-start gap-2 text-sm">
-                  <Check className="h-4 w-4 text-green-300 mt-0.5 shrink-0" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-            <Button className="w-full bg-white text-primary hover:bg-white/90 rounded-xl py-3.5 font-semibold" onClick={onContact}>
-              Kontakta oss
-            </Button>
-            <p className="text-xs text-primary-foreground/60 text-center mt-3">Faktureras månadsvis. Avsluta när du vill.</p>
-          </motion.div>
-        </div>
-
-        {/* Total callout */}
-        <motion.div
-          initial="hidden" whileInView="visible" viewport={{ once: true }} custom={2} variants={fadeUp}
-          className="max-w-3xl mx-auto mt-6 bg-white border border-slate-200 rounded-xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-        >
-          <div>
-            <p className="text-sm text-muted-foreground">Första månaden totalt:</p>
-            <p className="text-2xl font-mono font-bold text-foreground">3 949 kr</p>
-          </div>
-          <div className="text-right">
-            <p className="text-sm text-muted-foreground">Därefter 449 kr/mån.</p>
-            <p className="text-xs text-slate-400">Inga per-användare-kostnader. Någonsin.</p>
-          </div>
-        </motion.div>
-      </div>
-    </section>
-  );
-}
-
-/* ═══════════════════════ TESTIMONIALS ═══════════════════════ */
-const testimonials = [
-  { name: 'Transportledare', role: 'Åkeri', text: 'När uppdrag, förare och tider ligger på samma plats minskar behovet av samtal, dubbelkoll och sena kvällar med Excel.' },
-  { name: 'Förare', role: 'Distribution', text: 'I appen ser jag dagens uppdrag, kör, kvitterar med signatur och stämplar tid — utan att behöva ringa kontoret.' },
-  { name: 'Ekonomi', role: 'Bemanningsföretag', text: 'Tidrapporter och fakturaunderlag samlas automatiskt per kund och förare, vilket gör månadsavstämningen betydligt snabbare.' },
-  { name: 'Ägare', role: 'Mindre transportbolag', text: 'Fast månadspris oavsett antal förare gör kostnaden förutsägbar — vi vågar växa utan att licenskostnaden skenar.' },
-];
-
-function TestimonialsSection() {
-  return (
-    <section className="py-20 bg-slate-50 border-t border-slate-200">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6">
-        <motion.h2
-          initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}
-          className="text-2xl sm:text-3xl font-bold text-center mb-12 text-foreground"
-        >
-          Byggt för vardagen hos transportledare
-        </motion.h2>
-
-        {/* Featured quote */}
-        <motion.div
-          initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}
-          className="bg-primary text-primary-foreground rounded-2xl p-8 mb-6"
-        >
-          <p className="text-lg leading-relaxed mb-4 font-medium">
-            "Idén är enkel: ett system där dispatch, tidrapporter och fakturaunderlag hänger ihop — så att kontoret slipper kalkylark och förarna slipper SMS-tråden."
-          </p>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white font-bold text-sm">
-              AT
-            </div>
-            <div>
-              <p className="font-semibold text-sm">Aurora Transport</p>
-              <p className="text-xs text-primary-foreground/70">Så här tänker vi om vardagen</p>
-            </div>
-          </div>
-        </motion.div>
-
-        <div className="grid sm:grid-cols-2 gap-6">
-          {testimonials.map((t, i) => (
-            <motion.div
-              key={i}
-              initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i + 1}
-              className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm"
-            >
-              <p className="text-muted-foreground mb-4 leading-relaxed">{t.text}</p>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
-                  {t.name.charAt(0)}
-                </div>
-                <div>
-                  <p className="font-semibold text-foreground text-sm">{t.name}</p>
-                  <p className="text-xs text-muted-foreground">{t.role}</p>
-                </div>
-              </div>
+            {/* RIGHT — Dashboard mockup */}
+            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.15 }}>
+              <DashboardMockup />
             </motion.div>
-          ))}
+          </div>
         </div>
-      </div>
-    </section>
-  );
-}
+      </section>
 
-/* ═══════════════════════ FAQ ═══════════════════════ */
-const faqs = [
-  { q: 'Vad är Aurora Transport?', a: 'Ett transportledningssystem för svenska transport- och bemanningsföretag. Dispatch, tidrapportering och personalhantering i en app.' },
-  { q: 'Hur lång tid tar det att komma igång?', a: 'Grundkontot går snabbt att skapa. Vill du slippa konfigurera själv hjälper vi dig med onboarding, import av personal och genomgång med teamet.' },
-  { q: 'Behöver mina förare ladda ner en app?', a: 'Nej. PWA — fungerar direkt i mobilens webbläsare. Lägg till på hemskärmen som en vanlig app.' },
-  { q: 'Kan jag avsluta när jag vill?', a: 'Ja. Ingen bindningstid. Månadsvis betalning.' },
-  { q: 'Fungerar det med Fortnox?', a: 'Ja. Du kan exportera tidrapporter med ett klick, eller välja "Fakturaunderlag" för att generera specifikationer som du enkelt för över till Fortnox.' },
-  { q: 'Hanterar ni OB-tillägg och traktamente?', a: 'Ja. Du konfigurerar OB-scheman (kväll, natt, helg) och traktamentsnivåer under Ekonomi. Beloppen beräknas automatiskt baserat på arbetade timmar.' },
-  { q: 'Hur skiljer ni er från traditionella transportledningssystem?', a: 'Enklare, billigare och snabbare att komma igång med. Fast månadspris oavsett antal användare — ingen säljdemo eller per-användare-licenser.' },
-];
+      {/* PROBLEM */}
+      <section className="py-20 md:py-24 bg-card border-y border-border">
+        <div className="container mx-auto px-4">
+          <div className="max-w-2xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+              De flesta transportföretag förlorar tid på administration varje dag.
+            </h2>
+          </div>
+          <div className="mt-14 grid gap-6 md:grid-cols-3">
+            {[
+              { icon: MessageSquare, title: 'Uppdrag i chatten', text: 'Förare missar jobb, information försvinner och WhatsApp-gruppen blir snabbt ett kaos.' },
+              { icon: FileSpreadsheet, title: 'Tidrapporter i Excel', text: 'Timmar räknas ihop för hand, fel uppstår och löneunderlag tar onödig tid.' },
+              { icon: Phone, title: 'Planering via telefon', text: 'Du ringer runt för att hitta lediga förare och tappar värdefull tid vid varje tilldelning.' },
+            ].map((p, i) => (
+              <motion.div
+                key={p.title}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: '-80px' }}
+                variants={fadeUp}
+                custom={i}
+                className="group rounded-2xl border border-border bg-background p-7 shadow-sm transition-all hover:border-warning/40 hover:shadow-md"
+              >
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-warning/10 text-warning">
+                  <p.icon className="h-5 w-5" />
+                </div>
+                <h3 className="mt-5 text-lg font-semibold text-foreground">{p.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{p.text}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-function FaqSection() {
-  return (
-    <section id="faq" className="py-20 bg-white">
-      <div className="max-w-2xl mx-auto px-4 sm:px-6">
-        <motion.h2
-          initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp}
-          className="text-3xl sm:text-4xl font-bold text-foreground text-center mb-12"
-        >
-          Vanliga frågor
-        </motion.h2>
-        <Accordion type="single" collapsible className="space-y-3">
-          {faqs.map((faq, i) => (
-            <AccordionItem key={i} value={`faq-${i}`} className="bg-slate-50 rounded-xl border border-slate-200 px-5">
-              <AccordionTrigger className="text-left font-medium text-foreground hover:no-underline py-4">
-                {faq.q}
-              </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground pb-4">
-                {faq.a}
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
-      </div>
-    </section>
-  );
-}
+      {/* IGÅNG PÅ TRE STEG */}
+      <section className="py-20 md:py-24">
+        <div className="container mx-auto px-4">
+          <div className="max-w-2xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">Igång på tre steg.</h2>
+          </div>
+          <div className="mt-16 relative">
+            {/* Progress line */}
+            <div className="hidden md:block absolute top-8 left-[16%] right-[16%] h-px bg-gradient-to-r from-primary/20 via-primary/40 to-primary/20" />
+            <div className="grid gap-10 md:grid-cols-3 relative">
+              {[
+                { n: '01', title: 'Skapa ditt konto', text: 'Under 2 minuter' },
+                { n: '02', title: 'Bjud in din personal', text: 'De får mail direkt' },
+                { n: '03', title: 'Börja tilldela uppdrag', text: 'Föraren ser uppdraget direkt' },
+              ].map((s, i) => (
+                <motion.div
+                  key={s.n}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, margin: '-80px' }}
+                  variants={fadeUp}
+                  custom={i}
+                  className="text-center"
+                >
+                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary text-xl font-bold ring-8 ring-background">
+                    {s.n}
+                  </div>
+                  <h3 className="mt-6 text-xl font-semibold text-foreground">{s.title}</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">{s.text}</p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
 
-/* ═══════════════════════ SEO CONTENT ═══════════════════════ */
-function SeoContent() {
-  return (
-    <section className="py-20 bg-slate-50 border-t border-slate-200">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp}>
-          <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-6">
+      {/* FUNKTIONER */}
+      <section id="funktioner" className="py-20 md:py-24 bg-gradient-to-b from-[hsl(214_60%_97%)] to-background">
+        <div className="container mx-auto px-4">
+          <div className="max-w-2xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+              Allt du behöver. Inget du inte behöver.
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Ett fokuserat verktyg för transportföretag som vill slippa administration.
+            </p>
+          </div>
+          <div className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {[
+              { icon: Zap, title: 'Jobbdispatch på sekunder', text: 'Skapa och tilldela uppdrag med några klick. Föraren notifieras direkt.' },
+              { icon: Clock, title: 'Digital tidrapportering', text: 'Förare stämplar in och ut. Timmar beräknas automatiskt.' },
+              { icon: Wallet, title: 'OB-tillägg & traktamente', text: 'Konfigurera OB-schema för kväll, natt och helg samt traktamentsberäkning.' },
+              { icon: MapPin, title: 'Realtidsöversikt', text: 'Se var dina förare befinner sig och vilka uppdrag som pågår.' },
+              { icon: Users, title: 'Obegränsat antal förare', text: 'Bjud in hela teamet utan extra kostnad per användare.' },
+              { icon: FileText, title: 'Fakturaunderlag & Fortnox', text: 'Skapa underlag för fakturering och exportera data smidigt.' },
+            ].map((f, i) => (
+              <motion.div
+                key={f.title}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: '-60px' }}
+                variants={fadeUp}
+                custom={i}
+                className="rounded-2xl border border-border bg-card p-6 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5"
+              >
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <f.icon className="h-5 w-5" />
+                </div>
+                <h3 className="mt-5 text-base font-semibold text-foreground">{f.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{f.text}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* SYSTEMET I PRAKTIKEN */}
+      <section className="py-20 md:py-24">
+        <div className="container mx-auto px-4">
+          <div className="max-w-2xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+              Full kontroll över dina uppdrag
+            </h2>
+          </div>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-80px' }}
+            transition={{ duration: 0.6 }}
+            className="mt-12 max-w-6xl mx-auto"
+          >
+            <AssignmentTableMockup />
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ALLT SOM INGÅR */}
+      <section id="tjanster" className="py-20 md:py-24 bg-card border-y border-border">
+        <div className="container mx-auto px-4">
+          <div className="max-w-2xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+              Allt som ingår — i ett fast pris.
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Medan andra system tar betalt per användare får du allt inkluderat hos oss.
+            </p>
+          </div>
+          <div className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {[
+              { icon: ClipboardList, title: 'Order & Dispatch', items: ['Skapa uppdrag på sekunder', 'Tilldela förare med några klick', 'Återkommande uppdrag', 'Notifiering till förare', 'Aktivitetslogg'] },
+              { icon: MapIcon, title: 'Realtid & Karta', items: ['GPS-spårning av förare', 'Live-karta för admin', 'Geofencing', 'Ruttoptimering', 'Statusuppdatering i realtid'] },
+              { icon: Clock, title: 'Tidrapportering & Lön', items: ['Digital stämpelklocka', 'OB-schema kväll/natt/helg', 'Traktamente', 'Löneunderlag per förare', 'Export till lön'] },
+              { icon: FileText, title: 'Kund & Faktura', items: ['Kundregister med prislistor', 'Fakturaunderlag', 'Fortnox-export', 'Kundportal med token', 'Påminnelser'] },
+              { icon: UserCog, title: 'Personal & Fordon', items: ['Förare och underentreprenörer', 'Frånvaro & semester', 'Fordonsregister', 'Behörigheter & roller', 'Inbjudan via mail'] },
+              { icon: Package, title: 'Avrapportering & Dokumentation', items: ['Foto vid leverans', 'Digital signatur', 'Avvikelser & kommentarer', 'PDF-rapporter', 'Bokföringsexport (SIE)'] },
+            ].map((g, i) => (
+              <motion.div
+                key={g.title}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: '-60px' }}
+                variants={fadeUp}
+                custom={i}
+                className="rounded-2xl border border-border bg-background p-6 shadow-sm"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <g.icon className="h-5 w-5" />
+                  </div>
+                  <h3 className="text-base font-semibold text-foreground">{g.title}</h3>
+                </div>
+                <ul className="mt-5 space-y-2.5">
+                  {g.items.map((item) => (
+                    <li key={item} className="flex items-start gap-2.5 text-sm text-muted-foreground">
+                      <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* PRIS */}
+      <section id="pris" className="py-20 md:py-28 relative overflow-hidden">
+        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-background via-[hsl(214_60%_97%)] to-background" />
+        <div className="container mx-auto px-4">
+          <div className="max-w-2xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">Ett pris. Allt inkluderat.</h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Inga dolda avgifter. Inga kostnader per användare.
+            </p>
+          </div>
+          <div className="mt-14 grid gap-6 md:grid-cols-2 max-w-4xl mx-auto">
+            {/* Engång */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="rounded-3xl border border-border bg-card p-8 shadow-sm flex flex-col"
+            >
+              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Engång</div>
+              <div className="mt-4 flex items-baseline gap-2">
+                <span className="text-5xl font-bold tracking-tight text-foreground">3 500 kr</span>
+              </div>
+              <p className="mt-2 text-sm text-muted-foreground">Setup & onboarding</p>
+              <ul className="mt-7 space-y-3 flex-1">
+                {['Personlig onboarding', 'Vi konfigurerar systemet', 'Genomgång med teamet', 'Import av personal', 'Support under uppstart'].map((p) => (
+                  <li key={p} className="flex items-start gap-2.5 text-sm text-foreground">
+                    <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                    <span>{p}</span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+
+            {/* Löpande — featured */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="relative rounded-3xl bg-gradient-to-br from-primary to-primary-hover p-8 shadow-xl shadow-primary/25 flex flex-col text-primary-foreground"
+            >
+              <div className="absolute -top-3 right-6 rounded-full bg-warning px-3 py-1 text-xs font-semibold text-warning-foreground shadow-sm">
+                Mest populär
+              </div>
+              <div className="text-xs font-semibold uppercase tracking-wider text-primary-foreground/80">Löpande</div>
+              <div className="mt-4 flex items-baseline gap-2">
+                <span className="text-5xl font-bold tracking-tight">449 kr</span>
+                <span className="text-base text-primary-foreground/80">/mån</span>
+              </div>
+              <p className="mt-2 text-sm text-primary-foreground/85">Obegränsat antal användare</p>
+              <ul className="mt-7 space-y-3 flex-1">
+                {[
+                  'Obegränsat antal förare och admins',
+                  'Obegränsat antal uppdrag',
+                  'Dashboard & rapporter',
+                  'Tidrapportering',
+                  'OB-tillägg & traktamente',
+                  'Fakturaunderlag',
+                  'Support på svenska',
+                  'Ingen bindningstid',
+                ].map((p) => (
+                  <li key={p} className="flex items-start gap-2.5 text-sm">
+                    <Check className="h-4 w-4 mt-0.5 shrink-0" />
+                    <span>{p}</span>
+                  </li>
+                ))}
+              </ul>
+              <Button
+                onClick={() => setLeadModalOpen(true)}
+                size="lg"
+                className="mt-8 bg-background text-primary hover:bg-background/90 h-12"
+              >
+                Kontakta oss
+              </Button>
+            </motion.div>
+          </div>
+          <div className="mt-10 text-center text-sm text-muted-foreground">
+            <p><span className="font-medium text-foreground">Första månaden totalt: 3 949 kr</span> · Därefter 449 kr/mån</p>
+          </div>
+        </div>
+      </section>
+
+      {/* JÄMFÖRELSE */}
+      <section className="py-20 md:py-24">
+        <div className="container mx-auto px-4">
+          <div className="max-w-2xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">Varför Aurora Transport?</h2>
+          </div>
+          <div className="mt-12 max-w-5xl mx-auto overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border bg-secondary/50">
+                    <th className="text-left font-semibold text-foreground px-6 py-4">Funktion</th>
+                    <th className="text-center font-semibold text-primary px-6 py-4 bg-primary/5">Aurora Transport</th>
+                    <th className="text-center font-semibold text-muted-foreground px-6 py-4">Excel/WhatsApp</th>
+                    <th className="text-center font-semibold text-muted-foreground px-6 py-4">Dyra system</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    ['Jobbdispatch i realtid', true, false, true],
+                    ['Mobilapp för förare', true, false, true],
+                    ['Fast pris per månad', true, true, false],
+                    ['Obegränsat antal användare', true, true, false],
+                    ['Kom igång utan demo', true, true, false],
+                    ['Support på svenska', true, false, false],
+                    ['Pris per månad', '449 kr', '0 kr', '2 000–10 000 kr'],
+                  ].map(([label, a, b, c], i) => (
+                    <tr key={i as number} className="border-b border-border last:border-0">
+                      <td className="px-6 py-4 text-foreground font-medium">{label}</td>
+                      <td className="px-6 py-4 text-center bg-primary/5">
+                        <CompCell value={a} highlight />
+                      </td>
+                      <td className="px-6 py-4 text-center"><CompCell value={b} /></td>
+                      <td className="px-6 py-4 text-center"><CompCell value={c} /></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* TESTIMONIALS */}
+      <section className="py-20 md:py-24 bg-card border-y border-border">
+        <div className="container mx-auto px-4">
+          <div className="max-w-2xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">Vad våra användare säger</h2>
+          </div>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="mt-12 max-w-5xl mx-auto rounded-3xl bg-gradient-to-br from-primary to-primary-hover p-10 md:p-14 text-primary-foreground shadow-xl shadow-primary/20"
+          >
+            <div className="text-5xl font-serif leading-none text-primary-foreground/40">"</div>
+            <blockquote className="mt-2 text-xl md:text-2xl font-medium leading-relaxed">
+              Vi hanterade allt i WhatsApp-grupper innan. Nu har vi allt samlat — uppdrag, tidrapporter och förare. Systemet sparar tid varje dag.
+            </blockquote>
+            <div className="mt-6">
+              <div className="font-semibold">CJ Bemanning</div>
+              <div className="text-sm text-primary-foreground/80">Bemanningsföretag, Sverige</div>
+            </div>
+          </motion.div>
+          <div className="mt-8 grid gap-6 md:grid-cols-2 max-w-5xl mx-auto">
+            {[
+              'Vi bytte från papper och Excel till Aurora på en eftermiddag. Nu har vi koll på alla uppdrag i realtid.',
+              'Äntligen ett system som inte kräver en veckas utbildning. Förarna fattade direkt.',
+              'Priset var det som avgjorde — 449 kr oavsett hur många förare vi har.',
+              'Tidrapporterna exporteras smidigt och sparar oss timmar varje månad.',
+            ].map((q, i) => (
+              <motion.div
+                key={i}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: '-60px' }}
+                variants={fadeUp}
+                custom={i}
+                className="rounded-2xl border border-border bg-background p-6 shadow-sm"
+              >
+                <p className="text-sm leading-relaxed text-foreground">"{q}"</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="py-20 md:py-24">
+        <div className="container mx-auto px-4">
+          <div className="max-w-2xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">Vanliga frågor</h2>
+          </div>
+          <div className="mt-12 max-w-3xl mx-auto">
+            <Accordion type="single" collapsible className="space-y-3">
+              {[
+                { q: 'Vad är Aurora Transport?', a: 'Aurora Transport är ett digitalt system för transport- och bemanningsföretag som vill hantera uppdrag, förare och tidrapportering på ett enklare sätt.' },
+                { q: 'Hur lång tid tar det att komma igång?', a: 'De flesta kommer igång samma dag. Systemet är byggt för att vara enkelt och kräver ingen lång utbildning.' },
+                { q: 'Behöver mina förare ladda ner en app?', a: 'Systemet fungerar direkt i webbläsaren på mobil, surfplatta och dator.' },
+                { q: 'Kan jag avsluta när jag vill?', a: 'Ja. Det finns ingen bindningstid.' },
+                { q: 'Fungerar det med Fortnox?', a: 'Ja, systemet kan skapa fakturaunderlag och exportera data för Fortnox.' },
+                { q: 'Hanterar ni OB-tillägg och traktamente?', a: 'Ja, du kan konfigurera OB och traktamente utifrån dina behov.' },
+                { q: 'Vad skiljer er från dyrare system?', a: 'Aurora Transport är enklare, snabbare att komma igång med och har ett fast pris utan kostnad per användare.' },
+              ].map((item, i) => (
+                <AccordionItem
+                  key={i}
+                  value={`item-${i}`}
+                  className="rounded-xl border border-border bg-card px-5 shadow-sm"
+                >
+                  <AccordionTrigger className="text-left text-base font-semibold text-foreground hover:no-underline py-5">
+                    {item.q}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-sm text-muted-foreground leading-relaxed pb-5">
+                    {item.a}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </div>
+        </div>
+      </section>
+
+      {/* SEO TEXT */}
+      <section className="py-16 bg-secondary/40 border-y border-border">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <h2 className="text-2xl md:text-3xl font-semibold text-foreground">
             Transportledningssystem för moderna åkerier och bemanningsföretag
           </h2>
-          <div className="prose prose-slate max-w-none text-muted-foreground leading-relaxed space-y-4">
-            <p>
-              Aurora Transport är ett svenskt <strong>transportledningssystem</strong> byggt för små och medelstora transport-, åkeri- och bemanningsföretag. Plattformen samlar allt du behöver — jobbdispatch, personalhantering, tidrapportering och fakturering — i ett enda verktyg med fast pris på 449 kr/mån, oavsett antal användare.
-            </p>
-            <p>
-              Med Aurora Transport slipper du hantera uppdrag via WhatsApp, SMS och kalkylark. Istället skapar du uppdrag digitalt, tilldelar rätt förare med ett klick och får automatisk tidrapportering när föraren stämplar in och ut. Allt synligt i realtid — på dator, surfplatta och mobil.
-            </p>
-            <h3 className="text-lg font-semibold text-foreground !mt-8 !mb-3">Vad ingår?</h3>
-            <ul className="list-disc pl-5 space-y-1">
-              <li><strong>Jobbdispatch i realtid</strong> — skapa uppdrag och tilldela till förare. Notifiering direkt i mobilen.</li>
-              <li><strong>Digital tidrapportering</strong> — förare stämplar in och ut per uppdrag. Timmar beräknas automatiskt.</li>
-              <li><strong>OB-tillägg och traktamente</strong> — konfigurera scheman för kväll, natt och helg samt traktamentsnivåer baserat på arbetade timmar.</li>
-              <li><strong>GPS-spårning och live-karta</strong> — se var dina fordon och förare befinner sig just nu.</li>
-              <li><strong>Kundregister med prislistor</strong> — hantera kunder, kontaktpersoner och individuella priser.</li>
-              <li><strong>Fakturering och fakturaunderlag</strong> — skapa fullständiga fakturor eller fakturaunderlag anpassat för Fortnox-användare.</li>
-              <li><strong>Förarinställningar</strong> — styr vad förare ser i appen: dölj timmar, visa/dölj funktioner, per förare eller globalt.</li>
-              <li><strong>Fortnox-export</strong> — exportera tidrapporter och bokföringsunderlag med ett klick.</li>
-              <li><strong>Mobilapp utan installation</strong> — en PWA som fungerar direkt i webbläsaren, utan app-butik.</li>
-              <li><strong>Obegränsat antal förare och admins</strong> — inga extra kostnader oavsett teamstorlek.</li>
-            </ul>
-            <h3 className="text-lg font-semibold text-foreground !mt-8 !mb-3">Varför välja Aurora Transport?</h3>
-            <p>
-              Till skillnad från stora system som kräver säljdemo, implementation och per-användare-priser kan du komma igång med Aurora Transport på under 5 minuter. Vi erbjuder en komplett plattform till ett fast månadspris — ingen bindningstid, inga dolda avgifter. Support sker på svenska, och alla framtida uppdateringar ingår.
-            </p>
-            <p>
-              Oavsett om du driver ett litet åkeri med tre fordon eller ett bemanningsföretag med trettio förare så skalar Aurora Transport med dig. Vår plattform är ett modernt alternativ till system som Coredination, Pinpointer och andra traditionella transportledningssystem — enklare, billigare och snabbare att komma igång med.
-            </p>
-          </div>
-        </motion.div>
-      </div>
-    </section>
-  );
-}
-
-/* ═══════════════════════ FINAL CTA ═══════════════════════ */
-function FinalCta({ onContact }: { onContact: () => void }) {
-  return (
-    <section className="py-20 bg-[#0F172A] text-white">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
-        <motion.h2
-          initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp}
-          className="text-3xl sm:text-4xl font-bold mb-4"
-        >
-          Redo att modernisera ditt transportföretag?
-        </motion.h2>
-        <motion.p
-          initial="hidden" whileInView="visible" viewport={{ once: true }} custom={1} variants={fadeUp}
-          className="text-slate-400 mb-8"
-        >
-          449 kr/mån. Fast pris. Ingen bindningstid.
-        </motion.p>
-        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} custom={2} variants={fadeUp}>
-          <Button size="lg" className="rounded-xl px-10 py-6 text-base font-semibold bg-white text-[#0F172A] hover:bg-white/90" onClick={onContact}>
-            Kontakta oss
-          </Button>
-        </motion.div>
-        <motion.p
-          initial="hidden" whileInView="visible" viewport={{ once: true }} custom={3} variants={fadeUp}
-          className="mt-6"
-        >
-          <a href="mailto:info@auroramedia.se" className="text-slate-400 text-sm hover:text-white transition-colors">
-            info@auroramedia.se
-          </a>
-        </motion.p>
-      </div>
-    </section>
-  );
-}
-
-/* ═══════════════════════ INTERNAL LINKS ═══════════════════════ */
-const internalLinks = [
-  { to: '/transportledningssystem', title: 'Transportledningssystem', desc: 'Vad är ett TLS och varför behöver ditt företag ett?' },
-  { to: '/akeri-system', title: 'System för åkerier', desc: 'Skräddarsytt för åkeriägare som vill ha koll.' },
-  { to: '/dispatch-system', title: 'Dispatch-system', desc: 'Ersätt whiteboard och telefonsamtal.' },
-  { to: '/budtjanst-app', title: 'App för budtjänst', desc: 'Signerade kvitton och realtidsspårning.' },
-  { to: '/coredination-alternativ', title: 'Alternativ till Coredination', desc: 'Fast pris, inga bindningstider.' },
-  { to: '/tjanster', title: 'Alla funktioner', desc: 'Se hela funktionslistan.' },
-];
-
-function InternalLinks() {
-  return (
-    <section className="py-16 bg-white border-t border-slate-200">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <h2 className="text-2xl font-bold text-foreground mb-8 text-center">Läs mer</h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {internalLinks.map((link) => (
-            <Link key={link.to} to={link.to} className="block rounded-xl border border-slate-200 p-5 hover:shadow-md transition-shadow bg-slate-50">
-              <h3 className="font-semibold text-foreground mb-1">{link.title}</h3>
-              <p className="text-sm text-muted-foreground">{link.desc}</p>
-            </Link>
-          ))}
+          <p className="mt-5 text-base text-muted-foreground leading-relaxed">
+            Aurora Transport är ett svenskt transportledningssystem byggt för små och medelstora transport-, åkeri- och bemanningsföretag.
+            Plattformen samlar allt du behöver — jobbdispatch, personalhantering, tidrapportering och fakturering — i ett enda verktyg
+            med fast pris på 449 kr/mån.
+          </p>
+          <ul className="mt-6 grid gap-2.5 sm:grid-cols-2 text-sm text-muted-foreground">
+            {[
+              'Jobbdispatch i realtid',
+              'Digital tidrapportering',
+              'GPS-spårning och kartöversikt',
+              'Kundregister och prislistor',
+              'Fakturaunderlag',
+              'Förarapp i mobilen',
+              'Fortnox-export',
+              'Obegränsat antal användare',
+            ].map((t) => (
+              <li key={t} className="flex items-center gap-2">
+                <Check className="h-4 w-4 text-primary shrink-0" />
+                <span>{t}</span>
+              </li>
+            ))}
+          </ul>
         </div>
-      </div>
-    </section>
-  );
-}
+      </section>
 
-/* ═══════════════════════ FOOTER ═══════════════════════ */
-function Footer() {
-  return (
-    <footer className="bg-[#0F172A] border-t border-slate-800 py-10">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="flex flex-col md:flex-row md:items-start justify-between gap-8">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <Truck className="h-4 w-4 text-slate-400" />
-              <span className="font-semibold text-white">Aurora Transport</span>
+      {/* LÄS MER */}
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <h2 className="text-2xl md:text-3xl font-semibold text-foreground text-center">Läs mer</h2>
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
+            {[
+              { to: '/transportledningssystem', label: 'Transportledningssystem' },
+              { to: '/akeri-system', label: 'System för åkerier' },
+              { to: '/dispatch-system', label: 'Dispatch-system' },
+              { to: '/budtjanst-app', label: 'App för budtjänst' },
+              { to: '/coredination-alternativ', label: 'Alternativ till Coordination' },
+              { to: '/tjanster', label: 'Alla funktioner' },
+            ].map((l) => (
+              <Link
+                key={l.to}
+                to={l.to}
+                className="group flex items-center justify-between rounded-xl border border-border bg-card px-5 py-4 shadow-sm transition-all hover:border-primary/40 hover:shadow-md"
+              >
+                <span className="text-sm font-medium text-foreground">{l.label}</span>
+                <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-primary" />
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* SLUT-CTA */}
+      <section className="py-20 md:py-24 relative overflow-hidden bg-sidebar">
+        <div className="absolute inset-0 -z-0 bg-gradient-to-br from-sidebar via-sidebar to-primary/40" />
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2 h-[400px] w-[800px] rounded-full bg-primary/30 blur-3xl" />
+        <div className="container mx-auto px-4 relative">
+          <div className="max-w-2xl mx-auto text-center">
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-sidebar-foreground">
+              Redo att modernisera ditt transportföretag?
+            </h2>
+            <p className="mt-5 text-lg text-sidebar-foreground/80">
+              449 kr/mån. Fast pris. Ingen bindningstid.
+            </p>
+            <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+              <Button
+                size="lg"
+                onClick={() => setLeadModalOpen(true)}
+                className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 h-12 px-8 text-base"
+              >
+                Kontakta oss
+                <ArrowRight className="ml-1 h-4 w-4" />
+              </Button>
             </div>
-            <p className="text-sm text-slate-500">En produkt av Aurora Media AB</p>
-            <p className="text-sm text-slate-500">Org.nr 559272-0220</p>
-          </div>
-          <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-400">
-            <Link to="/tjanster" className="hover:text-white transition-colors">Tjänster</Link>
-            <Link to="/transportledningssystem" className="hover:text-white transition-colors">Transportledningssystem</Link>
-            <Link to="/coredination-alternativ" className="hover:text-white transition-colors">Coredination-alternativ</Link>
-            <Link to="/akeri-system" className="hover:text-white transition-colors">Åkerisystem</Link>
-            <Link to="/dispatch-system" className="hover:text-white transition-colors">Dispatch-system</Link>
-            <Link to="/budtjanst-app" className="hover:text-white transition-colors">Budtjänst-app</Link>
-            <Link to="/om-oss" className="hover:text-white transition-colors">Om oss</Link>
-            <Link to="/privacy" className="hover:text-white transition-colors">Integritetspolicy</Link>
-            <a href="mailto:info@auroramedia.se" className="hover:text-white transition-colors">Kontakt</a>
+            <a
+              href="mailto:info@auroramedia.se"
+              className="mt-6 inline-flex items-center gap-2 text-sm text-sidebar-foreground/70 hover:text-sidebar-foreground transition-colors"
+            >
+              <Mail className="h-4 w-4" />
+              info@auroramedia.se
+            </a>
           </div>
         </div>
-        <div className="mt-8 pt-6 border-t border-slate-800 text-center">
-          <p className="text-xs text-slate-500">© 2026 Aurora Media AB</p>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="bg-sidebar text-sidebar-foreground">
+        <div className="container mx-auto px-4 py-14">
+          <div className="grid gap-10 md:grid-cols-3">
+            <div>
+              <Link to="/" className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary shadow-sm">
+                  <Truck className="h-5 w-5 text-primary-foreground" strokeWidth={2.4} />
+                </div>
+                <span className="text-base font-semibold">Aurora Transport</span>
+              </Link>
+              <p className="mt-4 text-sm text-sidebar-foreground/70 leading-relaxed">
+                En produkt av Aurora Media AB<br />
+                Org.nr 559272-0220
+              </p>
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-sidebar-foreground">Produkt</h4>
+              <ul className="mt-4 space-y-2.5 text-sm text-sidebar-foreground/70">
+                <li><Link to="/tjanster" className="hover:text-sidebar-foreground transition-colors">Tjänster</Link></li>
+                <li><Link to="/transportledningssystem" className="hover:text-sidebar-foreground transition-colors">Transportledningssystem</Link></li>
+                <li><Link to="/coredination-alternativ" className="hover:text-sidebar-foreground transition-colors">Coordination alternativ</Link></li>
+                <li><Link to="/akeri-system" className="hover:text-sidebar-foreground transition-colors">Åkerisystem</Link></li>
+                <li><Link to="/dispatch-system" className="hover:text-sidebar-foreground transition-colors">Dispatch system</Link></li>
+                <li><Link to="/budtjanst-app" className="hover:text-sidebar-foreground transition-colors">Budtjänst app</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-sidebar-foreground">Företag</h4>
+              <ul className="mt-4 space-y-2.5 text-sm text-sidebar-foreground/70">
+                <li><Link to="/om-oss" className="hover:text-sidebar-foreground transition-colors">Om oss</Link></li>
+                <li><Link to="/integritetspolicy" className="hover:text-sidebar-foreground transition-colors">Integritetspolicy</Link></li>
+                <li><Link to="/kontakt" className="hover:text-sidebar-foreground transition-colors">Kontakt</Link></li>
+                <li><Link to="/blogg" className="hover:text-sidebar-foreground transition-colors">Blogg</Link></li>
+              </ul>
+            </div>
+          </div>
+          <div className="mt-12 border-t border-sidebar-border pt-6 text-xs text-sidebar-foreground/50">
+            © {new Date().getFullYear()} Aurora Media AB. Alla rättigheter reserverade.
+          </div>
+        </div>
+      </footer>
+
+      <LeadFormModal open={leadModalOpen} onOpenChange={setLeadModalOpen} source="landing" />
+    </div>
+  );
+}
+
+/* -------- DASHBOARD MOCKUP -------- */
+function DashboardMockup() {
+  return (
+    <div className="relative">
+      {/* Glow */}
+      <div className="absolute -inset-6 -z-10 rounded-3xl bg-gradient-to-tr from-primary/20 via-primary/5 to-transparent blur-2xl" />
+
+      <div className="rounded-2xl border border-border bg-card shadow-2xl shadow-primary/10 overflow-hidden">
+        {/* Browser chrome */}
+        <div className="flex items-center gap-1.5 px-4 py-3 border-b border-border bg-secondary/40">
+          <div className="h-2.5 w-2.5 rounded-full bg-destructive/60" />
+          <div className="h-2.5 w-2.5 rounded-full bg-warning/70" />
+          <div className="h-2.5 w-2.5 rounded-full bg-success/70" />
+          <div className="ml-4 flex-1 rounded-md bg-background/80 border border-border px-3 py-1 text-[10px] text-muted-foreground font-mono">
+            app.auroratransport.se
+          </div>
+        </div>
+
+        <div className="grid grid-cols-[140px_1fr] min-h-[460px]">
+          {/* Sidebar */}
+          <aside className="bg-sidebar text-sidebar-foreground p-3 space-y-0.5">
+            <div className="flex items-center gap-2 px-2 py-2 mb-2">
+              <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary">
+                <Truck className="h-3.5 w-3.5 text-primary-foreground" />
+              </div>
+              <span className="text-xs font-semibold">Aurora</span>
+            </div>
+            {[
+              { icon: LayoutDashboard, label: 'Översikt', active: true },
+              { icon: ClipboardList, label: 'Uppdrag' },
+              { icon: Users, label: 'Förare' },
+              { icon: UserCog, label: 'Personal' },
+              { icon: Clock, label: 'Tidrapport' },
+              { icon: BarChart3, label: 'Rapporter' },
+              { icon: Settings, label: 'Inställningar' },
+            ].map((it) => (
+              <div
+                key={it.label}
+                className={`flex items-center gap-2 px-2 py-2 rounded-md text-[11px] ${
+                  it.active
+                    ? 'bg-sidebar-accent text-sidebar-foreground font-medium'
+                    : 'text-sidebar-foreground/60'
+                }`}
+              >
+                <it.icon className="h-3.5 w-3.5" />
+                <span>{it.label}</span>
+              </div>
+            ))}
+          </aside>
+
+          {/* Main */}
+          <div className="p-5 space-y-4 bg-background">
+            {/* Top stat cards */}
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { label: 'Pågående uppdrag', value: '12', icon: Route, tint: 'bg-primary/10 text-primary' },
+                { label: 'Tilldelade förare', value: '8', icon: Users, tint: 'bg-success/10 text-success' },
+                { label: 'Idag rapporterade', value: '6', icon: Clock, tint: 'bg-warning/10 text-warning' },
+              ].map((s) => (
+                <div key={s.label} className="rounded-lg border border-border bg-card p-3">
+                  <div className={`flex h-7 w-7 items-center justify-center rounded-md ${s.tint}`}>
+                    <s.icon className="h-3.5 w-3.5" />
+                  </div>
+                  <div className="mt-2 text-lg font-bold tracking-tight text-foreground">{s.value}</div>
+                  <div className="text-[10px] text-muted-foreground uppercase tracking-wider">{s.label}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Active assignment + map */}
+            <div className="grid grid-cols-[1fr_120px] gap-3">
+              <div className="rounded-lg border border-border bg-card p-4">
+                <div className="flex items-center justify-between">
+                  <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    Aktuellt uppdrag
+                  </div>
+                  <span className="inline-flex items-center gap-1 rounded-md bg-success/10 text-success px-2 py-0.5 text-[10px] font-medium">
+                    <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+                    Pågående
+                  </span>
+                </div>
+                <div className="mt-3 text-sm font-semibold text-foreground">Göteborg → Stockholm</div>
+                <div className="mt-2 space-y-1 text-[11px] text-muted-foreground">
+                  <div>Upphämtning <span className="text-foreground font-medium">08:30</span></div>
+                  <div>Kund: <span className="text-foreground">Nilsson Åkeri AB</span></div>
+                  <div>Förare: <span className="text-foreground">Johan Svensson</span></div>
+                </div>
+                <button className="mt-4 w-full rounded-md bg-primary text-primary-foreground text-[11px] font-medium py-2 hover:bg-primary-hover transition-colors">
+                  Markera som slutförd
+                </button>
+              </div>
+
+              {/* Map mini */}
+              <div className="rounded-lg border border-border bg-gradient-to-br from-[hsl(214_60%_94%)] to-[hsl(214_60%_88%)] relative overflow-hidden">
+                <svg viewBox="0 0 120 200" className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
+                  {/* Road lines */}
+                  <path d="M 20 180 Q 30 140 50 110 T 90 50 L 100 20" stroke="hsl(var(--primary))" strokeWidth="2.5" fill="none" strokeDasharray="4 3" opacity="0.7" />
+                  <circle cx="20" cy="180" r="4" fill="hsl(var(--success))" />
+                  <circle cx="100" cy="20" r="4" fill="hsl(var(--primary))" />
+                  {/* Faint grid */}
+                  <g stroke="hsl(var(--border))" strokeWidth="0.5" opacity="0.5">
+                    <line x1="0" y1="50" x2="120" y2="50" />
+                    <line x1="0" y1="100" x2="120" y2="100" />
+                    <line x1="0" y1="150" x2="120" y2="150" />
+                  </g>
+                </svg>
+                <div className="absolute bottom-2 left-2 right-2 text-[9px] text-foreground/70 bg-background/70 backdrop-blur rounded px-1.5 py-1 text-center">
+                  Live-rutt
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </footer>
+    </div>
   );
+}
+
+/* -------- ASSIGNMENT TABLE MOCKUP -------- */
+function AssignmentTableMockup() {
+  const rows = [
+    { id: '#1042', route: 'Göteborg → Stockholm', driver: 'Johan Svensson', status: 'Pågående', statusKind: 'active', time: '08:30', customer: 'Nilsson Åkeri AB' },
+    { id: '#1041', route: 'Malmö → Jönköping', driver: 'Sara Andersson', status: 'Planerad', statusKind: 'pending', time: '09:00', customer: 'AB Transport' },
+    { id: '#1040', route: 'Helsingborg → Göteborg', driver: 'Ali Hassan', status: 'Planerad', statusKind: 'pending', time: '10:30', customer: 'Skåne Logistik AB' },
+    { id: '#1039', route: 'Stockholm → Uppsala', driver: 'Maria Karlsson', status: 'Klar', statusKind: 'completed', time: '07:00', customer: 'Nordic Freight AB' },
+  ];
+
+  const statusClass = (k: string) => {
+    if (k === 'active') return 'bg-success/10 text-success';
+    if (k === 'pending') return 'bg-primary/10 text-primary';
+    return 'bg-muted text-muted-foreground';
+  };
+
+  return (
+    <div className="rounded-2xl border border-border bg-card shadow-xl shadow-primary/5 overflow-hidden">
+      {/* Browser chrome */}
+      <div className="flex items-center gap-1.5 px-4 py-3 border-b border-border bg-secondary/40">
+        <div className="h-2.5 w-2.5 rounded-full bg-destructive/60" />
+        <div className="h-2.5 w-2.5 rounded-full bg-warning/70" />
+        <div className="h-2.5 w-2.5 rounded-full bg-success/70" />
+      </div>
+      <div className="grid grid-cols-[180px_1fr] min-h-[440px]">
+        {/* Sidebar */}
+        <aside className="bg-sidebar text-sidebar-foreground p-4 space-y-1">
+          <div className="flex items-center gap-2 px-2 py-2 mb-3">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary">
+              <Truck className="h-4 w-4 text-primary-foreground" />
+            </div>
+            <span className="text-sm font-semibold">Aurora</span>
+          </div>
+          {[
+            { icon: LayoutDashboard, label: 'Översikt' },
+            { icon: ClipboardList, label: 'Uppdrag', active: true },
+            { icon: Users, label: 'Förare' },
+            { icon: Clock, label: 'Tidrapport' },
+            { icon: FileText, label: 'Fakturor' },
+            { icon: BarChart3, label: 'Rapporter' },
+          ].map((it) => (
+            <div
+              key={it.label}
+              className={`flex items-center gap-2.5 px-2.5 py-2 rounded-md text-xs ${
+                it.active
+                  ? 'bg-sidebar-accent text-sidebar-foreground font-medium'
+                  : 'text-sidebar-foreground/60'
+              }`}
+            >
+              <it.icon className="h-4 w-4" />
+              <span>{it.label}</span>
+            </div>
+          ))}
+        </aside>
+
+        {/* Main */}
+        <div className="p-6 bg-background flex flex-col">
+          <div className="flex items-center justify-between gap-3 mb-5">
+            <div className="flex items-center gap-2 flex-1 max-w-md">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <div className="h-9 rounded-lg border border-border bg-card pl-9 pr-3 flex items-center text-xs text-muted-foreground">
+                  Sök uppdrag, kund eller förare...
+                </div>
+              </div>
+              <button className="h-9 px-3 rounded-lg border border-border bg-card text-xs font-medium text-foreground">
+                Filter
+              </button>
+            </div>
+            <button className="h-9 px-3 rounded-lg bg-primary text-primary-foreground text-xs font-medium inline-flex items-center gap-1.5">
+              <Plus className="h-3.5 w-3.5" />
+              Nytt uppdrag
+            </button>
+          </div>
+
+          <div className="rounded-lg border border-border overflow-hidden flex-1">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="border-b border-border bg-secondary/40 text-[10px] uppercase tracking-wider text-muted-foreground">
+                  <th className="text-left px-4 py-2.5 font-semibold">Uppdrag</th>
+                  <th className="text-left px-4 py-2.5 font-semibold">Förare</th>
+                  <th className="text-left px-4 py-2.5 font-semibold">Status</th>
+                  <th className="text-left px-4 py-2.5 font-semibold">Tid</th>
+                  <th className="text-left px-4 py-2.5 font-semibold">Kund</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r) => (
+                  <tr key={r.id} className="border-b border-border last:border-0 hover:bg-secondary/30">
+                    <td className="px-4 py-3">
+                      <div className="font-mono text-muted-foreground text-[10px]">{r.id}</div>
+                      <div className="font-medium text-foreground">{r.route}</div>
+                    </td>
+                    <td className="px-4 py-3 text-foreground">{r.driver}</td>
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-medium ${statusClass(r.statusKind)}`}>
+                        {r.statusKind === 'active' && <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />}
+                        {r.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-foreground font-mono">{r.time}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{r.customer}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* -------- COMPARISON CELL -------- */
+function CompCell({ value, highlight = false }: { value: boolean | string; highlight?: boolean }) {
+  if (typeof value === 'string') {
+    return <span className={highlight ? 'font-semibold text-primary' : 'text-foreground'}>{value}</span>;
+  }
+  if (value) {
+    return (
+      <CheckCircle2 className={`mx-auto h-5 w-5 ${highlight ? 'text-primary' : 'text-success'}`} />
+    );
+  }
+  return <Minus className="mx-auto h-5 w-5 text-muted-foreground/50" />;
 }
