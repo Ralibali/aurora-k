@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Truck, Zap, Clock, Users, MapPin, Smartphone, FileText, MessageSquare, FileSpreadsheet, Phone } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -14,8 +14,8 @@ const fadeUp = {
 
 export default function TransportledningssystemPage() {
   usePageMeta({
-    title: 'Transportledningssystem för SMF | Aurora Transport',
-    description: 'Enkelt transportledningssystem som samlar uppdrag, förare och tidrapporter. Kom igång samma dag. 449 kr/mån.',
+    title: 'Transportledningssystem för åkerier & transportföretag | Aurora Transport',
+    description: 'Aurora Transport är ett enkelt transportledningssystem för åkerier, budföretag och bemanningsteam. Hantera uppdrag, förare, tidrapporter och fakturaunderlag från 449 kr/mån.',
     canonical: 'https://auroratransport.se/transportledningssystem',
   });
 
@@ -32,6 +32,7 @@ export default function TransportledningssystemPage() {
       <HowItWorks />
       <FeaturesGrid />
       <ComparisonTable />
+      <SeoTextSection />
       <FaqSection />
       <FinalCta />
       <Footer />
@@ -85,19 +86,19 @@ function Hero() {
           Enkelt · Svenskt · Fast pris
         </motion.span>
         <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-4xl sm:text-5xl font-bold text-foreground leading-tight mb-6">
-          Transportledningssystem som faktiskt används i fält
+          Transportledningssystem för åkerier som vill slippa Excel-kaos
         </motion.h1>
         <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-xl text-muted-foreground leading-relaxed mb-8 max-w-2xl mx-auto">
-          Tilldela uppdrag, spåra förare och hantera tidrapporter — allt i en app.
+          Planera uppdrag, tilldela förare, följ arbetet i realtid och skapa tydliga tid- och fakturaunderlag — i ett system som teamet faktiskt orkar använda.
         </motion.p>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
           <Button size="lg" asChild className="rounded-xl px-8 py-6 text-base font-semibold">
-            <Link to="/kontakt">Kom igång idag — 449 kr/mån</Link>
+            <Link to="/kontakt">Boka genomgång</Link>
           </Button>
         </motion.div>
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="flex justify-center flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground mt-8">
           <span>✓ Ingen bindningstid</span>
-          <span>✓ Gratis onboarding</span>
+          <span>✓ Hjälp med onboarding</span>
           <span>✓ Support på svenska</span>
         </motion.div>
       </div>
@@ -249,7 +250,7 @@ function FaqSection() {
   const faqs = [
     { q: 'Vad är ett transportledningssystem?', a: 'Ett system som hjälper transportföretag att planera, tilldela och följa upp uppdrag digitalt — istället för via telefon, SMS eller kalkylark.' },
     { q: 'Passar det för mitt lilla åkeri?', a: 'Absolut. Aurora Transport är byggt specifikt för små och medelstora transport- och bemanningsföretag. Fast pris oavsett storlek.' },
-    { q: 'Vad skiljer er från Coredination?', a: 'Enklare, billigare och snabbare. 449 kr/mån fast pris oavsett antal användare. Kom igång på 5 minuter utan att kontakta oss.' },
+    { q: 'Vad skiljer er från Coredination?', a: 'Aurora Transport är byggt för företag som vill ha ett enklare och mer prisförutsägbart alternativ. Du får fast månadspris, obegränsat antal användare och ett system som är snabbt att komma igång med.' },
     { q: 'Behöver mina förare ladda ner en app?', a: 'Nej. Aurora Transport är en PWA som fungerar direkt i mobilens webbläsare utan installation.' },
     { q: 'Kan jag testa innan jag bestämmer mig?', a: 'Du kan komma igång direkt och avsluta när du vill. Ingen bindningstid.' },
   ];
