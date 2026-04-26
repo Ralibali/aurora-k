@@ -6,9 +6,9 @@ import { useBreadcrumbJsonLd } from '@/lib/breadcrumb-jsonld';
 import { usePageMeta } from '@/lib/use-page-meta';
 import { Button } from '@/components/ui/button';
 import {
-  Truck, Clock, Users, MapPin, Smartphone, Zap, FileText,
-  MessageSquare, FileSpreadsheet, Phone, Check, X, ChevronDown,
-  Menu, ArrowRight, Play, Shield, BarChart3, CalendarDays,
+  Truck, Clock, Users, MapPin, Zap, FileText,
+  MessageSquare, FileSpreadsheet, Phone, Check,
+  Play, Shield, BarChart3, CalendarDays,
   Route, Bell, Camera, PenTool, Package, Globe, Headphones,
   RefreshCw, FileDown, Settings, TrendingUp, Layers, Wallet,
   Eye, Moon, Coins,
@@ -42,8 +42,8 @@ export default function LandingPage() {
     { name: 'Hem', url: 'https://auroratransport.se/' },
   ], []));
   usePageMeta({
-    title: 'Aurora Transport – Enklaste dispatch-appen för transportföretag',
-    description: 'Hantera uppdrag, personal och tidrapporter enkelt. 449 kr/mån fast pris. Kom igång på 5 minuter.',
+    title: 'Transportledningssystem för åkerier & budföretag | Aurora Transport',
+    description: 'Aurora Transport samlar uppdrag, förare, tidrapportering och fakturaunderlag i ett enkelt system för svenska transportföretag. Fast pris från 449 kr/mån.',
     canonical: 'https://auroratransport.se/',
     ogImage: 'https://auroratransport.se/og-image.png',
   });
