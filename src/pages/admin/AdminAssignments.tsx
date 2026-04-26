@@ -239,8 +239,10 @@ export default function AdminAssignments() {
               title="Skapa ditt första uppdrag"
               description="Samla körningar, förare, tider och kundinformation på ett ställe. Ett uppdrag tar under 30 sekunder att skapa."
               hint="Tips: börja med ett vanligt uppdrag och återanvänd det senare som mall."
-              action={{ label: 'Skapa uppdrag', to: '/admin/assignments/new', icon: Plus }}
-              secondaryAction={{ label: 'Lägg till kund först', to: '/admin/customers/new' }}
+              actionLabel="Skapa uppdrag"
+              actionHref="/admin/assignments/new"
+              secondaryLabel="Lägg till kund först"
+              secondaryHref="/admin/customers/new"
             />
           ) : (
             <div className="bg-card rounded-lg border border-dashed border-border p-16 text-center shadow-card">
