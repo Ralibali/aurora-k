@@ -17,6 +17,8 @@ import { Link } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { StaggeredTableBody, StaggeredTableRow } from '@/components/StaggeredList';
+import { useDemoMode } from '@/hooks/useDemoMode';
+import { demoInvoices } from '@/lib/demo-data';
 
 function useInvoicePdfData() {
   const { data: allAssignments } = useAssignments();
@@ -74,14 +76,18 @@ export default function AdminInvoices() {
   const { data: allAssignments } = useAssignments();
   const updateStatus = useUpdateInvoiceStatus();
   const { buildPdfData, settings } = useInvoicePdfData();
+  const { enabled: demoEnabled } = useDemoMode();
+
+  const showingDemo = demoEnabled && (invoices?.length ?? 0) === 0;
+  const sourceInvoices = showingDemo ? (demoInvoices as any[]) : (invoices ?? []);
 
   const now = new Date().toISOString().split('T')[0];
-  const processedInvoices = (invoices ?? []).map(i => ({
+  const processedInvoices = sourceInvoices.map((i: any) => ({
     ...i,
     status: i.status === 'sent' && i.due_date < now ? 'overdue' : i.status,
   }));
 
-  const filtered = processedInvoices.filter(i => {
+  const filtered = processedInvoices.filter((i: any) => {
     if (statusFilter !== 'all' && i.status !== statusFilter) return false;
     if (customerFilter !== 'all' && i.customer_id !== customerFilter) return false;
     if (search) {
@@ -117,6 +123,12 @@ export default function AdminInvoices() {
   return (
     <AdminLayout title="Fakturering" description="Skapa, exportera och hantera fakturor">
       <div className="space-y-5 max-w-6xl">
+        {showingDemo && (
+          <div className="rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-900/40 px-4 py-2.5 text-xs text-amber-800 dark:text-amber-300 flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
+            Demo-läge — visar exempelfakturor (utkast, skickad, betald, förfallen). Knapparna nedan är inaktiva i demoläget.
+          </div>
+        )}
         <div className="flex flex-wrap gap-3">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
