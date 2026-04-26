@@ -166,3 +166,54 @@ export const demoRouteStops = [
   { id: 'demo-rs-4', title: 'Hämta — Returgods', address: 'Sisjön Industriområde, Askim', scheduled_start: dayOffsetAt(0, 11, 0), scheduled_end: dayOffsetAt(0, 11, 30), status: 'pending', distance_km: 8 },
   { id: 'demo-rs-5', title: 'Leverans — Centrallager', address: 'Backaplan 4, Göteborg', scheduled_start: dayOffsetAt(0, 12, 30), scheduled_end: dayOffsetAt(0, 13, 0), status: 'pending', distance_km: 11 },
 ];
+
+/** Per-month demo statistics for AdminStatistics empty state */
+export const demoMonthlyStats = {
+  deliveries: 142,
+  hours: 612.5,
+  activeCustomers: 18,
+  invoiced: 487_200,
+  deliveriesPerDay: [
+    { day: 'Mån', antal: 28 },
+    { day: 'Tis', antal: 34 },
+    { day: 'Ons', antal: 31 },
+    { day: 'Tor', antal: 24 },
+    { day: 'Fre', antal: 21 },
+    { day: 'Lör', antal: 4 },
+    { day: 'Sön', antal: 0 },
+  ],
+  hoursPerDriver: [
+    { name: 'Johan', timmar: 168.0, deliveries: 42 },
+    { name: 'Sara', timmar: 152.5, deliveries: 38 },
+    { name: 'Maria', timmar: 144.0, deliveries: 36 },
+    { name: 'Ali', timmar: 148.0, deliveries: 26 },
+  ],
+  deliveriesPerCustomer: [
+    { name: 'Nilsson Åkeri AB', value: 48 },
+    { name: 'Skåne Logistik AB', value: 36 },
+    { name: 'Nordic Freight AB', value: 32 },
+    { name: 'AB Transport Sverige', value: 26 },
+  ],
+};
+
+/** Per-month environmental demo data for AdminEnvironment */
+export const demoEnvironmentMonthly = {
+  totalKm: 14_280,
+  co2Kg: 1_713.6,
+  fuelLiters: 1_142.4,
+  trend: [
+    { month: 'Maj', km: 11200, co2: 1344 },
+    { month: 'Jun', km: 12100, co2: 1452 },
+    { month: 'Jul', km: 9800, co2: 1176 },
+    { month: 'Aug', km: 13400, co2: 1608 },
+    { month: 'Sep', km: 13900, co2: 1668 },
+    { month: 'Okt', km: 14280, co2: 1713 },
+  ],
+};
+
+/** Sample notifications shown in empty state */
+export const demoNotifications = [
+  { id: 'demo-n-1', title: 'Möte imorgon kl. 08:00', message: 'Vi går igenom veckans schema. Alla chaufförer förväntas delta i depån.', type: 'info', target_role: 'driver', created_at: hoursAgo(2) },
+  { id: 'demo-n-2', title: 'Ny rutin för fraktsedlar', message: 'Från och med nästa vecka ska alla fraktsedlar fotograferas direkt vid avlämning.', type: 'warning', target_role: 'driver', created_at: hoursAgo(8) },
+  { id: 'demo-n-3', title: 'Storhelger — ändrade tider', message: 'Påminnelse om reducerade öppettider under kommande röda dagar.', type: 'info', target_role: null, created_at: hoursAgo(26) },
+];
