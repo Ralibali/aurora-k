@@ -23,13 +23,17 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
 import { StaggeredTableBody, StaggeredTableRow, StaggeredList, StaggeredItem } from '@/components/StaggeredList';
+import { useDemoMode } from '@/hooks/useDemoMode';
+import { demoAssignments } from '@/lib/demo-data';
+import { EmptyState } from '@/components/EmptyState';
+import { Inbox as InboxIcon } from 'lucide-react';
 
 const filterTabs = [
-  { key: 'all', label: 'Alla' },
-  { key: 'pending', label: 'Ej tilldelade' },
-  { key: 'active', label: 'Pågående' },
-  { key: 'completed', label: 'Slutförda' },
-  { key: 'delayed', label: 'Försenade' },
+  { key: 'all', label: 'Alla', dotClass: 'bg-muted-foreground/40' },
+  { key: 'pending', label: 'Ej tilldelade', dotClass: 'bg-amber-500' },
+  { key: 'active', label: 'Pågående', dotClass: 'bg-emerald-500' },
+  { key: 'completed', label: 'Slutförda', dotClass: 'bg-slate-400' },
+  { key: 'delayed', label: 'Försenade', dotClass: 'bg-rose-500' },
 ] as const;
 
 export default function AdminAssignments() {
@@ -44,11 +48,26 @@ export default function AdminAssignments() {
   const { data: drivers } = useDrivers();
   const bulkAssign = useBulkAssignDriver();
   const updateAssignment = useUpdateAssignment();
+  const { enabled: demoEnabled } = useDemoMode();
+
+  // When demo mode is enabled and there's no real data, overlay demo assignments
+  const effectiveAssignments = useMemo(() => {
+    const real = assignments ?? [];
+    if (demoEnabled && real.length === 0) {
+      return demoAssignments.map((a: any) => ({
+        ...a,
+        assigned_driver_id: a.driver?.full_name ?? null,
+        scheduled_end: null,
+        instructions: null,
+      }));
+    }
+    return real;
+  }, [assignments, demoEnabled]);
 
   const today = format(new Date(), "EEEE d MMMM yyyy", { locale: sv });
 
   const filtered = useMemo(() =>
-    (assignments ?? []).filter(a => {
+    effectiveAssignments.filter((a: any) => {
       if (statusFilter !== 'all' && a.status !== statusFilter) return false;
       if (driverFilter !== 'all' && a.assigned_driver_id !== driverFilter) return false;
       if (search) {
@@ -56,9 +75,19 @@ export default function AdminAssignments() {
         if (!a.title.toLowerCase().includes(q) && !a.customer?.name?.toLowerCase().includes(q)) return false;
       }
       return true;
-    }).sort((a, b) => b.scheduled_start.localeCompare(a.scheduled_start)),
-    [assignments, statusFilter, driverFilter, search]
+    }).sort((a: any, b: any) => b.scheduled_start.localeCompare(a.scheduled_start)),
+    [effectiveAssignments, statusFilter, driverFilter, search]
   );
+
+  // Counts per tab for badges
+  const counts = useMemo(() => {
+    const base: Record<string, number> = { all: 0, pending: 0, active: 0, completed: 0, delayed: 0 };
+    for (const a of effectiveAssignments as any[]) {
+      base.all += 1;
+      if (base[a.status] !== undefined) base[a.status] += 1;
+    }
+    return base;
+  }, [effectiveAssignments]);
 
   const toggleSelect = (id: string) =>
     setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
@@ -100,27 +129,35 @@ export default function AdminAssignments() {
             </Select>
             <Button asChild>
               <Link to="/admin/assignments/new">
-                <Plus className="h-4 w-4 mr-1" /> Nytt uppdrag
+                <Plus className="h-4 w-4 mr-1" /> Skapa uppdrag
               </Link>
             </Button>
           </div>
         </div>
 
-        {/* Filter tabs */}
-        <div className="flex gap-1 overflow-x-auto pb-1 -mb-1">
-          {filterTabs.map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setStatusFilter(tab.key)}
-              className={`px-4 py-2 text-sm whitespace-nowrap rounded-t-md transition-colors ${
-                statusFilter === tab.key
-                  ? 'bg-blue-50 text-blue-700 font-medium border-b-2 border-blue-600'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+        {/* Filter tabs (pill style) */}
+        <div className="flex gap-1.5 overflow-x-auto pb-1 -mb-1 border-b border-border">
+          {filterTabs.map(tab => {
+            const isActive = statusFilter === tab.key;
+            const count = counts[tab.key] ?? 0;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => setStatusFilter(tab.key)}
+                className={`group inline-flex items-center gap-2 px-3.5 py-2 text-sm whitespace-nowrap rounded-md transition-all ${
+                  isActive
+                    ? 'bg-primary/10 text-primary font-semibold shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+                }`}
+              >
+                <span className={`inline-block h-1.5 w-1.5 rounded-full ${tab.dotClass}`} />
+                {tab.label}
+                <span className={`ml-0.5 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-[11px] rounded-full ${
+                  isActive ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+                }`}>{count}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Bulk selection bar */}
@@ -196,14 +233,25 @@ export default function AdminAssignments() {
             </div>
           </>
         ) : filtered.length === 0 ? (
-          <div className="bg-card rounded-lg border border-dashed border-border p-16 text-center shadow-card">
-            <Inbox className="h-12 w-12 text-slate-200 mx-auto mb-3" />
-            <p className="text-sm font-medium text-muted-foreground">Inga uppdrag hittades</p>
-            <p className="text-xs text-muted-foreground/60 mt-1">Prova att ändra filter eller skapa ett nytt uppdrag</p>
-            <Button size="sm" className="mt-4" asChild>
-              <Link to="/admin/assignments/new"><Plus className="h-3.5 w-3.5 mr-1" /> Skapa uppdrag</Link>
-            </Button>
-          </div>
+          (effectiveAssignments.length === 0 ? (
+            <EmptyState
+              icon={InboxIcon}
+              title="Skapa ditt första uppdrag"
+              description="Samla körningar, förare, tider och kundinformation på ett ställe. Ett uppdrag tar under 30 sekunder att skapa."
+              hint="Tips: börja med ett vanligt uppdrag och återanvänd det senare som mall."
+              action={{ label: 'Skapa uppdrag', to: '/admin/assignments/new', icon: Plus }}
+              secondaryAction={{ label: 'Lägg till kund först', to: '/admin/customers/new' }}
+            />
+          ) : (
+            <div className="bg-card rounded-lg border border-dashed border-border p-16 text-center shadow-card">
+              <Inbox className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
+              <p className="text-sm font-medium text-muted-foreground">Inga uppdrag matchar filtren</p>
+              <p className="text-xs text-muted-foreground/60 mt-1">Prova att ändra filter eller välj "Alla"</p>
+              <Button size="sm" variant="outline" className="mt-4" onClick={() => { setStatusFilter('all'); setDriverFilter('all'); setSearch(''); }}>
+                Rensa filter
+              </Button>
+            </div>
+          ))
         ) : (
           <>
             {/* Desktop table view */}
