@@ -8,47 +8,51 @@ interface PageMeta {
   noindex?: boolean;
 }
 
+function ensureMeta(selector: string, attr: 'name' | 'property', key: string): HTMLMetaElement {
+  let el = document.head.querySelector<HTMLMetaElement>(selector);
+  if (!el) {
+    el = document.createElement('meta');
+    el.setAttribute(attr, key);
+    document.head.appendChild(el);
+  }
+  return el;
+}
+
+function ensureCanonical(): HTMLLinkElement {
+  let link = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+  if (!link) {
+    link = document.createElement('link');
+    link.rel = 'canonical';
+    document.head.appendChild(link);
+  }
+  return link;
+}
+
 export function usePageMeta({ title, description, canonical, ogImage, noindex = false }: PageMeta) {
   useEffect(() => {
     document.title = title;
 
-    const desc = document.querySelector<HTMLMetaElement>('meta[name="description"]');
-    if (desc) desc.setAttribute('content', description);
+    ensureMeta('meta[name="description"]', 'name', 'description').setAttribute('content', description);
+    ensureCanonical().href = canonical;
 
-    let link = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
-    if (!link) { link = document.createElement('link'); link.rel = 'canonical'; document.head.appendChild(link); }
-    link.href = canonical;
+    ensureMeta('meta[property="og:title"]', 'property', 'og:title').setAttribute('content', title);
+    ensureMeta('meta[property="og:description"]', 'property', 'og:description').setAttribute('content', description);
+    ensureMeta('meta[property="og:url"]', 'property', 'og:url').setAttribute('content', canonical);
 
-    const ogTitle = document.querySelector<HTMLMetaElement>('meta[property="og:title"]');
-    if (ogTitle) ogTitle.setAttribute('content', title);
-    const ogDesc = document.querySelector<HTMLMetaElement>('meta[property="og:description"]');
-    if (ogDesc) ogDesc.setAttribute('content', description);
-    const ogUrl = document.querySelector<HTMLMetaElement>('meta[property="og:url"]');
-    if (ogUrl) ogUrl.setAttribute('content', canonical);
-
-    const twTitle = document.querySelector<HTMLMetaElement>('meta[name="twitter:title"]');
-    if (twTitle) twTitle.setAttribute('content', title);
-    const twDesc = document.querySelector<HTMLMetaElement>('meta[name="twitter:description"]');
-    if (twDesc) twDesc.setAttribute('content', description);
+    ensureMeta('meta[name="twitter:title"]', 'name', 'twitter:title').setAttribute('content', title);
+    ensureMeta('meta[name="twitter:description"]', 'name', 'twitter:description').setAttribute('content', description);
 
     if (ogImage) {
-      const ogImg = document.querySelector<HTMLMetaElement>('meta[property="og:image"]');
-      if (ogImg) ogImg.setAttribute('content', ogImage);
+      ensureMeta('meta[property="og:image"]', 'property', 'og:image').setAttribute('content', ogImage);
+      ensureMeta('meta[name="twitter:image"]', 'name', 'twitter:image').setAttribute('content', ogImage);
     }
 
-    let robots = document.querySelector<HTMLMetaElement>('meta[name="robots"]');
-    if (noindex) {
-      if (!robots) { robots = document.createElement('meta'); robots.name = 'robots'; document.head.appendChild(robots); }
-      robots.setAttribute('content', 'noindex, nofollow');
-    } else {
-      if (robots) robots.remove();
-    }
+    const robots = ensureMeta('meta[name="robots"]', 'name', 'robots');
+    robots.setAttribute(
+      'content',
+      noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large'
+    );
 
-    return () => {
-      const el = document.querySelector('link[rel="canonical"]');
-      if (el) el.remove();
-      const r = document.querySelector('meta[name="robots"]');
-      if (r) r.remove();
-    };
+    // No cleanup: we always keep canonical + robots present and overwrite on next route.
   }, [title, description, canonical, ogImage, noindex]);
 }
