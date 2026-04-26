@@ -18,6 +18,7 @@ import {
 import { useDrivers, useDriverCompensations, useUpsertDriverCompensation } from '@/hooks/useData';
 import { Plus, Moon, Briefcase, Trash2, Wallet, Save, Users } from 'lucide-react';
 import { toast } from 'sonner';
+import { UsageInfoCard } from '@/components/admin/UsageInfoCard';
 
 const COMP_LABELS: Record<string, string> = {
   hourly: 'Timlön',
@@ -88,6 +89,19 @@ export default function AdminCompensation() {
   return (
     <AdminLayout title="Ersättningar" description="Hantera grundlön, OB-tillägg och traktamenten">
       <div className="max-w-4xl space-y-6">
+        <UsageInfoCard
+          icon={Wallet}
+          title="Dessa regler används när tidrapporter räknas samman"
+          description="OB-tillägg, traktamenten och grundlön appliceras automatiskt på chaufförernas tider — så löneunderlaget blir rätt utan manuell beräkning."
+          usedFor={[
+            'Beräkning av OB i tidrapporter',
+            'Automatiskt traktamente per dag',
+            'Underlag till lönesystem',
+            'Export till bokföring',
+          ]}
+          nextStep={{ label: 'Visa rapporterade timmar', href: '/admin/reports' }}
+        />
+
         <Tabs defaultValue="base">
           <TabsList className="mb-4">
             <TabsTrigger value="base" className="gap-1.5"><Wallet className="h-3.5 w-3.5" /> Grundlön</TabsTrigger>
