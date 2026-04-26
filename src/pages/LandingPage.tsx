@@ -122,13 +122,13 @@ export default function LandingPage() {
             <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
               <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1.5 text-xs font-medium text-primary">
                 <Sparkles className="h-3.5 w-3.5" />
-                Byggd för svenska transport- och bemanningsföretag
+                Byggt i Sverige för åkerier, bud & bemanning
               </div>
               <h1 className="mt-6 text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-foreground leading-[1.05]">
-                Slipp Excel. Få <span className="text-primary">full kontroll</span> på dina uppdrag.
+                Slipp Excel och WhatsApp i <span className="text-primary">transportplaneringen</span>.
               </h1>
               <p className="mt-6 text-lg text-muted-foreground leading-relaxed max-w-xl">
-                Aurora Transport samlar jobb, förare, tider och rapportering i ett enkelt system — klart att använda på 5 minuter.
+                Aurora Transport samlar uppdrag, förare, tidrapporter och fakturering i ett enkelt system för svenska transportföretag. Kom igång samma dag.
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-3">
                 <Button
@@ -136,7 +136,7 @@ export default function LandingPage() {
                   onClick={() => setLeadModalOpen(true)}
                   className="bg-primary hover:bg-primary-hover text-primary-foreground shadow-lg shadow-primary/20 h-12 px-6 text-base"
                 >
-                  Kontakta oss — 449 kr/mån
+                  Boka 15 min demo
                   <ArrowRight className="ml-1 h-4 w-4" />
                 </Button>
                 <Button
@@ -146,15 +146,15 @@ export default function LandingPage() {
                   disabled={demoLoading}
                   className="h-12 px-6 text-base"
                 >
-                  {demoLoading ? 'Loggar in...' : 'Testa live-demo'}
+                  {demoLoading ? 'Loggar in...' : 'Se demo med exempeldata'}
                 </Button>
               </div>
               <ul className="mt-8 grid grid-cols-2 gap-x-6 gap-y-2.5 text-sm text-muted-foreground max-w-lg">
                 {[
+                  '449 kr/mån — fast pris',
                   'Ingen bindningstid',
-                  'Obegränsat antal förare',
                   'Support på svenska',
-                  'Driftklart på 5 minuter',
+                  'Kom igång samma dag',
                 ].map((t) => (
                   <li key={t} className="flex items-center gap-2">
                     <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
