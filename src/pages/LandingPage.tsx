@@ -690,7 +690,7 @@ export default function LandingPage() {
         </div>
       </footer>
 
-      <LeadFormModal open={leadModalOpen} onOpenChange={setLeadModalOpen} source="landing" />
+      <LeadFormModal open={leadModalOpen} onOpenChange={setLeadModalOpen} />
     </div>
   );
 }
