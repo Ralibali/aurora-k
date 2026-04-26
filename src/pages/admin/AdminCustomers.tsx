@@ -11,14 +11,23 @@ import { Plus, Search } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { StaggeredTableBody, StaggeredTableRow } from '@/components/StaggeredList';
+import { useDemoMode } from '@/hooks/useDemoMode';
+import { demoCustomersFull } from '@/lib/demo-data';
 
 export default function AdminCustomers() {
   const [search, setSearch] = useState('');
   const [pricingFilter, setPricingFilter] = useState<string>('all');
   const navigate = useNavigate();
   const { data: customers, isLoading } = useCustomers();
+  const { enabled: demoEnabled } = useDemoMode();
 
-  const filtered = (customers ?? []).filter(c => {
+  // Overlay demo customers when demo mode is on and the account has no real ones
+  const effectiveCustomers = (demoEnabled && (customers?.length ?? 0) === 0)
+    ? (demoCustomersFull as any)
+    : (customers ?? []);
+  const showingDemo = demoEnabled && (customers?.length ?? 0) === 0;
+
+  const filtered = effectiveCustomers.filter((c: any) => {
     if (pricingFilter !== 'all' && c.pricing_type !== pricingFilter) return false;
     if (search) {
       const q = search.toLowerCase();
@@ -33,6 +42,12 @@ export default function AdminCustomers() {
   return (
     <AdminLayout title="Kundregister" description="Hantera kunder och prissättning">
       <div className="space-y-5 max-w-6xl">
+        {showingDemo && (
+          <div className="rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-900/40 px-4 py-2.5 text-xs text-amber-800 dark:text-amber-300 flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
+            Demo-läge — visar exempelkunder. Klicka <strong>Ny kund</strong> för att lägga upp en riktig.
+          </div>
+        )}
         <div className="flex flex-wrap gap-3">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -78,8 +93,12 @@ export default function AdminCustomers() {
                 ))}
                 {!isLoading && filtered.length > 0 && (
                   <StaggeredTableBody>
-                    {filtered.map(c => (
-                      <StaggeredTableRow key={c.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/admin/customers/${c.id}`)}>
+                    {filtered.map((c: any) => (
+                      <StaggeredTableRow
+                        key={c.id}
+                        className="cursor-pointer hover:bg-muted/50"
+                        onClick={() => !showingDemo && navigate(`/admin/customers/${c.id}`)}
+                      >
                         <TableCell className="font-medium">{c.name}</TableCell>
                         <TableCell className="hidden md:table-cell text-muted-foreground font-mono">{c.org_number || '–'}</TableCell>
                         <TableCell className="hidden md:table-cell">{c.contact_person || '–'}</TableCell>
