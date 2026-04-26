@@ -1,8 +1,9 @@
-import { LayoutDashboard, Briefcase, Map, Users, Menu, Plus, X, ChevronRight, LogOut } from 'lucide-react';
+import { LayoutDashboard, Briefcase, Map, Users, Menu, Plus, X, ChevronRight, LogOut, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
+import { useDemoMode } from '@/hooks/useDemoMode';
 
 const tabs = [
   { label: 'Hem', icon: LayoutDashboard, to: '/admin', exact: true },
@@ -26,6 +27,7 @@ export function MobileTabBar() {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const { signOut } = useAuth();
+  const { enabled: demoEnabled, toggle: toggleDemo } = useDemoMode();
 
   const isTabActive = (tab: typeof tabs[number]) => {
     if (tab.exact) return location.pathname === tab.to;
@@ -125,6 +127,18 @@ export function MobileTabBar() {
                 ))}
               </div>
               <div className="border-t border-border px-5 py-3">
+                <button
+                  onClick={() => { toggleDemo(); setMenuOpen(false); }}
+                  className="flex items-center justify-between w-full py-3 px-2 text-sm text-foreground active:bg-muted rounded-lg transition-colors"
+                >
+                  <span className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    {demoEnabled ? 'Stäng av exempeldata' : 'Visa exempeldata'}
+                  </span>
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${demoEnabled ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
+                    {demoEnabled ? 'PÅ' : 'AV'}
+                  </span>
+                </button>
                 <button
                   onClick={handleLogout}
                   className="flex items-center gap-3 w-full py-3 text-sm text-destructive active:bg-muted rounded-lg transition-colors"
