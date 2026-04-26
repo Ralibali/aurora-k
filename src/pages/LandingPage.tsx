@@ -41,8 +41,8 @@ export default function LandingPage() {
     { name: 'Hem', url: 'https://auroratransport.se/' },
   ], []));
   usePageMeta({
-    title: 'Transportledningssystem för åkerier & budföretag | Aurora Transport',
-    description: 'Aurora Transport samlar uppdrag, förare, tidrapportering och fakturaunderlag i ett enkelt system för svenska transportföretag. Fast pris från 449 kr/mån.',
+    title: 'Slipp Excel & WhatsApp i transportplaneringen | Aurora Transport',
+    description: 'Aurora Transport samlar uppdrag, förare, tidrapporter och fakturering i ett enkelt svenskt system. 449 kr/mån. Ingen bindningstid. Boka 15 min demo.',
     canonical: 'https://auroratransport.se/',
     ogImage: 'https://auroratransport.se/og-image.png',
   });
