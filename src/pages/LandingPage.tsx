@@ -6,9 +6,9 @@ import { useBreadcrumbJsonLd } from '@/lib/breadcrumb-jsonld';
 import { usePageMeta } from '@/lib/use-page-meta';
 import { Button } from '@/components/ui/button';
 import {
-  Truck, Clock, Users, MapPin, Smartphone, Zap, FileText,
-  MessageSquare, FileSpreadsheet, Phone, Check, X, ChevronDown,
-  Menu, ArrowRight, Play, Shield, BarChart3, CalendarDays,
+  Truck, Clock, Users, MapPin, Zap, FileText,
+  MessageSquare, FileSpreadsheet, Phone, Check,
+  Play, Shield, BarChart3, CalendarDays,
   Route, Bell, Camera, PenTool, Package, Globe, Headphones,
   RefreshCw, FileDown, Settings, TrendingUp, Layers, Wallet,
   Eye, Moon, Coins,
@@ -42,8 +42,8 @@ export default function LandingPage() {
     { name: 'Hem', url: 'https://auroratransport.se/' },
   ], []));
   usePageMeta({
-    title: 'Aurora Transport – Enklaste dispatch-appen för transportföretag',
-    description: 'Hantera uppdrag, personal och tidrapporter enkelt. 449 kr/mån fast pris. Kom igång på 5 minuter.',
+    title: 'Transportledningssystem för åkerier & budföretag | Aurora Transport',
+    description: 'Aurora Transport samlar uppdrag, förare, tidrapportering och fakturaunderlag i ett enkelt system för svenska transportföretag. Fast pris från 449 kr/mån.',
     canonical: 'https://auroratransport.se/',
     ogImage: 'https://auroratransport.se/og-image.png',
   });
@@ -151,11 +151,11 @@ export default function LandingPage() {
       <ProblemSection />
       <HowItWorks />
       <FeaturesSection />
-      <PlatformShowcase onContact={openLead} />
-      <ComparisonTable />
-      <TestimonialsSection />
       <PricingSection onContact={openLead} />
       <FaqSection />
+      <ComparisonTable />
+      <TestimonialsSection />
+      <PlatformShowcase onContact={openLead} />
       <SeoContent />
       <InternalLinks />
       <FinalCta onContact={openLead} />
@@ -263,15 +263,15 @@ function HeroSection({ onDemo, demoLoading, onContact }: { onDemo: () => void; d
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.5 }}
               className="text-4xl sm:text-5xl font-bold text-foreground leading-tight mb-6"
             >
-              Sluta hantera uppdrag i{' '}
-              <span className="text-primary">Excel och WhatsApp.</span>
+              Full kontroll på uppdrag, förare och tidrapporter —
+              <span className="text-primary"> utan Excel-kaos.</span>
             </motion.h1>
 
             <motion.p
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }}
               className="text-xl text-slate-500 leading-relaxed mb-8 max-w-xl"
             >
-              Aurora Transport ger ditt företag ett komplett system för jobbdispatch, personalhantering och tidrapportering — klart på 5 minuter.
+              Aurora Transport är ett enkelt transportledningssystem för åkerier, budföretag och bemanningsteam som vill planera snabbare, rapportera enklare och fakturera med bättre underlag.
             </motion.p>
 
             <motion.div
@@ -279,7 +279,7 @@ function HeroSection({ onDemo, demoLoading, onContact }: { onDemo: () => void; d
               className="flex flex-col sm:flex-row gap-3 mb-2"
             >
               <Button size="lg" className="rounded-xl px-8 py-6 text-base font-semibold" onClick={onContact}>
-                Kontakta oss — 449 kr/mån
+                Boka genomgång
               </Button>
               <Button
                 variant="outline"
@@ -291,7 +291,7 @@ function HeroSection({ onDemo, demoLoading, onContact }: { onDemo: () => void; d
                 {demoLoading ? (
                   <span className="flex items-center gap-2"><span className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" /> Laddar demo...</span>
                 ) : (
-                  <><Play className="h-4 w-4" /> Testa live-demo</>
+                  <><Play className="h-4 w-4" /> Testa demo</>
                 )}
               </Button>
             </motion.div>
@@ -685,7 +685,7 @@ function ComparisonTable() {
                 <th className="text-left px-5 py-3.5 text-muted-foreground font-medium bg-slate-50">Funktion</th>
                 <th className="px-5 py-3.5 text-center font-semibold text-primary-foreground bg-primary">Aurora Transport</th>
                 <th className="px-5 py-3.5 text-center text-muted-foreground font-medium bg-slate-50">Excel/WhatsApp</th>
-                <th className="px-5 py-3.5 text-center text-muted-foreground font-medium bg-slate-50">Coredination</th>
+                <th className="px-5 py-3.5 text-center text-muted-foreground font-medium bg-slate-50">Traditionella system</th>
               </tr>
             </thead>
             <tbody>
@@ -821,10 +821,10 @@ function PricingSection({ onContact }: { onContact: () => void }) {
 
 /* ═══════════════════════ TESTIMONIALS ═══════════════════════ */
 const testimonials = [
-  { name: 'Marcus L.', role: 'Åkeriägare', text: 'Vi bytte från papper och Excel till Aurora på en eftermiddag. Nu har vi koll på alla uppdrag i realtid.' },
-  { name: 'Anna K.', role: 'Transportledare', text: 'Äntligen ett system som inte kräver en veckas utbildning. Förarna fattade direkt.' },
-  { name: 'Johan S.', role: 'VD', text: 'Priset var det som avgjorde — 449 kr oavsett hur många förare vi har. Otroligt bra deal.' },
-  { name: 'Sara M.', role: 'Ekonomiansvarig', text: 'Tidrapporterna exporteras rakt in i Fortnox. Sparar mig timmar varje månad.' },
+  { name: 'Transportledare', role: 'Åkeri', text: 'När uppdrag, förare och tider ligger på samma plats minskar behovet av samtal, dubbelkoll och sena kvällar med Excel.' },
+  { name: 'Förare', role: 'Distribution', text: 'I appen ser jag dagens uppdrag, kör, kvitterar med signatur och stämplar tid — utan att behöva ringa kontoret.' },
+  { name: 'Ekonomi', role: 'Bemanningsföretag', text: 'Tidrapporter och fakturaunderlag samlas automatiskt per kund och förare, vilket gör månadsavstämningen betydligt snabbare.' },
+  { name: 'Ägare', role: 'Mindre transportbolag', text: 'Fast månadspris oavsett antal förare gör kostnaden förutsägbar — vi vågar växa utan att licenskostnaden skenar.' },
 ];
 
 function TestimonialsSection() {
@@ -835,7 +835,7 @@ function TestimonialsSection() {
           initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}
           className="text-2xl sm:text-3xl font-bold text-center mb-12 text-foreground"
         >
-          Vad våra användare säger
+          Byggt för vardagen hos transportledare
         </motion.h2>
 
         {/* Featured quote */}
@@ -844,15 +844,15 @@ function TestimonialsSection() {
           className="bg-primary text-primary-foreground rounded-2xl p-8 mb-6"
         >
           <p className="text-lg leading-relaxed mb-4 font-medium">
-            "Vi hanterade allt i WhatsApp-grupper innan. Nu har vi allt samlat — uppdrag, tidrapporter, kvitton. Förarna fattade systemet samma dag."
+            "Idén är enkel: ett system där dispatch, tidrapporter och fakturaunderlag hänger ihop — så att kontoret slipper kalkylark och förarna slipper SMS-tråden."
           </p>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white font-bold text-sm">
-              CJ
+              AT
             </div>
             <div>
-              <p className="font-semibold text-sm">CJ Bemanning</p>
-              <p className="text-xs text-primary-foreground/70">Bemanningsföretag, Sverige</p>
+              <p className="font-semibold text-sm">Aurora Transport</p>
+              <p className="text-xs text-primary-foreground/70">Så här tänker vi om vardagen</p>
             </div>
           </div>
         </motion.div>
@@ -864,7 +864,7 @@ function TestimonialsSection() {
               initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i + 1}
               className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm"
             >
-              <p className="text-muted-foreground mb-4 leading-relaxed italic">"{t.text}"</p>
+              <p className="text-muted-foreground mb-4 leading-relaxed">{t.text}</p>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
                   {t.name.charAt(0)}
@@ -885,12 +885,12 @@ function TestimonialsSection() {
 /* ═══════════════════════ FAQ ═══════════════════════ */
 const faqs = [
   { q: 'Vad är Aurora Transport?', a: 'Ett transportledningssystem för svenska transport- och bemanningsföretag. Dispatch, tidrapportering och personalhantering i en app.' },
-  { q: 'Hur lång tid tar det att komma igång?', a: 'Under 5 minuter. Registrera, betala, bjud in förare, kör.' },
+  { q: 'Hur lång tid tar det att komma igång?', a: 'Grundkontot går snabbt att skapa. Vill du slippa konfigurera själv hjälper vi dig med onboarding, import av personal och genomgång med teamet.' },
   { q: 'Behöver mina förare ladda ner en app?', a: 'Nej. PWA — fungerar direkt i mobilens webbläsare. Lägg till på hemskärmen som en vanlig app.' },
   { q: 'Kan jag avsluta när jag vill?', a: 'Ja. Ingen bindningstid. Månadsvis betalning.' },
   { q: 'Fungerar det med Fortnox?', a: 'Ja. Du kan exportera tidrapporter med ett klick, eller välja "Fakturaunderlag" för att generera specifikationer som du enkelt för över till Fortnox.' },
   { q: 'Hanterar ni OB-tillägg och traktamente?', a: 'Ja. Du konfigurerar OB-scheman (kväll, natt, helg) och traktamentsnivåer under Ekonomi. Beloppen beräknas automatiskt baserat på arbetade timmar.' },
-  { q: 'Vad skiljer er från Coredination?', a: 'Enklare, billigare och snabbare. 449 kr/mån fast pris oavsett antal användare. Kom igång på 5 minuter utan att kontakta oss.' },
+  { q: 'Hur skiljer ni er från traditionella transportledningssystem?', a: 'Enklare, billigare och snabbare att komma igång med. Fast månadspris oavsett antal användare — ingen säljdemo eller per-användare-licenser.' },
 ];
 
 function FaqSection() {

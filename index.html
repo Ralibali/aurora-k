@@ -56,28 +56,7 @@
     <link rel="icon" type="image/png" href="/icon-192x192.png" />
     <link rel="manifest" href="/manifest.json" />
 
-    <!-- JSON-LD: SoftwareApplication -->
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Aurora Transport",
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": "Web, iOS",
-        "url": "https://auroratransport.se/",
-        "description": "Aurora Transport hjälper transportföretag hantera uppdrag, förare, personal och tidrapporter.",
-        "offers": {
-          "@type": "Offer",
-          "price": "449",
-          "priceCurrency": "SEK",
-          "availability": "https://schema.org/InStock"
-        },
-        "publisher": {
-          "@type": "Organization",
-          "name": "Aurora Media AB"
-        }
-      }
-    </script>
+    <!-- JSON-LD injiceras per sida via React (use-page-meta / sidkomponenter) -->
 
     <!-- Google Analytics 4 — replace G-XXXXXXXXXX with your Measurement ID -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-YFK8HNQPSW"></script>
