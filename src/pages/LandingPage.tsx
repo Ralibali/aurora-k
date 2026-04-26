@@ -821,10 +821,10 @@ function PricingSection({ onContact }: { onContact: () => void }) {
 
 /* ═══════════════════════ TESTIMONIALS ═══════════════════════ */
 const testimonials = [
-  { name: 'Marcus L.', role: 'Åkeriägare', text: 'Vi bytte från papper och Excel till Aurora på en eftermiddag. Nu har vi koll på alla uppdrag i realtid.' },
-  { name: 'Anna K.', role: 'Transportledare', text: 'Äntligen ett system som inte kräver en veckas utbildning. Förarna fattade direkt.' },
-  { name: 'Johan S.', role: 'VD', text: 'Priset var det som avgjorde — 449 kr oavsett hur många förare vi har. Otroligt bra deal.' },
-  { name: 'Sara M.', role: 'Ekonomiansvarig', text: 'Tidrapporterna exporteras rakt in i Fortnox. Sparar mig timmar varje månad.' },
+  { name: 'Transportledare', role: 'Åkeri', text: 'När uppdrag, förare och tider ligger på samma plats minskar behovet av samtal, dubbelkoll och sena kvällar med Excel.' },
+  { name: 'Förare', role: 'Distribution', text: 'I appen ser jag dagens uppdrag, kör, kvitterar med signatur och stämplar tid — utan att behöva ringa kontoret.' },
+  { name: 'Ekonomi', role: 'Bemanningsföretag', text: 'Tidrapporter och fakturaunderlag samlas automatiskt per kund och förare, vilket gör månadsavstämningen betydligt snabbare.' },
+  { name: 'Ägare', role: 'Mindre transportbolag', text: 'Fast månadspris oavsett antal förare gör kostnaden förutsägbar — vi vågar växa utan att licenskostnaden skenar.' },
 ];
 
 function TestimonialsSection() {
@@ -835,7 +835,7 @@ function TestimonialsSection() {
           initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}
           className="text-2xl sm:text-3xl font-bold text-center mb-12 text-foreground"
         >
-          Vad våra användare säger
+          Byggt för vardagen hos transportledare
         </motion.h2>
 
         {/* Featured quote */}
@@ -844,15 +844,15 @@ function TestimonialsSection() {
           className="bg-primary text-primary-foreground rounded-2xl p-8 mb-6"
         >
           <p className="text-lg leading-relaxed mb-4 font-medium">
-            "Vi hanterade allt i WhatsApp-grupper innan. Nu har vi allt samlat — uppdrag, tidrapporter, kvitton. Förarna fattade systemet samma dag."
+            "Idén är enkel: ett system där dispatch, tidrapporter och fakturaunderlag hänger ihop — så att kontoret slipper kalkylark och förarna slipper SMS-tråden."
           </p>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white font-bold text-sm">
-              CJ
+              AT
             </div>
             <div>
-              <p className="font-semibold text-sm">CJ Bemanning</p>
-              <p className="text-xs text-primary-foreground/70">Bemanningsföretag, Sverige</p>
+              <p className="font-semibold text-sm">Aurora Transport</p>
+              <p className="text-xs text-primary-foreground/70">Så här tänker vi om vardagen</p>
             </div>
           </div>
         </motion.div>
@@ -864,7 +864,7 @@ function TestimonialsSection() {
               initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i + 1}
               className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm"
             >
-              <p className="text-muted-foreground mb-4 leading-relaxed italic">"{t.text}"</p>
+              <p className="text-muted-foreground mb-4 leading-relaxed">{t.text}</p>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
                   {t.name.charAt(0)}
