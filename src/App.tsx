@@ -1,6 +1,6 @@
 import { lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -112,6 +112,26 @@ function PageLoader() {
   );
 }
 
+function PublicSiteEnhancements() {
+  const location = useLocation();
+  const isAppRoute =
+    location.pathname.startsWith("/admin") ||
+    location.pathname.startsWith("/driver") ||
+    location.pathname.startsWith("/platform") ||
+    location.pathname.startsWith("/portal") ||
+    location.pathname.startsWith("/onboarding");
+
+  if (isAppRoute) return null;
+
+  return (
+    <>
+      <PwaInstallPrompt />
+      <CookieConsent />
+      <ExitIntentPopup />
+    </>
+  );
+}
+
 const App = () => (
   <ThemeProvider attribute="class" defaultTheme="system" enableSystem={true}>
     <QueryClientProvider client={queryClient}>
@@ -219,10 +239,8 @@ const App = () => (
             </Suspense>
           </ErrorBoundary>
           </AuthProvider>
+          <PublicSiteEnhancements />
         </BrowserRouter>
-        <PwaInstallPrompt />
-        <CookieConsent />
-        <ExitIntentPopup />
       </TooltipProvider>
     </QueryClientProvider>
   </ThemeProvider>
