@@ -18,6 +18,7 @@ import { OnboardingChecklist } from '@/components/OnboardingChecklist';
 import { useAuth } from '@/hooks/useAuth';
 import { useDemoMode } from '@/hooks/useDemoMode';
 import { demoAssignments, demoActivity, demoKpis } from '@/lib/demo-data';
+import { DemoWelcomeBanner } from '@/components/admin/DemoWelcomeBanner';
 
 function greeting() {
   const h = new Date().getHours();
@@ -215,6 +216,7 @@ export default function AdminDashboard() {
   );
 
   const fullName = user?.user_metadata?.full_name?.split(' ')[0] ?? 'där';
+  const accountIsEmpty = !demoOn && !realLoading && (realAssignments?.length ?? 0) === 0 && (drivers?.length ?? 0) === 0;
 
   return (
     <AdminLayout title="Dashboard" description="Översikt över dagens aktivitet">
@@ -230,6 +232,9 @@ export default function AdminDashboard() {
             </p>
           </div>
         </div>
+
+        {/* Demo welcome — only when account is empty and demo is off */}
+        <DemoWelcomeBanner isEmpty={accountIsEmpty} />
 
         {/* Onboarding checklist */}
         {!demoOn && <OnboardingChecklist />}
