@@ -206,37 +206,130 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* IGÅNG PÅ TRE STEG */}
+      {/* FÖRE / EFTER */}
       <section className="py-20 md:py-24">
         <div className="container mx-auto px-4">
           <div className="max-w-2xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">Igång på tre steg.</h2>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+              Från manuell planering till full kontroll
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Så här ändras vardagen när du går från Excel & WhatsApp till Aurora Transport.
+            </p>
           </div>
-          <div className="mt-16 relative">
-            {/* Progress line */}
-            <div className="hidden md:block absolute top-8 left-[16%] right-[16%] h-px bg-gradient-to-r from-primary/20 via-primary/40 to-primary/20" />
-            <div className="grid gap-10 md:grid-cols-3 relative">
+          <div className="mt-12 grid gap-6 md:grid-cols-2 max-w-5xl mx-auto">
+            {/* FÖRE */}
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: '-80px' }}
+              variants={fadeUp}
+              custom={0}
+              className="rounded-2xl border border-border bg-card p-7 shadow-sm"
+            >
+              <div className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Före Aurora
+              </div>
+              <ul className="mt-6 space-y-3.5">
+                {[
+                  'Uppdrag i WhatsApp',
+                  'Tidrapporter i Excel',
+                  'Förare rings manuellt',
+                  'Fakturering kräver dubbelarbete',
+                  'Svårt att få överblick',
+                ].map((t) => (
+                  <li key={t} className="flex items-start gap-3 text-sm text-muted-foreground">
+                    <span className="mt-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-muted shrink-0">
+                      <X className="h-3 w-3 text-muted-foreground" />
+                    </span>
+                    <span>{t}</span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+
+            {/* EFTER */}
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: '-80px' }}
+              variants={fadeUp}
+              custom={1}
+              className="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/5 via-card to-card p-7 shadow-md"
+            >
+              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary uppercase tracking-wider">
+                <Sparkles className="h-3 w-3" /> Efter Aurora
+              </div>
+              <ul className="mt-6 space-y-3.5">
+                {[
+                  'Uppdrag samlade på ett ställe',
+                  'Förare får jobbet i mobilen',
+                  'Tidrapporter samlas automatiskt',
+                  'Fakturaunderlag skapas snabbare',
+                  'Full kontroll på verksamheten',
+                ].map((t) => (
+                  <li key={t} className="flex items-start gap-3 text-sm text-foreground">
+                    <span className="mt-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary/15 shrink-0">
+                      <Check className="h-3 w-3 text-primary" />
+                    </span>
+                    <span>{t}</span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* DEMO-FLOW — 5 STEG */}
+      <section className="py-20 md:py-24 bg-card border-y border-border">
+        <div className="container mx-auto px-4">
+          <div className="max-w-2xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+              Så fungerar Aurora på 5 minuter
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Från första uppdrag till färdigt fakturaunderlag — utan extra steg.
+            </p>
+          </div>
+          <div className="mt-14 max-w-5xl mx-auto">
+            <div className="grid gap-4 md:grid-cols-5">
               {[
-                { n: '01', title: 'Skapa ditt konto', text: 'Under 2 minuter' },
-                { n: '02', title: 'Bjud in din personal', text: 'De får mail direkt' },
-                { n: '03', title: 'Börja tilldela uppdrag', text: 'Föraren ser uppdraget direkt' },
+                { n: '1', title: 'Skapa uppdrag', text: 'Lägg in kund, adress och tid på under en minut.', icon: Plus },
+                { n: '2', title: 'Tilldela förare', text: 'Välj rätt person — föraren notifieras direkt.', icon: Users },
+                { n: '3', title: 'Föraren ser jobbet', text: 'All info i mobilen. Inga fler chattmeddelanden.', icon: Phone },
+                { n: '4', title: 'Tidrapport skickas in', text: 'Start, stopp och OB beräknas automatiskt.', icon: Clock },
+                { n: '5', title: 'Fakturaunderlag skapas', text: 'Klart att skicka eller exportera till Fortnox.', icon: FileText },
               ].map((s, i) => (
                 <motion.div
                   key={s.n}
                   initial="hidden"
                   whileInView="visible"
-                  viewport={{ once: true, margin: '-80px' }}
+                  viewport={{ once: true, margin: '-60px' }}
                   variants={fadeUp}
                   custom={i}
-                  className="text-center"
+                  className="relative rounded-2xl border border-border bg-background p-5 shadow-sm"
                 >
-                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary text-xl font-bold ring-8 ring-background">
-                    {s.n}
+                  <div className="flex items-center justify-between">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      <s.icon className="h-4 w-4" />
+                    </div>
+                    <span className="font-mono text-xs text-muted-foreground">0{s.n}</span>
                   </div>
-                  <h3 className="mt-6 text-xl font-semibold text-foreground">{s.title}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">{s.text}</p>
+                  <h3 className="mt-4 text-sm font-semibold text-foreground leading-tight">{s.title}</h3>
+                  <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">{s.text}</p>
                 </motion.div>
               ))}
+            </div>
+            <div className="mt-10 text-center">
+              <Button
+                size="lg"
+                onClick={() => setLeadModalOpen(true)}
+                className="bg-primary hover:bg-primary-hover text-primary-foreground h-12 px-6"
+              >
+                Boka 15 min demo
+                <ArrowRight className="ml-1 h-4 w-4" />
+              </Button>
             </div>
           </div>
         </div>
