@@ -263,15 +263,15 @@ function HeroSection({ onDemo, demoLoading, onContact }: { onDemo: () => void; d
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.5 }}
               className="text-4xl sm:text-5xl font-bold text-foreground leading-tight mb-6"
             >
-              Sluta hantera uppdrag i{' '}
-              <span className="text-primary">Excel och WhatsApp.</span>
+              Full kontroll på uppdrag, förare och tidrapporter —
+              <span className="text-primary"> utan Excel-kaos.</span>
             </motion.h1>
 
             <motion.p
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }}
               className="text-xl text-slate-500 leading-relaxed mb-8 max-w-xl"
             >
-              Aurora Transport ger ditt företag ett komplett system för jobbdispatch, personalhantering och tidrapportering — klart på 5 minuter.
+              Aurora Transport är ett enkelt transportledningssystem för åkerier, budföretag och bemanningsteam som vill planera snabbare, rapportera enklare och fakturera med bättre underlag.
             </motion.p>
 
             <motion.div
@@ -279,7 +279,7 @@ function HeroSection({ onDemo, demoLoading, onContact }: { onDemo: () => void; d
               className="flex flex-col sm:flex-row gap-3 mb-2"
             >
               <Button size="lg" className="rounded-xl px-8 py-6 text-base font-semibold" onClick={onContact}>
-                Kontakta oss — 449 kr/mån
+                Boka genomgång
               </Button>
               <Button
                 variant="outline"
@@ -291,7 +291,7 @@ function HeroSection({ onDemo, demoLoading, onContact }: { onDemo: () => void; d
                 {demoLoading ? (
                   <span className="flex items-center gap-2"><span className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" /> Laddar demo...</span>
                 ) : (
-                  <><Play className="h-4 w-4" /> Testa live-demo</>
+                  <><Play className="h-4 w-4" /> Testa demo</>
                 )}
               </Button>
             </motion.div>
