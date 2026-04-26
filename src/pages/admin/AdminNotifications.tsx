@@ -9,9 +9,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useNotifications, useCreateNotification } from '@/hooks/useAllFeatures';
 import { useAuth } from '@/hooks/useAuth';
-import { Plus, Bell, BellRing, Info, AlertTriangle } from 'lucide-react';
+import { Plus, Bell, BellRing, Info, AlertTriangle, Megaphone } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useDemoMode } from '@/hooks/useDemoMode';
+import { demoNotifications } from '@/lib/demo-data';
 
 const typeIcons: Record<string, any> = { info: Info, warning: AlertTriangle, alert: BellRing };
 const typeLabels: Record<string, string> = { info: 'Info', warning: 'Varning', alert: 'Brådskande' };
@@ -20,6 +22,7 @@ export default function AdminNotifications() {
   const { data: notifications, isLoading } = useNotifications();
   const create = useCreateNotification();
   const { user } = useAuth();
+  const { enabled: demoEnabled } = useDemoMode();
 
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState('');
@@ -34,13 +37,25 @@ export default function AdminNotifications() {
     });
   };
 
+  const showDemo = demoEnabled && (!notifications || notifications.length === 0);
+  const visibleList = showDemo ? demoNotifications : (notifications ?? []);
+
   return (
-    <AdminLayout title="Notiser & utropsmeddelanden">
+    <AdminLayout title="Notiser & utrop" description="Skicka meddelanden till chaufförer och administratörer">
       <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <p className="text-muted-foreground">Skicka meddelanden till chaufförer och administratörer.</p>
+        <div className="rounded-xl border border-primary/10 bg-gradient-to-br from-primary/5 via-card to-card p-4 flex items-start gap-3">
+          <div className="inline-flex items-center justify-center h-9 w-9 rounded-lg bg-primary/10 border border-primary/20 shrink-0">
+            <Megaphone className="h-4 w-4 text-primary" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-semibold">Når alla samtidigt — utan WhatsApp-grupper</p>
+            <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+              Skicka rutinändringar, mötespåminnelser eller akuta varningar. Mottagaren ser meddelandet direkt i appen
+              och du behöver aldrig oroa dig för att någon missade ett gruppchattmeddelande.
+            </p>
+          </div>
           <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild><Button size="sm"><Plus className="h-4 w-4 mr-1" /> Nytt utrop</Button></DialogTrigger>
+            <DialogTrigger asChild><Button size="sm" className="shrink-0"><Plus className="h-4 w-4 mr-1" /> Nytt utrop</Button></DialogTrigger>
             <DialogContent>
               <DialogHeader><DialogTitle>Nytt utrop</DialogTitle></DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -63,16 +78,39 @@ export default function AdminNotifications() {
             </DialogContent>
           </Dialog>
         </div>
+
+        {showDemo && (
+          <div className="rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-900/40 px-4 py-2.5 text-xs text-amber-800 dark:text-amber-300 flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
+            Visar exempelutrop. Klicka <strong>Nytt utrop</strong> för att skapa ditt första riktiga meddelande.
+          </div>
+        )}
+
         <div className="space-y-3">
           {isLoading ? [1,2,3].map(i => <Skeleton key={i} className="h-20 w-full" />) :
-          !notifications?.length ? <Card><CardContent className="py-12 text-center text-muted-foreground"><Bell className="h-10 w-10 mx-auto mb-3 opacity-30" /><p>Inga notiser</p></CardContent></Card> :
-          notifications.map(n => {
+          !visibleList.length ? (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <div className="inline-flex items-center justify-center h-14 w-14 rounded-2xl bg-primary/5 border border-primary/10 mb-4">
+                  <Bell className="h-7 w-7 text-primary/70" strokeWidth={1.75} />
+                </div>
+                <p className="font-semibold">Inga utrop skickade ännu</p>
+                <p className="text-sm text-muted-foreground mt-1.5 max-w-md mx-auto">
+                  Använd utrop för att informera hela teamet om rutinändringar, möten eller akuta händelser. Mycket smidigare än WhatsApp.
+                </p>
+                <Button size="sm" className="mt-5" onClick={() => setOpen(true)}>
+                  <Plus className="h-3.5 w-3.5 mr-1.5" /> Skapa första utropet
+                </Button>
+              </CardContent>
+            </Card>
+          ) :
+          visibleList.map(n => {
             const Icon = typeIcons[n.type] || Info;
             return (
               <Card key={n.id}>
                 <CardContent className="py-4">
                   <div className="flex gap-3 items-start">
-                    <Icon className={`h-5 w-5 mt-0.5 flex-shrink-0 ${n.type === 'alert' ? 'text-destructive' : n.type === 'warning' ? 'text-yellow-500' : 'text-muted-foreground'}`} />
+                    <Icon className={`h-5 w-5 mt-0.5 flex-shrink-0 ${n.type === 'alert' ? 'text-destructive' : n.type === 'warning' ? 'text-warning' : 'text-muted-foreground'}`} />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <p className="font-medium">{n.title}</p>

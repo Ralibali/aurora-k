@@ -16,43 +16,44 @@ import {
   DriverSettingsOverride,
 } from '@/hooks/useDriverSettings';
 import { useDrivers } from '@/hooks/useData';
-import { Smartphone, PenLine, Camera, Clock, CircleDot, Users, User, RotateCcw } from 'lucide-react';
+import { Smartphone, PenLine, Camera, Clock, CircleDot, Users, User, RotateCcw, Sparkles, ShieldCheck, LayoutDashboard } from 'lucide-react';
 
 const settingsKeys = ['require_signature', 'require_photo', 'show_time_report', 'show_availability_toggle', 'show_total_hours'] as const;
 type SettingKey = typeof settingsKeys[number];
 
-const settingsConfig: { key: SettingKey; label: string; description: string; icon: typeof PenLine }[] = [
+type SettingItem = {
+  key: SettingKey;
+  label: string;
+  description: string;
+  icon: typeof PenLine;
+  recommended?: boolean;
+};
+
+const settingsGroups: { id: string; title: string; description: string; icon: typeof ShieldCheck; items: SettingItem[] }[] = [
   {
-    key: 'require_signature',
-    label: 'Kräv signatur vid slutförande',
-    description: 'Föraren måste samla in mottagarens signatur innan uppdraget kan slutföras',
-    icon: PenLine,
+    id: 'documentation',
+    title: 'Dokumentation vid uppdrag',
+    description: 'Vad chauffören måste samla in när ett uppdrag slutförs.',
+    icon: ShieldCheck,
+    items: [
+      { key: 'require_signature', label: 'Kräv signatur vid slutförande', description: 'Föraren måste samla in mottagarens signatur innan uppdraget kan slutföras.', icon: PenLine, recommended: true },
+      { key: 'require_photo', label: 'Kräv fraktsedelfoto', description: 'Föraren uppmanas att ta foto på fraktsedeln vid slutförande.', icon: Camera, recommended: true },
+    ],
   },
   {
-    key: 'require_photo',
-    label: 'Kräv fraktsedelfoto',
-    description: 'Föraren uppmanas att ta foto på fraktsedeln vid slutförande',
-    icon: Camera,
-  },
-  {
-    key: 'show_time_report',
-    label: 'Visa tidrapporter',
-    description: 'Föraren kan se sin tidrapportssida med vecko- och månadsöversikt',
-    icon: Clock,
-  },
-  {
-    key: 'show_availability_toggle',
-    label: 'Visa tillgänglighets-toggle',
-    description: 'Föraren kan markera sig som ledig eller upptagen i sin profil',
-    icon: CircleDot,
-  },
-  {
-    key: 'show_total_hours',
-    label: 'Visa totala timmar',
-    description: 'Föraren kan se sina totala timmar i tidrapporten. Avaktivera för att dölja sammanställningen.',
-    icon: Clock,
+    id: 'app',
+    title: 'Synligt i förarappen',
+    description: 'Vilka funktioner och vyer chauffören ser i sin app.',
+    icon: LayoutDashboard,
+    items: [
+      { key: 'show_time_report', label: 'Visa tidrapporter', description: 'Föraren kan se sin tidrapportssida med vecko- och månadsöversikt.', icon: Clock, recommended: true },
+      { key: 'show_availability_toggle', label: 'Visa tillgänglighets-toggle', description: 'Föraren kan markera sig som ledig eller upptagen i sin profil.', icon: CircleDot },
+      { key: 'show_total_hours', label: 'Visa totala timmar', description: 'Föraren kan se sina totala timmar i tidrapporten. Avaktivera för att dölja sammanställningen.', icon: Clock },
+    ],
   },
 ];
+
+const settingsConfig: SettingItem[] = settingsGroups.flatMap(g => g.items);
 
 export default function AdminDriverSettings() {
   const { data: settings, isLoading } = useDriverSettings();
@@ -104,43 +105,63 @@ export default function AdminDriverSettings() {
 
   return (
     <AdminLayout title="Förarinställningar" description="Anpassa förarens app">
-      <div className="space-y-6">
-        {/* Global defaults */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Smartphone className="h-5 w-5 text-muted-foreground" />
-              Globala standardinställningar
-            </CardTitle>
-            <CardDescription>
-              Dessa gäller alla förare som inte har egna inställningar.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {isLoading ? (
-              [1, 2, 3, 4].map(i => <Skeleton key={i} className="h-16 w-full rounded-lg" />)
-            ) : (
-              settingsConfig.map((item) => (
-                <div key={item.key} className="flex items-center justify-between gap-4 py-3 border-b last:border-0">
-                  <div className="flex items-start gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                      <item.icon className="h-4 w-4 text-primary" />
+      <div className="space-y-6 max-w-3xl">
+        <div className="rounded-xl border border-primary/10 bg-gradient-to-br from-primary/5 via-card to-card p-4 flex items-start gap-3">
+          <div className="inline-flex items-center justify-center h-9 w-9 rounded-lg bg-primary/10 border border-primary/20 shrink-0">
+            <Smartphone className="h-4 w-4 text-primary" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold">Anpassa förarappen för ert företag</p>
+            <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+              Globala inställningar gäller alla förare. Du kan därefter göra undantag per chaufför längst ned.
+              Inställningar märkta <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-success/10 text-success text-[10px] font-medium align-middle"><Sparkles className="h-2.5 w-2.5" />Rekommenderad</span> ger bäst kvalitet i fakturaunderlag och dokumentation.
+            </p>
+          </div>
+        </div>
+
+        {/* Global defaults — grouped */}
+        {isLoading ? (
+          <div className="space-y-3">{[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-20 w-full rounded-lg" />)}</div>
+        ) : (
+          settingsGroups.map(group => (
+            <Card key={group.id}>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <group.icon className="h-4 w-4 text-muted-foreground" />
+                  {group.title}
+                </CardTitle>
+                <CardDescription className="text-xs">{group.description}</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-1">
+                {group.items.map(item => (
+                  <div key={item.key} className="flex items-center justify-between gap-4 py-3 border-b last:border-0">
+                    <div className="flex items-start gap-3">
+                      <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                        <item.icon className="h-4 w-4 text-primary" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Label className="text-sm font-medium">{item.label}</Label>
+                          {item.recommended && (
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-success/10 text-success text-[10px] font-medium">
+                              <Sparkles className="h-2.5 w-2.5" /> Rekommenderad
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
+                      </div>
                     </div>
-                    <div>
-                      <Label className="text-sm font-medium">{item.label}</Label>
-                      <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
-                    </div>
+                    <Switch
+                      checked={settings?.[item.key] ?? true}
+                      onCheckedChange={(v) => handleGlobalToggle(item.key, v)}
+                      disabled={updateSettings.isPending}
+                    />
                   </div>
-                  <Switch
-                    checked={settings?.[item.key] ?? true}
-                    onCheckedChange={(v) => handleGlobalToggle(item.key, v)}
-                    disabled={updateSettings.isPending}
-                  />
-                </div>
-              ))
-            )}
-          </CardContent>
-        </Card>
+                ))}
+              </CardContent>
+            </Card>
+          ))
+        )}
 
         {/* Per-driver overrides */}
         <Card>

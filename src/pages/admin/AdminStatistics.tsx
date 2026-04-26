@@ -10,6 +10,8 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Skeleton } from '@/components/ui/skeleton';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { useDemoMode } from '@/hooks/useDemoMode';
+import { demoMonthlyStats } from '@/lib/demo-data';
 
 const COLORS = ['hsl(213, 52%, 25%)', 'hsl(142, 71%, 45%)', 'hsl(32, 95%, 55%)', 'hsl(0, 72%, 51%)'];
 
@@ -24,6 +26,7 @@ export default function AdminStatistics() {
   const { data: customers } = useCustomers();
   const { data: invoices } = useInvoices();
   const { data: settings } = useSettings();
+  const { enabled: demoEnabled } = useDemoMode();
 
   // Filter by selected month
   const monthAssignments = (assignments ?? []).filter(a => a.scheduled_start.startsWith(month));
@@ -61,6 +64,17 @@ export default function AdminStatistics() {
   });
   const dayNames = ['Sön', 'Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör'];
   const deliveriesPerDay = dayNames.map((name, i) => ({ day: name, antal: daysMap[i] || 0 }));
+
+  const hasRealData = completed.length > 0;
+  const useDemo = demoEnabled && !hasRealData;
+
+  const displayCompleted = useDemo ? demoMonthlyStats.deliveries : completed.length;
+  const displayHours = useDemo ? demoMonthlyStats.hours : totalHours;
+  const displayCustomers = useDemo ? demoMonthlyStats.activeCustomers : activeCustomers;
+  const displayInvoiced = useDemo ? demoMonthlyStats.invoiced : invoicedAmount;
+  const displayPerDay = useDemo ? demoMonthlyStats.deliveriesPerDay : deliveriesPerDay;
+  const displayPerDriver = useDemo ? demoMonthlyStats.hoursPerDriver : hoursPerDriver;
+  const displayPerCustomer = useDemo ? demoMonthlyStats.deliveriesPerCustomer : deliveriesPerCustomer;
 
   const handleExportPdf = () => {
     const doc = new jsPDF();
@@ -107,6 +121,15 @@ export default function AdminStatistics() {
   return (
     <AdminLayout title="Statistik" description="Analysera leveranser, körtider och intäkter">
       <div className="space-y-6 max-w-6xl">
+        {useDemo && (
+          <div className="rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-900/40 px-4 py-2.5 text-xs text-amber-800 dark:text-amber-300 flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
+            Visar exempeldata för perioden. Slå av <strong>Exempeldata</strong> i headern när du vill se din riktiga statistik.
+          </div>
+        )}
+        <p className="text-sm text-muted-foreground">
+          Mätvärden för vald månad. Diagrammen uppdateras automatiskt när nya uppdrag slutförs och när tidrapporter sparas.
+        </p>
         <div className="flex items-center gap-3">
           <input type="month" value={month} onChange={e => setMonth(e.target.value)}
             className="border rounded-md px-3 py-2 text-sm bg-card" />
@@ -120,7 +143,7 @@ export default function AdminStatistics() {
             <div className="flex items-center gap-4">
               <div className="stat-card-icon bg-primary/10 text-primary"><ClipboardList className="h-5 w-5" /></div>
               <div>
-                {loadingA ? <Skeleton className="h-8 w-12" /> : <p className="stat-card-value font-mono">{completed.length}</p>}
+                {loadingA ? <Skeleton className="h-8 w-12" /> : <p className="stat-card-value font-mono">{displayCompleted}</p>}
                 <p className="stat-card-label">Leveranser</p>
               </div>
             </div>
@@ -129,7 +152,7 @@ export default function AdminStatistics() {
             <div className="flex items-center gap-4">
               <div className="stat-card-icon bg-success/10 text-success"><Clock className="h-5 w-5" /></div>
               <div>
-                {loadingA ? <Skeleton className="h-8 w-12" /> : <p className="stat-card-value font-mono">{totalHours.toFixed(1)}</p>}
+                {loadingA ? <Skeleton className="h-8 w-12" /> : <p className="stat-card-value font-mono">{displayHours.toFixed(1)}</p>}
                 <p className="stat-card-label">Körtimmar</p>
               </div>
             </div>
@@ -138,7 +161,7 @@ export default function AdminStatistics() {
             <div className="flex items-center gap-4">
               <div className="stat-card-icon bg-warning/10 text-warning"><Building2 className="h-5 w-5" /></div>
               <div>
-                {loadingA ? <Skeleton className="h-8 w-12" /> : <p className="stat-card-value font-mono">{activeCustomers}</p>}
+                {loadingA ? <Skeleton className="h-8 w-12" /> : <p className="stat-card-value font-mono">{displayCustomers}</p>}
                 <p className="stat-card-label">Aktiva kunder</p>
               </div>
             </div>
@@ -147,7 +170,7 @@ export default function AdminStatistics() {
             <div className="flex items-center gap-4">
               <div className="stat-card-icon bg-info/10 text-info"><Receipt className="h-5 w-5" /></div>
               <div>
-                {loadingA ? <Skeleton className="h-8 w-12" /> : <p className="stat-card-value font-mono">{invoicedAmount.toFixed(0)}</p>}
+                {loadingA ? <Skeleton className="h-8 w-12" /> : <p className="stat-card-value font-mono">{displayInvoiced.toFixed(0)}</p>}
                 <p className="stat-card-label">Fakturerat (kr)</p>
               </div>
             </div>
@@ -159,7 +182,7 @@ export default function AdminStatistics() {
             <CardContent className="pt-6">
               <h3 className="text-sm font-semibold mb-4">Leveranser per dag</h3>
               <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={deliveriesPerDay}>
+                <BarChart data={displayPerDay}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(214, 20%, 90%)" />
                   <XAxis dataKey="day" tick={{ fontSize: 12 }} />
                   <YAxis tick={{ fontSize: 12 }} />
@@ -174,7 +197,7 @@ export default function AdminStatistics() {
             <CardContent className="pt-6">
               <h3 className="text-sm font-semibold mb-4">Timmar per chaufför</h3>
               <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={hoursPerDriver} layout="vertical">
+                <BarChart data={displayPerDriver} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(214, 20%, 90%)" />
                   <XAxis type="number" tick={{ fontSize: 12 }} />
                   <YAxis dataKey="name" type="category" tick={{ fontSize: 12 }} width={80} />
@@ -190,8 +213,8 @@ export default function AdminStatistics() {
               <h3 className="text-sm font-semibold mb-4">Leveranser per kund</h3>
               <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
-                  <Pie data={deliveriesPerCustomer} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
-                    {deliveriesPerCustomer.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                  <Pie data={displayPerCustomer} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
+                    {displayPerCustomer.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                   </Pie>
                   <Tooltip />
                   <Legend />
