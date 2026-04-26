@@ -710,13 +710,13 @@ export default function LandingPage() {
           <div className="mt-12 max-w-3xl mx-auto">
             <Accordion type="single" collapsible className="space-y-3">
               {[
-                { q: 'Vad är Aurora Transport?', a: 'Aurora Transport är ett digitalt system för transport- och bemanningsföretag som vill hantera uppdrag, förare och tidrapportering på ett enklare sätt.' },
-                { q: 'Hur lång tid tar det att komma igång?', a: 'De flesta kommer igång samma dag. Systemet är byggt för att vara enkelt och kräver ingen lång utbildning.' },
-                { q: 'Behöver mina förare ladda ner en app?', a: 'Systemet fungerar direkt i webbläsaren på mobil, surfplatta och dator.' },
-                { q: 'Kan jag avsluta när jag vill?', a: 'Ja. Det finns ingen bindningstid.' },
-                { q: 'Fungerar det med Fortnox?', a: 'Ja, systemet kan skapa fakturaunderlag och exportera data för Fortnox.' },
-                { q: 'Hanterar ni OB-tillägg och traktamente?', a: 'Ja, du kan konfigurera OB och traktamente utifrån dina behov.' },
-                { q: 'Vad skiljer er från dyrare system?', a: 'Aurora Transport är enklare, snabbare att komma igång med och har ett fast pris utan kostnad per användare.' },
+                { q: 'Hur snabbt kommer vi igång?', a: 'De flesta kunder är igång samma dag. Vi hjälper er med en personlig onboarding där vi konfigurerar systemet, lägger in kunder och förare och går igenom flödet med teamet.' },
+                { q: 'Behöver förare installera något?', a: 'Nej. Förarna loggar in direkt i webbläsaren på sin mobil — inga appar behöver laddas ner från App Store eller Google Play.' },
+                { q: 'Kan vi avsluta när vi vill?', a: 'Ja. Det finns ingen bindningstid. Säg upp när som helst med 30 dagars uppsägningstid.' },
+                { q: 'Kan ni hjälpa oss lägga in kunder och förare?', a: 'Ja. Setupavgiften (3 500 kr) inkluderar att vi konfigurerar systemet åt er, importerar kunder och förare och utbildar teamet.' },
+                { q: 'Passar Aurora små åkerier?', a: 'Ja — vi är byggda för företag med 3–30 förare. Små åkerier, budfirmor, transportbemanning och lokala distributionsföretag är vår kärnmålgrupp.' },
+                { q: 'Hur skiljer ni er från större TMS-system?', a: 'Vi är enklare att komma igång med, har fast pris utan licenskostnad per användare och fokuserar på det svenska transportföretagens vardag — inte på funktioner ni aldrig använder.' },
+                { q: 'Fungerar det med Fortnox?', a: 'Ja, systemet skapar fakturaunderlag och exporterar data till Fortnox och andra bokföringsprogram (SIE, CSV).' },
               ].map((item, i) => (
                 <AccordionItem
                   key={i}
