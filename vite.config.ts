@@ -3,6 +3,33 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
+import prerender from "@prerenderer/rollup-plugin";
+
+// Routes som prerendras till statisk HTML vid produktion. Endast publika
+// SEO-sidor — inga inloggade vyer, inga /ads/*-annonssidor.
+const PRERENDER_ROUTES = [
+  "/",
+  "/tjanster",
+  "/transportledningssystem",
+  "/coredination-alternativ",
+  "/budtjanst-app",
+  "/akeri-system",
+  "/dispatch-system",
+  "/om-oss",
+  "/privacy",
+  "/kontakt",
+  "/blogg",
+  "/blogg/basta-dispatchsystemet-for-akeri-2026",
+  "/blogg/hur-digitaliserar-man-sin-budtjanst",
+  "/blogg/vad-kostar-ett-transportledningssystem",
+  "/blogg/transportledningssystem-for-sma-akerier",
+  "/blogg/dispatch-app-forare-transport",
+  "/blogg/bemanningsbolag-transport-system",
+  "/blogg/skillnad-tms-dispatch-system",
+  "/blogg/transportapp-utan-bindningstid",
+  "/blogg/digitalt-korordrersystem-fordelar",
+  "/blogg/byta-dispatchsystem-guide",
+];
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -101,7 +128,36 @@ export default defineConfig(({ mode }) => ({
         ],
       },
     }),
-  ].filter(Boolean),
+    // Prerendera publika SEO-sidor till statisk HTML vid produktionsbygge.
+    // Hoppar över i dev (annars startar Puppeteer mot sandboxen) och i
+    // development-mode-byggen så att Lovables livepreview fungerar normalt.
+    mode === "production" &&
+      prerender({
+        routes: PRERENDER_ROUTES,
+        renderer: "@prerenderer/renderer-puppeteer",
+        rendererOptions: {
+          maxConcurrentRoutes: 2,
+          renderAfterTime: 1500,
+          headless: true,
+          launchOptions: {
+            executablePath:
+              process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+            args: ["--no-sandbox", "--disable-setuid-sandbox"],
+          },
+        },
+        postProcess(renderedRoute: { route: string; html: string }) {
+          // Säkerställ att canonical alltid är auroratransport.se i prerenderad HTML
+          const canonical = `https://auroratransport.se${
+            renderedRoute.route === "/" ? "/" : renderedRoute.route
+          }`;
+          renderedRoute.html = renderedRoute.html.replace(
+            /<link\s+rel="canonical"[^>]*>/i,
+            `<link rel="canonical" href="${canonical}" />`
+          );
+          return renderedRoute;
+        },
+      }),
+  ].filter(Boolean) as Plugin[],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
