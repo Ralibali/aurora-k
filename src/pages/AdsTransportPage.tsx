@@ -39,6 +39,7 @@ export default function AdsTransportPage() {
     title: 'Transportledningssystem — Planera, spåra & fakturera | Aurora',
     description: 'Komplett transportledningssystem med uppdragsplanering, GPS-spårning, kundportal och fakturering. Allt i ett. 449 kr/mån.',
     canonical: 'https://auroratransport.se/ads/transport',
+    noindex: true,
   });
 
   useBreadcrumbJsonLd(useMemo(() => [

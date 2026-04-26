@@ -46,6 +46,7 @@ export default function AdsBudtjanstPage() {
     title: 'Budtjänst-app — Dispatch & realtidsspårning | Aurora',
     description: 'Hantera bud, leveranser och förare digitalt. Realtidsspårning, kvittens med foto & signatur, och automatisk tidrapportering. 449 kr/mån.',
     canonical: 'https://auroratransport.se/ads/budtjanst',
+    noindex: true,
   });
 
   useBreadcrumbJsonLd(useMemo(() => [
