@@ -548,10 +548,9 @@ export default function LandingPage() {
                 {[
                   'Obegränsat antal förare och admins',
                   'Obegränsat antal uppdrag',
-                  'Dashboard & rapporter',
                   'Tidrapportering',
-                  'OB-tillägg & traktamente',
                   'Fakturaunderlag',
+                  'Statistik & rapporter',
                   'Support på svenska',
                   'Ingen bindningstid',
                 ].map((p) => (
@@ -566,12 +565,50 @@ export default function LandingPage() {
                 size="lg"
                 className="mt-8 bg-background text-primary hover:bg-background/90 h-12"
               >
-                Kontakta oss
+                Boka 15 min demo
               </Button>
             </motion.div>
           </div>
           <div className="mt-10 text-center text-sm text-muted-foreground">
             <p><span className="font-medium text-foreground">Första månaden totalt: 3 949 kr</span> · Därefter 449 kr/mån</p>
+          </div>
+        </div>
+      </section>
+
+      {/* FÖRTROENDE */}
+      <section className="py-16 md:py-20 bg-card border-y border-border">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-10">
+              <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
+                Svenskt företag. Svensk support. Inga överraskningar.
+              </h2>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+              {[
+                { icon: Shield, label: 'Aurora Media AB', sub: 'Org.nr 559272-0220' },
+                { icon: Headphones, label: 'Support på svenska', sub: 'Mejl & telefon' },
+                { icon: MapIcon, label: 'Byggt i Sverige', sub: 'Svensk utveckling' },
+                { icon: CheckCircle2, label: 'Ingen bindningstid', sub: 'Säg upp när du vill' },
+                { icon: Wallet, label: 'Fast pris 449 kr/mån', sub: 'Oavsett antal förare' },
+              ].map((t, i) => (
+                <motion.div
+                  key={t.label}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, margin: '-60px' }}
+                  variants={fadeUp}
+                  custom={i}
+                  className="rounded-xl border border-border bg-background p-5 text-center"
+                >
+                  <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <t.icon className="h-5 w-5" />
+                  </div>
+                  <div className="mt-3 text-sm font-semibold text-foreground">{t.label}</div>
+                  <div className="mt-0.5 text-xs text-muted-foreground">{t.sub}</div>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
