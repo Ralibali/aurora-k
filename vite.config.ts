@@ -145,7 +145,7 @@ export default defineConfig(({ mode }) => ({
             args: ["--no-sandbox", "--disable-setuid-sandbox"],
           },
         },
-        postProcess(renderedRoute: { route: string; html: string }) {
+        postProcess(renderedRoute: { route: string; html: string }): void {
           // Säkerställ att canonical alltid är auroratransport.se i prerenderad HTML
           const canonical = `https://auroratransport.se${
             renderedRoute.route === "/" ? "/" : renderedRoute.route
@@ -154,7 +154,6 @@ export default defineConfig(({ mode }) => ({
             /<link\s+rel="canonical"[^>]*>/i,
             `<link rel="canonical" href="${canonical}" />`
           );
-          return renderedRoute;
         },
       }),
   ].filter(Boolean) as Plugin[],
