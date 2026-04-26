@@ -242,10 +242,10 @@ export default function AdminInvoices() {
                               <Download className="h-4 w-4" />
                             </Button>
                             {inv.status === 'draft' && (
-                              <Button variant="ghost" size="sm" onClick={() => updateStatus.mutate({ id: inv.id, status: 'sent' })}>Skicka</Button>
+                              <Button variant="ghost" size="sm" disabled={showingDemo} onClick={() => updateStatus.mutate({ id: inv.id, status: 'sent' })}>Skicka</Button>
                             )}
                             {(inv.status === 'sent' || inv.status === 'overdue') && (
-                              <Button variant="ghost" size="sm" onClick={() => updateStatus.mutate({ id: inv.id, status: 'paid' })}>Betald</Button>
+                              <Button variant="ghost" size="sm" disabled={showingDemo} onClick={() => updateStatus.mutate({ id: inv.id, status: 'paid' })}>Betald</Button>
                             )}
                           </div>
                         </TableCell>
