@@ -658,7 +658,7 @@ export default function AdminDrivers() {
                 <div
                   key={driver.id}
                   className="bg-card rounded-lg border border-border p-5 hover:shadow-md transition-shadow cursor-pointer"
-                  onClick={() => setSelectedDriver(driver)}
+                  onClick={() => !showingDemo && setSelectedDriver(driver)}
                 >
                   <div className="flex items-start gap-4">
                     <div className="relative">
