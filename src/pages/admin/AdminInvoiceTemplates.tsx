@@ -12,6 +12,7 @@ import { useInvoiceTemplates, useCreateInvoiceTemplate, useUpdateInvoiceTemplate
 import { Plus, Pencil, Trash2, FileText } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { UsageInfoCard } from '@/components/admin/UsageInfoCard';
 
 export default function AdminInvoiceTemplates() {
   const { data: templates, isLoading } = useInvoiceTemplates();
@@ -41,10 +42,22 @@ export default function AdminInvoiceTemplates() {
   return (
     <AdminLayout title="Fakturamallar">
       <div className="space-y-4">
+        <UsageInfoCard
+          icon={FileText}
+          title="Anpassa hur dina fakturor ser ut innan du skickar dem till kund"
+          description="Mallen styr logotyp, färger, sidhuvud och bankuppgifter. Sätt en standardmall så används den automatiskt för nya fakturor."
+          usedFor={[
+            'PDF-layout vid utskick',
+            'Färgsättning enligt din profil',
+            'Sidhuvud och sidfot på alla sidor',
+            'Bankgiro / Plusgiro / IBAN',
+          ]}
+          nextStep={{ label: 'Skapa faktura', href: '/admin/invoices/new' }}
+        />
         <div className="flex justify-between items-center">
-          <p className="text-muted-foreground">Anpassa utseendet på dina fakturor.</p>
+          <p className="text-sm text-muted-foreground">Anpassa utseendet på dina fakturor.</p>
           <Dialog open={open} onOpenChange={o => { setOpen(o); if (!o) reset(); }}>
-            <DialogTrigger asChild><Button size="sm"><Plus className="h-4 w-4 mr-1" /> Ny mall</Button></DialogTrigger>
+            <DialogTrigger asChild><Button size="sm"><Plus className="h-4 w-4 mr-1" /> Skapa standardmall</Button></DialogTrigger>
             <DialogContent className="max-w-lg">
               <DialogHeader><DialogTitle>{editId ? 'Redigera mall' : 'Ny fakturamall'}</DialogTitle></DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -63,7 +76,16 @@ export default function AdminInvoiceTemplates() {
         </div>
         <Card><CardContent className="p-0">
           {isLoading ? <div className="p-6 space-y-3">{[1,2,3].map(i => <Skeleton key={i} className="h-10 w-full" />)}</div> :
-          !templates?.length ? <div className="text-center py-12 text-muted-foreground"><FileText className="h-10 w-10 mx-auto mb-3 opacity-30" /><p>Inga fakturamallar</p></div> :
+          !templates?.length ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <FileText className="h-10 w-10 mx-auto mb-3 opacity-30" />
+              <p className="font-medium">Skapa din första fakturamall</p>
+              <p className="text-sm mt-1 max-w-sm mx-auto">Sätt logotyp, färger och bankuppgifter en gång — sedan ser alla fakturor enhetliga och proffsiga ut.</p>
+              <Button size="sm" className="mt-4" onClick={() => setOpen(true)}>
+                <Plus className="h-3.5 w-3.5 mr-1" /> Skapa standardmall
+              </Button>
+            </div>
+          ) :
           <Table><TableHeader><TableRow><TableHead>Namn</TableHead><TableHead>Färg</TableHead><TableHead>Logotyp</TableHead><TableHead>Bank</TableHead><TableHead className="w-[100px]" /></TableRow></TableHeader>
             <TableBody>{templates.map(t => (
               <TableRow key={t.id}>
