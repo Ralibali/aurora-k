@@ -3,15 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>Aurora Transport – Enklaste dispatch-appen för transportföretag</title>
-    <meta name="description" content="Hantera uppdrag, personal och tidrapporter enkelt. 449 kr/mån fast pris. Kom igång på 5 minuter.">
+
+    <title>Aurora Transport | Dispatch, uppdrag & tidrapportering för transportföretag</title>
+    <meta name="description" content="Aurora Transport hjälper transportföretag hantera uppdrag, förare, personal och tidrapporter på ett enkelt sätt. Fast pris 449 kr/mån. Kom igång på 5 minuter." />
     <meta name="author" content="Aurora Media AB" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href="https://auroratransport.se/" />
+
     <meta name="google-site-verification" content="875RMlHUf4oB4b1hUPTf9gwGDo2vmXhCdLUHO76VQe0" />
 
     <!-- Fonts: Plus Jakarta Sans + JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
 
     <!-- Theme -->
     <meta name="theme-color" content="#0F172A" />
@@ -35,20 +39,45 @@
 
     <!-- OG -->
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Aurora Transport" />
     <meta property="og:url" content="https://auroratransport.se/" />
     <meta property="og:locale" content="sv_SE" />
-    <meta property="og:image" content="https://auroratransport.se/og-image.png">
-    <meta property="og:title" content="Aurora Transport – Enklaste dispatch-appen för transportföretag">
-    <meta property="og:description" content="Hantera uppdrag, personal och tidrapporter enkelt. 449 kr/mån fast pris. Kom igång på 5 minuter.">
+    <meta property="og:title" content="Aurora Transport | Enklare dispatch för transportföretag" />
+    <meta property="og:description" content="Hantera uppdrag, förare, personal och tidrapporter. Fast pris 449 kr/mån. Kom igång på 5 minuter." />
+    <meta property="og:image" content="https://auroratransport.se/og-image.png" />
+    <meta property="og:image:alt" content="Aurora Transport dashboard för transportföretag" />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@auroratransport" />
-    <meta name="twitter:image" content="https://auroratransport.se/og-image.png">
-    <meta name="twitter:title" content="Aurora Transport – Enklaste dispatch-appen för transportföretag">
-    <meta name="twitter:description" content="Hantera uppdrag, personal och tidrapporter enkelt. 449 kr/mån fast pris. Kom igång på 5 minuter.">
+    <meta name="twitter:title" content="Aurora Transport | Enklare dispatch för transportföretag" />
+    <meta name="twitter:description" content="Hantera uppdrag, förare, personal och tidrapporter. Fast pris 449 kr/mån." />
+    <meta name="twitter:image" content="https://auroratransport.se/og-image.png" />
 
-    <link rel="icon" type="image/png" href="/icon-192x192.png">
-    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/png" href="/icon-192x192.png" />
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- JSON-LD: SoftwareApplication -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Aurora Transport",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web, iOS",
+        "url": "https://auroratransport.se/",
+        "description": "Aurora Transport hjälper transportföretag hantera uppdrag, förare, personal och tidrapporter.",
+        "offers": {
+          "@type": "Offer",
+          "price": "449",
+          "priceCurrency": "SEK",
+          "availability": "https://schema.org/InStock"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Aurora Media AB"
+        }
+      }
+    </script>
 
     <!-- Google Analytics 4 — replace G-XXXXXXXXXX with your Measurement ID -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-YFK8HNQPSW"></script>
@@ -56,7 +85,7 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-      gtag('config', 'G-YFK8HNQPSW');
+      gtag('config', 'G-YFK8HNQPSW', { anonymize_ip: true });
     </script>
   </head>
 
