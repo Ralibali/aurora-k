@@ -800,10 +800,10 @@ export default function LandingPage() {
         <div className="container mx-auto px-4 relative">
           <div className="max-w-2xl mx-auto text-center">
             <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-sidebar-foreground">
-              Redo att modernisera ditt transportföretag?
+              Redo att slippa Excel och WhatsApp?
             </h2>
             <p className="mt-5 text-lg text-sidebar-foreground/80">
-              449 kr/mån. Fast pris. Ingen bindningstid.
+              15 minuters demo räcker för att se om Aurora passar er. 449 kr/mån, ingen bindningstid.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
               <Button
@@ -811,8 +811,17 @@ export default function LandingPage() {
                 onClick={() => setLeadModalOpen(true)}
                 className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 h-12 px-8 text-base"
               >
-                Kontakta oss
+                Boka 15 min demo
                 <ArrowRight className="ml-1 h-4 w-4" />
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={handleDemo}
+                disabled={demoLoading}
+                className="h-12 px-8 text-base bg-transparent border-sidebar-foreground/30 text-sidebar-foreground hover:bg-sidebar-foreground/10 hover:text-sidebar-foreground"
+              >
+                {demoLoading ? 'Loggar in...' : 'Se demo med exempeldata'}
               </Button>
             </div>
             <a
