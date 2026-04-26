@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useArticles, useCreateArticle, useUpdateArticle, useDeleteArticle } from '@/hooks/useNewFeatures';
 import { Plus, Pencil, Trash2, Package } from 'lucide-react';
+import { UsageInfoCard } from '@/components/admin/UsageInfoCard';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -47,11 +48,23 @@ export default function AdminArticles() {
   return (
     <AdminLayout title="Artikelregister">
       <div className="space-y-4">
+        <UsageInfoCard
+          icon={Package}
+          title="Artiklar används för att räkna fram pris på uppdrag och fakturor"
+          description="När du skapar artiklar hämtas pris, enhet och moms automatiskt vid orderläggning och fakturering — så slipper du räkna manuellt."
+          usedFor={[
+            'Förvalt pris vid nya uppdrag',
+            'Snabbval på fakturarader',
+            'Kund-specifika prislistor',
+            'Korrekt momssats per rad',
+          ]}
+          nextStep={{ label: 'Skapa kundspecifik prislista', href: '/admin/customers' }}
+        />
         <div className="flex justify-between items-center">
-          <p className="text-muted-foreground">Hantera artiklar med priser för uppdrag och fakturering.</p>
+          <p className="text-sm text-muted-foreground">Hantera artiklar med priser för uppdrag och fakturering.</p>
           <Dialog open={dialogOpen} onOpenChange={(o) => { setDialogOpen(o); if (!o) resetForm(); }}>
             <DialogTrigger asChild>
-              <Button size="sm"><Plus className="h-4 w-4 mr-1" /> Ny artikel</Button>
+              <Button size="sm"><Plus className="h-4 w-4 mr-1" /> Skapa artikel</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader><DialogTitle>{editId ? 'Redigera artikel' : 'Ny artikel'}</DialogTitle></DialogHeader>
@@ -98,8 +111,11 @@ export default function AdminArticles() {
             ) : !articles?.length ? (
               <div className="text-center py-12 text-muted-foreground">
                 <Package className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                <p>Inga artiklar ännu</p>
-                <p className="text-sm">Skapa din första artikel för att komma igång.</p>
+                <p className="font-medium">Skapa din första artikel</p>
+                <p className="text-sm mt-1 max-w-sm mx-auto">När du skapat dina vanligaste tjänster eller produkter kan du återanvända dem i alla uppdrag och fakturor.</p>
+                <Button size="sm" className="mt-4" onClick={() => setDialogOpen(true)}>
+                  <Plus className="h-3.5 w-3.5 mr-1" /> Skapa artikel
+                </Button>
               </div>
             ) : (
               <Table>

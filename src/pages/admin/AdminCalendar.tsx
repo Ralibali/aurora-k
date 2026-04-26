@@ -22,6 +22,9 @@ import {
 } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { useDemoMode } from '@/hooks/useDemoMode';
+import { demoCalendarAssignments, demoDrivers } from '@/lib/demo-data';
+import { CalendarDays, Info } from 'lucide-react';
 
 type ViewMode = 'week' | 'month';
 
@@ -29,15 +32,28 @@ export default function AdminCalendar() {
   const navigate = useNavigate();
   const { data: assignments } = useAssignments();
   const { data: drivers } = useDrivers();
+  const { enabled: demoEnabled } = useDemoMode();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>('week');
   const [driverFilter, setDriverFilter] = useState<string>('all');
 
+  const effectiveAssignments = useMemo(() => {
+    const real = assignments ?? [];
+    if (demoEnabled && real.length === 0) return demoCalendarAssignments as any[];
+    return real;
+  }, [assignments, demoEnabled]);
+
+  const effectiveDrivers = useMemo(() => {
+    const real = drivers ?? [];
+    if (demoEnabled && real.length === 0) return demoDrivers as any[];
+    return real;
+  }, [drivers, demoEnabled]);
+
   const filteredAssignments = useMemo(() => {
-    if (!assignments) return [];
-    if (driverFilter === 'all') return assignments;
-    return assignments.filter(a => a.assigned_driver_id === driverFilter);
-  }, [assignments, driverFilter]);
+    if (!effectiveAssignments.length) return [];
+    if (driverFilter === 'all') return effectiveAssignments;
+    return effectiveAssignments.filter((a: any) => a.assigned_driver_id === driverFilter);
+  }, [effectiveAssignments, driverFilter]);
 
   const days = useMemo(() => {
     if (viewMode === 'week') {
@@ -94,6 +110,20 @@ export default function AdminCalendar() {
   return (
     <AdminLayout title="Kalender">
       <div className="space-y-4">
+        {/* Helper banner */}
+        <div className="flex items-start gap-3 rounded-lg border border-border bg-card/50 px-4 py-3 text-sm">
+          <Info className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+          <div className="flex-1">
+            <p className="text-foreground font-medium">Här ser du uppdrag per dag och chaufför.</p>
+            <p className="text-muted-foreground text-xs mt-0.5">
+              Färgerna visar status: <span className="text-orange-600 dark:text-orange-400">väntande</span>,{' '}
+              <span className="text-blue-600 dark:text-blue-400">pågående</span>,{' '}
+              <span className="text-green-600 dark:text-green-400">slutförda</span>,{' '}
+              <span className="text-destructive">avbokade</span>.
+            </p>
+          </div>
+        </div>
+
         {/* Toolbar */}
         <div className="flex flex-wrap items-center gap-3 justify-between">
           <div className="flex items-center gap-2">
@@ -115,7 +145,7 @@ export default function AdminCalendar() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Alla chaufförer</SelectItem>
-                {(drivers ?? []).map(d => (
+                {effectiveDrivers.map((d: any) => (
                   <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>
                 ))}
               </SelectContent>
@@ -130,10 +160,26 @@ export default function AdminCalendar() {
               </SelectContent>
             </Select>
             <Button size="sm" onClick={() => navigate('/admin/assignments/new')}>
-              <Plus className="h-4 w-4 mr-1" /> Nytt uppdrag
+              <Plus className="h-4 w-4 mr-1" /> Skapa uppdrag
             </Button>
           </div>
         </div>
+
+        {/* CTA overlay when no assignments at all */}
+        {effectiveAssignments.length === 0 && (
+          <div className="rounded-lg border border-dashed border-border bg-card/50 p-8 text-center">
+            <div className="inline-flex items-center justify-center h-12 w-12 rounded-2xl bg-primary/5 border border-primary/10 mb-3">
+              <CalendarDays className="h-6 w-6 text-primary/70" />
+            </div>
+            <h3 className="text-base font-semibold text-foreground mb-1">Skapa veckans första uppdrag</h3>
+            <p className="text-sm text-muted-foreground max-w-md mx-auto mb-4">
+              När du planerar uppdrag visas de här som färgade block per dag och chaufför — så hela teamet ser veckan i taget.
+            </p>
+            <Button size="sm" onClick={() => navigate('/admin/assignments/new')}>
+              <Plus className="h-4 w-4 mr-1" /> Skapa uppdrag
+            </Button>
+          </div>
+        )}
 
         {/* Calendar Grid */}
         <div className="border rounded-lg overflow-hidden bg-card">
