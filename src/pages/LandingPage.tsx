@@ -444,14 +444,63 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* PILOTKUND */}
+      <section className="py-20 md:py-24">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-80px' }}
+            transition={{ duration: 0.6 }}
+            className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/8 via-card to-card p-8 md:p-12 max-w-5xl mx-auto shadow-md"
+          >
+            <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-primary/15 blur-3xl" aria-hidden />
+            <div className="relative grid gap-8 md:grid-cols-[1.2fr_1fr] items-center">
+              <div>
+                <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary uppercase tracking-wider">
+                  <Sparkles className="h-3.5 w-3.5" /> Begränsat antal platser
+                </div>
+                <h2 className="mt-5 text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+                  Bli pilotkund
+                </h2>
+                <p className="mt-4 text-base text-muted-foreground leading-relaxed">
+                  Vi söker några få transportföretag som vill testa Aurora Transport och hjälpa oss göra systemet ännu bättre. Du får extra närhet till teamet och påverkar vad vi bygger härnäst.
+                </p>
+                <Button
+                  size="lg"
+                  onClick={() => setLeadModalOpen(true)}
+                  className="mt-7 bg-primary hover:bg-primary-hover text-primary-foreground h-12 px-6"
+                >
+                  Ansök som pilotkund
+                  <ArrowRight className="ml-1 h-4 w-4" />
+                </Button>
+              </div>
+              <ul className="space-y-3">
+                {[
+                  'Setuphjälp ingår',
+                  'Personlig onboarding',
+                  'Ingen bindningstid',
+                  '449 kr/mån — fast pris',
+                ].map((t) => (
+                  <li key={t} className="flex items-start gap-3 rounded-xl border border-border bg-background/80 backdrop-blur px-4 py-3 text-sm text-foreground">
+                    <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                    <span className="font-medium">{t}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* PRIS */}
       <section id="pris" className="py-20 md:py-28 relative overflow-hidden">
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-background via-[hsl(214_60%_97%)] to-background" />
         <div className="container mx-auto px-4">
           <div className="max-w-2xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">Ett pris. Allt inkluderat.</h2>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">Enkelt pris. Inga överraskningar.</h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              Inga dolda avgifter. Inga kostnader per användare.
+              Fast månadskostnad. Inga avgifter per användare. Säg upp när du vill.
             </p>
           </div>
           <div className="mt-14 grid gap-6 md:grid-cols-2 max-w-4xl mx-auto">
