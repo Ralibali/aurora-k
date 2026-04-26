@@ -149,6 +149,8 @@ const App = () => (
                 <Route path="/blogg/basta-dispatchsystemet-for-akeri-2026" element={<BlogBastaDispatch />} />
                 <Route path="/blogg/hur-digitaliserar-man-sin-budtjanst" element={<BlogDigitaliseraBudtjanst />} />
                 <Route path="/blogg/vad-kostar-ett-transportledningssystem" element={<BlogVadKostarTms />} />
+                <Route path="/blogg/transportledningssystem-for-sma-akerier" element={<BlogTmsSmaaAkerier />} />
+                {/* Backward-compat redirect for old misspelled slug */}
                 <Route path="/blogg/transportledningssystem-for-sma-akeries" element={<BlogTmsSmaaAkerier />} />
                 <Route path="/blogg/dispatch-app-forare-transport" element={<BlogDispatchAppForare />} />
                 <Route path="/blogg/bemanningsbolag-transport-system" element={<BlogBemanningsbolag />} />

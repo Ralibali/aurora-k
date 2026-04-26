@@ -5,6 +5,7 @@ Disallow: /driver
 Disallow: /platform
 Disallow: /onboarding
 Disallow: /portal
+Disallow: /login
 Disallow: /reset-password
 Disallow: /forgot-password
 
