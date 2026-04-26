@@ -20,6 +20,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
+import { useDemoMode } from '@/hooks/useDemoMode';
+import { demoDriversFull } from '@/lib/demo-data';
 
 const COMP_LABELS: Record<string, string> = {
   hourly: 'Timbaserad',
@@ -538,6 +540,12 @@ export default function AdminDrivers() {
   const { data: assignments } = useAssignments();
   const { data: compensations } = useDriverCompensations();
   const qc = useQueryClient();
+  const { enabled: demoEnabled } = useDemoMode();
+
+  const effectiveDrivers = (demoEnabled && (drivers?.length ?? 0) === 0)
+    ? (demoDriversFull as any)
+    : (drivers ?? []);
+  const showingDemo = demoEnabled && (drivers?.length ?? 0) === 0;
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -558,22 +566,28 @@ export default function AdminDrivers() {
   }, [assignments, today]);
 
   const filtered = useMemo(() => {
-    let list = drivers ?? [];
+    let list = effectiveDrivers;
     if (search) {
       const q = search.toLowerCase();
-      list = list.filter(d => d.full_name.toLowerCase().includes(q) || d.email.toLowerCase().includes(q));
+      list = list.filter((d: any) => d.full_name.toLowerCase().includes(q) || d.email.toLowerCase().includes(q));
     }
-    if (filter === 'available') list = list.filter(d => d.is_available);
-    else if (filter === 'active') list = list.filter(d => driverStats.get(d.id)?.activeToday);
-    else if (filter === 'inactive') list = list.filter(d => !driverStats.get(d.id)?.todayCount);
+    if (filter === 'available') list = list.filter((d: any) => d.is_available);
+    else if (filter === 'active') list = list.filter((d: any) => driverStats.get(d.id)?.activeToday);
+    else if (filter === 'inactive') list = list.filter((d: any) => !driverStats.get(d.id)?.todayCount);
     return list;
-  }, [drivers, search, filter, driverStats]);
+  }, [effectiveDrivers, search, filter, driverStats]);
 
   const getCompensation = (driverId: string) => (compensations ?? []).find(c => c.driver_id === driverId);
 
   return (
     <AdminLayout title="Chaufförer" description="Hantera chaufförer och deras tillgänglighet">
       <div className="space-y-6">
+        {showingDemo && (
+          <div className="rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-900/40 px-4 py-2.5 text-xs text-amber-800 dark:text-amber-300 flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
+            Demo-läge — visar exempelchaufförer. Klicka <strong>Lägg till förare</strong> eller <strong>Bjud in</strong> för att lägga upp ditt riktiga team.
+          </div>
+        )}
         {/* Top bar */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <h2 className="text-2xl font-bold text-foreground">Chaufförer</h2>
@@ -644,7 +658,7 @@ export default function AdminDrivers() {
                 <div
                   key={driver.id}
                   className="bg-card rounded-lg border border-border p-5 hover:shadow-md transition-shadow cursor-pointer"
-                  onClick={() => setSelectedDriver(driver)}
+                  onClick={() => !showingDemo && setSelectedDriver(driver)}
                 >
                   <div className="flex items-start gap-4">
                     <div className="relative">
