@@ -41,8 +41,8 @@ export default function LandingPage() {
     { name: 'Hem', url: 'https://auroratransport.se/' },
   ], []));
   usePageMeta({
-    title: 'Transportledningssystem för åkerier & budföretag | Aurora Transport',
-    description: 'Aurora Transport samlar uppdrag, förare, tidrapportering och fakturaunderlag i ett enkelt system för svenska transportföretag. Fast pris från 449 kr/mån.',
+    title: 'Slipp Excel & WhatsApp i transportplaneringen | Aurora Transport',
+    description: 'Aurora Transport samlar uppdrag, förare, tidrapporter och fakturering i ett enkelt svenskt system. 449 kr/mån. Ingen bindningstid. Boka 15 min demo.',
     canonical: 'https://auroratransport.se/',
     ogImage: 'https://auroratransport.se/og-image.png',
   });
@@ -122,13 +122,13 @@ export default function LandingPage() {
             <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
               <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1.5 text-xs font-medium text-primary">
                 <Sparkles className="h-3.5 w-3.5" />
-                Byggd för svenska transport- och bemanningsföretag
+                Byggt i Sverige för åkerier, bud & bemanning
               </div>
               <h1 className="mt-6 text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-foreground leading-[1.05]">
-                Slipp Excel. Få <span className="text-primary">full kontroll</span> på dina uppdrag.
+                Slipp Excel och WhatsApp i <span className="text-primary">transportplaneringen</span>.
               </h1>
               <p className="mt-6 text-lg text-muted-foreground leading-relaxed max-w-xl">
-                Aurora Transport samlar jobb, förare, tider och rapportering i ett enkelt system — klart att använda på 5 minuter.
+                Aurora Transport samlar uppdrag, förare, tidrapporter och fakturering i ett enkelt system för svenska transportföretag. Kom igång samma dag.
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-3">
                 <Button
@@ -136,7 +136,7 @@ export default function LandingPage() {
                   onClick={() => setLeadModalOpen(true)}
                   className="bg-primary hover:bg-primary-hover text-primary-foreground shadow-lg shadow-primary/20 h-12 px-6 text-base"
                 >
-                  Kontakta oss — 449 kr/mån
+                  Boka 15 min demo
                   <ArrowRight className="ml-1 h-4 w-4" />
                 </Button>
                 <Button
@@ -146,15 +146,15 @@ export default function LandingPage() {
                   disabled={demoLoading}
                   className="h-12 px-6 text-base"
                 >
-                  {demoLoading ? 'Loggar in...' : 'Testa live-demo'}
+                  {demoLoading ? 'Loggar in...' : 'Se demo med exempeldata'}
                 </Button>
               </div>
               <ul className="mt-8 grid grid-cols-2 gap-x-6 gap-y-2.5 text-sm text-muted-foreground max-w-lg">
                 {[
+                  '449 kr/mån — fast pris',
                   'Ingen bindningstid',
-                  'Obegränsat antal förare',
                   'Support på svenska',
-                  'Driftklart på 5 minuter',
+                  'Kom igång samma dag',
                 ].map((t) => (
                   <li key={t} className="flex items-center gap-2">
                     <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
@@ -206,37 +206,130 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* IGÅNG PÅ TRE STEG */}
+      {/* FÖRE / EFTER */}
       <section className="py-20 md:py-24">
         <div className="container mx-auto px-4">
           <div className="max-w-2xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">Igång på tre steg.</h2>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+              Från manuell planering till full kontroll
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Så här ändras vardagen när du går från Excel & WhatsApp till Aurora Transport.
+            </p>
           </div>
-          <div className="mt-16 relative">
-            {/* Progress line */}
-            <div className="hidden md:block absolute top-8 left-[16%] right-[16%] h-px bg-gradient-to-r from-primary/20 via-primary/40 to-primary/20" />
-            <div className="grid gap-10 md:grid-cols-3 relative">
+          <div className="mt-12 grid gap-6 md:grid-cols-2 max-w-5xl mx-auto">
+            {/* FÖRE */}
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: '-80px' }}
+              variants={fadeUp}
+              custom={0}
+              className="rounded-2xl border border-border bg-card p-7 shadow-sm"
+            >
+              <div className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Före Aurora
+              </div>
+              <ul className="mt-6 space-y-3.5">
+                {[
+                  'Uppdrag i WhatsApp',
+                  'Tidrapporter i Excel',
+                  'Förare rings manuellt',
+                  'Fakturering kräver dubbelarbete',
+                  'Svårt att få överblick',
+                ].map((t) => (
+                  <li key={t} className="flex items-start gap-3 text-sm text-muted-foreground">
+                    <span className="mt-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-muted shrink-0">
+                      <X className="h-3 w-3 text-muted-foreground" />
+                    </span>
+                    <span>{t}</span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+
+            {/* EFTER */}
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: '-80px' }}
+              variants={fadeUp}
+              custom={1}
+              className="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/5 via-card to-card p-7 shadow-md"
+            >
+              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary uppercase tracking-wider">
+                <Sparkles className="h-3 w-3" /> Efter Aurora
+              </div>
+              <ul className="mt-6 space-y-3.5">
+                {[
+                  'Uppdrag samlade på ett ställe',
+                  'Förare får jobbet i mobilen',
+                  'Tidrapporter samlas automatiskt',
+                  'Fakturaunderlag skapas snabbare',
+                  'Full kontroll på verksamheten',
+                ].map((t) => (
+                  <li key={t} className="flex items-start gap-3 text-sm text-foreground">
+                    <span className="mt-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary/15 shrink-0">
+                      <Check className="h-3 w-3 text-primary" />
+                    </span>
+                    <span>{t}</span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* DEMO-FLOW — 5 STEG */}
+      <section className="py-20 md:py-24 bg-card border-y border-border">
+        <div className="container mx-auto px-4">
+          <div className="max-w-2xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+              Så fungerar Aurora på 5 minuter
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Från första uppdrag till färdigt fakturaunderlag — utan extra steg.
+            </p>
+          </div>
+          <div className="mt-14 max-w-5xl mx-auto">
+            <div className="grid gap-4 md:grid-cols-5">
               {[
-                { n: '01', title: 'Skapa ditt konto', text: 'Under 2 minuter' },
-                { n: '02', title: 'Bjud in din personal', text: 'De får mail direkt' },
-                { n: '03', title: 'Börja tilldela uppdrag', text: 'Föraren ser uppdraget direkt' },
+                { n: '1', title: 'Skapa uppdrag', text: 'Lägg in kund, adress och tid på under en minut.', icon: Plus },
+                { n: '2', title: 'Tilldela förare', text: 'Välj rätt person — föraren notifieras direkt.', icon: Users },
+                { n: '3', title: 'Föraren ser jobbet', text: 'All info i mobilen. Inga fler chattmeddelanden.', icon: Phone },
+                { n: '4', title: 'Tidrapport skickas in', text: 'Start, stopp och OB beräknas automatiskt.', icon: Clock },
+                { n: '5', title: 'Fakturaunderlag skapas', text: 'Klart att skicka eller exportera till Fortnox.', icon: FileText },
               ].map((s, i) => (
                 <motion.div
                   key={s.n}
                   initial="hidden"
                   whileInView="visible"
-                  viewport={{ once: true, margin: '-80px' }}
+                  viewport={{ once: true, margin: '-60px' }}
                   variants={fadeUp}
                   custom={i}
-                  className="text-center"
+                  className="relative rounded-2xl border border-border bg-background p-5 shadow-sm"
                 >
-                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary text-xl font-bold ring-8 ring-background">
-                    {s.n}
+                  <div className="flex items-center justify-between">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      <s.icon className="h-4 w-4" />
+                    </div>
+                    <span className="font-mono text-xs text-muted-foreground">0{s.n}</span>
                   </div>
-                  <h3 className="mt-6 text-xl font-semibold text-foreground">{s.title}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">{s.text}</p>
+                  <h3 className="mt-4 text-sm font-semibold text-foreground leading-tight">{s.title}</h3>
+                  <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">{s.text}</p>
                 </motion.div>
               ))}
+            </div>
+            <div className="mt-10 text-center">
+              <Button
+                size="lg"
+                onClick={() => setLeadModalOpen(true)}
+                className="bg-primary hover:bg-primary-hover text-primary-foreground h-12 px-6"
+              >
+                Boka 15 min demo
+                <ArrowRight className="ml-1 h-4 w-4" />
+              </Button>
             </div>
           </div>
         </div>
@@ -351,14 +444,63 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* PILOTKUND */}
+      <section className="py-20 md:py-24">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-80px' }}
+            transition={{ duration: 0.6 }}
+            className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/8 via-card to-card p-8 md:p-12 max-w-5xl mx-auto shadow-md"
+          >
+            <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-primary/15 blur-3xl" aria-hidden />
+            <div className="relative grid gap-8 md:grid-cols-[1.2fr_1fr] items-center">
+              <div>
+                <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary uppercase tracking-wider">
+                  <Sparkles className="h-3.5 w-3.5" /> Begränsat antal platser
+                </div>
+                <h2 className="mt-5 text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+                  Bli pilotkund
+                </h2>
+                <p className="mt-4 text-base text-muted-foreground leading-relaxed">
+                  Vi söker några få transportföretag som vill testa Aurora Transport och hjälpa oss göra systemet ännu bättre. Du får extra närhet till teamet och påverkar vad vi bygger härnäst.
+                </p>
+                <Button
+                  size="lg"
+                  onClick={() => setLeadModalOpen(true)}
+                  className="mt-7 bg-primary hover:bg-primary-hover text-primary-foreground h-12 px-6"
+                >
+                  Ansök som pilotkund
+                  <ArrowRight className="ml-1 h-4 w-4" />
+                </Button>
+              </div>
+              <ul className="space-y-3">
+                {[
+                  'Setuphjälp ingår',
+                  'Personlig onboarding',
+                  'Ingen bindningstid',
+                  '449 kr/mån — fast pris',
+                ].map((t) => (
+                  <li key={t} className="flex items-start gap-3 rounded-xl border border-border bg-background/80 backdrop-blur px-4 py-3 text-sm text-foreground">
+                    <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                    <span className="font-medium">{t}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* PRIS */}
       <section id="pris" className="py-20 md:py-28 relative overflow-hidden">
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-background via-[hsl(214_60%_97%)] to-background" />
         <div className="container mx-auto px-4">
           <div className="max-w-2xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">Ett pris. Allt inkluderat.</h2>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">Enkelt pris. Inga överraskningar.</h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              Inga dolda avgifter. Inga kostnader per användare.
+              Fast månadskostnad. Inga avgifter per användare. Säg upp när du vill.
             </p>
           </div>
           <div className="mt-14 grid gap-6 md:grid-cols-2 max-w-4xl mx-auto">
@@ -406,10 +548,9 @@ export default function LandingPage() {
                 {[
                   'Obegränsat antal förare och admins',
                   'Obegränsat antal uppdrag',
-                  'Dashboard & rapporter',
                   'Tidrapportering',
-                  'OB-tillägg & traktamente',
                   'Fakturaunderlag',
+                  'Statistik & rapporter',
                   'Support på svenska',
                   'Ingen bindningstid',
                 ].map((p) => (
@@ -424,12 +565,50 @@ export default function LandingPage() {
                 size="lg"
                 className="mt-8 bg-background text-primary hover:bg-background/90 h-12"
               >
-                Kontakta oss
+                Boka 15 min demo
               </Button>
             </motion.div>
           </div>
           <div className="mt-10 text-center text-sm text-muted-foreground">
             <p><span className="font-medium text-foreground">Första månaden totalt: 3 949 kr</span> · Därefter 449 kr/mån</p>
+          </div>
+        </div>
+      </section>
+
+      {/* FÖRTROENDE */}
+      <section className="py-16 md:py-20 bg-card border-y border-border">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-10">
+              <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
+                Svenskt företag. Svensk support. Inga överraskningar.
+              </h2>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+              {[
+                { icon: Shield, label: 'Aurora Media AB', sub: 'Org.nr 559272-0220' },
+                { icon: Headphones, label: 'Support på svenska', sub: 'Mejl & telefon' },
+                { icon: MapIcon, label: 'Byggt i Sverige', sub: 'Svensk utveckling' },
+                { icon: CheckCircle2, label: 'Ingen bindningstid', sub: 'Säg upp när du vill' },
+                { icon: Wallet, label: 'Fast pris 449 kr/mån', sub: 'Oavsett antal förare' },
+              ].map((t, i) => (
+                <motion.div
+                  key={t.label}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, margin: '-60px' }}
+                  variants={fadeUp}
+                  custom={i}
+                  className="rounded-xl border border-border bg-background p-5 text-center"
+                >
+                  <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <t.icon className="h-5 w-5" />
+                  </div>
+                  <div className="mt-3 text-sm font-semibold text-foreground">{t.label}</div>
+                  <div className="mt-0.5 text-xs text-muted-foreground">{t.sub}</div>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -531,13 +710,13 @@ export default function LandingPage() {
           <div className="mt-12 max-w-3xl mx-auto">
             <Accordion type="single" collapsible className="space-y-3">
               {[
-                { q: 'Vad är Aurora Transport?', a: 'Aurora Transport är ett digitalt system för transport- och bemanningsföretag som vill hantera uppdrag, förare och tidrapportering på ett enklare sätt.' },
-                { q: 'Hur lång tid tar det att komma igång?', a: 'De flesta kommer igång samma dag. Systemet är byggt för att vara enkelt och kräver ingen lång utbildning.' },
-                { q: 'Behöver mina förare ladda ner en app?', a: 'Systemet fungerar direkt i webbläsaren på mobil, surfplatta och dator.' },
-                { q: 'Kan jag avsluta när jag vill?', a: 'Ja. Det finns ingen bindningstid.' },
-                { q: 'Fungerar det med Fortnox?', a: 'Ja, systemet kan skapa fakturaunderlag och exportera data för Fortnox.' },
-                { q: 'Hanterar ni OB-tillägg och traktamente?', a: 'Ja, du kan konfigurera OB och traktamente utifrån dina behov.' },
-                { q: 'Vad skiljer er från dyrare system?', a: 'Aurora Transport är enklare, snabbare att komma igång med och har ett fast pris utan kostnad per användare.' },
+                { q: 'Hur snabbt kommer vi igång?', a: 'De flesta kunder är igång samma dag. Vi hjälper er med en personlig onboarding där vi konfigurerar systemet, lägger in kunder och förare och går igenom flödet med teamet.' },
+                { q: 'Behöver förare installera något?', a: 'Nej. Förarna loggar in direkt i webbläsaren på sin mobil — inga appar behöver laddas ner från App Store eller Google Play.' },
+                { q: 'Kan vi avsluta när vi vill?', a: 'Ja. Det finns ingen bindningstid. Säg upp när som helst med 30 dagars uppsägningstid.' },
+                { q: 'Kan ni hjälpa oss lägga in kunder och förare?', a: 'Ja. Setupavgiften (3 500 kr) inkluderar att vi konfigurerar systemet åt er, importerar kunder och förare och utbildar teamet.' },
+                { q: 'Passar Aurora små åkerier?', a: 'Ja — vi är byggda för företag med 3–30 förare. Små åkerier, budfirmor, transportbemanning och lokala distributionsföretag är vår kärnmålgrupp.' },
+                { q: 'Hur skiljer ni er från större TMS-system?', a: 'Vi är enklare att komma igång med, har fast pris utan licenskostnad per användare och fokuserar på det svenska transportföretagens vardag — inte på funktioner ni aldrig använder.' },
+                { q: 'Fungerar det med Fortnox?', a: 'Ja, systemet skapar fakturaunderlag och exporterar data till Fortnox och andra bokföringsprogram (SIE, CSV).' },
               ].map((item, i) => (
                 <AccordionItem
                   key={i}
@@ -621,10 +800,10 @@ export default function LandingPage() {
         <div className="container mx-auto px-4 relative">
           <div className="max-w-2xl mx-auto text-center">
             <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-sidebar-foreground">
-              Redo att modernisera ditt transportföretag?
+              Redo att slippa Excel och WhatsApp?
             </h2>
             <p className="mt-5 text-lg text-sidebar-foreground/80">
-              449 kr/mån. Fast pris. Ingen bindningstid.
+              15 minuters demo räcker för att se om Aurora passar er. 449 kr/mån, ingen bindningstid.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
               <Button
@@ -632,8 +811,17 @@ export default function LandingPage() {
                 onClick={() => setLeadModalOpen(true)}
                 className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 h-12 px-8 text-base"
               >
-                Kontakta oss
+                Boka 15 min demo
                 <ArrowRight className="ml-1 h-4 w-4" />
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={handleDemo}
+                disabled={demoLoading}
+                className="h-12 px-8 text-base bg-transparent border-sidebar-foreground/30 text-sidebar-foreground hover:bg-sidebar-foreground/10 hover:text-sidebar-foreground"
+              >
+                {demoLoading ? 'Loggar in...' : 'Se demo med exempeldata'}
               </Button>
             </div>
             <a
