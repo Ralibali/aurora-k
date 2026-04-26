@@ -885,12 +885,12 @@ function TestimonialsSection() {
 /* ═══════════════════════ FAQ ═══════════════════════ */
 const faqs = [
   { q: 'Vad är Aurora Transport?', a: 'Ett transportledningssystem för svenska transport- och bemanningsföretag. Dispatch, tidrapportering och personalhantering i en app.' },
-  { q: 'Hur lång tid tar det att komma igång?', a: 'Under 5 minuter. Registrera, betala, bjud in förare, kör.' },
+  { q: 'Hur lång tid tar det att komma igång?', a: 'Grundkontot går snabbt att skapa. Vill du slippa konfigurera själv hjälper vi dig med onboarding, import av personal och genomgång med teamet.' },
   { q: 'Behöver mina förare ladda ner en app?', a: 'Nej. PWA — fungerar direkt i mobilens webbläsare. Lägg till på hemskärmen som en vanlig app.' },
   { q: 'Kan jag avsluta när jag vill?', a: 'Ja. Ingen bindningstid. Månadsvis betalning.' },
   { q: 'Fungerar det med Fortnox?', a: 'Ja. Du kan exportera tidrapporter med ett klick, eller välja "Fakturaunderlag" för att generera specifikationer som du enkelt för över till Fortnox.' },
   { q: 'Hanterar ni OB-tillägg och traktamente?', a: 'Ja. Du konfigurerar OB-scheman (kväll, natt, helg) och traktamentsnivåer under Ekonomi. Beloppen beräknas automatiskt baserat på arbetade timmar.' },
-  { q: 'Vad skiljer er från Coredination?', a: 'Enklare, billigare och snabbare. 449 kr/mån fast pris oavsett antal användare. Kom igång på 5 minuter utan att kontakta oss.' },
+  { q: 'Hur skiljer ni er från traditionella transportledningssystem?', a: 'Enklare, billigare och snabbare att komma igång med. Fast månadspris oavsett antal användare — ingen säljdemo eller per-användare-licenser.' },
 ];
 
 function FaqSection() {
