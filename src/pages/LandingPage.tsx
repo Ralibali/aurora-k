@@ -151,11 +151,11 @@ export default function LandingPage() {
       <ProblemSection />
       <HowItWorks />
       <FeaturesSection />
-      <PlatformShowcase onContact={openLead} />
-      <ComparisonTable />
-      <TestimonialsSection />
       <PricingSection onContact={openLead} />
       <FaqSection />
+      <ComparisonTable />
+      <TestimonialsSection />
+      <PlatformShowcase onContact={openLead} />
       <SeoContent />
       <InternalLinks />
       <FinalCta onContact={openLead} />
