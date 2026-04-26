@@ -685,7 +685,7 @@ function ComparisonTable() {
                 <th className="text-left px-5 py-3.5 text-muted-foreground font-medium bg-slate-50">Funktion</th>
                 <th className="px-5 py-3.5 text-center font-semibold text-primary-foreground bg-primary">Aurora Transport</th>
                 <th className="px-5 py-3.5 text-center text-muted-foreground font-medium bg-slate-50">Excel/WhatsApp</th>
-                <th className="px-5 py-3.5 text-center text-muted-foreground font-medium bg-slate-50">Coredination</th>
+                <th className="px-5 py-3.5 text-center text-muted-foreground font-medium bg-slate-50">Traditionella system</th>
               </tr>
             </thead>
             <tbody>
