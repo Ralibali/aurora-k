@@ -217,3 +217,89 @@ export const demoNotifications = [
   { id: 'demo-n-2', title: 'Ny rutin för fraktsedlar', message: 'Från och med nästa vecka ska alla fraktsedlar fotograferas direkt vid avlämning.', type: 'warning', target_role: 'driver', created_at: hoursAgo(8) },
   { id: 'demo-n-3', title: 'Storhelger — ändrade tider', message: 'Påminnelse om reducerade öppettider under kommande röda dagar.', type: 'info', target_role: null, created_at: hoursAgo(26) },
 ];
+
+function dateOffsetISO(daysOffset: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + daysOffset);
+  return d.toISOString().slice(0, 10);
+}
+
+/** Demo customers expanded to match Customer table columns (pricing, contact). */
+export const demoCustomersFull = [
+  { id: 'demo-c-1', name: 'Nilsson Åkeri AB', email: 'order@nilssonakeri.se', phone: '08-555 12 34', org_number: '556012-1234', contact_person: 'Erik Nilsson', pricing_type: 'per_hour', price_per_hour: 695, price_per_delivery: null, payment_terms_days: 30, invoice_address: 'Industrigatan 12, 111 22 Stockholm', visit_address: 'Industrigatan 12, 111 22 Stockholm', notes: null, created_at: hoursAgo(24 * 30) },
+  { id: 'demo-c-2', name: 'Skåne Logistik AB', email: 'kontakt@skanelogistik.se', phone: '040-12 34 56', org_number: '556789-4567', contact_person: 'Anna Berg', pricing_type: 'per_delivery', price_per_hour: null, price_per_delivery: 1450, payment_terms_days: 14, invoice_address: 'Hamnvägen 4, 211 19 Malmö', visit_address: 'Hamnvägen 4, 211 19 Malmö', notes: null, created_at: hoursAgo(24 * 60) },
+  { id: 'demo-c-3', name: 'Nordic Freight AB', email: 'info@nordicfreight.se', phone: '031-99 88 77', org_number: '556321-7890', contact_person: 'Marcus Lind', pricing_type: 'per_hour', price_per_hour: 750, price_per_delivery: null, payment_terms_days: 30, invoice_address: 'Frihamnen 8, 417 55 Göteborg', visit_address: 'Frihamnen 8, 417 55 Göteborg', notes: null, created_at: hoursAgo(24 * 90) },
+  { id: 'demo-c-4', name: 'AB Transport Sverige', email: 'bokning@abtransport.se', phone: '054-22 33 44', org_number: '556456-2345', contact_person: 'Linda Olsson', pricing_type: 'manual', price_per_hour: null, price_per_delivery: null, payment_terms_days: 20, invoice_address: 'Karolinen 1, 651 88 Karlstad', visit_address: 'Karolinen 1, 651 88 Karlstad', notes: null, created_at: hoursAgo(24 * 14) },
+];
+
+/** Demo drivers expanded with timestamps for the Driver list. */
+export const demoDriversFull = [
+  { id: 'demo-d-1', full_name: 'Johan Svensson', email: 'johan@demo.se', is_available: true, role: 'driver', created_at: hoursAgo(24 * 200) },
+  { id: 'demo-d-2', full_name: 'Sara Andersson', email: 'sara@demo.se', is_available: true, role: 'driver', created_at: hoursAgo(24 * 150) },
+  { id: 'demo-d-3', full_name: 'Ali Hassan', email: 'ali@demo.se', is_available: false, role: 'driver', created_at: hoursAgo(24 * 95) },
+  { id: 'demo-d-4', full_name: 'Maria Karlsson', email: 'maria@demo.se', is_available: true, role: 'driver', created_at: hoursAgo(24 * 60) },
+];
+
+/** Realistic demo invoices: 1 draft, 1 sent (open), 1 paid, 1 overdue. */
+export const demoInvoices = [
+  {
+    id: 'demo-inv-1',
+    invoice_number: 2042,
+    customer_id: 'demo-c-1',
+    customer: { id: 'demo-c-1', name: 'Nilsson Åkeri AB', org_number: '556012-1234', invoice_address: 'Industrigatan 12, 111 22 Stockholm', pricing_type: 'per_hour', price_per_hour: 695, price_per_delivery: null },
+    invoice_date: dateOffsetISO(-3),
+    due_date: dateOffsetISO(27),
+    total_ex_vat: 18_540,
+    vat_amount: 4_635,
+    total_inc_vat: 23_175,
+    status: 'sent',
+    assignment_ids: ['demo-a-1042'],
+    reference: 'PO-44521',
+    message: 'Tack för ert förtroende.',
+  },
+  {
+    id: 'demo-inv-2',
+    invoice_number: 2041,
+    customer_id: 'demo-c-3',
+    customer: { id: 'demo-c-3', name: 'Nordic Freight AB', org_number: '556321-7890', invoice_address: 'Frihamnen 8, 417 55 Göteborg', pricing_type: 'per_hour', price_per_hour: 750, price_per_delivery: null },
+    invoice_date: dateOffsetISO(-12),
+    due_date: dateOffsetISO(-5),
+    total_ex_vat: 31_200,
+    vat_amount: 7_800,
+    total_inc_vat: 39_000,
+    status: 'sent',
+    assignment_ids: ['demo-a-1040'],
+    reference: 'Order 8821',
+    message: null,
+  },
+  {
+    id: 'demo-inv-3',
+    invoice_number: 2040,
+    customer_id: 'demo-c-2',
+    customer: { id: 'demo-c-2', name: 'Skåne Logistik AB', org_number: '556789-4567', invoice_address: 'Hamnvägen 4, 211 19 Malmö', pricing_type: 'per_delivery', price_per_hour: null, price_per_delivery: 1450 },
+    invoice_date: dateOffsetISO(-21),
+    due_date: dateOffsetISO(-7),
+    total_ex_vat: 11_600,
+    vat_amount: 2_900,
+    total_inc_vat: 14_500,
+    status: 'paid',
+    assignment_ids: ['demo-a-1041'],
+    reference: null,
+    message: null,
+  },
+  {
+    id: 'demo-inv-4',
+    invoice_number: 2043,
+    customer_id: 'demo-c-4',
+    customer: { id: 'demo-c-4', name: 'AB Transport Sverige', org_number: '556456-2345', invoice_address: 'Karolinen 1, 651 88 Karlstad', pricing_type: 'manual', price_per_hour: null, price_per_delivery: null },
+    invoice_date: dateOffsetISO(-1),
+    due_date: dateOffsetISO(29),
+    total_ex_vat: 8_400,
+    vat_amount: 2_100,
+    total_inc_vat: 10_500,
+    status: 'draft',
+    assignment_ids: ['demo-a-1039'],
+    reference: null,
+    message: 'Utkast — kontrollera innan utskick.',
+  },
+];
