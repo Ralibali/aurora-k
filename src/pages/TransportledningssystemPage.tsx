@@ -246,6 +246,38 @@ function ComparisonTable() {
   );
 }
 
+function SeoTextSection() {
+  return (
+    <section className="py-20 bg-background border-t border-border">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6">
+        <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-6">
+          Vad är ett transportledningssystem?
+        </h2>
+        <div className="prose prose-slate max-w-none text-muted-foreground leading-relaxed space-y-4">
+          <p>
+            Ett transportledningssystem hjälper åkerier, budföretag och transportteam att samla planering,
+            uppdrag, förare, tidrapportering och fakturaunderlag på ett ställe. Istället för att jobba
+            med telefon, SMS, WhatsApp och kalkylark får transportledaren en tydlig översikt över vad som
+            ska göras, vem som kör och vilka uppdrag som är klara.
+          </p>
+          <p>
+            Aurora Transport är byggt för svenska transportföretag som vill ha ett enkelt system utan
+            lång implementation, dyra användarlicenser eller krångliga utbildningar. Förare kan använda
+            systemet direkt i mobilen, och administratörer får bättre kontroll över uppdrag, tider och
+            underlag.
+          </p>
+          <h3 className="text-xl font-semibold text-foreground mt-6 mb-3">Transportledning utan tung implementation</h3>
+          <p>
+            Många traditionella transportledningssystem är byggda för stora organisationer. Aurora
+            Transport fokuserar istället på små och medelstora företag som behöver komma igång snabbt,
+            arbeta mer strukturerat och minska tiden som läggs på manuell administration.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function FaqSection() {
   const faqs = [
     { q: 'Vad är ett transportledningssystem?', a: 'Ett system som hjälper transportföretag att planera, tilldela och följa upp uppdrag digitalt — istället för via telefon, SMS eller kalkylark.' },
