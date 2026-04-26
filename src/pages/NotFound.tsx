@@ -2,9 +2,18 @@ import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
 import { Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { usePageMeta } from "@/lib/use-page-meta";
 
 const NotFound = () => {
   const location = useLocation();
+
+  usePageMeta({
+    title: "Sidan hittades inte | Aurora Transport",
+    description:
+      "Sidan du sökte finns inte längre eller har flyttats. Gå till startsidan eller utforska våra tjänster för åkerier och transportföretag.",
+    canonical: `https://auroratransport.se${location.pathname}`,
+    noindex: true,
+  });
 
   useEffect(() => {
     console.error("404 Error: User attempted to access non-existent route:", location.pathname);

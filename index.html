@@ -56,7 +56,32 @@
     <link rel="icon" type="image/png" href="/icon-192x192.png" />
     <link rel="manifest" href="/manifest.json" />
 
-    <!-- JSON-LD injiceras per sida via React (use-page-meta / sidkomponenter) -->
+    <!-- Global Organization + WebSite JSON-LD (sidspecifik JSON-LD läggs på varje sida) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://auroratransport.se/#organization",
+          "name": "Aurora Transport",
+          "url": "https://auroratransport.se/",
+          "logo": "https://auroratransport.se/icon-512x512.png",
+          "founder": { "@type": "Organization", "name": "Aurora Media AB" },
+          "areaServed": "SE",
+          "sameAs": []
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://auroratransport.se/#website",
+          "url": "https://auroratransport.se/",
+          "name": "Aurora Transport",
+          "inLanguage": "sv-SE",
+          "publisher": { "@id": "https://auroratransport.se/#organization" }
+        }
+      ]
+    }
+    </script>
 
     <!-- Google Analytics 4 — replace G-XXXXXXXXXX with your Measurement ID -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-YFK8HNQPSW"></script>
