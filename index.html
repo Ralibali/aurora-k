@@ -96,62 +96,6 @@
 
   <body>
     <div id="root"></div>
-    <script>
-      (() => {
-        const words = {
-          '1': 'ett', '01': 'ett',
-          '2': 'två', '02': 'två',
-          '3': 'tre', '03': 'tre',
-          '4': 'fyra', '04': 'fyra',
-          '5': 'fem', '05': 'fem',
-          '6': 'sex', '06': 'sex',
-          '7': 'sju', '07': 'sju',
-          '8': 'åtta', '08': 'åtta',
-          '9': 'nio', '09': 'nio',
-          '10': 'tio', '11': 'elva', '12': 'tolv'
-        };
-
-        const skip = (text) => /kr|org\.nr|2026|2027|http|icon-|g-|measurement|measurement id/i.test(text);
-
-        const replaceSmallNumbers = () => {
-          if (window.location.pathname !== '/') return;
-
-          const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
-            acceptNode(node) {
-              const parent = node.parentElement;
-              if (!parent || ['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEXTAREA', 'INPUT'].includes(parent.tagName)) {
-                return NodeFilter.FILTER_REJECT;
-              }
-              const text = node.nodeValue || '';
-              if (skip(text)) return NodeFilter.FILTER_REJECT;
-              return /\b(?:0?[1-9]|1[0-2])\b/.test(text)
-                ? NodeFilter.FILTER_ACCEPT
-                : NodeFilter.FILTER_REJECT;
-            }
-          });
-
-          const nodes = [];
-          while (walker.nextNode()) nodes.push(walker.currentNode);
-
-          nodes.forEach((node) => {
-            node.nodeValue = (node.nodeValue || '')
-              .replace(/\b(0?[1-9]|1[0-2])\b/g, (match) => words[match] || match);
-          });
-        };
-
-        const run = () => {
-          replaceSmallNumbers();
-          window.setTimeout(replaceSmallNumbers, 300);
-          window.setTimeout(replaceSmallNumbers, 1000);
-        };
-
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', run);
-        } else {
-          run();
-        }
-      })();
-    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
