@@ -124,7 +124,7 @@
               }
               const text = node.nodeValue || '';
               if (skip(text)) return NodeFilter.FILTER_REJECT;
-              return /(\b(?:0?[1-9]|1[0-2])\b|15 min|5 min|5 minuter)/.test(text)
+              return /\b(?:0?[1-9]|1[0-2])\b/.test(text)
                 ? NodeFilter.FILTER_ACCEPT
                 : NodeFilter.FILTER_REJECT;
             }
@@ -135,9 +135,6 @@
 
           nodes.forEach((node) => {
             node.nodeValue = (node.nodeValue || '')
-              .replace(/15 min/g, 'femton min')
-              .replace(/5 minuter/g, 'fem minuter')
-              .replace(/5 min/g, 'fem min')
               .replace(/\b(0?[1-9]|1[0-2])\b/g, (match) => words[match] || match);
           });
         };
