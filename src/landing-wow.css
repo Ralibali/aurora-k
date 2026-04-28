@@ -1,0 +1,136 @@
+/* Premium visual treatment for the public landing page */
+
+#root > .min-h-screen.bg-background {
+  background:
+    radial-gradient(circle at top left, hsl(var(--primary) / 0.14), transparent 34rem),
+    radial-gradient(circle at 82% 8%, hsl(var(--warning) / 0.12), transparent 32rem),
+    linear-gradient(180deg, hsl(214 76% 98%), hsl(var(--background)) 34rem);
+}
+
+#root > .min-h-screen.bg-background > header {
+  border-bottom-color: hsl(var(--border) / 0.7);
+  background: hsl(var(--background) / 0.74);
+  box-shadow: 0 16px 48px hsl(222 47% 11% / 0.06);
+}
+
+#root > .min-h-screen.bg-background > header + section {
+  isolation: isolate;
+}
+
+#root > .min-h-screen.bg-background > header + section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -9;
+  pointer-events: none;
+  background-image:
+    linear-gradient(hsl(var(--primary) / 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--primary) / 0.055) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: linear-gradient(to bottom, black, transparent 72%);
+}
+
+#root > .min-h-screen.bg-background > header + section::after {
+  content: "";
+  position: absolute;
+  top: 5rem;
+  right: max(1rem, calc((100vw - 1180px) / 2));
+  width: 20rem;
+  height: 20rem;
+  z-index: -8;
+  pointer-events: none;
+  border-radius: 999px;
+  background: conic-gradient(from 180deg, hsl(var(--primary) / 0.2), hsl(var(--warning) / 0.16), hsl(var(--primary) / 0.08), hsl(var(--primary) / 0.2));
+  filter: blur(54px);
+  opacity: 0.75;
+}
+
+#root > .min-h-screen.bg-background > header + section h1 {
+  letter-spacing: -0.06em;
+  text-wrap: balance;
+}
+
+#root > .min-h-screen.bg-background > header + section h1 .text-primary {
+  color: transparent;
+  background: linear-gradient(90deg, hsl(var(--primary)), hsl(207 90% 54%), hsl(var(--warning)));
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+#root > .min-h-screen.bg-background > header + section p {
+  text-wrap: pretty;
+}
+
+#root > .min-h-screen.bg-background > header + section button:first-child,
+#root > .min-h-screen.bg-background section[id="pris"] button,
+#root > .min-h-screen.bg-background section button.bg-primary {
+  position: relative;
+  overflow: hidden;
+  transform: translateZ(0);
+  box-shadow: 0 18px 50px hsl(var(--primary) / 0.28);
+}
+
+#root > .min-h-screen.bg-background > header + section button:first-child::after,
+#root > .min-h-screen.bg-background section[id="pris"] button::after,
+#root > .min-h-screen.bg-background section button.bg-primary::after {
+  content: "";
+  position: absolute;
+  inset: -40% auto -40% -60%;
+  width: 45%;
+  transform: rotate(18deg);
+  background: linear-gradient(90deg, transparent, hsl(0 0% 100% / 0.42), transparent);
+  transition: left 0.7s ease;
+}
+
+#root > .min-h-screen.bg-background > header + section button:first-child:hover::after,
+#root > .min-h-screen.bg-background section[id="pris"] button:hover::after,
+#root > .min-h-screen.bg-background section button.bg-primary:hover::after {
+  left: 120%;
+}
+
+#root > .min-h-screen.bg-background .rounded-2xl,
+#root > .min-h-screen.bg-background .rounded-3xl {
+  border-color: hsl(var(--border) / 0.82);
+}
+
+#root > .min-h-screen.bg-background .shadow-sm,
+#root > .min-h-screen.bg-background .shadow-md,
+#root > .min-h-screen.bg-background .shadow-xl {
+  box-shadow: 0 20px 70px hsl(222 47% 11% / 0.08);
+}
+
+#root > .min-h-screen.bg-background section .rounded-2xl:hover,
+#root > .min-h-screen.bg-background section .rounded-3xl:hover {
+  border-color: hsl(var(--primary) / 0.28);
+}
+
+#root > .min-h-screen.bg-background section h2 {
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+
+#root > .min-h-screen.bg-background section[id="pris"] .bg-gradient-to-br.from-primary {
+  box-shadow: 0 30px 90px hsl(var(--primary) / 0.34), inset 0 1px 0 hsl(0 0% 100% / 0.26);
+}
+
+@media (min-width: 1024px) {
+  #root > .min-h-screen.bg-background > header + section .container {
+    padding-top: 7rem;
+    padding-bottom: 8rem;
+  }
+
+  #root > .min-h-screen.bg-background > header + section h1 {
+    font-size: clamp(4.25rem, 6vw, 6.8rem);
+    line-height: 0.95;
+  }
+}
+
+@media (max-width: 767px) {
+  #root > .min-h-screen.bg-background > header + section h1 {
+    letter-spacing: -0.045em;
+  }
+
+  #root > .min-h-screen.bg-background > header + section::before {
+    background-size: 48px 48px;
+  }
+}
