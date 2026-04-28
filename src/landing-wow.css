@@ -1,147 +1,132 @@
-/* Premium visual treatment for the public landing page */
+/* Aurora Transport — stabil premium-finish.
+   Ingen text eller siffra ändras här. Endast visuellt lyft. */
+
+:root {
+  --aurora-ink: 222 47% 11%;
+  --aurora-soft-blue: 214 100% 97%;
+}
 
 #root > .min-h-screen.bg-background {
   background:
-    radial-gradient(circle at top left, hsl(var(--primary) / 0.14), transparent 34rem),
-    radial-gradient(circle at 82% 8%, hsl(var(--warning) / 0.12), transparent 32rem),
-    linear-gradient(180deg, hsl(214 76% 98%), hsl(var(--background)) 34rem);
+    radial-gradient(circle at 18% 0%, hsl(var(--primary) / 0.10), transparent 30rem),
+    radial-gradient(circle at 86% 16%, hsl(var(--warning) / 0.08), transparent 28rem),
+    linear-gradient(180deg, hsl(var(--aurora-soft-blue)), hsl(var(--background)) 34rem);
 }
 
 #root > .min-h-screen.bg-background > header {
-  border-bottom-color: hsl(var(--border) / 0.7);
-  background: hsl(var(--background) / 0.74);
-  box-shadow: 0 16px 48px hsl(222 47% 11% / 0.06);
+  background: hsl(var(--background) / 0.88);
+  border-bottom-color: hsl(var(--border) / 0.78);
+  box-shadow: 0 10px 34px hsl(var(--aurora-ink) / 0.045);
 }
 
 #root > .min-h-screen.bg-background > header + section {
-  isolation: isolate;
+  position: relative;
+  overflow: hidden;
 }
 
 #root > .min-h-screen.bg-background > header + section::before {
   content: "";
   position: absolute;
   inset: 0;
-  z-index: -9;
   pointer-events: none;
   background-image:
-    linear-gradient(hsl(var(--primary) / 0.055) 1px, transparent 1px),
-    linear-gradient(90deg, hsl(var(--primary) / 0.055) 1px, transparent 1px);
-  background-size: 72px 72px;
-  mask-image: linear-gradient(to bottom, black, transparent 72%);
+    linear-gradient(hsl(var(--primary) / 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--primary) / 0.04) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: linear-gradient(to bottom, black 0%, transparent 78%);
 }
 
-#root > .min-h-screen.bg-background > header + section::after {
-  content: "";
-  position: absolute;
-  top: 5rem;
-  right: max(1rem, calc((100vw - 1180px) / 2));
-  width: 20rem;
-  height: 20rem;
-  z-index: -8;
-  pointer-events: none;
-  border-radius: 999px;
-  background: conic-gradient(from 180deg, hsl(var(--primary) / 0.2), hsl(var(--warning) / 0.16), hsl(var(--primary) / 0.08), hsl(var(--primary) / 0.2));
-  filter: blur(54px);
-  opacity: 0.75;
+#root > .min-h-screen.bg-background > header + section > * {
+  position: relative;
 }
 
 #root > .min-h-screen.bg-background > header + section h1 {
-  letter-spacing: -0.055em;
+  letter-spacing: -0.048em;
   text-wrap: balance;
-  max-width: 10.5ch;
 }
 
 #root > .min-h-screen.bg-background > header + section h1 .text-primary {
   color: transparent;
-  background: linear-gradient(90deg, hsl(var(--primary)), hsl(207 90% 54%), hsl(var(--warning)));
+  background: linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(204 86% 53%) 58%, hsl(43 70% 46%) 100%);
   -webkit-background-clip: text;
   background-clip: text;
 }
 
-#root > .min-h-screen.bg-background > header + section p {
+#root > .min-h-screen.bg-background > header + section p,
+#root > .min-h-screen.bg-background section h2,
+#root > .min-h-screen.bg-background section p {
   text-wrap: pretty;
 }
 
-#root > .min-h-screen.bg-background > header + section button:first-child,
-#root > .min-h-screen.bg-background section[id="pris"] button,
-#root > .min-h-screen.bg-background section button.bg-primary {
-  position: relative;
-  overflow: hidden;
-  transform: translateZ(0);
-  box-shadow: 0 18px 50px hsl(var(--primary) / 0.28);
+#root > .min-h-screen.bg-background button.bg-primary,
+#root > .min-h-screen.bg-background a.bg-primary,
+#root > .min-h-screen.bg-background section[id="pris"] button {
+  box-shadow: 0 16px 42px hsl(var(--primary) / 0.20);
+  transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
 }
 
-#root > .min-h-screen.bg-background > header + section button:first-child::after,
-#root > .min-h-screen.bg-background section[id="pris"] button::after,
-#root > .min-h-screen.bg-background section button.bg-primary::after {
-  content: "";
-  position: absolute;
-  inset: -40% auto -40% -60%;
-  width: 45%;
-  transform: rotate(18deg);
-  background: linear-gradient(90deg, transparent, hsl(0 0% 100% / 0.42), transparent);
-  transition: left 0.7s ease;
-}
-
-#root > .min-h-screen.bg-background > header + section button:first-child:hover::after,
-#root > .min-h-screen.bg-background section[id="pris"] button:hover::after,
-#root > .min-h-screen.bg-background section button.bg-primary:hover::after {
-  left: 120%;
+#root > .min-h-screen.bg-background button.bg-primary:hover,
+#root > .min-h-screen.bg-background a.bg-primary:hover,
+#root > .min-h-screen.bg-background section[id="pris"] button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 22px 52px hsl(var(--primary) / 0.26);
 }
 
 #root > .min-h-screen.bg-background .rounded-2xl,
 #root > .min-h-screen.bg-background .rounded-3xl {
-  border-color: hsl(var(--border) / 0.82);
-}
-
-#root > .min-h-screen.bg-background .shadow-sm,
-#root > .min-h-screen.bg-background .shadow-md,
-#root > .min-h-screen.bg-background .shadow-xl {
-  box-shadow: 0 20px 70px hsl(222 47% 11% / 0.08);
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
 }
 
 #root > .min-h-screen.bg-background section .rounded-2xl:hover,
 #root > .min-h-screen.bg-background section .rounded-3xl:hover {
-  border-color: hsl(var(--primary) / 0.28);
+  transform: translateY(-2px);
+  border-color: hsl(var(--primary) / 0.22);
+  box-shadow: 0 18px 46px hsl(var(--aurora-ink) / 0.075);
 }
 
 #root > .min-h-screen.bg-background section h2 {
-  letter-spacing: -0.045em;
-  text-wrap: balance;
+  letter-spacing: -0.038em;
 }
 
 #root > .min-h-screen.bg-background section[id="pris"] .bg-gradient-to-br.from-primary {
-  box-shadow: 0 30px 90px hsl(var(--primary) / 0.34), inset 0 1px 0 hsl(0 0% 100% / 0.26);
+  box-shadow: 0 26px 70px hsl(var(--primary) / 0.28), inset 0 1px 0 hsl(0 0% 100% / 0.18);
 }
 
 @media (min-width: 1024px) {
   #root > .min-h-screen.bg-background > header + section .container {
-    padding-top: 6rem;
-    padding-bottom: 7rem;
+    padding-top: 5.5rem;
+    padding-bottom: 6.5rem;
   }
 
   #root > .min-h-screen.bg-background > header + section h1 {
-    font-size: clamp(3.7rem, 5vw, 5.4rem);
-    line-height: 0.98;
+    font-size: clamp(3.35rem, 4.25vw, 4.75rem);
+    line-height: 1.02;
+    max-width: 12.5ch;
   }
 
   #root > .min-h-screen.bg-background > header + section .grid {
-    grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
-    column-gap: 4.5rem;
+    align-items: center;
   }
 
-  #root > .min-h-screen.bg-background > header + section .grid > * {
+  #root > .min-h-screen.bg-background > header + section .grid > :first-child,
+  #root > .min-h-screen.bg-background > header + section .grid > :last-child {
     min-width: 0;
+  }
+}
+
+@media (max-width: 1023px) {
+  #root > .min-h-screen.bg-background > header + section h1 {
+    max-width: 13ch;
   }
 }
 
 @media (max-width: 767px) {
   #root > .min-h-screen.bg-background > header + section h1 {
-    letter-spacing: -0.045em;
     max-width: none;
+    letter-spacing: -0.042em;
   }
 
   #root > .min-h-screen.bg-background > header + section::before {
-    background-size: 48px 48px;
+    background-size: 44px 44px;
   }
 }
