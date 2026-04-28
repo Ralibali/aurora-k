@@ -56,6 +56,10 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
+      // Registreringen görs manuellt i src/main.tsx så att den kan spärras
+      // under prerender/build på 127.0.0.1. Annars kan HeadlessChrome försöka
+      // hämta /sw.js innan den finns och Sentry får MIME-felet text/html.
+      injectRegister: false,
       devOptions: {
         enabled: false,
       },
