@@ -16,6 +16,7 @@ import { DriverLayout } from "@/components/DriverLayout";
 import { PlatformAdminShell } from "@/components/PlatformAdminLayout";
 
 const LandingPage = lazy(() => import("./pages/LandingPage"));
+const PublicBookingPage = lazy(() => import("./pages/PublicBookingPage"));
 const TransportledningssystemPage = lazy(() => import("./pages/TransportledningssystemPage"));
 const CoredinationAlternativPage = lazy(() => import("./pages/CoredinationAlternativPage"));
 const TjansterPage = lazy(() => import("./pages/TjansterPage"));
@@ -104,6 +105,8 @@ const App = () => (
               <Suspense fallback={<PageLoader />}>
                 <Routes>
                 <Route path="/" element={<LandingPage />} />
+                <Route path="/boka" element={<PublicBookingPage />} />
+                <Route path="/boka/:slug" element={<PublicBookingPage />} />
                 <Route path="/transportledningssystem" element={<TransportledningssystemPage />} />
                 <Route path="/coredination-alternativ" element={<CoredinationAlternativPage />} />
                 <Route path="/tjanster" element={<TjansterPage />} />
@@ -124,7 +127,6 @@ const App = () => (
                 <Route path="/ads/transport" element={<AdsTransportPage />} />
                 <Route path="/ads/flotta" element={<AdsFlottaPage />} />
 
-                {/* Admin routes — share a single sidebar shell */}
                 <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><SubscriptionGuard><AdminShell /></SubscriptionGuard></ProtectedRoute>}>
                   <Route index element={<AdminDashboard />} />
                   <Route path="assignments" element={<AdminAssignments />} />
@@ -159,7 +161,6 @@ const App = () => (
                   <Route path="compensation" element={<AdminCompensation />} />
                 </Route>
 
-                {/* Platform admin routes */}
                 <Route path="/platform" element={<PlatformAdminGuard><PlatformAdminShell /></PlatformAdminGuard>}>
                   <Route index element={<PlatformDashboard />} />
                   <Route path="companies" element={<PlatformCompanies />} />
@@ -169,7 +170,6 @@ const App = () => (
                   <Route path="leads" element={<PlatformLeads />} />
                 </Route>
 
-{/* Driver routes — share a single layout shell */}
                 <Route path="/driver" element={<ProtectedRoute requiredRole="driver"><DriverLayout /></ProtectedRoute>}>
                   <Route index element={<DriverAssignments />} />
                   <Route path="assignments" element={<DriverAssignments />} />
