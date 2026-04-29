@@ -13,6 +13,32 @@ interface LeadFormProps {
   compact?: boolean;
 }
 
+// Beräknar nästa rimliga återkopplingstid (vardag 09–17, Europe/Stockholm-känsla via lokal tid)
+function getResponseEta(): string {
+  const now = new Date();
+  const day = now.getDay(); // 0 = sön, 6 = lör
+  const hour = now.getHours();
+
+  // Vardag inom kontorstid -> snabbt svar
+  if (day >= 1 && day <= 5 && hour >= 9 && hour < 17) {
+    return 'Vi hör av oss inom 2 timmar — oftast snabbare.';
+  }
+  // Vardag tidig morgon
+  if (day >= 1 && day <= 5 && hour < 9) {
+    return 'Vi hör av oss idag innan kl. 11:00.';
+  }
+  // Vardag kväll
+  if (day >= 1 && day <= 5 && hour >= 17) {
+    return 'Vi hör av oss imorgon förmiddag, senast kl. 11:00.';
+  }
+  // Lördag
+  if (day === 6) {
+    return 'Vi hör av oss på måndag morgon, senast kl. 10:00.';
+  }
+  // Söndag
+  return 'Vi hör av oss imorgon (måndag) senast kl. 10:00.';
+}
+
 export function LeadForm({ onSuccess, compact = false }: LeadFormProps) {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
