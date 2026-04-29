@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from 'next-themes';
 import { motion } from 'framer-motion';
 import {
@@ -22,6 +22,7 @@ import {
   Wallet,
   X,
   Zap,
+  Globe,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -29,6 +30,8 @@ import { LeadFormModal } from '@/components/LeadFormModal';
 import { useAuth } from '@/hooks/useAuth';
 import { useBreadcrumbJsonLd } from '@/lib/breadcrumb-jsonld';
 import { usePageMeta } from '@/lib/use-page-meta';
+import { useHreflang } from '@/lib/use-hreflang';
+import { landingCopy, type Lang } from '@/i18n/landing';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -41,88 +44,12 @@ const fadeUp = {
   }),
 };
 
-const trustPoints = [
-  'Fast pris: 449 kr per månad',
-  'Ingen bindningstid',
-  'Support på svenska',
-  'Kom igång samma dag',
-];
-
-const valueCards = [
-  {
-    icon: TimerReset,
-    title: 'Mindre administration',
-    text: 'Skapa uppdrag, tilldela förare och samla tidrapporter utan att hoppa mellan Excel, telefon och chattar.',
-  },
-  {
-    icon: ShieldCheck,
-    title: 'Färre missar',
-    text: 'Alla ser rätt information direkt. Mindre dubbelarbete, färre missförstånd och bättre koll på varje uppdrag.',
-  },
-  {
-    icon: Wallet,
-    title: 'Snabbare underlag',
-    text: 'Gå från utfört jobb till färdigt fakturaunderlag med tydligare tidrapporter och samlad historik.',
-  },
-];
-
-const steps = [
-  { label: '01', icon: FileText, title: 'Skapa uppdrag', text: 'Lägg in kund, adress, tid och instruktioner på ett ställe.' },
-  { label: '02', icon: Users, title: 'Tilldela förare', text: 'Välj rätt person och skicka ut jobbet direkt.' },
-  { label: '03', icon: Truck, title: 'Föraren ser jobbet', text: 'All information finns i mobilen, utan extra chattar.' },
-  { label: '04', icon: Clock, title: 'Tidrapportera', text: 'Start, stopp och kommentarer registreras enkelt.' },
-  { label: '05', icon: PackageCheck, title: 'Underlag klart', text: 'Samla tid och uppdrag till tydligare fakturaunderlag.' },
-];
-
-const featureGroups = [
-  {
-    icon: Route,
-    title: 'Uppdrag och planering',
-    text: 'Planera dagen, tilldela jobb och följ status i ett tydligt flöde.',
-    items: ['Skapa uppdrag snabbt', 'Tilldela förare', 'Status i realtid'],
-  },
-  {
-    icon: Users,
-    title: 'Förare och personal',
-    text: 'Ge förare rätt information direkt i mobilen och minska onödiga samtal.',
-    items: ['Mobil förarvy', 'Tydliga instruktioner', 'Mindre chattkaos'],
-  },
-  {
-    icon: BarChart3,
-    title: 'Tid och ekonomi',
-    text: 'Samla tider, historik och fakturaunderlag utan dubbelarbete.',
-    items: ['Tidrapportering', 'Fakturaunderlag', 'Rapporter och överblick'],
-  },
-];
-
-const audiences = [
-  { icon: Truck, title: 'Åkerier', text: 'För mindre och växande åkerier som vill få bättre kontroll över uppdrag och förare.' },
-  { icon: Zap, title: 'Budfirmor', text: 'För bolag med snabba jobb, många ändringar och behov av tydlig mobil kommunikation.' },
-  { icon: Users, title: 'Transportbemanning', text: 'För verksamheter som behöver hålla koll på personal, pass, tider och uppdrag.' },
-];
-
-const faqs = [
-  {
-    q: 'Vad kostar Aurora Transport?',
-    a: 'Aurora Transport kostar 449 kr per månad. Setup och onboarding kostar 3 500 kr som engångskostnad.',
-  },
-  {
-    q: 'Finns det bindningstid?',
-    a: 'Nej. Du kan säga upp när du vill. Målet är att systemet ska vara enkelt att börja med och enkelt att stanna kvar i.',
-  },
-  {
-    q: 'Passar Aurora små åkerier?',
-    a: 'Ja. Sidan och systemet är byggt för mindre transportföretag som vill bort från Excel, WhatsApp och manuell administration.',
-  },
-  {
-    q: 'Kan förarna använda mobilen?',
-    a: 'Ja. Förarna kan se uppdrag och rapportera information direkt via mobilen.',
-  },
-  {
-    q: 'Hur snabbt kan vi komma igång?',
-    a: 'De flesta kan komma igång samma dag efter en kort genomgång och enkel uppsättning.',
-  },
-];
+// Icons for value cards / steps / feature groups / audiences are kept in code
+// (they don't translate). Copy comes from i18n/landing.ts.
+const valueIcons = [TimerReset, ShieldCheck, Wallet];
+const stepIcons = [FileText, Users, Truck, Clock, PackageCheck];
+const featureIcons = [Route, Users, BarChart3];
+const audienceIcons = [Truck, Zap, Users];
 
 export default function LandingPageV2() {
   const auth = useAuth();
@@ -130,23 +57,34 @@ export default function LandingPageV2() {
   const isPlatformAdmin = auth.isPlatformAdmin;
   const { setTheme, theme } = useTheme();
   const navigate = useNavigate();
+  const location = useLocation();
   const [leadModalOpen, setLeadModalOpen] = useState(false);
   const [demoLoading, setDemoLoading] = useState(false);
 
-  useBreadcrumbJsonLd(useMemo(() => [{ name: 'Hem', url: 'https://auroratransport.se/' }], []));
+  const lang: Lang = location.pathname.startsWith('/en') ? 'en' : 'sv';
+  const t = landingCopy[lang];
+  const canonical = lang === 'en' ? t.hreflang.en : t.hreflang.sv;
+  const otherLang: Lang = lang === 'sv' ? 'en' : 'sv';
+  const otherPath = otherLang === 'en' ? '/en' : '/';
+
+  useBreadcrumbJsonLd(useMemo(() => [{ name: t.nav.breadcrumbHome, url: canonical }], [t, canonical]));
   usePageMeta({
-    title: 'Slipp Excel och WhatsApp i transportplaneringen | Aurora Transport',
-    description: 'Aurora Transport samlar uppdrag, förare, tidrapporter och fakturaunderlag i ett enkelt system för svenska transportföretag. Fast pris 449 kr per månad.',
-    canonical: 'https://auroratransport.se/',
+    title: t.meta.title,
+    description: t.meta.description,
+    canonical,
     ogImage: 'https://auroratransport.se/og-image.png',
   });
+  useHreflang(
+    useMemo(() => ({ sv: t.hreflang.sv, en: t.hreflang.en }), [t]),
+    t.htmlLang,
+  );
 
   useEffect(() => {
     if (theme !== 'light') setTheme('light');
   }, [theme, setTheme]);
 
   const dashboardHref = user ? (isPlatformAdmin ? '/platform' : role === 'driver' ? '/driver' : '/admin') : '/login';
-  const dashboardLabel = user ? 'Gå till dashboard' : 'Logga in';
+  const dashboardLabel = user ? t.nav.dashboard : t.nav.login;
 
   const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -156,7 +94,7 @@ export default function LandingPageV2() {
     setDemoLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('demo-login', { body: { type: 'akeri' } });
-      if (error || !data?.email) throw new Error(data?.error || 'Kunde inte skapa demo');
+      if (error || !data?.email) throw new Error(data?.error || t.toasts.demoError);
 
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: data.email,
@@ -164,10 +102,10 @@ export default function LandingPageV2() {
       });
       if (signInError) throw signInError;
 
-      toast.success(`Inloggad som ${data.companyName} — omdirigerar...`);
+      toast.success(t.toasts.demoSuccess(data.companyName));
       setTimeout(() => navigate('/admin'), 500);
     } catch (err: any) {
-      toast.error(err.message || 'Demo-inloggning misslyckades');
+      toast.error(err.message || t.toasts.demoError);
     } finally {
       setDemoLoading(false);
     }
@@ -177,7 +115,7 @@ export default function LandingPageV2() {
     <div className="min-h-screen bg-[#f7f9fc] text-slate-950">
       <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/85 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <Link to="/" className="flex items-center gap-3">
+          <Link to={lang === 'en' ? '/en' : '/'} className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#0f2f6e] shadow-lg shadow-blue-900/15">
               <Truck className="h-5 w-5 text-white" strokeWidth={2.5} />
             </div>
@@ -185,20 +123,37 @@ export default function LandingPageV2() {
           </Link>
 
           <nav className="hidden items-center gap-8 text-sm font-semibold text-slate-600 md:flex">
-            <button onClick={() => scrollTo('funktioner')} className="transition hover:text-slate-950">Funktioner</button>
-            <button onClick={() => scrollTo('flode')} className="transition hover:text-slate-950">Så fungerar det</button>
-            <button onClick={() => scrollTo('pris')} className="transition hover:text-slate-950">Pris</button>
-            <button onClick={() => scrollTo('faq')} className="transition hover:text-slate-950">FAQ</button>
+            <button onClick={() => scrollTo('funktioner')} className="transition hover:text-slate-950">{t.nav.features}</button>
+            <button onClick={() => scrollTo('flode')} className="transition hover:text-slate-950">{t.nav.flow}</button>
+            <button onClick={() => scrollTo('pris')} className="transition hover:text-slate-950">{t.nav.pricing}</button>
+            <button onClick={() => scrollTo('faq')} className="transition hover:text-slate-950">{t.nav.faq}</button>
           </nav>
 
           <div className="flex items-center gap-2">
+            <Link
+              to={otherPath}
+              hrefLang={otherLang}
+              aria-label={t.langSwitch.aria}
+              className="hidden items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 transition hover:border-slate-300 hover:text-slate-950 sm:inline-flex"
+            >
+              <Globe className="h-3.5 w-3.5" />
+              <span className={lang === 'sv' ? 'text-slate-950' : 'text-slate-400'}>{t.langSwitch.sv}</span>
+              <span className="text-slate-300">/</span>
+              <span className={lang === 'en' ? 'text-slate-950' : 'text-slate-400'}>{t.langSwitch.en}</span>
+            </Link>
             <Button asChild variant="ghost" size="sm" className="hidden text-slate-700 hover:text-slate-950 sm:inline-flex">
               <Link to={dashboardHref}>{dashboardLabel}</Link>
             </Button>
             <Button size="sm" onClick={() => setLeadModalOpen(true)} className="hidden rounded-xl bg-[#123b88] px-4 font-bold text-white hover:bg-[#0f2f6e] md:inline-flex">
-              Boka demo
+              {t.nav.bookDemo}
             </Button>
-            <Button variant="outline" size="icon" className="md:hidden" aria-label="Meny">
+            <Button asChild variant="outline" size="sm" className="sm:hidden" aria-label={t.langSwitch.aria}>
+              <Link to={otherPath} hrefLang={otherLang}>
+                <Globe className="h-3.5 w-3.5 mr-1" />
+                {otherLang.toUpperCase()}
+              </Link>
+            </Button>
+            <Button variant="outline" size="icon" className="md:hidden" aria-label={t.nav.menu}>
               <Menu className="h-4 w-4" />
             </Button>
           </div>
@@ -212,29 +167,29 @@ export default function LandingPageV2() {
             <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="max-w-2xl">
               <div className="inline-flex items-center gap-2 rounded-full border border-blue-900/15 bg-white/80 px-3 py-1.5 text-xs font-bold text-[#123b88] shadow-sm">
                 <Sparkles className="h-3.5 w-3.5" />
-                Byggt i Sverige för åkerier, bud och bemanning
+                {t.hero.badge}
               </div>
 
               <h1 className="mt-6 max-w-3xl text-5xl font-black tracking-[-0.055em] text-slate-950 sm:text-6xl lg:text-7xl lg:leading-[0.95]">
-                Slipp Excel, WhatsApp och manuell planering
+                {t.hero.h1}
               </h1>
 
               <p className="mt-6 max-w-xl text-lg leading-8 text-slate-600">
-                Aurora samlar uppdrag, förare, tidrapportering och fakturaunderlag i ett enkelt system för svenska transportföretag.
+                {t.hero.sub}
               </p>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Button size="lg" onClick={() => setLeadModalOpen(true)} className="h-13 rounded-2xl bg-[#123b88] px-7 text-base font-bold text-white shadow-xl shadow-blue-900/20 hover:bg-[#0f2f6e]">
-                  Boka demo
+                  {t.hero.ctaPrimary}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
                 <Button size="lg" variant="outline" onClick={handleDemo} disabled={demoLoading} className="h-13 rounded-2xl border-slate-300 bg-white px-7 text-base font-bold text-slate-950 hover:bg-slate-50">
-                  {demoLoading ? 'Loggar in...' : 'Se demo med exempeldata'}
+                  {demoLoading ? t.hero.ctaSecondaryLoading : t.hero.ctaSecondaryIdle}
                 </Button>
               </div>
 
               <div className="mt-8 grid gap-3 text-sm font-medium text-slate-600 sm:grid-cols-2">
-                {trustPoints.map((point) => (
+                {t.hero.trustPoints.map((point) => (
                   <div key={point} className="flex items-center gap-2">
                     <CheckCircle2 className="h-4 w-4 shrink-0 text-[#123b88]" />
                     <span>{point}</span>
@@ -252,15 +207,18 @@ export default function LandingPageV2() {
         <section className="bg-white py-16 sm:py-20">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid gap-5 md:grid-cols-3">
-              {valueCards.map((card, index) => (
-                <motion.div key={card.title} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-80px' }} variants={fadeUp} custom={index} className="rounded-[2rem] border border-slate-200 bg-white p-7 shadow-[0_20px_70px_rgba(15,23,42,0.06)]">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#eef5ff] text-[#123b88]">
-                    <card.icon className="h-5 w-5" />
-                  </div>
-                  <h2 className="mt-5 text-xl font-black tracking-tight text-slate-950">{card.title}</h2>
-                  <p className="mt-3 leading-7 text-slate-600">{card.text}</p>
-                </motion.div>
-              ))}
+              {t.values.map((card, index) => {
+                const Icon = valueIcons[index] ?? TimerReset;
+                return (
+                  <motion.div key={card.title} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-80px' }} variants={fadeUp} custom={index} className="rounded-[2rem] border border-slate-200 bg-white p-7 shadow-[0_20px_70px_rgba(15,23,42,0.06)]">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#eef5ff] text-[#123b88]">
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <h2 className="mt-5 text-xl font-black tracking-tight text-slate-950">{card.title}</h2>
+                    <p className="mt-3 leading-7 text-slate-600">{card.text}</p>
+                  </motion.div>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -268,24 +226,27 @@ export default function LandingPageV2() {
         <section id="flode" className="border-y border-slate-200 bg-slate-950 py-20 text-white sm:py-24">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-3xl text-center">
-              <p className="text-sm font-bold uppercase tracking-[0.22em] text-blue-300">Från order till underlag</p>
-              <h2 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">Så fungerar Aurora i praktiken</h2>
-              <p className="mt-5 text-lg leading-8 text-slate-300">Ett tydligt flöde för uppdrag, förare och rapportering — utan extra administration.</p>
+              <p className="text-sm font-bold uppercase tracking-[0.22em] text-blue-300">{t.flow.eyebrow}</p>
+              <h2 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">{t.flow.h2}</h2>
+              <p className="mt-5 text-lg leading-8 text-slate-300">{t.flow.sub}</p>
             </div>
 
             <div className="mt-14 grid gap-4 md:grid-cols-5">
-              {steps.map((step, index) => (
-                <motion.div key={step.title} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-80px' }} variants={fadeUp} custom={index} className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-5 shadow-2xl shadow-black/10">
-                  <div className="flex items-center justify-between">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-400/15 text-blue-200">
-                      <step.icon className="h-5 w-5" />
+              {t.flow.steps.map((step, index) => {
+                const Icon = stepIcons[index] ?? FileText;
+                return (
+                  <motion.div key={step.title} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-80px' }} variants={fadeUp} custom={index} className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-5 shadow-2xl shadow-black/10">
+                    <div className="flex items-center justify-between">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-400/15 text-blue-200">
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <span className="font-mono text-xs font-bold text-slate-500">{step.label}</span>
                     </div>
-                    <span className="font-mono text-xs font-bold text-slate-500">{step.label}</span>
-                  </div>
-                  <h3 className="mt-5 font-black tracking-tight">{step.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-300">{step.text}</p>
-                </motion.div>
-              ))}
+                    <h3 className="mt-5 font-black tracking-tight">{step.title}</h3>
+                    <p className="mt-2 text-sm leading-6 text-slate-300">{step.text}</p>
+                  </motion.div>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -293,29 +254,32 @@ export default function LandingPageV2() {
         <section id="funktioner" className="bg-[#f7f9fc] py-20 sm:py-24">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl">
-              <p className="text-sm font-bold uppercase tracking-[0.22em] text-[#123b88]">Funktioner</p>
-              <h2 className="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">Allt du behöver. Inget du inte behöver.</h2>
-              <p className="mt-5 text-lg leading-8 text-slate-600">Ett fokuserat verktyg för transportföretag som vill slippa administration och få bättre kontroll på vardagen.</p>
+              <p className="text-sm font-bold uppercase tracking-[0.22em] text-[#123b88]">{t.features.eyebrow}</p>
+              <h2 className="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">{t.features.h2}</h2>
+              <p className="mt-5 text-lg leading-8 text-slate-600">{t.features.sub}</p>
             </div>
 
             <div className="mt-12 grid gap-6 lg:grid-cols-3">
-              {featureGroups.map((group, index) => (
-                <motion.div key={group.title} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-80px' }} variants={fadeUp} custom={index} className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-[0_22px_80px_rgba(15,23,42,0.06)]">
-                  <div className="flex h-13 w-13 items-center justify-center rounded-2xl bg-[#123b88] text-white">
-                    <group.icon className="h-6 w-6" />
-                  </div>
-                  <h3 className="mt-6 text-2xl font-black tracking-tight text-slate-950">{group.title}</h3>
-                  <p className="mt-3 leading-7 text-slate-600">{group.text}</p>
-                  <ul className="mt-6 space-y-3">
-                    {group.items.map((item) => (
-                      <li key={item} className="flex items-center gap-3 text-sm font-bold text-slate-700">
-                        <Check className="h-4 w-4 text-[#123b88]" />
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </motion.div>
-              ))}
+              {t.features.groups.map((group, index) => {
+                const Icon = featureIcons[index] ?? Route;
+                return (
+                  <motion.div key={group.title} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-80px' }} variants={fadeUp} custom={index} className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-[0_22px_80px_rgba(15,23,42,0.06)]">
+                    <div className="flex h-13 w-13 items-center justify-center rounded-2xl bg-[#123b88] text-white">
+                      <Icon className="h-6 w-6" />
+                    </div>
+                    <h3 className="mt-6 text-2xl font-black tracking-tight text-slate-950">{group.title}</h3>
+                    <p className="mt-3 leading-7 text-slate-600">{group.text}</p>
+                    <ul className="mt-6 space-y-3">
+                      {group.items.map((item) => (
+                        <li key={item} className="flex items-center gap-3 text-sm font-bold text-slate-700">
+                          <Check className="h-4 w-4 text-[#123b88]" />
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </motion.div>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -323,24 +287,27 @@ export default function LandingPageV2() {
         <section className="bg-white py-20 sm:py-24">
           <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
             <div>
-              <p className="text-sm font-bold uppercase tracking-[0.22em] text-[#123b88]">För vem?</p>
-              <h2 className="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">Byggt för transportbolag som vill jobba snabbare</h2>
-              <p className="mt-5 text-lg leading-8 text-slate-600">Aurora är gjort för bolag som behöver ordning, fart och enkelhet — inte fler komplicerade system.</p>
+              <p className="text-sm font-bold uppercase tracking-[0.22em] text-[#123b88]">{t.audiences.eyebrow}</p>
+              <h2 className="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">{t.audiences.h2}</h2>
+              <p className="mt-5 text-lg leading-8 text-slate-600">{t.audiences.sub}</p>
             </div>
             <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
-              {audiences.map((item) => (
-                <div key={item.title} className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5">
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-[#123b88] shadow-sm">
-                      <item.icon className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <h3 className="font-black text-slate-950">{item.title}</h3>
-                      <p className="mt-1 text-sm leading-6 text-slate-600">{item.text}</p>
+              {t.audiences.items.map((item, index) => {
+                const Icon = audienceIcons[index] ?? Truck;
+                return (
+                  <div key={item.title} className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5">
+                    <div className="flex items-start gap-4">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-[#123b88] shadow-sm">
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <h3 className="font-black text-slate-950">{item.title}</h3>
+                        <p className="mt-1 text-sm leading-6 text-slate-600">{item.text}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>
@@ -349,29 +316,29 @@ export default function LandingPageV2() {
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-900/20 to-transparent" />
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-3xl text-center">
-              <p className="text-sm font-bold uppercase tracking-[0.22em] text-[#123b88]">Pris</p>
-              <h2 className="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">Ett fast pris. Inget krångel.</h2>
-              <p className="mt-5 text-lg leading-8 text-slate-600">För transportföretag som vill komma igång snabbt utan bindningstid eller dolda avgifter.</p>
+              <p className="text-sm font-bold uppercase tracking-[0.22em] text-[#123b88]">{t.pricing.eyebrow}</p>
+              <h2 className="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">{t.pricing.h2}</h2>
+              <p className="mt-5 text-lg leading-8 text-slate-600">{t.pricing.sub}</p>
             </div>
 
             <div className="mx-auto mt-12 grid max-w-4xl gap-6 md:grid-cols-[0.85fr_1.15fr]">
               <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-[0_22px_70px_rgba(15,23,42,0.06)]">
-                <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-500">Setup</p>
-                <div className="mt-4 text-5xl font-black tracking-tight text-slate-950">3 500 kr</div>
-                <p className="mt-3 leading-7 text-slate-600">Engångskostnad för uppstart, konfiguration och onboarding.</p>
+                <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-500">{t.pricing.setupLabel}</p>
+                <div className="mt-4 text-5xl font-black tracking-tight text-slate-950">{t.pricing.setupPrice}</div>
+                <p className="mt-3 leading-7 text-slate-600">{t.pricing.setupText}</p>
               </div>
 
               <div className="relative overflow-hidden rounded-[2rem] bg-[#0b1730] p-8 text-white shadow-[0_30px_90px_rgba(15,47,110,0.28)]">
                 <div className="absolute right-[-4rem] top-[-4rem] h-48 w-48 rounded-full bg-blue-500/30 blur-3xl" />
                 <div className="relative">
-                  <p className="text-sm font-bold uppercase tracking-[0.18em] text-blue-200">Löpande</p>
+                  <p className="text-sm font-bold uppercase tracking-[0.18em] text-blue-200">{t.pricing.monthlyLabel}</p>
                   <div className="mt-4 flex items-end gap-2">
-                    <span className="text-6xl font-black tracking-tight">449 kr</span>
-                    <span className="pb-2 text-lg font-semibold text-slate-300">per månad</span>
+                    <span className="text-6xl font-black tracking-tight">{t.pricing.monthlyPrice}</span>
+                    <span className="pb-2 text-lg font-semibold text-slate-300">{t.pricing.monthlyUnit}</span>
                   </div>
-                  <p className="mt-4 leading-7 text-slate-300">Obegränsat antal förare, admins och uppdrag. Support på svenska ingår.</p>
+                  <p className="mt-4 leading-7 text-slate-300">{t.pricing.monthlyText}</p>
                   <div className="mt-7 grid gap-3 sm:grid-cols-2">
-                    {['Ingen bindningstid', 'Support på svenska', 'Obegränsat antal förare', 'Fakturaunderlag ingår'].map((item) => (
+                    {t.pricing.monthlyBenefits.map((item) => (
                       <div key={item} className="flex items-center gap-2 text-sm font-bold text-slate-100">
                         <CheckCircle2 className="h-4 w-4 text-blue-300" />
                         {item}
@@ -379,7 +346,7 @@ export default function LandingPageV2() {
                     ))}
                   </div>
                   <Button size="lg" onClick={() => setLeadModalOpen(true)} className="mt-8 rounded-2xl bg-white px-7 font-black text-[#0b1730] hover:bg-blue-50">
-                    Boka demo
+                    {t.pricing.cta}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </div>
@@ -391,12 +358,12 @@ export default function LandingPageV2() {
         <section id="faq" className="bg-white py-20 sm:py-24">
           <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[0.85fr_1.15fr] lg:px-8">
             <div>
-              <p className="text-sm font-bold uppercase tracking-[0.22em] text-[#123b88]">FAQ</p>
-              <h2 className="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">Vanliga frågor</h2>
-              <p className="mt-5 text-lg leading-8 text-slate-600">Kort, rakt och utan krångel. Precis som systemet.</p>
+              <p className="text-sm font-bold uppercase tracking-[0.22em] text-[#123b88]">{t.faq.eyebrow}</p>
+              <h2 className="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">{t.faq.h2}</h2>
+              <p className="mt-5 text-lg leading-8 text-slate-600">{t.faq.sub}</p>
             </div>
             <Accordion type="single" collapsible className="space-y-3">
-              {faqs.map((item, index) => (
+              {t.faq.items.map((item, index) => (
                 <AccordionItem key={item.q} value={`item-${index}`} className="rounded-2xl border border-slate-200 bg-slate-50 px-5">
                   <AccordionTrigger className="text-left font-black text-slate-950 hover:no-underline">{item.q}</AccordionTrigger>
                   <AccordionContent className="leading-7 text-slate-600">{item.a}</AccordionContent>
@@ -408,15 +375,15 @@ export default function LandingPageV2() {
 
         <section className="bg-slate-950 px-4 py-16 text-white sm:px-6 sm:py-20 lg:px-8">
           <div className="mx-auto max-w-5xl rounded-[2.2rem] border border-white/10 bg-white/[0.04] p-8 text-center shadow-2xl shadow-black/20 sm:p-12">
-            <h2 className="text-4xl font-black tracking-tight sm:text-5xl">Redo att slippa Excel och WhatsApp?</h2>
-            <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-slate-300">Boka en kort demo så visar vi hur Aurora kan passa ditt transportföretag.</p>
+            <h2 className="text-4xl font-black tracking-tight sm:text-5xl">{t.finalCta.h2}</h2>
+            <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-slate-300">{t.finalCta.sub}</p>
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
               <Button size="lg" onClick={() => setLeadModalOpen(true)} className="rounded-2xl bg-white px-7 font-black text-slate-950 hover:bg-blue-50">
-                Boka demo
+                {t.finalCta.primary}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
               <Button size="lg" variant="outline" onClick={handleDemo} disabled={demoLoading} className="rounded-2xl border-white/20 bg-transparent px-7 font-black text-white hover:bg-white/10 hover:text-white">
-                {demoLoading ? 'Loggar in...' : 'Se demo med exempeldata'}
+                {demoLoading ? t.finalCta.secondaryLoading : t.finalCta.secondaryIdle}
               </Button>
             </div>
           </div>
