@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Building2, User, Mail, Phone, Hash, Truck, Send, CheckCircle2 } from 'lucide-react';
+import { Building2, User, Mail, Phone, Hash, Truck, Send, CheckCircle2, Clock, Mail as MailIcon, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface LeadFormProps {
@@ -107,16 +107,58 @@ export function LeadForm({ onSuccess, compact = false }: LeadFormProps) {
   };
 
   if (submitted) {
+    const eta = getResponseEta();
     return (
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="text-center py-8 space-y-3"
+        initial={{ opacity: 0, scale: 0.96, y: 8 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: 'easeOut' }}
+        className="py-6 space-y-5 text-center"
       >
-        <CheckCircle2 className="h-12 w-12 text-emerald-500 mx-auto" />
-        <h3 className="text-lg font-semibold text-foreground">Tack för ditt intresse!</h3>
-        <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-          Vi har tagit emot din intresseanmälan och kontaktar dig inom kort för att berätta mer.
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.1, type: 'spring', stiffness: 220, damping: 14 }}
+          className="relative mx-auto h-16 w-16"
+        >
+          <div className="absolute inset-0 rounded-full bg-emerald-500/15 animate-pulse" />
+          <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/20">
+            <CheckCircle2 className="h-9 w-9 text-emerald-500" />
+          </div>
+        </motion.div>
+
+        <div className="space-y-2">
+          <h3 className="text-xl font-semibold text-foreground">
+            Tack {form.contact_person.split(' ')[0] || 'så mycket'} — vi hörs snart!
+          </h3>
+          <p className="text-sm text-muted-foreground max-w-sm mx-auto leading-relaxed">
+            Din intresseanmälan har landat hos oss. En riktig människa — inte en robot —
+            läser igenom den och hör av sig personligen för en kort, förutsättningslös pratstund.
+          </p>
+        </div>
+
+        <div className="mx-auto max-w-sm rounded-lg border border-border bg-secondary/40 p-4 text-left space-y-3">
+          <div className="flex items-start gap-3">
+            <Clock className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-foreground">Beräknad återkoppling</p>
+              <p className="text-sm text-muted-foreground">{eta}</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <MailIcon className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-foreground">Bekräftelse på väg</p>
+              <p className="text-sm text-muted-foreground">
+                Kolla {form.email || 'din inkorg'} (och skräpposten, för säkerhets skull).
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-xs text-muted-foreground flex items-center justify-center gap-1.5">
+          <Sparkles className="h-3.5 w-3.5 text-primary" />
+          Under tiden — luta dig tillbaka. Vi tar det härifrån.
         </p>
       </motion.div>
     );
