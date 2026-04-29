@@ -159,7 +159,7 @@ export default function LandingPageV3() {
                 {t.hero.badge}
               </div>
 
-              <h1 className="mt-6 max-w-3xl text-4xl font-black tracking-[-0.05em] text-slate-950 sm:text-5xl lg:text-6xl lg:leading-[0.98]">
+              <h1 className="mt-6 text-4xl font-black tracking-[-0.03em] text-slate-950 [hyphens:auto] [overflow-wrap:break-word] sm:text-5xl lg:text-[3.25rem] lg:leading-[1.02] xl:text-6xl xl:leading-[0.98]" lang="sv">
                 {t.hero.h1}
               </h1>
 
