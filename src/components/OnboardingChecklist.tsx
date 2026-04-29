@@ -73,7 +73,7 @@ export function OnboardingChecklist() {
             <div className="min-w-0">
               <h3 className="font-semibold text-foreground text-sm leading-tight">Kom igång med Aurora Transport</h3>
               <p className="text-xs text-muted-foreground mt-1">
-                Aurora sparar mest tid när uppdrag, förare och fakturering hänger ihop.
+                Aurora Transport sparar mest tid när uppdrag, förare och fakturering hänger ihop.
               </p>
             </div>
           </div>

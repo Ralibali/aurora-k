@@ -36,7 +36,7 @@ export default function AdsFlottaPage() {
   const [demoLoading, setDemoLoading] = useState(false);
 
   usePageMeta({
-    title: 'Fordonshantering & Flottaöversikt — GPS & service | Aurora',
+    title: 'Fordonshantering & Flottaöversikt — GPS & service | Aurora Transport',
     description: 'Hantera din fordonsflotta digitalt. GPS-spårning, serviceplanering, förarschema och kostnadsanalys. 449 kr/mån.',
     canonical: 'https://auroratransport.se/ads/flotta',
     noindex: true,

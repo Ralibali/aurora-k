@@ -414,7 +414,7 @@ function HeroProductMockup() {
           <aside className="hidden bg-[#0b1730] p-5 text-white sm:block">
             <div className="flex items-center gap-2 font-black">
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-500"><Truck className="h-4 w-4" /></div>
-              Aurora
+              Aurora Transport
             </div>
             <div className="mt-8 space-y-2 text-sm text-slate-300">
               {['Översikt', 'Uppdrag', 'Förare', 'Tidrapport', 'Rapporter'].map((item, index) => (

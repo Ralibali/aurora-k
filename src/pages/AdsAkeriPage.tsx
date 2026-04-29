@@ -36,7 +36,7 @@ export default function AdsAkeriPage() {
   const [demoLoading, setDemoLoading] = useState(false);
 
   usePageMeta({
-    title: 'Åkerisystem — Digital transportledning för åkerier | Aurora',
+    title: 'Åkerisystem — Digital transportledning för åkerier | Aurora Transport',
     description: 'Komplett åkerisystem med fordonshantering, förarschema, GPS-spårning och fakturering. Digitalisera ditt åkeri idag. 449 kr/mån.',
     canonical: 'https://auroratransport.se/ads/akeri',
     noindex: true,

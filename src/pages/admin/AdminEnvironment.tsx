@@ -62,7 +62,7 @@ export default function AdminEnvironment() {
           <div className="flex-1">
             <p className="text-sm font-semibold">Så fungerar miljöuppföljningen</p>
             <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-              Aurora beräknar utsläpp och bränsleförbrukning automatiskt baserat på körsträckan som loggas på varje uppdrag.
+              Aurora Transport beräknar utsläpp och bränsleförbrukning automatiskt baserat på körsträckan som loggas på varje uppdrag.
               Schabloner: <strong>0,12 kg CO₂/km</strong> och <strong>0,08 liter bränsle/km</strong>. Använd rapporten i hållbarhetsredovisning eller upphandlingssvar.
             </p>
           </div>

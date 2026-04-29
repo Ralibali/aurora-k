@@ -25,14 +25,14 @@ const sections = [
   },
   {
     title: 'Från tidrapport till fakturaunderlag',
-    text: 'Tidrapporteringen är inte bara viktig för lön och intern uppföljning. Den påverkar också fakturering, kundunderlag och lönsamhet. Med Aurora får du bättre struktur på vilka uppdrag som är utförda, vem som körde, hur lång tid arbetet tog och vilket underlag som behöver vidare till fakturering.',
+    text: 'Tidrapporteringen är inte bara viktig för lön och intern uppföljning. Den påverkar också fakturering, kundunderlag och lönsamhet. Med Aurora Transport får du bättre struktur på vilka uppdrag som är utförda, vem som körde, hur lång tid arbetet tog och vilket underlag som behöver vidare till fakturering.',
     icon: FileText,
   },
 ];
 
 export default function TidrapporteringTransportPage() {
   usePageMeta({
-    title: 'Tidrapportering transport | Tidrapportera i mobilen med Aurora',
+    title: 'Tidrapportering transport | Tidrapportera i mobilen med Aurora Transport',
     description: 'Digital tidrapportering för transportföretag, åkerier och budfirmor. Låt förare tidrapportera i mobilen och skapa tydligare fakturaunderlag med Aurora Transport.',
     canonical: 'https://auroratransport.se/tidrapportering-transport',
     ogImage: 'https://auroratransport.se/og-image.png',
@@ -82,7 +82,7 @@ export default function TidrapporteringTransportPage() {
           <div className="mt-6 space-y-6 text-lg leading-8 text-slate-600">
             <p>För många transportföretag är tidrapportering en av de saker som skapar mest onödig administration. Förare rapporterar tider på olika sätt, uppdrag ändras under dagen och informationen behöver ofta samlas ihop i efterhand. Det kan fungera när bolaget är litet, men så fort antalet förare, kunder och uppdrag växer blir det svårt att få en pålitlig överblick. Digital tidrapportering för transport gör att arbetstiden kopplas närmare uppdraget, så att du snabbare kan se vad som är utfört och vilket underlag som finns.</p>
             <p>Aurora Transport är byggt för den här vardagen. Systemet samlar transportplanering, uppdrag, förare, tidrapportering och fakturaunderlag i samma flöde. Det betyder att en förare inte behöver leta efter information i olika chattar, och att administratören slipper tolka handskrivna lappar eller föra över tider manuellt till Excel. Resultatet blir bättre kontroll, färre missförstånd och snabbare väg till fakturering.</p>
-            <p>Den här sidan är särskilt relevant för dig som söker efter tidrapport online transport, tidrapportera i mobilen transport eller vad ett system för tidrapportering inom transport kostar. Aurora är inte ett tungt affärssystem som kräver lång implementation, utan ett fokuserat transportledningssystem för mindre och växande transportföretag som vill få ordning på uppdrag, förare och rapportering utan att göra vardagen mer komplicerad.</p>
+            <p>Den här sidan är särskilt relevant för dig som söker efter tidrapport online transport, tidrapportera i mobilen transport eller vad ett system för tidrapportering inom transport kostar. Aurora Transport är inte ett tungt affärssystem som kräver lång implementation, utan ett fokuserat transportledningssystem för mindre och växande transportföretag som vill få ordning på uppdrag, förare och rapportering utan att göra vardagen mer komplicerad.</p>
           </div>
         </div>
       </section>

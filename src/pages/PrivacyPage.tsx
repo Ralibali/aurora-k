@@ -33,7 +33,7 @@ const PrivacyPage = () => {
 
       <h2>1. Vilka vi är</h2>
       <p>
-        Aurora TMS ("vi", "oss") tillhandahåller ett transportledningssystem. Denna policy
+        Aurora Transport ("vi", "oss") tillhandahåller ett transportledningssystem. Denna policy
         beskriver hur vi samlar in, använder och skyddar dina personuppgifter.
       </p>
 

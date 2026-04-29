@@ -39,7 +39,7 @@ const slotsCopy: Record<Lang, Record<Slot, string>> = {
 const t = {
   sv: {
     title: 'Boka 15 min demo',
-    description: 'Vi visar Aurora live och svarar på dina frågor. Helt förutsättningslöst.',
+    description: 'Vi visar Aurora Transport live och svarar på dina frågor. Helt förutsättningslöst.',
     name: 'Ditt namn',
     namePh: 'För- och efternamn',
     company: 'Företag',
@@ -71,7 +71,7 @@ const t = {
   },
   en: {
     title: 'Book a 15 min demo',
-    description: 'We will walk you through Aurora live and answer your questions. No strings attached.',
+    description: 'We will walk you through Aurora Transport live and answer your questions. No strings attached.',
     name: 'Your name',
     namePh: 'First and last name',
     company: 'Company',

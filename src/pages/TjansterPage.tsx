@@ -291,7 +291,7 @@ function Advantages() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-10">
           <motion.h2 custom={0} variants={fadeUp} className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-            Varför välja Aurora?
+            Varför välja Aurora Transport?
           </motion.h2>
           <motion.p custom={1} variants={fadeUp} className="text-lg text-muted-foreground">
             Jämfört med Coredination och andra system — så här skiljer vi oss.
@@ -359,13 +359,13 @@ function OnboardingSteps() {
 
 const faqs = [
   { q: 'Vad kostar Aurora Transport?', a: '449 kr/mån med en engångs startavgift på 3 500 kr. Obegränsat antal förare, fordon och uppdrag ingår. Inga dolda avgifter.' },
-  { q: 'Behöver förarna ladda ner en app?', a: 'Nej. Aurora använder PWA-teknik (Progressive Web App). Förarna öppnar en länk i mobilen och kan lägga till den på hemskärmen — fungerar som en vanlig app utan App Store.' },
+  { q: 'Behöver förarna ladda ner en app?', a: 'Nej. Aurora Transport använder PWA-teknik (Progressive Web App). Förarna öppnar en länk i mobilen och kan lägga till den på hemskärmen — fungerar som en vanlig app utan App Store.' },
   { q: 'Hur lång tid tar det att komma igång?', a: 'Under 5 minuter. Registrera företaget, bjud in förare via e-post och börja skapa uppdrag direkt.' },
   { q: 'Finns det någon bindningstid?', a: 'Nej, ingen bindningstid. Du kan avsluta din prenumeration när som helst.' },
   { q: 'Kan mina kunder följa sina leveranser?', a: 'Ja. Via kundportalen kan era kunder lägga bokningsförfrågningar, följa leveransstatus i realtid och lämna nöjdhetsbetyg.' },
   { q: 'Fungerar GPS-spårningen i realtid?', a: 'Ja. Alla förare som har förarappen öppen delar sin position. Administratörer ser alla fordon på en live-karta med hastighet, riktning och positionshistorik.' },
   { q: 'Kan jag generera fakturor direkt från uppdrag?', a: 'Ja. När ett uppdrag är slutfört kan du generera en faktura med ett klick. Stöd för kundspecifika prislistor, artikelregister och PDF-export.' },
-  { q: 'Hur skiljer sig Aurora från Coredination?', a: 'Aurora erbjuder fast pris utan per-användare-avgifter, snabbare onboarding, modern mobilupplevelse och svenskt gränssnitt — till en lägre totalkostnad.' },
+  { q: 'Hur skiljer sig Aurora Transport från Coredination?', a: 'Aurora Transport erbjuder fast pris utan per-användare-avgifter, snabbare onboarding, modern mobilupplevelse och svenskt gränssnitt — till en lägre totalkostnad.' },
 ];
 
 function FaqSection() {
@@ -412,7 +412,7 @@ function DemoSection() {
             Testa demo — helt gratis
           </motion.h2>
           <motion.p custom={2} variants={fadeUp} className="text-muted-foreground mb-8 max-w-lg mx-auto">
-            Utforska systemet med exempeldata. Logga in som admin eller förare och se hur Aurora fungerar i praktiken.
+            Utforska systemet med exempeldata. Logga in som admin eller förare och se hur Aurora Transport fungerar i praktiken.
           </motion.p>
           <motion.div custom={3} variants={fadeUp}>
             <Button size="lg" variant="outline" asChild className="rounded-xl px-8 py-5 text-base font-semibold">

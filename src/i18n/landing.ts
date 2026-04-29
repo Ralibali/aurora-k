@@ -189,7 +189,7 @@ const SV: LandingCopy = {
   audiences: {
     eyebrow: 'För vem?',
     h2: 'Transportledningssystem för åkerier, budfirmor och transportbemanning',
-    sub: 'Aurora är byggt för transportbolag som behöver ordning, fart och enkelhet — inte fler komplicerade system.',
+    sub: 'Aurora Transport är byggt för transportbolag som behöver ordning, fart och enkelhet — inte fler komplicerade system.',
     items: [
       { title: 'Åkerier', text: 'För mindre och växande åkerier som vill få bättre kontroll över uppdrag, förare och fakturaunderlag.' },
       { title: 'Budfirmor', text: 'För budfirmor med snabba jobb, många ändringar och behov av tydlig mobil kommunikation.' },
@@ -217,9 +217,9 @@ const SV: LandingCopy = {
     items: [
       { q: 'Vad är ett transportledningssystem?', a: 'Ett transportledningssystem hjälper transportföretag att planera uppdrag, tilldela förare, följa status, samla tidrapporter och skapa fakturaunderlag i ett gemensamt system.' },
       { q: 'Vad kostar Aurora Transport?', a: 'Aurora Transport kostar 449 kr per månad. Setup och onboarding kostar 3 500 kr som engångskostnad.' },
-      { q: 'Kan Aurora användas som dispatchsystem?', a: 'Ja. Aurora fungerar som ett enkelt dispatchsystem där du kan skapa uppdrag, tilldela förare och följa status i realtid.' },
+      { q: 'Kan Aurora Transport användas som dispatchsystem?', a: 'Ja. Aurora Transport fungerar som ett enkelt dispatchsystem där du kan skapa uppdrag, tilldela förare och följa status i realtid.' },
       { q: 'Finns det bindningstid?', a: 'Nej. Du kan säga upp när du vill. Målet är att systemet ska vara enkelt att börja med och enkelt att stanna kvar i.' },
-      { q: 'Passar Aurora små åkerier?', a: 'Ja. Aurora är byggt för mindre åkerier och transportföretag som vill bort från Excel, WhatsApp och manuell administration.' },
+      { q: 'Passar Aurora Transport små åkerier?', a: 'Ja. Aurora Transport är byggt för mindre åkerier och transportföretag som vill bort från Excel, WhatsApp och manuell administration.' },
       { q: 'Kan förarna använda mobilen?', a: 'Ja. Förarna kan se uppdrag och rapportera information direkt via mobilen.' },
       { q: 'Hur fungerar digital tidrapportering?', a: 'Föraren rapporterar tid och uppdragsinformation digitalt. Informationen kan sedan användas för bättre uppföljning och tydligare fakturaunderlag.' },
       { q: 'Hur snabbt kan vi komma igång?', a: 'De flesta kan komma igång samma dag efter en kort genomgång och enkel uppsättning.' },
@@ -340,7 +340,7 @@ const EN: LandingCopy = {
   audiences: {
     eyebrow: 'Who is it for?',
     h2: 'Transport management system for hauliers, couriers and transport staffing teams',
-    sub: 'Aurora is built for transport companies that need order, speed and simplicity — not yet another complicated system.',
+    sub: 'Aurora Transport is built for transport companies that need order, speed and simplicity — not yet another complicated system.',
     items: [
       { title: 'Hauliers', text: 'For small and growing hauliers that want better control over jobs, drivers and invoice drafts.' },
       { title: 'Couriers', text: 'For courier companies with fast jobs, frequent changes and a need for clear mobile communication.' },
@@ -368,9 +368,9 @@ const EN: LandingCopy = {
     items: [
       { q: 'What is a transport management system?', a: 'A transport management system helps transport companies plan jobs, assign drivers, follow status, collect time reports and create invoice drafts in one shared system.' },
       { q: 'What does Aurora Transport cost?', a: 'Aurora Transport is 449 SEK per month. Setup and onboarding is a one-time fee of 3,500 SEK.' },
-      { q: 'Can Aurora be used as a dispatch system?', a: 'Yes. Aurora works as a simple dispatch system where you can create jobs, assign drivers and follow status in real time.' },
+      { q: 'Can Aurora Transport be used as a dispatch system?', a: 'Yes. Aurora Transport works as a simple dispatch system where you can create jobs, assign drivers and follow status in real time.' },
       { q: 'Is there a lock-in period?', a: 'No. You can cancel whenever you want. We want the system to be easy to start with and easy to stay with.' },
-      { q: 'Does Aurora suit small hauliers?', a: 'Yes. Aurora is built for small transport companies that want to move away from Excel, WhatsApp and manual admin.' },
+      { q: 'Does Aurora Transport suit small hauliers?', a: 'Yes. Aurora Transport is built for small transport companies that want to move away from Excel, WhatsApp and manual admin.' },
       { q: 'Can drivers use it on their phone?', a: 'Yes. Drivers can see jobs and report directly from their phone.' },
       { q: 'How does digital time reporting work?', a: 'The driver reports time and job information digitally. The information can then be used for better follow-up and clearer invoice drafts.' },
       { q: 'How quickly can we get started?', a: 'Most teams are up and running the same day after a short walkthrough and a simple setup.' },

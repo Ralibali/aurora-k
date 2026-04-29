@@ -228,7 +228,7 @@ export default function LandingPage() {
               className="rounded-2xl border border-border bg-card p-7 shadow-sm"
             >
               <div className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                Före Aurora
+                Före Aurora Transport
               </div>
               <ul className="mt-6 space-y-3.5">
                 {[
@@ -258,7 +258,7 @@ export default function LandingPage() {
               className="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/5 via-card to-card p-7 shadow-md"
             >
               <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary uppercase tracking-wider">
-                <Sparkles className="h-3 w-3" /> Efter Aurora
+                <Sparkles className="h-3 w-3" /> Efter Aurora Transport
               </div>
               <ul className="mt-6 space-y-3.5">
                 {[
@@ -286,7 +286,7 @@ export default function LandingPage() {
         <div className="container mx-auto px-4">
           <div className="max-w-2xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
-              Så fungerar Aurora på 5 minuter
+              Så fungerar Aurora Transport på 5 minuter
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
               Från första uppdrag till färdigt fakturaunderlag — utan extra steg.
@@ -680,7 +680,7 @@ export default function LandingPage() {
           </motion.div>
           <div className="mt-8 grid gap-6 md:grid-cols-2 max-w-5xl mx-auto">
             {[
-              'Vi bytte från papper och Excel till Aurora på en eftermiddag. Nu har vi koll på alla uppdrag i realtid.',
+              'Vi bytte från papper och Excel till Aurora Transport på en eftermiddag. Nu har vi koll på alla uppdrag i realtid.',
               'Äntligen ett system som inte kräver en veckas utbildning. Förarna fattade direkt.',
               'Priset var det som avgjorde — 449 kr oavsett hur många förare vi har.',
               'Tidrapporterna exporteras smidigt och sparar oss timmar varje månad.',
@@ -714,7 +714,7 @@ export default function LandingPage() {
                 { q: 'Behöver förare installera något?', a: 'Nej. Förarna loggar in direkt i webbläsaren på sin mobil — inga appar behöver laddas ner från App Store eller Google Play.' },
                 { q: 'Kan vi avsluta när vi vill?', a: 'Ja. Det finns ingen bindningstid. Säg upp när som helst med 30 dagars uppsägningstid.' },
                 { q: 'Kan ni hjälpa oss lägga in kunder och förare?', a: 'Ja. Setupavgiften (3 500 kr) inkluderar att vi konfigurerar systemet åt er, importerar kunder och förare och utbildar teamet.' },
-                { q: 'Passar Aurora små åkerier?', a: 'Ja — vi är byggda för företag med 3–30 förare. Små åkerier, budfirmor, transportbemanning och lokala distributionsföretag är vår kärnmålgrupp.' },
+                { q: 'Passar Aurora Transport små åkerier?', a: 'Ja — vi är byggda för företag med 3–30 förare. Små åkerier, budfirmor, transportbemanning och lokala distributionsföretag är vår kärnmålgrupp.' },
                 { q: 'Hur skiljer ni er från större TMS-system?', a: 'Vi är enklare att komma igång med, har fast pris utan licenskostnad per användare och fokuserar på det svenska transportföretagens vardag — inte på funktioner ni aldrig använder.' },
                 { q: 'Fungerar det med Fortnox?', a: 'Ja, systemet skapar fakturaunderlag och exporterar data till Fortnox och andra bokföringsprogram (SIE, CSV).' },
               ].map((item, i) => (
@@ -803,7 +803,7 @@ export default function LandingPage() {
               Redo att slippa Excel och WhatsApp?
             </h2>
             <p className="mt-5 text-lg text-sidebar-foreground/80">
-              15 minuters demo räcker för att se om Aurora passar er. 449 kr/mån, ingen bindningstid.
+              15 minuters demo räcker för att se om Aurora Transport passar er. 449 kr/mån, ingen bindningstid.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
               <Button
@@ -908,7 +908,7 @@ function DashboardMockup() {
               <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary">
                 <Truck className="h-3.5 w-3.5 text-primary-foreground" />
               </div>
-              <span className="text-xs font-semibold">Aurora</span>
+              <span className="text-xs font-semibold">Aurora Transport</span>
             </div>
             {[
               { icon: LayoutDashboard, label: 'Översikt', active: true },
@@ -1031,7 +1031,7 @@ function AssignmentTableMockup() {
             <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary">
               <Truck className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="text-sm font-semibold">Aurora</span>
+            <span className="text-sm font-semibold">Aurora Transport</span>
           </div>
           {[
             { icon: LayoutDashboard, label: 'Översikt' },

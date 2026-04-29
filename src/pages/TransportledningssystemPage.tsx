@@ -268,7 +268,7 @@ function SeoTextSection() {
           </p>
           <h3 className="text-xl font-semibold text-foreground mt-6 mb-3">Transportledning utan tung implementation</h3>
           <p>
-            Många traditionella transportledningssystem är byggda för stora organisationer. Aurora
+            Många traditionella transportledningssystem är byggda för stora organisationer. Aurora Transport
             Transport fokuserar istället på små och medelstora företag som behöver komma igång snabbt,
             arbeta mer strukturerat och minska tiden som läggs på manuell administration.
           </p>

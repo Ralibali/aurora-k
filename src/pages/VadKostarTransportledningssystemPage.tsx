@@ -17,7 +17,7 @@ const included = [
 const costFactors = [
   {
     title: 'Antal användare och förare',
-    text: 'Många system tar betalt per användare, förare eller administratör. För mindre åkerier och budfirmor kan det göra priset svårt att förutse när teamet växer. Aurora har i stället ett fast månadspris, vilket gör det enklare att räkna på kostnaden.',
+    text: 'Många system tar betalt per användare, förare eller administratör. För mindre åkerier och budfirmor kan det göra priset svårt att förutse när teamet växer. Aurora Transport har i stället ett fast månadspris, vilket gör det enklare att räkna på kostnaden.',
   },
   {
     title: 'Funktioner som ingår',
@@ -25,13 +25,13 @@ const costFactors = [
   },
   {
     title: 'Implementation och onboarding',
-    text: 'Vissa system kräver långa projekt, konsulter och anpassningar. För många mindre transportföretag är det viktigare att komma igång snabbt. Aurora har en tydlig setupkostnad för uppstart, konfiguration och onboarding.',
+    text: 'Vissa system kräver långa projekt, konsulter och anpassningar. För många mindre transportföretag är det viktigare att komma igång snabbt. Aurora Transport har en tydlig setupkostnad för uppstart, konfiguration och onboarding.',
   },
 ];
 
 export default function VadKostarTransportledningssystemPage() {
   usePageMeta({
-    title: 'Vad kostar ett transportledningssystem? Pris för åkerier | Aurora',
+    title: 'Vad kostar ett transportledningssystem? Pris för åkerier | Aurora Transport',
     description: 'Vad kostar ett transportledningssystem för åkerier, budfirmor och transportföretag? Läs om pris, setup, tidrapportering, dispatch och vad som ingår i Aurora Transport.',
     canonical: 'https://auroratransport.se/vad-kostar-transportledningssystem',
     ogImage: 'https://auroratransport.se/og-image.png',
@@ -109,9 +109,9 @@ export default function VadKostarTransportledningssystemPage() {
           <div className="rounded-[2rem] border border-slate-200 bg-[#eef5ff] p-8 sm:p-10">
             <div className="flex items-center gap-3">
               <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#123b88] text-white"><Wallet className="h-6 w-6" /></span>
-              <h2 className="text-3xl font-black tracking-tight text-slate-950">Vad ingår i Aurora?</h2>
+              <h2 className="text-3xl font-black tracking-tight text-slate-950">Vad ingår i Aurora Transport?</h2>
             </div>
-            <p className="mt-5 text-lg leading-8 text-slate-600">Aurora är gjort för att ge mindre transportföretag ett prisvärt alternativ till tunga affärssystem. Du får ett transportledningssystem där uppdrag, förare, tidrapportering och fakturaunderlag hänger ihop. Det gör att du inte behöver köpa flera separata verktyg för att hantera planering, rapportering och underlag.</p>
+            <p className="mt-5 text-lg leading-8 text-slate-600">Aurora Transport är gjort för att ge mindre transportföretag ett prisvärt alternativ till tunga affärssystem. Du får ett transportledningssystem där uppdrag, förare, tidrapportering och fakturaunderlag hänger ihop. Det gör att du inte behöver köpa flera separata verktyg för att hantera planering, rapportering och underlag.</p>
             <div className="mt-7 grid gap-3 sm:grid-cols-2">
               {included.map((item) => <div key={item} className="flex items-start gap-3 rounded-2xl bg-white p-4 text-sm font-bold text-slate-700"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#123b88]" />{item}</div>)}
             </div>
@@ -122,8 +122,8 @@ export default function VadKostarTransportledningssystemPage() {
       <section className="bg-slate-950 px-4 py-16 text-white sm:px-6 sm:py-20 lg:px-8">
         <div className="mx-auto max-w-5xl text-center">
           <p className="text-sm font-black uppercase tracking-[0.22em] text-blue-300">Se om det passar</p>
-          <h2 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">Vill du se vad Aurora skulle kosta för er?</h2>
-          <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-slate-300">Boka en kort demo så visar vi hur systemet fungerar, vad som ingår och hur Aurora kan ersätta Excel, WhatsApp och manuell administration i ditt transportföretag.</p>
+          <h2 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">Vill du se vad Aurora Transport skulle kosta för er?</h2>
+          <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-slate-300">Boka en kort demo så visar vi hur systemet fungerar, vad som ingår och hur Aurora Transport kan ersätta Excel, WhatsApp och manuell administration i ditt transportföretag.</p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
             <Button asChild size="lg" className="rounded-2xl bg-white px-7 font-black text-slate-950 hover:bg-blue-50"><Link to="/boka">Boka demo</Link></Button>
             <Button asChild size="lg" variant="outline" className="rounded-2xl border-white/20 bg-transparent px-7 font-black text-white hover:bg-white/10 hover:text-white"><Link to="/">Till startsidan</Link></Button>

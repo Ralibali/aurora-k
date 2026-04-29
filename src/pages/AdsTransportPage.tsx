@@ -36,7 +36,7 @@ export default function AdsTransportPage() {
   const [demoLoading, setDemoLoading] = useState(false);
 
   usePageMeta({
-    title: 'Transportledningssystem — Planera, spåra & fakturera | Aurora',
+    title: 'Transportledningssystem — Planera, spåra & fakturera | Aurora Transport',
     description: 'Komplett transportledningssystem med uppdragsplanering, GPS-spårning, kundportal och fakturering. Allt i ett. 449 kr/mån.',
     canonical: 'https://auroratransport.se/ads/transport',
     noindex: true,
@@ -259,7 +259,7 @@ export default function AdsTransportPage() {
             </motion.h2>
             <div className="grid sm:grid-cols-2 gap-6">
               {[
-                { text: 'Vi testade Coredination och andra — Aurora var det enda som faktiskt passade ett litet transportbolag.', name: 'Anders P.', role: 'VD', initials: 'AP' },
+                { text: 'Vi testade Coredination och andra — Aurora Transport var det enda som faktiskt passade ett litet transportbolag.', name: 'Anders P.', role: 'VD', initials: 'AP' },
                 { text: 'Kundportalen gör att kunderna slutat ringa och fråga var leveransen är. Bara det är värt pengarna.', name: 'Linda M.', role: 'Transportledare', initials: 'LM' },
               ].map((q, i) => (
                 <motion.div key={i} custom={i + 1} variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="bg-white/[0.02] border border-white/[0.05] rounded-2xl p-7 hover:border-white/[0.08] transition-colors">
