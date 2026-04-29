@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { usePageMeta } from '@/lib/use-page-meta';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ClipboardList, ShoppingCart, Receipt, Building2, CalendarPlus, MessageCircle } from 'lucide-react';
+import { ClipboardList, ShoppingCart, Receipt, Building2, CalendarPlus, MessageCircle, ArrowUpRight, Clock, MapPin, Route, Truck, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { BookingRequestForm } from '@/components/portal/BookingRequestForm';
 import { PortalChat } from '@/components/portal/PortalChat';
 
@@ -21,6 +22,17 @@ const statusVariant = (s: string): 'default' | 'secondary' | 'destructive' | 'ou
   if (s === 'active' || s === 'in_progress' || s === 'sent') return 'default';
   return 'outline';
 };
+
+function routeText(a: any) {
+  if (a.pickup_address && a.delivery_address) return `${a.pickup_address} → ${a.delivery_address}`;
+  return a.pickup_address || a.delivery_address || a.address || 'Adress saknas';
+}
+
+function formatDateTime(value?: string) {
+  if (!value) return '—';
+  return new Date(value).toLocaleString('sv-SE', { dateStyle: 'medium', timeStyle: 'short' });
+}
+
 export default function CustomerPortal() {
   usePageMeta({ title: 'Kundportal | Aurora Transport', description: '', canonical: 'https://auroratransport.se/portal', noindex: true });
   const [searchParams] = useSearchParams();
@@ -34,18 +46,13 @@ export default function CustomerPortal() {
 
     const fetchData = async () => {
       const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-      const res = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/customer-portal?token=${encodeURIComponent(token)}`,
-        { headers: { 'Content-Type': 'application/json' } }
-      );
-
+      const res = await fetch(`https://${projectId}.supabase.co/functions/v1/customer-portal?token=${encodeURIComponent(token)}`, { headers: { 'Content-Type': 'application/json' } });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         setError(err.error || 'Kunde inte ladda data');
         setLoading(false);
         return;
       }
-
       setData(await res.json());
       setLoading(false);
     };
@@ -54,50 +61,75 @@ export default function CustomerPortal() {
   }, [token]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background p-6">
-        <div className="max-w-4xl mx-auto space-y-4">
-          <Skeleton className="h-12 w-64" />
-          <Skeleton className="h-96 w-full" />
-        </div>
-      </div>
-    );
+    return <div className="min-h-screen bg-slate-950 p-6"><div className="max-w-6xl mx-auto space-y-4"><Skeleton className="h-12 w-64 bg-white/10" /><Skeleton className="h-96 w-full bg-white/10" /></div></div>;
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Card className="max-w-md">
-          <CardContent className="pt-6 text-center">
-            <p className="text-destructive font-medium">{error}</p>
-            <p className="text-sm text-muted-foreground mt-2">Kontakta oss om problemet kvarstår.</p>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
+        <Card className="max-w-md"><CardContent className="pt-6 text-center"><AlertTriangle className="mx-auto mb-3 h-10 w-10 text-destructive" /><p className="text-destructive font-medium">{error}</p><p className="text-sm text-muted-foreground mt-2">Kontakta oss om problemet kvarstår.</p></CardContent></Card>
       </div>
     );
   }
 
-  const { customer, assignments, orders, invoices, bookings = [] } = data;
+  const { customer, assignments = [], orders = [], invoices = [], bookings = [] } = data;
 
-  const handleBookingCreated = (booking: any) => {
-    setData((prev: any) => ({ ...prev, bookings: [booking, ...(prev.bookings || [])] }));
-  };
+  const stats = useMemo(() => {
+    const activeAssignments = assignments.filter((a: any) => ['pending', 'active', 'in_progress'].includes(a.status)).length;
+    const completedAssignments = assignments.filter((a: any) => a.status === 'completed').length;
+    const openInvoices = invoices.filter((i: any) => ['draft', 'sent', 'overdue'].includes(i.status)).length;
+    const overdue = invoices.filter((i: any) => i.status === 'overdue').length;
+    return { activeAssignments, completedAssignments, openInvoices, overdue };
+  }, [assignments, invoices]);
+
+  const nextAssignment = useMemo(() => {
+    return [...assignments].filter((a: any) => a.status !== 'completed' && a.status !== 'cancelled').sort((a: any, b: any) => String(a.scheduled_start).localeCompare(String(b.scheduled_start)))[0];
+  }, [assignments]);
+
+  const handleBookingCreated = (booking: any) => setData((prev: any) => ({ ...prev, bookings: [booking, ...(prev.bookings || [])] }));
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-3">
-          <Building2 className="h-6 w-6 text-primary" />
-          <div>
-            <h1 className="text-lg font-semibold">{customer?.name}</h1>
-            <p className="text-xs text-muted-foreground">Kundportal</p>
+    <div className="min-h-screen bg-slate-950 text-slate-50">
+      <header className="border-b border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.28),_transparent_32%)]">
+        <div className="max-w-6xl mx-auto px-4 py-8">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-sm text-blue-100"><Building2 className="h-4 w-4" /> Kundportal</div>
+              <h1 className="mt-4 text-3xl font-bold md:text-5xl">{customer?.name}</h1>
+              <p className="mt-2 max-w-2xl text-slate-300">Följ uppdrag, se status, hämta fakturor och skicka nya transportförfrågningar på ett ställe.</p>
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Button asChild variant="secondary"><Link to={`/boka/aurora-transport`} target="_blank"><CalendarPlus className="mr-2 h-4 w-4" /> Ny bokning</Link></Button>
+              <Button variant="outline" className="border-white/20 bg-white/10 text-white hover:bg-white/20" onClick={() => navigator.clipboard?.writeText(window.location.href)}>Kopiera portallänk</Button>
+            </div>
+          </div>
+
+          <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-2xl bg-white/10 p-4"><p className="text-sm text-slate-300">Aktiva uppdrag</p><p className="mt-1 text-3xl font-bold">{stats.activeAssignments}</p></div>
+            <div className="rounded-2xl bg-white/10 p-4"><p className="text-sm text-slate-300">Slutförda</p><p className="mt-1 text-3xl font-bold">{stats.completedAssignments}</p></div>
+            <div className="rounded-2xl bg-white/10 p-4"><p className="text-sm text-slate-300">Öppna fakturor</p><p className="mt-1 text-3xl font-bold">{stats.openInvoices}</p></div>
+            <div className="rounded-2xl bg-white/10 p-4"><p className="text-sm text-slate-300">Förfallna</p><p className="mt-1 text-3xl font-bold">{stats.overdue}</p></div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-6 py-6">
-        <Tabs defaultValue="assignments">
-          <TabsList>
+      <main className="max-w-6xl mx-auto px-4 py-6 text-slate-950">
+        {nextAssignment && (
+          <Card className="mb-5 border-blue-200 bg-blue-50">
+            <CardContent className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p className="text-sm font-semibold text-blue-700">Nästa uppdrag</p>
+                <h2 className="text-xl font-bold">{nextAssignment.title}</h2>
+                <p className="mt-1 flex items-center gap-2 text-sm text-muted-foreground"><Clock className="h-4 w-4" /> {formatDateTime(nextAssignment.scheduled_start)}</p>
+                <p className="mt-1 flex items-center gap-2 text-sm text-muted-foreground"><Route className="h-4 w-4" /> {routeText(nextAssignment)}</p>
+              </div>
+              <Badge variant={statusVariant(nextAssignment.status)}>{statusLabels[nextAssignment.status] || nextAssignment.status}</Badge>
+            </CardContent>
+          </Card>
+        )}
+
+        <Tabs defaultValue="assignments" className="space-y-4">
+          <TabsList className="flex h-auto flex-wrap justify-start">
             <TabsTrigger value="assignments" className="gap-1"><ClipboardList className="h-3.5 w-3.5" /> Uppdrag</TabsTrigger>
             <TabsTrigger value="orders" className="gap-1"><ShoppingCart className="h-3.5 w-3.5" /> Beställningar</TabsTrigger>
             <TabsTrigger value="invoices" className="gap-1"><Receipt className="h-3.5 w-3.5" /> Fakturor</TabsTrigger>
@@ -105,103 +137,20 @@ export default function CustomerPortal() {
             <TabsTrigger value="chat" className="gap-1"><MessageCircle className="h-3.5 w-3.5" /> Chatt</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="assignments" className="mt-4">
-            <Card>
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Uppdrag</TableHead>
-                      <TableHead>Adress</TableHead>
-                      <TableHead>Planerat</TableHead>
-                      <TableHead>Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {assignments.length === 0 && (
-                      <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-8">Inga uppdrag</TableCell></TableRow>
-                    )}
-                    {assignments.map((a: any) => (
-                      <TableRow key={a.id}>
-                        <TableCell className="font-medium">{a.title}</TableCell>
-                        <TableCell>{a.address}</TableCell>
-                        <TableCell>{new Date(a.scheduled_start).toLocaleDateString('sv-SE')}</TableCell>
-                        <TableCell><Badge variant={statusVariant(a.status)}>{statusLabels[a.status] || a.status}</Badge></TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+          <TabsContent value="assignments">
+            <Card><CardContent className="p-0"><Table><TableHeader><TableRow><TableHead>Uppdrag</TableHead><TableHead>Rutt</TableHead><TableHead>Planerat</TableHead><TableHead>Status</TableHead></TableRow></TableHeader><TableBody>{assignments.length === 0 && <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-8">Inga uppdrag</TableCell></TableRow>}{assignments.map((a: any) => <TableRow key={a.id}><TableCell><div className="font-medium">{a.title}</div>{a.service_type && <Badge variant="outline" className="mt-1">{a.service_type}</Badge>}</TableCell><TableCell className="max-w-[420px]"><div className="flex gap-2 text-sm text-muted-foreground"><MapPin className="mt-0.5 h-4 w-4 shrink-0" /><span>{routeText(a)}</span></div></TableCell><TableCell>{formatDateTime(a.scheduled_start)}</TableCell><TableCell><Badge variant={statusVariant(a.status)}>{statusLabels[a.status] || a.status}</Badge></TableCell></TableRow>)}</TableBody></Table></CardContent></Card>
           </TabsContent>
 
-          <TabsContent value="orders" className="mt-4">
-            <Card>
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>#</TableHead>
-                      <TableHead>Beställning</TableHead>
-                      <TableHead>Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {orders.length === 0 && (
-                      <TableRow><TableCell colSpan={3} className="text-center text-muted-foreground py-8">Inga beställningar</TableCell></TableRow>
-                    )}
-                    {orders.map((o: any) => (
-                      <TableRow key={o.id}>
-                        <TableCell className="font-mono text-xs">{o.order_number}</TableCell>
-                        <TableCell className="font-medium">{o.title}</TableCell>
-                        <TableCell><Badge variant={statusVariant(o.status)}>{statusLabels[o.status] || o.status}</Badge></TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+          <TabsContent value="orders">
+            <Card><CardContent className="p-0"><Table><TableHeader><TableRow><TableHead>#</TableHead><TableHead>Beställning</TableHead><TableHead>Status</TableHead></TableRow></TableHeader><TableBody>{orders.length === 0 && <TableRow><TableCell colSpan={3} className="text-center text-muted-foreground py-8">Inga beställningar</TableCell></TableRow>}{orders.map((o: any) => <TableRow key={o.id}><TableCell className="font-mono text-xs">{o.order_number}</TableCell><TableCell className="font-medium">{o.title}</TableCell><TableCell><Badge variant={statusVariant(o.status)}>{statusLabels[o.status] || o.status}</Badge></TableCell></TableRow>)}</TableBody></Table></CardContent></Card>
           </TabsContent>
 
-          <TabsContent value="invoices" className="mt-4">
-            <Card>
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Fakturanr</TableHead>
-                      <TableHead>Datum</TableHead>
-                      <TableHead>Förfallodatum</TableHead>
-                      <TableHead className="text-right">Belopp</TableHead>
-                      <TableHead>Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {invoices.length === 0 && (
-                      <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">Inga fakturor</TableCell></TableRow>
-                    )}
-                    {invoices.map((inv: any) => (
-                      <TableRow key={inv.id}>
-                        <TableCell className="font-medium">#{inv.invoice_number}</TableCell>
-                        <TableCell>{inv.invoice_date}</TableCell>
-                        <TableCell>{inv.due_date}</TableCell>
-                        <TableCell className="text-right">{inv.total_inc_vat?.toFixed(0)} kr</TableCell>
-                        <TableCell><Badge variant={statusVariant(inv.status)}>{statusLabels[inv.status] || inv.status}</Badge></TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+          <TabsContent value="invoices">
+            <Card><CardContent className="p-0"><Table><TableHeader><TableRow><TableHead>Fakturanr</TableHead><TableHead>Datum</TableHead><TableHead>Förfallodatum</TableHead><TableHead className="text-right">Belopp</TableHead><TableHead>Status</TableHead></TableRow></TableHeader><TableBody>{invoices.length === 0 && <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">Inga fakturor</TableCell></TableRow>}{invoices.map((inv: any) => <TableRow key={inv.id}><TableCell className="font-medium">#{inv.invoice_number}</TableCell><TableCell>{inv.invoice_date}</TableCell><TableCell>{inv.due_date}</TableCell><TableCell className="text-right font-mono">{inv.total_inc_vat?.toFixed(0)} kr</TableCell><TableCell><Badge variant={statusVariant(inv.status)}>{statusLabels[inv.status] || inv.status}</Badge></TableCell></TableRow>)}</TableBody></Table></CardContent></Card>
           </TabsContent>
 
-          <TabsContent value="booking" className="mt-4">
-            <BookingRequestForm token={token!} bookings={bookings} onCreated={handleBookingCreated} />
-          </TabsContent>
-
-          <TabsContent value="chat" className="mt-4">
-            <PortalChat token={token!} customerName={customer?.name || 'Kund'} />
-          </TabsContent>
+          <TabsContent value="booking"><BookingRequestForm token={token!} bookings={bookings} onCreated={handleBookingCreated} /></TabsContent>
+          <TabsContent value="chat"><PortalChat token={token!} customerName={customer?.name || 'Kund'} /></TabsContent>
         </Tabs>
       </main>
     </div>
