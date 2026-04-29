@@ -27,6 +27,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { LeadFormModal } from '@/components/LeadFormModal';
+import { DemoBookingModal } from '@/components/DemoBookingModal';
 import { useAuth } from '@/hooks/useAuth';
 import { useBreadcrumbJsonLd } from '@/lib/breadcrumb-jsonld';
 import { usePageMeta } from '@/lib/use-page-meta';
@@ -59,6 +60,7 @@ export default function LandingPageV2() {
   const navigate = useNavigate();
   const location = useLocation();
   const [leadModalOpen, setLeadModalOpen] = useState(false);
+  const [demoModalOpen, setDemoModalOpen] = useState(false);
   const [demoLoading, setDemoLoading] = useState(false);
 
   const lang: Lang = location.pathname.startsWith('/en') ? 'en' : 'sv';
@@ -144,7 +146,7 @@ export default function LandingPageV2() {
             <Button asChild variant="ghost" size="sm" className="hidden text-slate-700 hover:text-slate-950 sm:inline-flex">
               <Link to={dashboardHref}>{dashboardLabel}</Link>
             </Button>
-            <Button size="sm" onClick={() => setLeadModalOpen(true)} className="hidden rounded-xl bg-[#123b88] px-4 font-bold text-white hover:bg-[#0f2f6e] md:inline-flex">
+            <Button size="sm" onClick={() => setDemoModalOpen(true)} className="hidden rounded-xl bg-[#123b88] px-4 font-bold text-white hover:bg-[#0f2f6e] md:inline-flex">
               {t.nav.bookDemo}
             </Button>
             <Button asChild variant="outline" size="sm" className="sm:hidden" aria-label={t.langSwitch.aria}>
@@ -179,7 +181,7 @@ export default function LandingPageV2() {
               </p>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Button size="lg" onClick={() => setLeadModalOpen(true)} className="h-13 rounded-2xl bg-[#123b88] px-7 text-base font-bold text-white shadow-xl shadow-blue-900/20 hover:bg-[#0f2f6e]">
+                <Button size="lg" onClick={() => setDemoModalOpen(true)} className="h-13 rounded-2xl bg-[#123b88] px-7 text-base font-bold text-white shadow-xl shadow-blue-900/20 hover:bg-[#0f2f6e]">
                   {t.hero.ctaPrimary}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
@@ -345,7 +347,7 @@ export default function LandingPageV2() {
                       </div>
                     ))}
                   </div>
-                  <Button size="lg" onClick={() => setLeadModalOpen(true)} className="mt-8 rounded-2xl bg-white px-7 font-black text-[#0b1730] hover:bg-blue-50">
+                  <Button size="lg" onClick={() => setDemoModalOpen(true)} className="mt-8 rounded-2xl bg-white px-7 font-black text-[#0b1730] hover:bg-blue-50">
                     {t.pricing.cta}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
@@ -378,7 +380,7 @@ export default function LandingPageV2() {
             <h2 className="text-4xl font-black tracking-tight sm:text-5xl">{t.finalCta.h2}</h2>
             <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-slate-300">{t.finalCta.sub}</p>
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-              <Button size="lg" onClick={() => setLeadModalOpen(true)} className="rounded-2xl bg-white px-7 font-black text-slate-950 hover:bg-blue-50">
+              <Button size="lg" onClick={() => setDemoModalOpen(true)} className="rounded-2xl bg-white px-7 font-black text-slate-950 hover:bg-blue-50">
                 {t.finalCta.primary}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -391,6 +393,7 @@ export default function LandingPageV2() {
       </main>
 
       <LeadFormModal open={leadModalOpen} onOpenChange={setLeadModalOpen} />
+      <DemoBookingModal open={demoModalOpen} onOpenChange={setDemoModalOpen} lang={lang} />
     </div>
   );
 }
