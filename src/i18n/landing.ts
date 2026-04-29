@@ -138,7 +138,7 @@ const SV: LandingCopy = {
   ],
   flow: {
     eyebrow: 'Från order till underlag',
-    h2: 'Så fungerar Aurora i praktiken',
+    h2: 'Så fungerar Aurora Transport i praktiken',
     sub: 'Ett tydligt flöde för uppdrag, förare och rapportering — utan extra administration.',
     steps: [
       { label: '01', title: 'Skapa uppdrag', text: 'Lägg in kund, adress, tid och instruktioner på ett ställe.' },
@@ -276,7 +276,7 @@ const EN: LandingCopy = {
   ],
   flow: {
     eyebrow: 'From order to invoice',
-    h2: 'How Aurora works in practice',
+    h2: 'How Aurora Transport works in practice',
     sub: 'A clear flow for jobs, drivers and reporting — without the extra admin.',
     steps: [
       { label: '01', title: 'Create a job', text: 'Add customer, address, time and notes in one place.' },
