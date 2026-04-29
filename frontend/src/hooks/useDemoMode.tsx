@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 interface DemoModeContextValue {
   enabled: boolean;
@@ -12,6 +13,7 @@ const DemoModeContext = createContext<DemoModeContextValue | undefined>(undefine
 const STORAGE_KEY = 'aurora-demo-mode';
 
 export function DemoModeProvider({ children }: { children: ReactNode }) {
+  const [searchParams] = useSearchParams();
   const [enabled, setEnabled] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
     return window.localStorage.getItem(STORAGE_KEY) === 'true';
@@ -21,6 +23,13 @@ export function DemoModeProvider({ children }: { children: ReactNode }) {
     if (typeof window === 'undefined') return;
     window.localStorage.setItem(STORAGE_KEY, String(enabled));
   }, [enabled]);
+
+  // Support ?demo=1 / ?demo=0 URL params for sales demos
+  useEffect(() => {
+    const demoParam = searchParams.get('demo');
+    if (demoParam === '1') setEnabled(true);
+    else if (demoParam === '0') setEnabled(false);
+  }, [searchParams]);
 
   const toggle = useCallback(() => setEnabled((v) => !v), []);
   const enable = useCallback(() => setEnabled(true), []);
