@@ -114,7 +114,7 @@ export function PlatformLayout({ children, title, description }: PlatformLayoutP
           {description && <p className="text-[11px] text-muted-foreground truncate">{description}</p>}
         </div>
       </header>
-      <main className="flex-1 p-4 md:p-6 overflow-auto">
+      <main id="main-content" className="flex-1 p-4 md:p-6 overflow-auto">
         <PageTransition>{children}</PageTransition>
       </main>
     </>

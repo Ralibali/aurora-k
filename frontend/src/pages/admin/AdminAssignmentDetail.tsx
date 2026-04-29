@@ -260,8 +260,8 @@ export default function AdminAssignmentDetail() {
             <div className="flex items-center justify-between"><Label htmlFor="req-photo" className="text-sm">Kräv fraktsedelsfoto</Label><Switch id="req-photo" checked={assignment.require_photo} onCheckedChange={(checked) => updateAssignment.mutate({ id: assignment.id, require_photo: checked })} /></div>
           </div>
 
-          {assignment.signature_url && <div><p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Mottagarens signatur</p><img src={assignment.signature_url} alt="Signatur" className="w-full max-w-xs rounded-lg border bg-white p-2" /></div>}
-          {assignment.consignment_photo_url && <div><p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Fraktsedel</p><img src={assignment.consignment_photo_url} alt="Fraktsedel" className="w-full max-w-xs rounded-lg border" /></div>}
+          {assignment.signature_url && <div><p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Mottagarens signatur</p><img src={assignment.signature_url} alt="Signatur" loading="lazy" decoding="async" className="w-full max-w-xs rounded-lg border bg-white p-2" /></div>}
+          {assignment.consignment_photo_url && <div><p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Fraktsedel</p><img src={assignment.consignment_photo_url} alt="Fraktsedel" loading="lazy" decoding="async" className="w-full max-w-xs rounded-lg border" /></div>}
 
           {a.driver_comment && <div className="bg-secondary rounded-lg p-3"><p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-1"><MessageSquare className="h-3 w-3" /> Förarkommentar / statuslogg</p><p className="text-sm whitespace-pre-wrap">{a.driver_comment}</p></div>}
 

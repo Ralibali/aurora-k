@@ -187,7 +187,7 @@ export default function AdminSettings() {
         <CardContent className="space-y-4">
           {f.logo_url ? (
             <div className="border rounded-lg p-4 bg-muted/30 flex items-center gap-4">
-              <img src={f.logo_url} alt="Logotyp" className="h-16 max-w-[200px] object-contain" />
+              <img src={f.logo_url} alt="Logotyp" loading="lazy" decoding="async" className="h-16 max-w-[200px] object-contain" />
               <Button variant="outline" size="sm" onClick={() => setField('logo_url', null)}>Ta bort</Button>
             </div>
           ) : (

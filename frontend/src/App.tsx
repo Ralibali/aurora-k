@@ -10,6 +10,9 @@ import { CookieConsent } from "@/components/CookieConsent";
 import { ExitIntentPopup } from "@/components/ExitIntentPopup";
 import { QuickContactButton } from "@/components/QuickContactButton";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { ScrollToTop } from "@/components/ScrollToTop";
+import { SkipToContent } from "@/components/SkipToContent";
+import { NetworkStatusBanner } from "@/components/NetworkStatusBanner";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { SubscriptionGuard } from "@/components/SubscriptionGuard";
@@ -98,7 +101,16 @@ const BlogDigitaltKororder = lazy(() => import("./pages/blog/BlogDigitaltKororde
 const BlogBytaDispatch = lazy(() => import("./pages/blog/BlogBytaDispatch"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Sane defaults for a SaaS: retry once, don't refetch on focus in background tabs
+      retry: 1,
+      refetchOnWindowFocus: false,
+      staleTime: 30_000,
+    },
+  },
+});
 
 function PageLoader() {
   return (
@@ -145,6 +157,9 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <SkipToContent />
+          <ScrollToTop />
+          <NetworkStatusBanner />
           <AuthProvider>
           <ErrorBoundary>
               <Suspense fallback={<PageLoader />}>

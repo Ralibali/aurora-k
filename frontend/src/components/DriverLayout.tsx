@@ -2,28 +2,30 @@ import { Suspense } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Briefcase, Clock, FileText, User, Truck, Bell } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
-import { useAuth } from '@/hooks/useAuth';
 
 export function DriverLayout() {
-  const { user } = useAuth();
-
   return (
     <div className="min-h-screen flex flex-col bg-[#F8FAFC]">
       {/* Top header */}
       <header className="h-14 pt-safe flex items-center justify-between border-b border-border bg-white px-4 shrink-0 sticky top-0 z-30">
         <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
-            <Truck className="h-3.5 w-3.5 text-white" />
+            <Truck className="h-3.5 w-3.5 text-white" aria-hidden="true" />
           </div>
           <h1 className="text-sm font-semibold text-foreground">Aurora Transport</h1>
         </div>
-        <button className="text-muted-foreground hover:text-foreground p-2 rounded-md hover:bg-secondary transition-colors">
-          <Bell className="h-5 w-5" />
+        <button
+          type="button"
+          aria-label="Notifikationer"
+          title="Notifikationer"
+          className="text-muted-foreground hover:text-foreground p-2 rounded-md hover:bg-secondary transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center"
+        >
+          <Bell className="h-5 w-5" aria-hidden="true" />
         </button>
       </header>
 
       {/* Page content */}
-      <main className="flex-1 overflow-auto pb-20">
+      <main id="main-content" className="flex-1 overflow-auto pb-20">
         <Suspense
           fallback={
             <div className="flex-1 flex items-center justify-center py-20">

@@ -94,7 +94,7 @@ export function AdminLayout({ children, title, description, actions }: AdminLayo
           {actions ?? <QuickCreateMenu />}
         </div>
       </header>
-      <main className="flex-1 p-4 md:p-6 pb-24 md:pb-6 overflow-auto">
+      <main id="main-content" className="flex-1 p-4 md:p-6 pb-24 md:pb-6 overflow-auto">
         <PageTransition>{children}</PageTransition>
       </main>
     </>

@@ -238,7 +238,7 @@ export default function DriverAssignmentDetail() {
         </Card>
 
         {isCompleted && (
-          <Card className="border-green-200 bg-green-50"><CardContent className="space-y-3 p-5 text-center"><CheckCircle2 className="mx-auto h-12 w-12 text-green-600" /><p className="text-lg font-bold text-green-900">Uppdraget är slutfört</p>{assignment.actual_start && assignment.actual_stop && <p className="text-sm text-green-800">Tid: {calculateDuration(assignment.actual_start, assignment.actual_stop)}</p>}{a.consignment_photo_url && <img src={a.consignment_photo_url} alt="Fraktsedel" className="mx-auto mt-3 max-w-xs rounded-xl border bg-white" />}</CardContent></Card>
+          <Card className="border-green-200 bg-green-50"><CardContent className="space-y-3 p-5 text-center"><CheckCircle2 className="mx-auto h-12 w-12 text-green-600" /><p className="text-lg font-bold text-green-900">Uppdraget är slutfört</p>{assignment.actual_start && assignment.actual_stop && <p className="text-sm text-green-800">Tid: {calculateDuration(assignment.actual_start, assignment.actual_stop)}</p>}{a.consignment_photo_url && <img src={a.consignment_photo_url} alt="Fraktsedel" loading="lazy" decoding="async" className="mx-auto mt-3 max-w-xs rounded-xl border bg-white" />}</CardContent></Card>
         )}
       </main>
 
