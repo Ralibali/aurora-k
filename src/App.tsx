@@ -21,6 +21,8 @@ import { PlatformAdminShell } from "@/components/PlatformAdminLayout";
 const LandingPage = lazy(() => import("./pages/LandingPageV3"));
 const PublicBookingPage = lazy(() => import("./pages/PublicBookingPage"));
 const TransportledningssystemPage = lazy(() => import("./pages/TransportledningssystemPage"));
+const TidrapporteringTransportPage = lazy(() => import("./pages/TidrapporteringTransportPage"));
+const VadKostarTransportledningssystemPage = lazy(() => import("./pages/VadKostarTransportledningssystemPage"));
 const CoredinationAlternativPage = lazy(() => import("./pages/CoredinationAlternativPage"));
 const TjansterPage = lazy(() => import("./pages/TjansterPage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
@@ -152,6 +154,8 @@ const App = () => (
                 <Route path="/en" element={<LandingPage />} />
                 <Route path="/en/book" element={<LandingPage />} />
                 <Route path="/transportledningssystem" element={<TransportledningssystemPage />} />
+                <Route path="/tidrapportering-transport" element={<TidrapporteringTransportPage />} />
+                <Route path="/vad-kostar-transportledningssystem" element={<VadKostarTransportledningssystemPage />} />
                 <Route path="/coredination-alternativ" element={<CoredinationAlternativPage />} />
                 <Route path="/tjanster" element={<TjansterPage />} />
                 <Route path="/login" element={<LoginPage />} />
