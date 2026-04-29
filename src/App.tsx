@@ -18,6 +18,7 @@ import { DriverLayout } from "@/components/DriverLayout";
 import { PlatformAdminShell } from "@/components/PlatformAdminLayout";
 
 const LandingPage = lazy(() => import("./pages/LandingPage"));
+const PublicBookingPage = lazy(() => import("./pages/PublicBookingPage"));
 const TransportledningssystemPage = lazy(() => import("./pages/TransportledningssystemPage"));
 const CoredinationAlternativPage = lazy(() => import("./pages/CoredinationAlternativPage"));
 const TjansterPage = lazy(() => import("./pages/TjansterPage"));
@@ -144,6 +145,8 @@ const App = () => (
               <Suspense fallback={<PageLoader />}>
                 <Routes>
                 <Route path="/" element={<LandingPage />} />
+                <Route path="/boka" element={<PublicBookingPage />} />
+                <Route path="/boka/:slug" element={<PublicBookingPage />} />
                 <Route path="/transportledningssystem" element={<TransportledningssystemPage />} />
                 <Route path="/coredination-alternativ" element={<CoredinationAlternativPage />} />
                 <Route path="/tjanster" element={<TjansterPage />} />
