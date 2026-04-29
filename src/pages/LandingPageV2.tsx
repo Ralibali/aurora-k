@@ -85,6 +85,12 @@ export default function LandingPageV2() {
     if (theme !== 'light') setTheme('light');
   }, [theme, setTheme]);
 
+  useEffect(() => {
+    if (location.pathname === '/boka' || location.pathname === '/en/book') {
+      setDemoModalOpen(true);
+    }
+  }, [location.pathname]);
+
   const dashboardHref = user ? (isPlatformAdmin ? '/platform' : role === 'driver' ? '/driver' : '/admin') : '/login';
   const dashboardLabel = user ? t.nav.dashboard : t.nav.login;
 
