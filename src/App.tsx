@@ -202,6 +202,7 @@ const App = () => (
                   <Route path="drivers" element={<AdminDrivers />} />
                   <Route path="invoices" element={<AdminInvoices />} />
                   <Route path="invoices/new" element={<AdminNewInvoice />} />
+                  <Route path="invoice-basis" element={<AdminInvoiceBasis />} />
                   <Route path="reports" element={<AdminReports />} />
                   <Route path="statistics" element={<AdminStatistics />} />
                   <Route path="settings" element={<AdminSettings />} />
