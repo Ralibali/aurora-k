@@ -8,39 +8,48 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
 import { useCustomers, useDrivers, useCreateAssignment } from '@/hooks/useData';
 import { useVehicles, useOrders } from '@/hooks/useNewFeatures';
+import { useUpdateBookingRequest } from '@/hooks/useAllFeatures';
 import { priorityLabels } from '@/lib/types';
-import { ArrowLeft } from 'lucide-react';
-import { toast } from 'sonner';
+import { ArrowLeft, MapPin, PackageCheck, Route, Truck } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 type RecurrenceFrequency = 'weekly' | 'biweekly' | 'monthly';
 
 function addInterval(date: Date, freq: RecurrenceFrequency): Date {
   const d = new Date(date);
-  switch (freq) {
-    case 'weekly': d.setDate(d.getDate() + 7); break;
-    case 'biweekly': d.setDate(d.getDate() + 14); break;
-    case 'monthly': d.setMonth(d.getMonth() + 1); break;
-  }
+  if (freq === 'weekly') d.setDate(d.getDate() + 7);
+  if (freq === 'biweekly') d.setDate(d.getDate() + 14);
+  if (freq === 'monthly') d.setMonth(d.getMonth() + 1);
   return d;
+}
+
+function buildAddress(pickup: string, delivery: string) {
+  if (pickup && delivery) return `${pickup} → ${delivery}`;
+  return pickup || delivery;
 }
 
 export default function AdminNewAssignment() {
   const navigate = useNavigate();
   const location = useLocation();
-  const copyFrom = (location.state as any)?.copy;
+  const state = (location.state as any) || {};
+  const copyFrom = state.copy;
+  const bookingRequestId = state.bookingRequestId as string | undefined;
 
   const { data: customers } = useCustomers();
   const { data: drivers } = useDrivers();
   const { data: vehicles } = useVehicles();
   const { data: orders } = useOrders();
   const createAssignment = useCreateAssignment();
+  const updateBookingRequest = useUpdateBookingRequest();
 
-  const [title, setTitle] = useState(copyFrom ? copyFrom.title : '');
+  const [title, setTitle] = useState(copyFrom?.title || '');
   const [customerId, setCustomerId] = useState(copyFrom?.customer_id || '');
-  const [address, setAddress] = useState(copyFrom?.address || '');
+  const [serviceType, setServiceType] = useState(copyFrom?.service_type || '');
+  const [pickupAddress, setPickupAddress] = useState(copyFrom?.pickup_address || copyFrom?.address || '');
+  const [deliveryAddress, setDeliveryAddress] = useState(copyFrom?.delivery_address || '');
   const [instructions, setInstructions] = useState(copyFrom?.instructions || '');
   const [priority, setPriority] = useState(copyFrom?.priority || 'normal');
   const [scheduledStart, setScheduledStart] = useState('');
@@ -52,11 +61,6 @@ export default function AdminNewAssignment() {
   const [cost, setCost] = useState<string>(copyFrom?.cost != null ? String(copyFrom.cost) : '');
   const [vehicleId, setVehicleId] = useState(copyFrom?.vehicle_id || '');
   const [orderId, setOrderId] = useState(copyFrom?.order_id || '');
-  const [geofenceRadius, setGeofenceRadius] = useState('');
-  const [geofenceLat, setGeofenceLat] = useState('');
-  const [geofenceLng, setGeofenceLng] = useState('');
-
-  // Recurrence
   const [recurrenceEnabled, setRecurrenceEnabled] = useState(false);
   const [recurrenceFrequency, setRecurrenceFrequency] = useState<RecurrenceFrequency>('weekly');
   const [recurrenceEndDate, setRecurrenceEndDate] = useState('');
@@ -69,70 +73,68 @@ export default function AdminNewAssignment() {
     const baseStart = new Date(scheduledStart);
     const baseEnd = scheduledEnd ? new Date(scheduledEnd) : null;
     const durationMs = baseEnd ? baseEnd.getTime() - baseStart.getTime() : 0;
-
     const dates: { start: Date; end: Date | null }[] = [{ start: baseStart, end: baseEnd }];
 
     if (recurrenceEnabled && recurrenceEndDate) {
       const endLimit = new Date(recurrenceEndDate + 'T23:59:59');
       let nextStart = addInterval(baseStart, recurrenceFrequency);
       while (nextStart <= endLimit) {
-        dates.push({
-          start: nextStart,
-          end: baseEnd ? new Date(nextStart.getTime() + durationMs) : null,
-        });
+        dates.push({ start: nextStart, end: baseEnd ? new Date(nextStart.getTime() + durationMs) : null });
         nextStart = addInterval(nextStart, recurrenceFrequency);
       }
     }
 
     try {
       for (const d of dates) {
+        const payload: any = {
+          title,
+          customer_id: customerId,
+          address: buildAddress(pickupAddress, deliveryAddress),
+          pickup_address: pickupAddress || null,
+          delivery_address: deliveryAddress || null,
+          service_type: serviceType || null,
+          booking_request_id: bookingRequestId || null,
+          instructions: instructions || null,
+          scheduled_start: d.start.toISOString(),
+          scheduled_end: d.end ? d.end.toISOString() : null,
+          assigned_driver_id: driverId,
+          priority,
+          admin_comment: adminComment || null,
+          require_signature: requireSignature,
+          require_photo: requirePhoto,
+          cost: cost ? parseFloat(cost) : null,
+          vehicle_id: vehicleId || null,
+          order_id: orderId || null,
+        };
         await new Promise<void>((resolve, reject) => {
-          createAssignment.mutate({
-            title,
-            customer_id: customerId,
-            address,
-            instructions: instructions || null,
-            scheduled_start: d.start.toISOString(),
-            scheduled_end: d.end ? d.end.toISOString() : null,
-            assigned_driver_id: driverId,
-            priority,
-            admin_comment: adminComment || null,
-            require_signature: requireSignature,
-            require_photo: requirePhoto,
-            cost: cost ? parseFloat(cost) : null,
-            vehicle_id: vehicleId || null,
-            order_id: orderId || null,
-            geofence_radius: geofenceRadius ? parseInt(geofenceRadius) : null,
-            geofence_lat: geofenceLat ? parseFloat(geofenceLat) : null,
-            geofence_lng: geofenceLng ? parseFloat(geofenceLng) : null,
-          }, {
-            onSuccess: () => resolve(),
-            onError: (err) => reject(err),
-          });
+          createAssignment.mutate(payload, { onSuccess: () => resolve(), onError: (err) => reject(err) });
         });
       }
 
-      // Send assignment confirmation email to driver
+      if (bookingRequestId) {
+        updateBookingRequest.mutate({ id: bookingRequestId, status: 'accepted', admin_note: 'Omgjord till uppdrag' });
+      }
+
       try {
         const driver = (drivers ?? []).find(d => d.id === driverId);
         const customer = (customers ?? []).find(c => c.id === customerId);
         if (driver?.email && customer) {
           const formattedDate = new Date(scheduledStart).toLocaleString('sv-SE', {
-            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-            hour: '2-digit', minute: '2-digit',
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
           });
           await supabase.functions.invoke('send-email', {
             body: {
-              to: 'info@auroramedia.se',
+              to: driver.email,
               subject: `Nytt uppdrag: ${title}`,
               templateName: 'assignment-confirmation',
               templateData: {
                 driverName: driver.full_name,
                 title,
-                address,
+                address: buildAddress(pickupAddress, deliveryAddress),
                 scheduledStart: formattedDate,
                 customerName: customer.name,
                 priority,
+                serviceType,
                 instructions: instructions || null,
                 adminComment: adminComment || null,
                 appUrl: `${window.location.origin}/driver/assignments`,
@@ -152,38 +154,76 @@ export default function AdminNewAssignment() {
 
   return (
     <AdminLayout title="Nytt uppdrag">
-      <div className="max-w-2xl">
+      <div className="max-w-3xl">
         <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="mb-4">
           <ArrowLeft className="h-4 w-4 mr-1" /> Tillbaka
         </Button>
 
         <Card>
-          <CardHeader><CardTitle>Skapa nytt uppdrag</CardTitle></CardHeader>
+          <CardHeader>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <CardTitle>Skapa nytt uppdrag</CardTitle>
+              {bookingRequestId && <Badge variant="outline">Skapas från bokningsförfrågan</Badge>}
+            </div>
+          </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="title">Titel</Label>
-                <Input id="title" value={title} onChange={e => setTitle(e.target.value)} placeholder="T.ex. Leverans kontorsmöbler" required />
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="rounded-xl border bg-blue-50/50 p-4">
+                <div className="mb-4 flex items-center gap-2 font-semibold"><Truck className="h-4 w-4" /> Transportuppdrag</div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2 sm:col-span-2">
+                    <Label htmlFor="title">Titel</Label>
+                    <Input id="title" value={title} onChange={e => setTitle(e.target.value)} placeholder="T.ex. Kranbil till byggarbetsplats" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Uppdragstyp</Label>
+                    <Select value={serviceType || 'none'} onValueChange={(v) => setServiceType(v === 'none' ? '' : v)}>
+                      <SelectTrigger><SelectValue placeholder="Välj typ" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Ej angivet</SelectItem>
+                        {['Kranbil', 'Budbil', 'Tippbil', 'Krokbil', 'TMA-skydd', 'Byggsäck', 'Maskintransport', 'Annat'].map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Kund</Label>
+                    <Select value={customerId} onValueChange={setCustomerId} required>
+                      <SelectTrigger><SelectValue placeholder="Välj kund" /></SelectTrigger>
+                      <SelectContent>{(customers ?? []).map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-xl border p-4">
+                <div className="mb-4 flex items-center gap-2 font-semibold"><Route className="h-4 w-4" /> Rutt</div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="pickup">Hämtningsadress</Label>
+                    <Input id="pickup" value={pickupAddress} onChange={e => setPickupAddress(e.target.value)} placeholder="Gata, ort, platsinfo" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="delivery">Leveransadress</Label>
+                    <Input id="delivery" value={deliveryAddress} onChange={e => setDeliveryAddress(e.target.value)} placeholder="Gata, ort, platsinfo" />
+                  </div>
+                </div>
+                <p className="mt-2 flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="h-3 w-3" /> Föraren ser rutten som: {buildAddress(pickupAddress, deliveryAddress) || '—'}</p>
               </div>
 
               <div className="space-y-2">
-                <Label>Kund</Label>
-                <Select value={customerId} onValueChange={setCustomerId} required>
-                  <SelectTrigger><SelectValue placeholder="Välj kund" /></SelectTrigger>
-                  <SelectContent>
-                    {(customers ?? []).map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="instructions">Instruktioner</Label>
+                <Textarea id="instructions" value={instructions} onChange={e => setInstructions(e.target.value)} placeholder="Gods, vikt, hinder, portkod, kontaktperson, övrigt..." />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="address">Leveransadress</Label>
-                <Input id="address" value={address} onChange={e => setAddress(e.target.value)} placeholder="Gatuadress, stad" required />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="instructions">Instruktioner (valfritt)</Label>
-                <Textarea id="instructions" value={instructions} onChange={e => setInstructions(e.target.value)} placeholder="Särskilda instruktioner..." />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="date">Datum och starttid</Label>
+                  <Input id="date" type="datetime-local" value={scheduledStart} onChange={e => setScheduledStart(e.target.value)} required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="end">Sluttid</Label>
+                  <Input id="end" type="datetime-local" value={scheduledEnd} onChange={e => setScheduledEnd(e.target.value)} />
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -200,29 +240,15 @@ export default function AdminNewAssignment() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="date">Datum och starttid</Label>
-                  <Input id="date" type="datetime-local" value={scheduledStart} onChange={e => setScheduledStart(e.target.value)} required />
+                  <Label>Tilldela chaufför</Label>
+                  <Select value={driverId} onValueChange={setDriverId} required>
+                    <SelectTrigger><SelectValue placeholder="Välj chaufför" /></SelectTrigger>
+                    <SelectContent>{(drivers ?? []).map(d => <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>)}</SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="end">Sluttid (valfritt)</Label>
-                  <Input id="end" type="datetime-local" value={scheduledEnd} onChange={e => setScheduledEnd(e.target.value)} />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Tilldela chaufför</Label>
-                <Select value={driverId} onValueChange={setDriverId} required>
-                  <SelectTrigger><SelectValue placeholder="Välj chaufför" /></SelectTrigger>
-                  <SelectContent>
-                    {(drivers ?? []).map(d => <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Fordon (valfritt)</Label>
-                   <Select value={vehicleId || 'none'} onValueChange={(v) => setVehicleId(v === 'none' ? '' : v)}>
+                  <Label>Fordon</Label>
+                  <Select value={vehicleId || 'none'} onValueChange={(v) => setVehicleId(v === 'none' ? '' : v)}>
                     <SelectTrigger><SelectValue placeholder="Inget fordon" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="none">Inget fordon</SelectItem>
@@ -230,9 +256,12 @@ export default function AdminNewAssignment() {
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Beställning (valfritt)</Label>
-                   <Select value={orderId || 'none'} onValueChange={(v) => setOrderId(v === 'none' ? '' : v)}>
+                  <Label>Beställning</Label>
+                  <Select value={orderId || 'none'} onValueChange={(v) => setOrderId(v === 'none' ? '' : v)}>
                     <SelectTrigger><SelectValue placeholder="Ingen beställning" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="none">Ingen beställning</SelectItem>
@@ -240,90 +269,41 @@ export default function AdminNewAssignment() {
                     </SelectContent>
                   </Select>
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="cost">Kostnad / fakturabelopp</Label>
+                  <Input id="cost" type="number" step="0.01" min="0" value={cost} onChange={e => setCost(e.target.value)} placeholder="T.ex. 1500" />
+                </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="comment">Intern kommentar (valfritt)</Label>
-              <Textarea id="comment" value={adminComment} onChange={e => setAdminComment(e.target.value)} placeholder="Meddelande till chauffören..." />
+                <Label htmlFor="comment">Meddelande till chauffören</Label>
+                <Textarea id="comment" value={adminComment} onChange={e => setAdminComment(e.target.value)} placeholder="Syns i förarappen..." />
               </div>
 
-              {/* Kostnad */}
-              <div className="space-y-2">
-                <Label htmlFor="cost">Kostnad / fakturabelopp (kr, valfritt)</Label>
-                <Input id="cost" type="number" step="0.01" min="0" value={cost} onChange={e => setCost(e.target.value)} placeholder="T.ex. 1500" />
-              </div>
-
-              {/* Geofence */}
               <div className="border rounded-lg p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium">Geofence</p>
-                    <p className="text-xs text-muted-foreground">Auto-notis vid ankomst/avfärd</p>
-                  </div>
-                  <Switch checked={!!geofenceRadius} onCheckedChange={(on) => { if (!on) { setGeofenceRadius(''); setGeofenceLat(''); setGeofenceLng(''); } else { setGeofenceRadius('200'); }}} />
-                </div>
-                {!!geofenceRadius && (
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="space-y-1">
-                      <Label className="text-xs">Latitud</Label>
-                      <Input type="number" step="any" value={geofenceLat} onChange={e => setGeofenceLat(e.target.value)} placeholder="59.33" />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs">Longitud</Label>
-                      <Input type="number" step="any" value={geofenceLng} onChange={e => setGeofenceLng(e.target.value)} placeholder="18.07" />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs">Radie (m)</Label>
-                      <Input type="number" value={geofenceRadius} onChange={e => setGeofenceRadius(e.target.value)} placeholder="200" />
-                    </div>
-                  </div>
-                )}
+                <p className="text-sm font-medium flex items-center gap-2"><PackageCheck className="h-4 w-4" /> Krav vid slutförande</p>
+                <div className="flex items-center justify-between"><Label htmlFor="req-sig" className="cursor-pointer">Kräv mottagarsignatur</Label><Switch id="req-sig" checked={requireSignature} onCheckedChange={setRequireSignature} /></div>
+                <div className="flex items-center justify-between"><Label htmlFor="req-photo" className="cursor-pointer">Kräv fraktsedelsfoto</Label><Switch id="req-photo" checked={requirePhoto} onCheckedChange={setRequirePhoto} /></div>
               </div>
 
-              {/* Signatur & Foto krav */}
               <div className="border rounded-lg p-4 space-y-3">
-                <p className="text-sm font-medium">Krav vid slutförande</p>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="req-sig" className="cursor-pointer">Kräv mottagarsignatur</Label>
-                  <Switch id="req-sig" checked={requireSignature} onCheckedChange={setRequireSignature} />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="req-photo" className="cursor-pointer">Kräv fraktsedelfoto</Label>
-                  <Switch id="req-photo" checked={requirePhoto} onCheckedChange={setRequirePhoto} />
-                </div>
-              </div>
-
-              {/* Recurrence */}
-              <div className="border rounded-lg p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label>Upprepning</Label>
-                  <Switch checked={recurrenceEnabled} onCheckedChange={setRecurrenceEnabled} />
-                </div>
+                <div className="flex items-center justify-between"><Label>Upprepning</Label><Switch checked={recurrenceEnabled} onCheckedChange={setRecurrenceEnabled} /></div>
                 {recurrenceEnabled && (
-                  <div className="space-y-3">
+                  <div className="grid gap-3 sm:grid-cols-2">
                     <div className="space-y-2">
                       <Label>Frekvens</Label>
                       <Select value={recurrenceFrequency} onValueChange={(v) => setRecurrenceFrequency(v as RecurrenceFrequency)}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="weekly">Varje vecka</SelectItem>
-                          <SelectItem value="biweekly">Varannan vecka</SelectItem>
-                          <SelectItem value="monthly">Varje månad</SelectItem>
-                        </SelectContent>
+                        <SelectContent><SelectItem value="weekly">Varje vecka</SelectItem><SelectItem value="biweekly">Varannan vecka</SelectItem><SelectItem value="monthly">Varje månad</SelectItem></SelectContent>
                       </Select>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="recurrence-end">Upprepa till och med</Label>
-                      <Input id="recurrence-end" type="date" value={recurrenceEndDate} onChange={e => setRecurrenceEndDate(e.target.value)} required={recurrenceEnabled} />
-                    </div>
+                    <div className="space-y-2"><Label htmlFor="recurrence-end">Upprepa till och med</Label><Input id="recurrence-end" type="date" value={recurrenceEndDate} onChange={e => setRecurrenceEndDate(e.target.value)} required={recurrenceEnabled} /></div>
                   </div>
                 )}
               </div>
 
               <div className="flex gap-2 pt-2">
-                <Button type="submit" disabled={isSubmitting || createAssignment.isPending}>
-                  {isSubmitting ? 'Skapar...' : 'Skapa uppdrag'}
-                </Button>
+                <Button type="submit" disabled={isSubmitting || createAssignment.isPending}>{isSubmitting ? 'Skapar...' : 'Skapa uppdrag'}</Button>
                 <Button type="button" variant="outline" onClick={() => navigate(-1)}>Avbryt</Button>
               </div>
             </form>
