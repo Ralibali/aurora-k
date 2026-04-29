@@ -41,6 +41,7 @@ const AdminNewCustomer = lazy(() => import("./pages/admin/AdminNewCustomer"));
 const AdminDrivers = lazy(() => import("./pages/admin/AdminDrivers"));
 const AdminInvoices = lazy(() => import("./pages/admin/AdminInvoices"));
 const AdminNewInvoice = lazy(() => import("./pages/admin/AdminNewInvoice"));
+const AdminInvoiceBasis = lazy(() => import("./pages/admin/AdminInvoiceBasis"));
 const AdminReports = lazy(() => import("./pages/admin/AdminReports"));
 const AdminStatistics = lazy(() => import("./pages/admin/AdminStatistics"));
 const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
