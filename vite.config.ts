@@ -66,7 +66,7 @@ export default defineConfig(({ mode }) => ({
       includeAssets: ["icon-192x192.png", "icon-512x512.png"],
       manifest: {
         name: "Aurora Transport",
-        short_name: "Aurora",
+        short_name: "Aurora Transport",
         description: "Transportledningssystem för moderna åkerier",
         start_url: "/",
         display: "standalone",
