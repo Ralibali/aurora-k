@@ -27,6 +27,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { LeadFormModal } from '@/components/LeadFormModal';
+import { DemoBookingModal } from '@/components/DemoBookingModal';
 import { useAuth } from '@/hooks/useAuth';
 import { useBreadcrumbJsonLd } from '@/lib/breadcrumb-jsonld';
 import { usePageMeta } from '@/lib/use-page-meta';
@@ -59,6 +60,7 @@ export default function LandingPageV2() {
   const navigate = useNavigate();
   const location = useLocation();
   const [leadModalOpen, setLeadModalOpen] = useState(false);
+  const [demoModalOpen, setDemoModalOpen] = useState(false);
   const [demoLoading, setDemoLoading] = useState(false);
 
   const lang: Lang = location.pathname.startsWith('/en') ? 'en' : 'sv';
@@ -391,6 +393,7 @@ export default function LandingPageV2() {
       </main>
 
       <LeadFormModal open={leadModalOpen} onOpenChange={setLeadModalOpen} />
+      <DemoBookingModal open={demoModalOpen} onOpenChange={setDemoModalOpen} lang={lang} />
     </div>
   );
 }
