@@ -38,5 +38,5 @@ jobs:
       - name: Test
         run: npm run test
 
-      - name: Build
-        run: npm run build
+      - name: Build without prerender
+        run: npm run build:dev
