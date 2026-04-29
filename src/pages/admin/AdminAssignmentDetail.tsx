@@ -12,7 +12,7 @@ import { PriorityBadge } from '@/components/PriorityBadge';
 import { useAssignment, useUpdateAssignment, useDeleteAssignment, useDrivers, useAssignmentLogs, useCreateAssignmentLog } from '@/hooks/useData';
 import { useAuth } from '@/hooks/useAuth';
 import { formatSwedishDateTime, calculateDuration } from '@/lib/format';
-import { Trash2, Copy, History, Mail, Bell, X, Phone, MapPin, Calendar, Clock, User, FileText, AlertTriangle, CheckCircle2, MessageSquare, Navigation } from 'lucide-react';
+import { Trash2, Copy, History, Mail, Bell, X, MapPin, Calendar, Clock, User, FileText, AlertTriangle, CheckCircle2, MessageSquare, Navigation, Receipt } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
@@ -109,6 +109,7 @@ export default function AdminAssignmentDetail() {
   const a = assignment as any;
   const currentComment = comment !== null ? comment : (assignment.admin_comment || '');
   const flags = getDriverEventFlags(a.driver_comment);
+  const canInvoice = assignment.status === 'completed' && !assignment.invoiced && assignment.customer_id;
 
   const handleDriverChange = (driverId: string) => {
     const oldDriver = assignment.driver?.full_name || 'Ingen';
@@ -169,6 +170,20 @@ export default function AdminAssignmentDetail() {
                   <p className="font-semibold">Avvikelse rapporterad</p>
                   <p className="mt-1 text-sm">Kontrollera förarkommentaren och kontakta förare eller kund vid behov.</p>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {canInvoice && (
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-950">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="font-semibold">Klart för fakturering</p>
+                  <p className="mt-1 text-sm text-emerald-800">Uppdraget är slutfört och kan göras om till faktura direkt.</p>
+                </div>
+                <Button onClick={() => navigate('/admin/invoices/new', { state: { customerId: assignment.customer_id, assignmentIds: [assignment.id], startAtStep: 3 } })}>
+                  <Receipt className="mr-2 h-4 w-4" /> Skapa faktura
+                </Button>
               </div>
             </div>
           )}
@@ -264,6 +279,7 @@ export default function AdminAssignmentDetail() {
           </div>
 
           <div className="flex gap-2 flex-wrap border-t border-border pt-4">
+            {canInvoice && <Button size="sm" onClick={() => navigate('/admin/invoices/new', { state: { customerId: assignment.customer_id, assignmentIds: [assignment.id], startAtStep: 3 } })}><Receipt className="h-4 w-4 mr-1" /> Skapa faktura</Button>}
             <Button variant="outline" size="sm" onClick={() => navigate('/admin/assignments/new', { state: { copy: assignment } })}><Copy className="h-4 w-4 mr-1" /> Kopiera</Button>
             <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
               <DialogTrigger asChild><Button variant="outline" size="sm"><Mail className="h-4 w-4 mr-1" /> Dela</Button></DialogTrigger>
