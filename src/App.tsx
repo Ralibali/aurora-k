@@ -18,7 +18,7 @@ import { AdminShell } from "@/components/AdminLayout";
 import { DriverLayout } from "@/components/DriverLayout";
 import { PlatformAdminShell } from "@/components/PlatformAdminLayout";
 
-const LandingPage = lazy(() => import("./pages/LandingPageV2"));
+const LandingPage = lazy(() => import("./pages/LandingPageV3"));
 const TransportledningssystemPage = lazy(() => import("./pages/TransportledningssystemPage"));
 const CoredinationAlternativPage = lazy(() => import("./pages/CoredinationAlternativPage"));
 const TjansterPage = lazy(() => import("./pages/TjansterPage"));
