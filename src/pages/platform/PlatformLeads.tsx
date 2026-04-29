@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
-import { Search, Building2, Mail, Phone, Truck, Hash, MessageSquare, UserPlus, ExternalLink, ChevronRight } from 'lucide-react';
+import { Search, Building2, Mail, Phone, Truck, Hash, MessageSquare, UserPlus, ExternalLink, ChevronRight, Download, Archive } from 'lucide-react';
 import { EmptyState } from '@/components/EmptyState';
 
 const statusMap: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
@@ -23,6 +23,7 @@ const statusMap: Record<string, { label: string; variant: 'default' | 'secondary
   contacted: { label: 'Kontaktad', variant: 'secondary' },
   converted: { label: 'Konverterad', variant: 'outline' },
   rejected: { label: 'Avvisad', variant: 'destructive' },
+  archived: { label: 'Arkiverad', variant: 'secondary' },
 };
 
 const fallbackStatus = { label: 'Okänd', variant: 'secondary' as const };
@@ -114,6 +115,38 @@ export default function PlatformLeads() {
     converted: leads.filter((l: any) => l.status === 'converted').length,
   };
 
+  const exportCsv = () => {
+    if (!filtered.length) {
+      toast.error('Inga leads att exportera');
+      return;
+    }
+    const headers = [
+      'Datum', 'Företag', 'Kontaktperson', 'E-post', 'Telefon', 'Org.nr',
+      'Flottstorlek', 'Poäng', 'Status', 'UTM Källa', 'UTM Medium', 'UTM Kampanj', 'Meddelande', 'Anteckningar'
+    ];
+    const escape = (v: any) => {
+      const s = v == null ? '' : String(v);
+      return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const rows = filtered.map((l: any) => [
+      format(new Date(l.created_at), 'yyyy-MM-dd HH:mm'),
+      l.company_name, l.contact_person, l.email, l.phone || '', l.org_number || '',
+      l.fleet_size || '', l.lead_score ?? 0,
+      statusMap[l.status]?.label || l.status,
+      l.utm_source || '', l.utm_medium || '', l.utm_campaign || '',
+      (l.message || '').replace(/\n/g, ' '), (l.admin_notes || '').replace(/\n/g, ' '),
+    ].map(escape).join(';'));
+    const csv = '\uFEFF' + [headers.join(';'), ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `leads-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(`${filtered.length} leads exporterade`);
+  };
+
   return (
     <PlatformLayout title="Leads" description="Intresseanmälningar från potentiella kunder">
       {/* Stats */}
@@ -154,8 +187,13 @@ export default function PlatformLeads() {
             <SelectItem value="contacted">Kontaktade</SelectItem>
             <SelectItem value="converted">Konverterade</SelectItem>
             <SelectItem value="rejected">Avvisade</SelectItem>
+            <SelectItem value="archived">Arkiverade</SelectItem>
           </SelectContent>
         </Select>
+        <Button variant="outline" onClick={exportCsv} className="sm:w-auto">
+          <Download className="h-4 w-4 mr-2" />
+          Exportera CSV
+        </Button>
       </div>
 
       {/* Table */}
@@ -267,6 +305,7 @@ export default function PlatformLeads() {
                     <SelectItem value="contacted">Kontaktad</SelectItem>
                     <SelectItem value="converted">Konverterad</SelectItem>
                     <SelectItem value="rejected">Avvisad</SelectItem>
+                    <SelectItem value="archived">Arkiverad</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -286,17 +325,31 @@ export default function PlatformLeads() {
               </div>
 
               {selectedLead.status !== 'converted' && (
-                <Button
-                  className="w-full"
-                  onClick={() => {
-                    setConvertCompanyName(selectedLead.company_name);
-                    setConvertOrgNr(selectedLead.org_number || '');
-                    setConvertOpen(true);
-                  }}
-                >
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Skapa företag & onboarda
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    className="flex-1"
+                    onClick={() => {
+                      setConvertCompanyName(selectedLead.company_name);
+                      setConvertOrgNr(selectedLead.org_number || '');
+                      setConvertOpen(true);
+                    }}
+                  >
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Skapa företag & onboarda
+                  </Button>
+                  {selectedLead.status !== 'archived' && (
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        updateLead.mutate({ id: selectedLead.id, status: 'archived' });
+                        setSelectedLead({ ...selectedLead, status: 'archived' });
+                      }}
+                    >
+                      <Archive className="h-4 w-4 mr-2" />
+                      Arkivera
+                    </Button>
+                  )}
+                </div>
               )}
             </div>
           </DialogContent>
