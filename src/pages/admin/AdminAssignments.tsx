@@ -11,7 +11,7 @@ import { StatusBadge } from '@/components/StatusBadge';
 import { PriorityBadge } from '@/components/PriorityBadge';
 import { useAssignments, useDrivers, useBulkAssignDriver, useUpdateAssignment } from '@/hooks/useData';
 import { formatSwedishDateTime, formatSwedishTime } from '@/lib/format';
-import { Plus, Search, Users, Clock, ChevronRight, Inbox, MoreHorizontal, Route, AlertTriangle, UserX, Truck } from 'lucide-react';
+import { Plus, Search, Users, Clock, Inbox, MoreHorizontal, Route, UserX, Truck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -24,6 +24,7 @@ import { useDemoMode } from '@/hooks/useDemoMode';
 import { demoAssignments } from '@/lib/demo-data';
 import { EmptyState } from '@/components/EmptyState';
 import { Inbox as InboxIcon } from 'lucide-react';
+import { DemoModeBanner } from '@/components/DemoModeBanner';
 
 const filterTabs = [
   { key: 'all', label: 'Alla', dotClass: 'bg-muted-foreground/40' },
@@ -44,7 +45,7 @@ function getRouteSummary(a: any) {
 function matchesTab(a: any, tab: string) {
   if (tab === 'all') return true;
   if (tab === 'unassigned') return !a.assigned_driver_id;
-  if (tab === 'urgent') return a.priority === 'urgent';
+  if (tab === 'urgent') return a.priority === 'urgent' || a.priority === 'high';
   return a.status === tab;
 }
 
@@ -60,15 +61,20 @@ export default function AdminAssignments() {
   const { data: drivers } = useDrivers();
   const bulkAssign = useBulkAssignDriver();
   const updateAssignment = useUpdateAssignment();
-  const { enabled: demoEnabled } = useDemoMode();
+  const demo = useDemoMode();
 
   const effectiveAssignments = useMemo(() => {
     const real = assignments ?? [];
-    if (demoEnabled && real.length === 0) {
-      return demoAssignments.map((a: any) => ({ ...a, assigned_driver_id: a.driver?.full_name ?? null, scheduled_end: null, instructions: null }));
+    if (demo.enabled && real.length === 0) {
+      return demoAssignments.map((a: any) => ({
+        ...a,
+        assigned_driver_id: a.assigned_driver_id ?? a.driver?.full_name ?? null,
+        scheduled_end: a.scheduled_end ?? null,
+        instructions: a.instructions ?? null,
+      }));
     }
     return real;
-  }, [assignments, demoEnabled]);
+  }, [assignments, demo.enabled]);
 
   const today = format(new Date(), 'EEEE d MMMM yyyy', { locale: sv });
 
@@ -91,7 +97,7 @@ export default function AdminAssignments() {
     for (const a of effectiveAssignments as any[]) {
       base.all += 1;
       if (!a.assigned_driver_id) base.unassigned += 1;
-      if (a.priority === 'urgent') base.urgent += 1;
+      if (a.priority === 'urgent' || a.priority === 'high') base.urgent += 1;
       if (base[a.status] !== undefined) base[a.status] += 1;
     }
     return base;
@@ -103,11 +109,13 @@ export default function AdminAssignments() {
   }, [effectiveAssignments]);
 
   const toggleSelect = (id: string) => setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
-  const toggleAll = () => { if (selected.length === filtered.length) setSelected([]); else setSelected(filtered.map(a => a.id)); };
+  const toggleAll = () => { if (selected.length === filtered.length) setSelected([]); else setSelected(filtered.map((a: any) => a.id)); };
 
   return (
     <AdminLayout title="Uppdrag" description="Transportledning, rutter och förare">
       <div className="space-y-5">
+        {demo.enabled && <DemoModeBanner onDisable={demo.disable} />}
+
         <div className="rounded-2xl border bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 p-5 text-white shadow-xl">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
@@ -137,7 +145,10 @@ export default function AdminAssignments() {
               </SelectContent>
             </Select>
           </div>
-          <Button asChild><Link to="/admin/assignments/new"><Plus className="h-4 w-4 mr-1" /> Skapa uppdrag</Link></Button>
+          <div className="flex gap-2">
+            {!demo.enabled && <Button variant="outline" onClick={demo.enable}>Demo mode</Button>}
+            <Button asChild><Link to="/admin/assignments/new"><Plus className="h-4 w-4 mr-1" /> Skapa uppdrag</Link></Button>
+          </div>
         </div>
 
         <div className="flex gap-1.5 overflow-x-auto pb-1 -mb-1 border-b border-border">
@@ -164,7 +175,7 @@ export default function AdminAssignments() {
         {isLoading ? (
           <div className="hidden md:block bg-card rounded-lg border border-border shadow-card overflow-hidden"><Table><TableBody>{[1,2,3,4,5].map(i => <TableRow key={i}><TableCell><Skeleton className="h-10 w-full" /></TableCell></TableRow>)}</TableBody></Table></div>
         ) : filtered.length === 0 ? (
-          effectiveAssignments.length === 0 ? <EmptyState icon={InboxIcon} title="Skapa ditt första uppdrag" description="Samla körningar, förare, tider och kundinformation på ett ställe." hint="Tips: börja med ett vanligt uppdrag och återanvänd det senare som mall." actionLabel="Skapa uppdrag" actionHref="/admin/assignments/new" secondaryLabel="Lägg till kund först" secondaryHref="/admin/customers/new" /> : <div className="bg-card rounded-lg border border-dashed border-border p-16 text-center shadow-card"><Inbox className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" /><p className="text-sm font-medium text-muted-foreground">Inga uppdrag matchar filtren</p><Button size="sm" variant="outline" className="mt-4" onClick={() => { setStatusFilter('all'); setDriverFilter('all'); setSearch(''); }}>Rensa filter</Button></div>
+          effectiveAssignments.length === 0 ? <EmptyState icon={InboxIcon} title="Skapa ditt första uppdrag" description="Samla körningar, förare, tider och kundinformation på ett ställe." hint="Tips: aktivera Demo mode för att visa en säljklar version med exempeldata." actionLabel="Skapa uppdrag" actionHref="/admin/assignments/new" secondaryLabel="Aktivera Demo mode" onSecondaryAction={demo.enable} /> : <div className="bg-card rounded-lg border border-dashed border-border p-16 text-center shadow-card"><Inbox className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" /><p className="text-sm font-medium text-muted-foreground">Inga uppdrag matchar filtren</p><Button size="sm" variant="outline" className="mt-4" onClick={() => { setStatusFilter('all'); setDriverFilter('all'); setSearch(''); }}>Rensa filter</Button></div>
         ) : (
           <>
             <div className="hidden md:block bg-card rounded-lg border border-border shadow-card overflow-hidden">
