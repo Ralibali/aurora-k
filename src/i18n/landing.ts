@@ -111,7 +111,7 @@ const SV: LandingCopy = {
   hero: {
     badge: 'Byggt i Sverige för åkerier, bud och bemanning',
     h1: 'Slipp Excel, WhatsApp och manuell planering',
-    sub: 'Aurora samlar uppdrag, förare, tidrapportering och fakturaunderlag i ett enkelt system för svenska transportföretag.',
+    sub: 'Aurora Transport samlar uppdrag, förare, tidrapportering och fakturaunderlag i ett enkelt system för svenska transportföretag.',
     ctaPrimary: 'Boka demo',
     ctaSecondaryIdle: 'Se demo med exempeldata',
     ctaSecondaryLoading: 'Loggar in...',
