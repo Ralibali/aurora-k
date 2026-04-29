@@ -19,6 +19,7 @@ import { DriverLayout } from "@/components/DriverLayout";
 import { PlatformAdminShell } from "@/components/PlatformAdminLayout";
 
 const LandingPage = lazy(() => import("./pages/LandingPageV3"));
+const PublicBookingPage = lazy(() => import("./pages/PublicBookingPage"));
 const TransportledningssystemPage = lazy(() => import("./pages/TransportledningssystemPage"));
 const CoredinationAlternativPage = lazy(() => import("./pages/CoredinationAlternativPage"));
 const TjansterPage = lazy(() => import("./pages/TjansterPage"));
@@ -146,7 +147,8 @@ const App = () => (
               <Suspense fallback={<PageLoader />}>
                 <Routes>
                 <Route path="/" element={<LandingPage />} />
-                <Route path="/boka" element={<LandingPage />} />
+                <Route path="/boka" element={<PublicBookingPage />} />
+                <Route path="/boka/:slug" element={<PublicBookingPage />} />
                 <Route path="/en" element={<LandingPage />} />
                 <Route path="/en/book" element={<LandingPage />} />
                 <Route path="/transportledningssystem" element={<TransportledningssystemPage />} />
@@ -175,7 +177,6 @@ const App = () => (
                 <Route path="/blogg/hur-digitaliserar-man-sin-budtjanst" element={<BlogDigitaliseraBudtjanst />} />
                 <Route path="/blogg/vad-kostar-ett-transportledningssystem" element={<BlogVadKostarTms />} />
                 <Route path="/blogg/transportledningssystem-for-sma-akerier" element={<BlogTmsSmaaAkerier />} />
-                {/* Backward-compat redirect for old misspelled slug */}
                 <Route path="/blogg/transportledningssystem-for-sma-akeries" element={<BlogTmsSmaaAkerier />} />
                 <Route path="/blogg/dispatch-app-forare-transport" element={<BlogDispatchAppForare />} />
                 <Route path="/blogg/bemanningsbolag-transport-system" element={<BlogBemanningsbolag />} />
