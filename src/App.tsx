@@ -146,7 +146,9 @@ const App = () => (
               <Suspense fallback={<PageLoader />}>
                 <Routes>
                 <Route path="/" element={<LandingPage />} />
+                <Route path="/boka" element={<LandingPage />} />
                 <Route path="/en" element={<LandingPage />} />
+                <Route path="/en/book" element={<LandingPage />} />
                 <Route path="/transportledningssystem" element={<TransportledningssystemPage />} />
                 <Route path="/coredination-alternativ" element={<CoredinationAlternativPage />} />
                 <Route path="/tjanster" element={<TjansterPage />} />
