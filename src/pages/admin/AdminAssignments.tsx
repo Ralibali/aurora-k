@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
 import { AdminLayout } from '@/components/AdminLayout';
@@ -11,17 +11,14 @@ import { StatusBadge } from '@/components/StatusBadge';
 import { PriorityBadge } from '@/components/PriorityBadge';
 import { useAssignments, useDrivers, useBulkAssignDriver, useUpdateAssignment } from '@/hooks/useData';
 import { formatSwedishDateTime, formatSwedishTime } from '@/lib/format';
-import { Plus, Search, Users, Clock, ChevronRight, Inbox, MoreHorizontal } from 'lucide-react';
+import { Plus, Search, Users, Clock, ChevronRight, Inbox, MoreHorizontal, Route, AlertTriangle, UserX, Truck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { StaggeredTableBody, StaggeredTableRow, StaggeredList, StaggeredItem } from '@/components/StaggeredList';
 import { useDemoMode } from '@/hooks/useDemoMode';
 import { demoAssignments } from '@/lib/demo-data';
@@ -30,11 +27,26 @@ import { Inbox as InboxIcon } from 'lucide-react';
 
 const filterTabs = [
   { key: 'all', label: 'Alla', dotClass: 'bg-muted-foreground/40' },
-  { key: 'pending', label: 'Ej tilldelade', dotClass: 'bg-amber-500' },
+  { key: 'unassigned', label: 'Saknar förare', dotClass: 'bg-amber-500' },
+  { key: 'urgent', label: 'Brådskande', dotClass: 'bg-rose-500' },
+  { key: 'pending', label: 'Tilldelade', dotClass: 'bg-blue-500' },
   { key: 'active', label: 'Pågående', dotClass: 'bg-emerald-500' },
   { key: 'completed', label: 'Slutförda', dotClass: 'bg-slate-400' },
-  { key: 'delayed', label: 'Försenade', dotClass: 'bg-rose-500' },
 ] as const;
+
+function getRouteSummary(a: any) {
+  const pickup = a.pickup_address;
+  const delivery = a.delivery_address;
+  if (pickup && delivery) return `${pickup} → ${delivery}`;
+  return pickup || delivery || a.address;
+}
+
+function matchesTab(a: any, tab: string) {
+  if (tab === 'all') return true;
+  if (tab === 'unassigned') return !a.assigned_driver_id;
+  if (tab === 'urgent') return a.priority === 'urgent';
+  return a.status === tab;
+}
 
 export default function AdminAssignments() {
   const navigate = useNavigate();
@@ -50,344 +62,140 @@ export default function AdminAssignments() {
   const updateAssignment = useUpdateAssignment();
   const { enabled: demoEnabled } = useDemoMode();
 
-  // When demo mode is enabled and there's no real data, overlay demo assignments
   const effectiveAssignments = useMemo(() => {
     const real = assignments ?? [];
     if (demoEnabled && real.length === 0) {
-      return demoAssignments.map((a: any) => ({
-        ...a,
-        assigned_driver_id: a.driver?.full_name ?? null,
-        scheduled_end: null,
-        instructions: null,
-      }));
+      return demoAssignments.map((a: any) => ({ ...a, assigned_driver_id: a.driver?.full_name ?? null, scheduled_end: null, instructions: null }));
     }
     return real;
   }, [assignments, demoEnabled]);
 
-  const today = format(new Date(), "EEEE d MMMM yyyy", { locale: sv });
+  const today = format(new Date(), 'EEEE d MMMM yyyy', { locale: sv });
 
   const filtered = useMemo(() =>
     effectiveAssignments.filter((a: any) => {
-      if (statusFilter !== 'all' && a.status !== statusFilter) return false;
+      if (!matchesTab(a, statusFilter)) return false;
       if (driverFilter !== 'all' && a.assigned_driver_id !== driverFilter) return false;
       if (search) {
         const q = search.toLowerCase();
-        if (!a.title.toLowerCase().includes(q) && !a.customer?.name?.toLowerCase().includes(q)) return false;
+        const haystack = `${a.title} ${a.customer?.name ?? ''} ${a.address ?? ''} ${a.pickup_address ?? ''} ${a.delivery_address ?? ''} ${a.service_type ?? ''}`.toLowerCase();
+        if (!haystack.includes(q)) return false;
       }
       return true;
     }).sort((a: any, b: any) => b.scheduled_start.localeCompare(a.scheduled_start)),
     [effectiveAssignments, statusFilter, driverFilter, search]
   );
 
-  // Counts per tab for badges
   const counts = useMemo(() => {
-    const base: Record<string, number> = { all: 0, pending: 0, active: 0, completed: 0, delayed: 0 };
+    const base: Record<string, number> = { all: 0, unassigned: 0, urgent: 0, pending: 0, active: 0, completed: 0 };
     for (const a of effectiveAssignments as any[]) {
       base.all += 1;
+      if (!a.assigned_driver_id) base.unassigned += 1;
+      if (a.priority === 'urgent') base.urgent += 1;
       if (base[a.status] !== undefined) base[a.status] += 1;
     }
     return base;
   }, [effectiveAssignments]);
 
-  const toggleSelect = (id: string) =>
-    setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  const todayCount = useMemo(() => {
+    const todayPrefix = format(new Date(), 'yyyy-MM-dd');
+    return (effectiveAssignments as any[]).filter(a => a.scheduled_start?.startsWith(todayPrefix)).length;
+  }, [effectiveAssignments]);
 
-  const toggleAll = () => {
-    if (selected.length === filtered.length) setSelected([]);
-    else setSelected(filtered.map(a => a.id));
-  };
+  const toggleSelect = (id: string) => setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  const toggleAll = () => { if (selected.length === filtered.length) setSelected([]); else setSelected(filtered.map(a => a.id)); };
 
   return (
-    <AdminLayout title="Uppdrag" description="Hantera och fördela uppdrag till chaufförer">
+    <AdminLayout title="Uppdrag" description="Transportledning, rutter och förare">
       <div className="space-y-5">
-        {/* Top bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h2 className="text-2xl font-bold text-foreground">Uppdrag</h2>
-            <p className="text-sm text-muted-foreground capitalize">{today}</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Sök uppdrag..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-9 w-[220px]"
-              />
+        <div className="rounded-2xl border bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 p-5 text-white shadow-xl">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <Badge className="mb-3 bg-blue-500/20 text-blue-100 hover:bg-blue-500/20"><Truck className="mr-1 h-3 w-3" /> Dispatchvy</Badge>
+              <h2 className="text-2xl font-bold text-white">Uppdrag</h2>
+              <p className="text-sm text-slate-300 capitalize">{today}</p>
             </div>
-            <Select value={driverFilter} onValueChange={setDriverFilter}>
-              <SelectTrigger className="w-[160px]">
-                <SelectValue placeholder="Chaufför" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Alla chaufförer</SelectItem>
-                {(drivers ?? []).map(d => (
-                  <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button asChild>
-              <Link to="/admin/assignments/new">
-                <Plus className="h-4 w-4 mr-1" /> Skapa uppdrag
-              </Link>
-            </Button>
+            <div className="grid gap-3 sm:grid-cols-3 lg:w-[520px]">
+              <div className="rounded-xl bg-white/10 p-3"><p className="text-xs text-slate-300">Idag</p><p className="text-2xl font-bold">{todayCount}</p></div>
+              <div className="rounded-xl bg-white/10 p-3"><p className="text-xs text-slate-300">Saknar förare</p><p className="text-2xl font-bold">{counts.unassigned}</p></div>
+              <div className="rounded-xl bg-white/10 p-3"><p className="text-xs text-slate-300">Brådskande</p><p className="text-2xl font-bold">{counts.urgent}</p></div>
+            </div>
           </div>
         </div>
 
-        {/* Filter tabs (pill style) */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input placeholder="Sök uppdrag, rutt, kund..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 sm:w-[280px]" />
+            </div>
+            <Select value={driverFilter} onValueChange={setDriverFilter}>
+              <SelectTrigger className="sm:w-[180px]"><SelectValue placeholder="Chaufför" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Alla chaufförer</SelectItem>
+                {(drivers ?? []).map(d => <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <Button asChild><Link to="/admin/assignments/new"><Plus className="h-4 w-4 mr-1" /> Skapa uppdrag</Link></Button>
+        </div>
+
         <div className="flex gap-1.5 overflow-x-auto pb-1 -mb-1 border-b border-border">
           {filterTabs.map(tab => {
             const isActive = statusFilter === tab.key;
             const count = counts[tab.key] ?? 0;
             return (
-              <button
-                key={tab.key}
-                onClick={() => setStatusFilter(tab.key)}
-                className={`group inline-flex items-center gap-2 px-3.5 py-2 text-sm whitespace-nowrap rounded-md transition-all ${
-                  isActive
-                    ? 'bg-primary/10 text-primary font-semibold shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
-                }`}
-              >
-                <span className={`inline-block h-1.5 w-1.5 rounded-full ${tab.dotClass}`} />
-                {tab.label}
-                <span className={`ml-0.5 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-[11px] rounded-full ${
-                  isActive ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-                }`}>{count}</span>
+              <button key={tab.key} onClick={() => setStatusFilter(tab.key)} className={`group inline-flex items-center gap-2 px-3.5 py-2 text-sm whitespace-nowrap rounded-md transition-all ${isActive ? 'bg-primary/10 text-primary font-semibold shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-secondary'}`}>
+                <span className={`inline-block h-1.5 w-1.5 rounded-full ${tab.dotClass}`} />{tab.label}
+                <span className={`ml-0.5 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-[11px] rounded-full ${isActive ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>{count}</span>
               </button>
             );
           })}
         </div>
 
-        {/* Bulk selection bar */}
         {selected.length > 0 && (
           <div className="flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2">
             <span className="text-sm font-medium text-blue-700">{selected.length} valda</span>
-            <Button size="sm" variant="outline" onClick={() => setBulkDialogOpen(true)}>
-              <Users className="h-4 w-4 mr-1" /> Tilldela chaufför
-            </Button>
+            <Button size="sm" variant="outline" onClick={() => setBulkDialogOpen(true)}><Users className="h-4 w-4 mr-1" /> Tilldela chaufför</Button>
             <Button size="sm" variant="ghost" onClick={() => setSelected([])}>Avmarkera</Button>
           </div>
         )}
 
-        {/* Desktop table */}
         {isLoading ? (
-          <>
-            {/* Desktop table skeleton */}
-            <div className="hidden md:block bg-card rounded-lg border border-border shadow-card overflow-hidden">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-10"><Skeleton className="h-4 w-4 rounded" /></TableHead>
-                    <TableHead><Skeleton className="h-3 w-8" /></TableHead>
-                    <TableHead><Skeleton className="h-3 w-16" /></TableHead>
-                    <TableHead><Skeleton className="h-3 w-20" /></TableHead>
-                    <TableHead><Skeleton className="h-3 w-24" /></TableHead>
-                    <TableHead><Skeleton className="h-3 w-16" /></TableHead>
-                    <TableHead><Skeleton className="h-3 w-12" /></TableHead>
-                    <TableHead className="w-10" />
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {[1, 2, 3, 4, 5].map(i => (
-                    <TableRow key={i}>
-                      <TableCell><Skeleton className="h-4 w-4 rounded" /></TableCell>
-                      <TableCell><Skeleton className="h-3 w-14 rounded" /></TableCell>
-                      <TableCell><Skeleton className="h-4 w-28 rounded" /></TableCell>
-                      <TableCell><Skeleton className="h-3 w-24 rounded" /></TableCell>
-                      <TableCell><Skeleton className="h-3 w-32 rounded" /></TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Skeleton className="h-6 w-6 rounded-full" />
-                          <Skeleton className="h-3 w-20 rounded" />
-                        </div>
-                      </TableCell>
-                      <TableCell><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
-                      <TableCell><Skeleton className="h-8 w-8 rounded" /></TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-            {/* Mobile card skeleton */}
-            <div className="md:hidden space-y-3">
-              {[1, 2, 3, 4].map(i => (
-                <div key={i} className="bg-card rounded-lg border border-border p-4 shadow-card space-y-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 space-y-1.5">
-                      <Skeleton className="h-4 w-3/4 rounded" />
-                      <Skeleton className="h-3 w-1/2 rounded" />
-                    </div>
-                    <Skeleton className="h-5 w-16 rounded-full" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <Skeleton className="h-3 w-16 rounded" />
-                    <div className="flex items-center gap-1.5">
-                      <Skeleton className="h-5 w-5 rounded-full" />
-                      <Skeleton className="h-3 w-20 rounded" />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </>
+          <div className="hidden md:block bg-card rounded-lg border border-border shadow-card overflow-hidden"><Table><TableBody>{[1,2,3,4,5].map(i => <TableRow key={i}><TableCell><Skeleton className="h-10 w-full" /></TableCell></TableRow>)}</TableBody></Table></div>
         ) : filtered.length === 0 ? (
-          (effectiveAssignments.length === 0 ? (
-            <EmptyState
-              icon={InboxIcon}
-              title="Skapa ditt första uppdrag"
-              description="Samla körningar, förare, tider och kundinformation på ett ställe. Ett uppdrag tar under 30 sekunder att skapa."
-              hint="Tips: börja med ett vanligt uppdrag och återanvänd det senare som mall."
-              actionLabel="Skapa uppdrag"
-              actionHref="/admin/assignments/new"
-              secondaryLabel="Lägg till kund först"
-              secondaryHref="/admin/customers/new"
-            />
-          ) : (
-            <div className="bg-card rounded-lg border border-dashed border-border p-16 text-center shadow-card">
-              <Inbox className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
-              <p className="text-sm font-medium text-muted-foreground">Inga uppdrag matchar filtren</p>
-              <p className="text-xs text-muted-foreground/60 mt-1">Prova att ändra filter eller välj "Alla"</p>
-              <Button size="sm" variant="outline" className="mt-4" onClick={() => { setStatusFilter('all'); setDriverFilter('all'); setSearch(''); }}>
-                Rensa filter
-              </Button>
-            </div>
-          ))
+          effectiveAssignments.length === 0 ? <EmptyState icon={InboxIcon} title="Skapa ditt första uppdrag" description="Samla körningar, förare, tider och kundinformation på ett ställe." hint="Tips: börja med ett vanligt uppdrag och återanvänd det senare som mall." actionLabel="Skapa uppdrag" actionHref="/admin/assignments/new" secondaryLabel="Lägg till kund först" secondaryHref="/admin/customers/new" /> : <div className="bg-card rounded-lg border border-dashed border-border p-16 text-center shadow-card"><Inbox className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" /><p className="text-sm font-medium text-muted-foreground">Inga uppdrag matchar filtren</p><Button size="sm" variant="outline" className="mt-4" onClick={() => { setStatusFilter('all'); setDriverFilter('all'); setSearch(''); }}>Rensa filter</Button></div>
         ) : (
           <>
-            {/* Desktop table view */}
             <div className="hidden md:block bg-card rounded-lg border border-border shadow-card overflow-hidden">
               <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-10">
-                      <Checkbox
-                        checked={selected.length === filtered.length && filtered.length > 0}
-                        onCheckedChange={toggleAll}
-                      />
-                    </TableHead>
-                    <TableHead>ID</TableHead>
-                    <TableHead>Kund</TableHead>
-                    <TableHead>Datum & Tid</TableHead>
-                    <TableHead>Adress</TableHead>
-                    <TableHead>Chaufför</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="w-10"></TableHead>
-                  </TableRow>
-                </TableHeader>
+                <TableHeader><TableRow><TableHead className="w-10"><Checkbox checked={selected.length === filtered.length && filtered.length > 0} onCheckedChange={toggleAll} /></TableHead><TableHead>ID</TableHead><TableHead>Uppdrag</TableHead><TableHead>Rutt</TableHead><TableHead>Tid</TableHead><TableHead>Chaufför</TableHead><TableHead>Status</TableHead><TableHead className="w-10" /></TableRow></TableHeader>
                 <StaggeredTableBody>
-                  {filtered.map(a => (
-                    <StaggeredTableRow
-                      key={a.id}
-                      className="cursor-pointer hover:bg-secondary/50"
-                      onClick={() => navigate(`/admin/assignments/${a.id}`)}
-                    >
-                      <TableCell onClick={(e) => e.stopPropagation()}>
-                        <Checkbox
-                          checked={selected.includes(a.id)}
-                          onCheckedChange={() => toggleSelect(a.id)}
-                        />
-                      </TableCell>
-                      <TableCell className="font-mono text-xs text-muted-foreground">
-                        {a.id.slice(0, 6).toUpperCase()}
-                      </TableCell>
+                  {filtered.map((a: any) => (
+                    <StaggeredTableRow key={a.id} className="cursor-pointer hover:bg-secondary/50" onClick={() => navigate(`/admin/assignments/${a.id}`)}>
+                      <TableCell onClick={(e) => e.stopPropagation()}><Checkbox checked={selected.includes(a.id)} onCheckedChange={() => toggleSelect(a.id)} /></TableCell>
+                      <TableCell className="font-mono text-xs text-muted-foreground">{a.id.slice(0, 6).toUpperCase()}</TableCell>
                       <TableCell>
-                        <div>
-                          <span className="font-semibold text-sm">{a.customer?.name}</span>
-                          {a.priority !== 'normal' && (
-                            <span className="ml-2"><PriorityBadge priority={a.priority} /></span>
-                          )}
-                        </div>
+                        <div className="space-y-1"><div className="flex items-center gap-2"><span className="font-semibold text-sm">{a.title}</span>{a.service_type && <Badge variant="outline" className="text-[10px]">{a.service_type}</Badge>}{a.priority !== 'normal' && <PriorityBadge priority={a.priority} />}</div><p className="text-xs text-muted-foreground">{a.customer?.name || 'Ingen kund'}</p></div>
                       </TableCell>
-                      <TableCell className="font-mono text-sm">
-                        {formatSwedishDateTime(a.scheduled_start)}
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground max-w-[200px] truncate">
-                        {a.address}
-                      </TableCell>
-                      <TableCell>
-                        {a.driver ? (
-                          <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                              <span className="text-[9px] font-bold text-blue-700">
-                                {a.driver.full_name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
-                              </span>
-                            </div>
-                            <span className="text-sm">{a.driver.full_name}</span>
-                          </div>
-                        ) : (
-                          <span className="text-sm text-muted-foreground italic">Ej tilldelad</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <StatusBadge status={a.status} />
-                      </TableCell>
-                      <TableCell onClick={(e) => e.stopPropagation()}>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => navigate(`/admin/assignments/${a.id}`)}>
-                              Redigera
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => {
-                              navigate('/admin/assignments/new', { state: { copy: a } });
-                            }}>
-                              Kopiera
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              className="text-destructive"
-                              onClick={() => {
-                                updateAssignment.mutate({ id: a.id, status: 'cancelled' } as any);
-                                toast.success('Uppdraget avbokat');
-                              }}
-                            >
-                              Avboka
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
+                      <TableCell className="max-w-[280px]"><div className="flex items-start gap-2 text-sm text-muted-foreground"><Route className="mt-0.5 h-4 w-4 shrink-0" /><span className="line-clamp-2">{getRouteSummary(a)}</span></div></TableCell>
+                      <TableCell className="font-mono text-sm">{formatSwedishDateTime(a.scheduled_start)}</TableCell>
+                      <TableCell>{a.driver ? <div className="flex items-center gap-2"><div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center shrink-0"><span className="text-[9px] font-bold text-blue-700">{a.driver.full_name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}</span></div><span className="text-sm">{a.driver.full_name}</span></div> : <span className="inline-flex items-center gap-1 text-sm text-amber-700"><UserX className="h-3.5 w-3.5" /> Saknar förare</span>}</TableCell>
+                      <TableCell><StatusBadge status={a.status} /></TableCell>
+                      <TableCell onClick={(e) => e.stopPropagation()}><DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem onClick={() => navigate(`/admin/assignments/${a.id}`)}>Redigera</DropdownMenuItem><DropdownMenuItem onClick={() => navigate('/admin/assignments/new', { state: { copy: a } })}>Kopiera</DropdownMenuItem><DropdownMenuItem className="text-destructive" onClick={() => { updateAssignment.mutate({ id: a.id, status: 'cancelled' } as any); toast.success('Uppdraget avbokat'); }}>Avboka</DropdownMenuItem></DropdownMenuContent></DropdownMenu></TableCell>
                     </StaggeredTableRow>
                   ))}
                 </StaggeredTableBody>
               </Table>
             </div>
 
-            {/* Mobile card view */}
             <StaggeredList className="md:hidden space-y-3">
-              {filtered.map(a => (
+              {filtered.map((a: any) => (
                 <StaggeredItem key={a.id}>
-                  <Link
-                    to={`/admin/assignments/${a.id}`}
-                    className="block bg-card rounded-lg border border-border p-4 shadow-card active:bg-secondary transition-colors"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0 flex-1">
-                        <p className="font-semibold text-sm text-foreground truncate">{a.title}</p>
-                        <p className="text-sm text-muted-foreground mt-0.5">{a.customer?.name}</p>
-                      </div>
-                      <StatusBadge status={a.status} />
-                    </div>
-                    <div className="flex items-center justify-between mt-3">
-                      <div className="flex items-center gap-1.5 text-muted-foreground">
-                        <Clock className="h-3.5 w-3.5" />
-                        <span className="font-mono text-xs">{formatSwedishTime(a.scheduled_start)}</span>
-                      </div>
-                      {a.driver && (
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center">
-                            <span className="text-[8px] font-bold text-blue-700">
-                              {a.driver.full_name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
-                            </span>
-                          </div>
-                          <span className="text-xs text-muted-foreground">{a.driver.full_name}</span>
-                        </div>
-                      )}
-                    </div>
+                  <Link to={`/admin/assignments/${a.id}`} className="block bg-card rounded-lg border border-border p-4 shadow-card active:bg-secondary transition-colors">
+                    <div className="flex items-start justify-between gap-2"><div className="min-w-0 flex-1"><div className="flex items-center gap-2"><p className="font-semibold text-sm text-foreground truncate">{a.title}</p>{a.service_type && <span className="text-[10px] rounded bg-muted px-1.5 py-0.5 text-muted-foreground">{a.service_type}</span>}</div><p className="text-sm text-muted-foreground mt-0.5">{a.customer?.name}</p></div><StatusBadge status={a.status} /></div>
+                    <p className="mt-3 line-clamp-2 text-xs text-muted-foreground">{getRouteSummary(a)}</p>
+                    <div className="flex items-center justify-between mt-3"><div className="flex items-center gap-1.5 text-muted-foreground"><Clock className="h-3.5 w-3.5" /><span className="font-mono text-xs">{formatSwedishTime(a.scheduled_start)}</span></div>{a.driver ? <div className="flex items-center gap-1.5"><div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center"><span className="text-[8px] font-bold text-blue-700">{a.driver.full_name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}</span></div><span className="text-xs text-muted-foreground">{a.driver.full_name}</span></div> : <span className="text-xs text-amber-700">Saknar förare</span>}</div>
                   </Link>
                 </StaggeredItem>
               ))}
@@ -395,30 +203,8 @@ export default function AdminAssignments() {
           </>
         )}
 
-        {/* Bulk assign dialog */}
         <Dialog open={bulkDialogOpen} onOpenChange={setBulkDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Tilldela chaufför till {selected.length} uppdrag</DialogTitle>
-            </DialogHeader>
-            <Select onValueChange={(v) => {
-              const driver = (drivers ?? []).find(d => d.id === v);
-              bulkAssign.mutate({ assignmentIds: selected, driverId: v }, {
-                onSuccess: () => {
-                  toast.success(`${selected.length} uppdrag tilldelade ${driver?.full_name}`);
-                  setSelected([]);
-                  setBulkDialogOpen(false);
-                }
-              });
-            }}>
-              <SelectTrigger><SelectValue placeholder="Välj chaufför" /></SelectTrigger>
-              <SelectContent>
-                {(drivers ?? []).map(d => (
-                  <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </DialogContent>
+          <DialogContent><DialogHeader><DialogTitle>Tilldela chaufför till {selected.length} uppdrag</DialogTitle></DialogHeader><Select onValueChange={(v) => { const driver = (drivers ?? []).find(d => d.id === v); bulkAssign.mutate({ assignmentIds: selected, driverId: v }, { onSuccess: () => { toast.success(`${selected.length} uppdrag tilldelade ${driver?.full_name}`); setSelected([]); setBulkDialogOpen(false); } }); }}><SelectTrigger><SelectValue placeholder="Välj chaufför" /></SelectTrigger><SelectContent>{(drivers ?? []).map(d => <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>)}</SelectContent></Select></DialogContent>
         </Dialog>
       </div>
     </AdminLayout>
