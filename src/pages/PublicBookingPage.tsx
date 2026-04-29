@@ -142,13 +142,12 @@ export default function PublicBookingPage() {
     const { error } = await supabase.from('booking_requests').insert(payload);
 
     if (error) {
-      const saved = JSON.parse(localStorage.getItem('aurora_public_booking_requests') || '[]');
-      localStorage.setItem('aurora_public_booking_requests', JSON.stringify([{ id: number, created_at: new Date().toISOString(), ...payload }, ...saved]));
-      toast.warning('Förfrågan sparades lokalt i demo-läge. Koppla Supabase/RLS för skarp publik inskickning.');
-    } else {
-      toast.success('Förfrågan skickad!');
+      toast.error('Kunde inte skicka förfrågan. Kontrollera Supabase/RLS eller försök igen.');
+      setIsSubmitting(false);
+      return;
     }
 
+    toast.success('Förfrågan skickad!');
     setOrderNumber(number);
     setStep(6);
     setIsSubmitting(false);
