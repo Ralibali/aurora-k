@@ -8,6 +8,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { PwaInstallPrompt } from "@/components/PwaInstallPrompt";
 import { CookieConsent } from "@/components/CookieConsent";
 import { ExitIntentPopup } from "@/components/ExitIntentPopup";
+import { QuickContactButton } from "@/components/QuickContactButton";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
@@ -128,6 +129,7 @@ function PublicSiteEnhancements() {
       <PwaInstallPrompt />
       <CookieConsent />
       <ExitIntentPopup />
+      <QuickContactButton />
     </>
   );
 }
