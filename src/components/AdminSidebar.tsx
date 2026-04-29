@@ -39,6 +39,7 @@ const primarySections = [
   {
     label: 'Ekonomi',
     items: [
+      { title: 'Fakturaunderlag', url: '/admin/invoice-basis', icon: FileText },
       { title: 'Fakturor', url: '/admin/invoices', icon: FileText },
       { title: 'OB & Traktamente', url: '/admin/compensation', icon: Briefcase },
     ],
