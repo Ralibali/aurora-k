@@ -109,7 +109,7 @@ export default function PublicBookingPage() {
       const { error } = await supabase.from('booking_requests').insert(payload);
       if (error) throw error;
 
-      await supabase.from('notification_outbox').insert([
+      await (supabase as any).from('notification_outbox').insert([
         {
           channel: 'email',
           type: 'booking_request_created',
