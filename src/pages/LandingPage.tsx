@@ -83,7 +83,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       {/* HEADER */}
       <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/80 backdrop-blur-xl">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
@@ -124,7 +124,7 @@ export default function LandingPage() {
                 <Sparkles className="h-3.5 w-3.5" />
                 Byggt i Sverige för åkerier, bud & bemanning
               </div>
-              <h1 className="mt-6 text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-foreground leading-[1.05]">
+              <h1 className="mt-6 text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-foreground leading-[1.1] [hyphens:auto] break-words">
                 Slipp Excel och WhatsApp i <span className="text-primary">transportplaneringen</span>.
               </h1>
               <p className="mt-6 text-lg text-muted-foreground leading-relaxed max-w-xl">
