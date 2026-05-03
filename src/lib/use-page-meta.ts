@@ -53,10 +53,24 @@ export function usePageMeta({ title, description, canonical, ogImage, noindex = 
       noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large'
     );
 
-    document.dispatchEvent(
-      new CustomEvent('aurora-seo-ready', {
-        detail: { title, canonical },
-      })
-    );
+    const dispatchSeoReady = () => {
+      document.dispatchEvent(
+        new CustomEvent('aurora-seo-ready', {
+          detail: { title, canonical },
+        })
+      );
+    };
+
+    const frame = window.requestAnimationFrame
+      ? window.requestAnimationFrame(dispatchSeoReady)
+      : window.setTimeout(dispatchSeoReady, 0);
+
+    return () => {
+      if (window.cancelAnimationFrame && typeof frame === 'number') {
+        window.cancelAnimationFrame(frame);
+      } else {
+        window.clearTimeout(frame);
+      }
+    };
   }, [title, description, canonical, ogImage, noindex]);
 }
