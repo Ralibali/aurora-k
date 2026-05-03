@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useLayoutEffect } from 'react';
 
 interface PageMeta {
   title: string;
@@ -29,11 +29,11 @@ function ensureCanonical(): HTMLLinkElement {
 }
 
 export function usePageMeta({ title, description, canonical, ogImage, noindex = false }: PageMeta) {
-  useEffect(() => {
+  useLayoutEffect(() => {
     document.title = title;
 
     ensureMeta('meta[name="description"]', 'name', 'description').setAttribute('content', description);
-    ensureCanonical().href = canonical;
+    ensureCanonical().setAttribute('href', canonical);
 
     ensureMeta('meta[property="og:title"]', 'property', 'og:title').setAttribute('content', title);
     ensureMeta('meta[property="og:description"]', 'property', 'og:description').setAttribute('content', description);
@@ -53,6 +53,10 @@ export function usePageMeta({ title, description, canonical, ogImage, noindex = 
       noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large'
     );
 
-    // No cleanup: we always keep canonical + robots present and overwrite on next route.
+    document.dispatchEvent(
+      new CustomEvent('aurora-seo-ready', {
+        detail: { title, canonical },
+      })
+    );
   }, [title, description, canonical, ogImage, noindex]);
 }
