@@ -3,6 +3,7 @@ import { Truck, ArrowLeft } from 'lucide-react';
 import { useMemo, ReactNode } from 'react';
 import { usePageMeta } from '@/lib/use-page-meta';
 import { useBreadcrumbJsonLd } from '@/lib/breadcrumb-jsonld';
+import { useJsonLd } from '@/lib/use-json-ld';
 
 interface BlogLayoutProps {
   slug: string;
@@ -15,18 +16,48 @@ interface BlogLayoutProps {
 }
 
 export function BlogLayout({ slug, title, seoTitle, metaDescription, publishDate, readTime, children }: BlogLayoutProps) {
+  const canonical = `https://auroratransport.se/blogg/${slug}`;
+
   usePageMeta({
     title: seoTitle,
     description: metaDescription,
-    canonical: `https://auroratransport.se/blogg/${slug}`,
+    canonical,
     ogImage: 'https://auroratransport.se/og-image.png',
   });
 
   useBreadcrumbJsonLd(useMemo(() => [
     { name: 'Hem', url: 'https://auroratransport.se/' },
     { name: 'Blogg', url: 'https://auroratransport.se/blogg' },
-    { name: title, url: `https://auroratransport.se/blogg/${slug}` },
-  ], [title, slug]));
+    { name: title, url: canonical },
+  ], [title, canonical]));
+
+  useJsonLd(`blogposting-${slug}`, {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: title,
+    name: title,
+    description: metaDescription,
+    datePublished: publishDate,
+    dateModified: publishDate,
+    inLanguage: 'sv-SE',
+    author: {
+      '@type': 'Organization',
+      name: 'Aurora Transport',
+      url: 'https://auroratransport.se/',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Aurora Media AB',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://auroratransport.se/icon-512x512.png',
+      },
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': canonical,
+    },
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -80,22 +111,6 @@ export function BlogLayout({ slug, title, seoTitle, metaDescription, publishDate
           <p className="text-xs text-slate-500">© 2026 Aurora Media AB</p>
         </div>
       </footer>
-
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'BlogPosting',
-            headline: seoTitle,
-            description: metaDescription,
-            datePublished: publishDate,
-            author: { '@type': 'Organization', name: 'Aurora Transport' },
-            publisher: { '@type': 'Organization', name: 'Aurora Media AB' },
-            mainEntityOfPage: `https://auroratransport.se/blogg/${slug}`,
-          }),
-        }}
-      />
     </div>
   );
 }
