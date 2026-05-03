@@ -1,4 +1,14 @@
 User-agent: *
 Allow: /
 
+Disallow: /admin
+Disallow: /driver
+Disallow: /platform
+Disallow: /portal
+Disallow: /onboarding
+Disallow: /login
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /ads/
+
 Sitemap: https://auroratransport.se/sitemap.xml
