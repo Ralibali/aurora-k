@@ -1,14 +1,13 @@
-import { useEffect } from 'react';
+import { useLayoutEffect } from 'react';
 
 /**
  * Manages <link rel="alternate" hreflang="..."> and the <html lang="..."> attribute.
- * Pass a record of language code -> absolute URL. The first entry is also used as x-default.
+ * Pass a record of language code -> absolute URL. Swedish is preferred as x-default.
  */
 export function useHreflang(alternates: Record<string, string>, htmlLang: string) {
-  useEffect(() => {
+  useLayoutEffect(() => {
     document.documentElement.lang = htmlLang;
 
-    // Remove any previously injected alternates we manage.
     document.head
       .querySelectorAll('link[rel="alternate"][data-hreflang-managed="1"]')
       .forEach((el) => el.remove());
@@ -27,7 +26,7 @@ export function useHreflang(alternates: Record<string, string>, htmlLang: string
       const xDefault = document.createElement('link');
       xDefault.rel = 'alternate';
       xDefault.hreflang = 'x-default';
-      xDefault.href = entries[0][1];
+      xDefault.href = alternates.sv ?? entries[0][1];
       xDefault.setAttribute('data-hreflang-managed', '1');
       document.head.appendChild(xDefault);
     }
@@ -37,5 +36,5 @@ export function useHreflang(alternates: Record<string, string>, htmlLang: string
         .querySelectorAll('link[rel="alternate"][data-hreflang-managed="1"]')
         .forEach((el) => el.remove());
     };
-  }, [alternates, htmlLang]);
+  }, [JSON.stringify(alternates), htmlLang]);
 }
