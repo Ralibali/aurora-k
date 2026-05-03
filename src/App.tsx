@@ -1,6 +1,6 @@
 import { lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -182,7 +182,7 @@ const App = () => (
                 <Route path="/blogg/hur-digitaliserar-man-sin-budtjanst" element={<BlogDigitaliseraBudtjanst />} />
                 <Route path="/blogg/vad-kostar-ett-transportledningssystem" element={<BlogVadKostarTms />} />
                 <Route path="/blogg/transportledningssystem-for-sma-akerier" element={<BlogTmsSmaaAkerier />} />
-                <Route path="/blogg/transportledningssystem-for-sma-akeries" element={<BlogTmsSmaaAkerier />} />
+                <Route path="/blogg/transportledningssystem-for-sma-akeries" element={<Navigate to="/blogg/transportledningssystem-for-sma-akerier" replace />} />
                 <Route path="/blogg/dispatch-app-forare-transport" element={<BlogDispatchAppForare />} />
                 <Route path="/blogg/bemanningsbolag-transport-system" element={<BlogBemanningsbolag />} />
                 <Route path="/blogg/skillnad-tms-dispatch-system" element={<BlogTmsVsDispatch />} />
