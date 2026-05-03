@@ -4,32 +4,7 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 import prerender from "@prerenderer/rollup-plugin";
-
-// Routes som prerendras till statisk HTML vid produktion. Endast publika
-// SEO-sidor — inga inloggade vyer, inga /ads/*-annonssidor.
-const PRERENDER_ROUTES = [
-  "/",
-  "/tjanster",
-  "/transportledningssystem",
-  "/coredination-alternativ",
-  "/budtjanst-app",
-  "/akeri-system",
-  "/dispatch-system",
-  "/om-oss",
-  "/privacy",
-  "/kontakt",
-  "/blogg",
-  "/blogg/basta-dispatchsystemet-for-akeri-2026",
-  "/blogg/hur-digitaliserar-man-sin-budtjanst",
-  "/blogg/vad-kostar-ett-transportledningssystem",
-  "/blogg/transportledningssystem-for-sma-akerier",
-  "/blogg/dispatch-app-forare-transport",
-  "/blogg/bemanningsbolag-transport-system",
-  "/blogg/skillnad-tms-dispatch-system",
-  "/blogg/transportapp-utan-bindningstid",
-  "/blogg/digitalt-korordrersystem-fordelar",
-  "/blogg/byta-dispatchsystem-guide",
-];
+import { PRERENDER_ROUTES } from "./src/lib/seo-routes";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -133,15 +108,15 @@ export default defineConfig(({ mode }) => ({
       },
     }),
     // Prerendera publika SEO-sidor till statisk HTML vid produktionsbygge.
-    // Hoppar över i dev (annars startar Puppeteer mot sandboxen) och i
-    // development-mode-byggen så att Lovables livepreview fungerar normalt.
+    // Väntar på att varje route själv signalerar att SEO-headen är färdig.
     mode === "production" &&
       prerender({
         routes: PRERENDER_ROUTES,
         renderer: "@prerenderer/renderer-puppeteer",
         rendererOptions: {
-          maxConcurrentRoutes: 2,
-          renderAfterTime: 1500,
+          maxConcurrentRoutes: 1,
+          renderAfterDocumentEvent: "aurora-seo-ready",
+          renderAfterTime: 5000,
           headless: true,
           launchOptions: {
             executablePath:
@@ -150,14 +125,32 @@ export default defineConfig(({ mode }) => ({
           },
         },
         postProcess(renderedRoute: { route: string; html: string }): void {
-          // Säkerställ att canonical alltid är auroratransport.se i prerenderad HTML
-          const canonical = `https://auroratransport.se${
-            renderedRoute.route === "/" ? "/" : renderedRoute.route
-          }`;
-          renderedRoute.html = renderedRoute.html.replace(
-            /<link\s+rel="canonical"[^>]*>/i,
-            `<link rel="canonical" href="${canonical}" />`
-          );
+          const routePath =
+            renderedRoute.route === "/"
+              ? "/"
+              : renderedRoute.route.replace(/\/$/, "");
+
+          const canonical = `https://auroratransport.se${routePath}`;
+          const canonicalTag = `<link rel="canonical" href="${canonical}" />`;
+
+          if (/<link\s+rel=["']canonical["'][^>]*>/i.test(renderedRoute.html)) {
+            renderedRoute.html = renderedRoute.html.replace(
+              /<link\s+rel=["']canonical["'][^>]*>/i,
+              canonicalTag
+            );
+          } else {
+            renderedRoute.html = renderedRoute.html.replace(
+              "</head>",
+              `  ${canonicalTag}\n</head>`
+            );
+          }
+
+          if (/<meta\s+property=["']og:url["'][^>]*>/i.test(renderedRoute.html)) {
+            renderedRoute.html = renderedRoute.html.replace(
+              /<meta\s+property=["']og:url["'][^>]*>/i,
+              `<meta property="og:url" content="${canonical}" />`
+            );
+          }
         },
       }),
   ].filter(Boolean) as Plugin[],
