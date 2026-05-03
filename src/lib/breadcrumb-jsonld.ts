@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useLayoutEffect } from 'react';
 
 interface BreadcrumbItem {
   name: string;
@@ -6,27 +6,33 @@ interface BreadcrumbItem {
 }
 
 export function useBreadcrumbJsonLd(items: BreadcrumbItem[]) {
-  useEffect(() => {
+  useLayoutEffect(() => {
     const jsonLd = {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      "itemListElement": items.map((item, i) => ({
-        "@type": "ListItem",
-        "position": i + 1,
-        "name": item.name,
-        "item": item.url,
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: items.map((item, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: item.name,
+        item: item.url,
       })),
     };
 
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
+    let script = document.head.querySelector<HTMLScriptElement>(
+      'script[type="application/ld+json"][data-jsonld-id="breadcrumb"]'
+    );
+
+    if (!script) {
+      script = document.createElement('script');
+      script.type = 'application/ld+json';
+      script.setAttribute('data-jsonld-id', 'breadcrumb');
+      document.head.appendChild(script);
+    }
+
     script.textContent = JSON.stringify(jsonLd);
-    script.id = 'breadcrumb-jsonld';
-    document.head.appendChild(script);
 
     return () => {
-      const el = document.getElementById('breadcrumb-jsonld');
-      if (el) el.remove();
+      script?.remove();
     };
-  }, [items]);
+  }, [JSON.stringify(items)]);
 }
