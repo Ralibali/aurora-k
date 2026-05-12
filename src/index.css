@@ -240,6 +240,42 @@ input:-webkit-autofill:focus {
   display: none;
 }
 
+/* Responsive typography tuning — tracking & line-height per breakpoint.
+   Goal: even, proportional rhythm across mobile and desktop. */
+h1, .h1 {
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+h2, .h2 {
+  line-height: 1.2;
+  letter-spacing: -0.005em;
+}
+h3, .h3 {
+  line-height: 1.25;
+  letter-spacing: -0.003em;
+}
+p, li {
+  line-height: 1.65;
+  letter-spacing: 0.005em;
+}
+
+@media (min-width: 640px) {
+  h1, .h1 { line-height: 1.12; letter-spacing: -0.015em; }
+  h2, .h2 { line-height: 1.18; letter-spacing: -0.01em; }
+  p, li   { line-height: 1.7;  letter-spacing: 0.003em; }
+}
+
+@media (min-width: 1024px) {
+  h1, .h1 { line-height: 1.05; letter-spacing: -0.025em; }
+  h2, .h2 { line-height: 1.15; letter-spacing: -0.018em; }
+  h3, .h3 { line-height: 1.25; letter-spacing: -0.012em; }
+  p, li   { line-height: 1.7;  letter-spacing: 0.002em; }
+}
+
+@media (min-width: 1536px) {
+  h1, .h1 { letter-spacing: -0.03em; }
+}
+
 /* Swedish hyphenation & robust overflow for hero/headline titles.
    Relies on <html lang="sv"> so the browser uses Swedish hyphenation rules. */
 h1, h2, h3,
