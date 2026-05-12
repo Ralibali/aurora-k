@@ -16,7 +16,7 @@ export function LeadFormModal({ open, onOpenChange }: LeadFormModalProps) {
             Fyll i formuläret så kontaktar vi dig för en personlig genomgång.
           </DialogDescription>
         </DialogHeader>
-        <LeadForm compact onSuccess={() => {}} />
+        <LeadForm compact onSuccess={() => setTimeout(() => onOpenChange(false), 4000)} />
       </DialogContent>
     </Dialog>
   );

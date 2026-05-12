@@ -4,13 +4,11 @@ import { StatusBadge } from '@/components/StatusBadge';
 import { PriorityBadge } from '@/components/PriorityBadge';
 import { useAssignments, useDrivers } from '@/hooks/useData';
 import { formatSwedishTime } from '@/lib/format';
-import {
-  Briefcase, Users, Truck, AlertCircle, Plus, ArrowRight,
-  MapPin, Clock, ChevronRight, Inbox, CalendarDays, Wallet,
-} from 'lucide-react';
+import { Briefcase, Users, Truck, CircleAlert as AlertCircle, Plus, ArrowRight, MapPin, Clock, ChevronRight, Inbox, CalendarDays, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { StaggeredList, StaggeredItem } from '@/components/StaggeredList';
@@ -241,8 +239,12 @@ export default function AdminDashboard() {
 
         {/* Live indicator */}
         {isLive && (
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="relative flex h-2 w-2">
+          <div
+            className="flex items-center gap-2 text-xs text-muted-foreground"
+            aria-live="polite"
+            aria-label="Realtidsdata aktiv"
+          >
+            <span className="relative flex h-2 w-2" aria-hidden="true">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
             </span>
@@ -260,8 +262,8 @@ export default function AdminDashboard() {
           </Button>
         </div>
 
-        {/* KPI cards — 2 on mobile, 4 on desktop */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+        {/* KPI cards — 2 on mobile, 3 on tablet, 4 on desktop */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
           <KpiCard
             icon={Briefcase}
             value={activeCount}
@@ -348,7 +350,12 @@ export default function AdminDashboard() {
                         <div className="flex items-center gap-3 px-4 py-3 flex-1 min-w-0">
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
-                              <span className="text-sm font-semibold text-foreground truncate">{a.customer?.name}</span>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="text-sm font-semibold text-foreground truncate">{a.customer?.name}</span>
+                                </TooltipTrigger>
+                                <TooltipContent side="top">{a.customer?.name}</TooltipContent>
+                              </Tooltip>
                               {a.priority !== 'normal' && <PriorityBadge priority={a.priority} />}
                             </div>
                             <div className="flex items-center gap-3 mt-1">

@@ -4,6 +4,7 @@ import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import { useDemoMode } from '@/hooks/useDemoMode';
+import { toast } from 'sonner';
 
 const tabs = [
   { label: 'Hem', icon: LayoutDashboard, to: '/admin', exact: true },
@@ -128,7 +129,14 @@ export function MobileTabBar() {
               </div>
               <div className="border-t border-border px-5 py-3">
                 <button
-                  onClick={() => { toggleDemo(); setMenuOpen(false); }}
+                  onClick={() => {
+                    toggleDemo();
+                    setMenuOpen(false);
+                    toast(demoEnabled ? 'Exempeldata avstängt' : 'Exempeldata påslaget', {
+                      description: demoEnabled ? 'Du ser nu din riktiga data.' : 'Du ser nu exempeldata — inget sparas.',
+                      duration: 3000,
+                    });
+                  }}
                   className="flex items-center justify-between w-full py-3 px-2 text-sm text-foreground active:bg-muted rounded-lg transition-colors"
                 >
                   <span className="flex items-center gap-2">

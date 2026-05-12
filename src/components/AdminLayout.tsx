@@ -9,6 +9,7 @@ import { QuickCreateMenu } from '@/components/admin/QuickCreateMenu';
 import { CommandPalette } from '@/components/admin/CommandPalette';
 import { DemoBanner } from '@/components/admin/DemoBanner';
 import { DemoModeProvider, useDemoMode } from '@/hooks/useDemoMode';
+import { toast } from 'sonner';
 
 /** Shared shell — rendered once, sidebar stays mounted across route changes */
 export function AdminShell() {
@@ -44,11 +45,18 @@ interface AdminLayoutProps {
 
 function DemoToggle() {
   const { enabled, toggle } = useDemoMode();
+  const handleToggle = () => {
+    toggle();
+    toast(enabled ? 'Exempeldata avstängt' : 'Exempeldata påslaget', {
+      description: enabled ? 'Du ser nu din riktiga data.' : 'Du ser nu exempeldata — inget sparas.',
+      duration: 3000,
+    });
+  };
   return (
     <Button
       variant={enabled ? 'default' : 'outline'}
       size="sm"
-      onClick={toggle}
+      onClick={handleToggle}
       className={`hidden md:inline-flex h-9 gap-1.5 ${enabled ? '' : 'border-amber-300/60 text-amber-700 hover:bg-amber-50 hover:text-amber-800 dark:border-amber-900/60 dark:text-amber-400 dark:hover:bg-amber-950/30'}`}
       title="Visa eller dölj exempeldata"
     >

@@ -11,7 +11,7 @@ import {
   BarChart3, Route, Bell, Package, Headphones,
   Wallet, LayoutDashboard, ClipboardList, UserCog,
   Settings, Search, Plus, ArrowRight, Mail, Shield,
-  Sparkles, Map as MapIcon, CheckCircle2, Minus,
+  Sparkles, Map as MapIcon, CheckCircle2, Minus, Loader2,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -146,7 +146,9 @@ export default function LandingPage() {
                   disabled={demoLoading}
                   className="h-12 px-6 text-base"
                 >
-                  {demoLoading ? 'Loggar in...' : 'Se demo med exempeldata'}
+                  {demoLoading ? (
+                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Loggar in...</>
+                  ) : 'Se demo med exempeldata'}
                 </Button>
               </div>
               <ul className="mt-8 grid grid-cols-2 gap-x-6 gap-y-2.5 text-sm text-muted-foreground max-w-lg">
@@ -620,14 +622,14 @@ export default function LandingPage() {
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">Varför Aurora Transport?</h2>
           </div>
           <div className="mt-12 max-w-5xl mx-auto overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <div className="overflow-x-auto -mx-px">
+              <table className="w-full min-w-[520px] text-sm">
                 <thead>
                   <tr className="border-b border-border bg-secondary/50">
-                    <th className="text-left font-semibold text-foreground px-6 py-4">Funktion</th>
-                    <th className="text-center font-semibold text-primary px-6 py-4 bg-primary/5">Aurora Transport</th>
-                    <th className="text-center font-semibold text-muted-foreground px-6 py-4">Excel/WhatsApp</th>
-                    <th className="text-center font-semibold text-muted-foreground px-6 py-4">Dyra system</th>
+                    <th className="text-left font-semibold text-foreground px-4 md:px-6 py-4">Funktion</th>
+                    <th className="text-center font-semibold text-primary px-3 md:px-6 py-4 bg-primary/5 whitespace-nowrap">Aurora Transport</th>
+                    <th className="text-center font-semibold text-muted-foreground px-3 md:px-6 py-4 whitespace-nowrap">Excel/WhatsApp</th>
+                    <th className="text-center font-semibold text-muted-foreground px-3 md:px-6 py-4 whitespace-nowrap">Dyra system</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -641,12 +643,12 @@ export default function LandingPage() {
                     ['Pris per månad', '449 kr', '0 kr', '2 000–10 000 kr'],
                   ].map(([label, a, b, c], i) => (
                     <tr key={i as number} className="border-b border-border last:border-0">
-                      <td className="px-6 py-4 text-foreground font-medium">{label}</td>
-                      <td className="px-6 py-4 text-center bg-primary/5">
+                      <td className="px-4 md:px-6 py-3.5 text-foreground font-medium">{label}</td>
+                      <td className="px-3 md:px-6 py-3.5 text-center bg-primary/5">
                         <CompCell value={a} highlight />
                       </td>
-                      <td className="px-6 py-4 text-center"><CompCell value={b} /></td>
-                      <td className="px-6 py-4 text-center"><CompCell value={c} /></td>
+                      <td className="px-3 md:px-6 py-3.5 text-center"><CompCell value={b} /></td>
+                      <td className="px-3 md:px-6 py-3.5 text-center"><CompCell value={c} /></td>
                     </tr>
                   ))}
                 </tbody>
@@ -821,7 +823,9 @@ export default function LandingPage() {
                 disabled={demoLoading}
                 className="h-12 px-8 text-base bg-transparent border-sidebar-foreground/30 text-sidebar-foreground hover:bg-sidebar-foreground/10 hover:text-sidebar-foreground"
               >
-                {demoLoading ? 'Loggar in...' : 'Se demo med exempeldata'}
+                {demoLoading ? (
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Loggar in...</>
+                ) : 'Se demo med exempeldata'}
               </Button>
             </div>
             <a

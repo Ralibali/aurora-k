@@ -2,25 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from 'next-themes';
 import { motion } from 'framer-motion';
-import {
-  ArrowRight,
-  BarChart3,
-  Check,
-  CheckCircle2,
-  Clock,
-  FileText,
-  Globe,
-  Menu,
-  PackageCheck,
-  Route,
-  ShieldCheck,
-  Sparkles,
-  TimerReset,
-  Truck,
-  Users,
-  Wallet,
-  Zap,
-} from 'lucide-react';
+import { ArrowRight, ChartBar as BarChart3, Check, CircleCheck as CheckCircle2, Clock, FileText, Globe, Loader as Loader2, Menu, PackageCheck, Route, ShieldCheck, Sparkles, TimerReset, Truck, Users, Wallet, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { LeadFormModal } from '@/components/LeadFormModal';
@@ -186,7 +168,9 @@ export default function LandingPageV3() {
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
                 <Button size="lg" variant="outline" onClick={handleDemo} disabled={demoLoading} className="h-13 rounded-2xl border-slate-300 bg-white px-7 text-base font-bold text-slate-950 hover:bg-slate-50">
-                  {demoLoading ? t.hero.ctaSecondaryLoading : t.hero.ctaSecondaryIdle}
+                  {demoLoading ? (
+                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{t.hero.ctaSecondaryLoading}</>
+                  ) : t.hero.ctaSecondaryIdle}
                 </Button>
               </div>
 
@@ -401,7 +385,9 @@ export default function LandingPageV3() {
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
               <Button size="lg" variant="outline" onClick={handleDemo} disabled={demoLoading} className="rounded-2xl border-white/20 bg-transparent px-7 font-black text-white hover:bg-white/10 hover:text-white">
-                {demoLoading ? t.finalCta.secondaryLoading : t.finalCta.secondaryIdle}
+                {demoLoading ? (
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{t.finalCta.secondaryLoading}</>
+                ) : t.finalCta.secondaryIdle}
               </Button>
             </div>
           </div>
