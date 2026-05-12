@@ -212,6 +212,8 @@ export default function LandingPageV3() {
           </div>
         </section>
 
+        <IncludedSection lang={lang} onDemo={() => setDemoModalOpen(true)} />
+
         <section className="bg-[#f7f9fc] py-18 sm:py-22">
           <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
             <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-80px' }} variants={fadeUp} custom={0}>
