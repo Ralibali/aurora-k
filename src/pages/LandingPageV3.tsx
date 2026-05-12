@@ -27,6 +27,7 @@ import { LeadFormModal } from '@/components/LeadFormModal';
 import { DemoBookingModal } from '@/components/DemoBookingModal';
 import { useAuth } from '@/hooks/useAuth';
 import { useBreadcrumbJsonLd } from '@/lib/breadcrumb-jsonld';
+import { useJsonLd } from '@/lib/use-json-ld';
 import { usePageMeta } from '@/lib/use-page-meta';
 import { useHreflang } from '@/lib/use-hreflang';
 import { landingCopy, type Lang } from '@/i18n/landing';
@@ -72,6 +73,18 @@ export default function LandingPageV3() {
     ogImage: 'https://auroratransport.se/og-image.png',
   });
   useHreflang(useMemo(() => ({ sv: t.hreflang.sv, en: t.hreflang.en }), [t]), t.htmlLang);
+  useJsonLd('faqpage', useMemo(() => ({
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: t.faq.items.map((item) => ({
+      '@type': 'Question',
+      name: item.q,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.a,
+      },
+    })),
+  }), [t.faq.items]));
 
   useEffect(() => {
     if (theme !== 'light') setTheme('light');
