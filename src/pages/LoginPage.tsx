@@ -65,7 +65,10 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
-      toast.error('Inloggningen misslyckades: ' + error.message);
+      const msg = error.message?.includes('Invalid login credentials')
+        ? 'Fel e-post eller lösenord. Försök igen.'
+        : error.message || 'Inloggningen misslyckades.';
+      toast.error(msg);
       setSubmitting(false);
       return;
     }
@@ -88,8 +91,8 @@ export default function LoginPage() {
           <div className="mx-auto w-16 h-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30 mb-4">
             <Truck className="h-8 w-8 text-primary-foreground" />
           </div>
-          <h1 className="text-2xl font-bold text-sidebar-foreground">Dispatch</h1>
-          <p className="text-sm text-sidebar-foreground/60 mt-1">Uppdragshantering för chaufförer</p>
+          <h1 className="text-2xl font-bold text-sidebar-foreground">Aurora Transport</h1>
+          <p className="text-sm text-sidebar-foreground/60 mt-1">Logga in på ditt konto</p>
         </div>
 
         {/* Login Card */}
@@ -177,7 +180,9 @@ export default function LoginPage() {
 
         <p className="text-center text-xs text-sidebar-foreground/40 mt-4">
           Inget konto?{' '}
-          <Link to="/kontakt" className="text-primary hover:underline">Kontakta oss</Link>
+          <Link to="/register" className="text-primary hover:underline">Skapa konto</Link>
+          {' '}eller{' '}
+          <Link to="/kontakt" className="text-primary hover:underline">kontakta oss</Link>
         </p>
         <p className="text-center text-xs text-sidebar-foreground/40 mt-2">
           © {new Date().getFullYear()} Aurora Medias Transport

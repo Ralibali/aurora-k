@@ -5,6 +5,8 @@ interface PageMeta {
   description: string;
   canonical: string;
   ogImage?: string;
+  ogImageAlt?: string;
+  ogType?: string;
   noindex?: boolean;
 }
 
@@ -28,7 +30,7 @@ function ensureCanonical(): HTMLLinkElement {
   return link;
 }
 
-export function usePageMeta({ title, description, canonical, ogImage, noindex = false }: PageMeta) {
+export function usePageMeta({ title, description, canonical, ogImage, ogImageAlt, ogType = 'website', noindex = false }: PageMeta) {
   useLayoutEffect(() => {
     document.title = title;
 
@@ -38,13 +40,20 @@ export function usePageMeta({ title, description, canonical, ogImage, noindex = 
     ensureMeta('meta[property="og:title"]', 'property', 'og:title').setAttribute('content', title);
     ensureMeta('meta[property="og:description"]', 'property', 'og:description').setAttribute('content', description);
     ensureMeta('meta[property="og:url"]', 'property', 'og:url').setAttribute('content', canonical);
+    ensureMeta('meta[property="og:type"]', 'property', 'og:type').setAttribute('content', ogType);
+    ensureMeta('meta[property="og:site_name"]', 'property', 'og:site_name').setAttribute('content', 'Aurora Transport');
 
+    ensureMeta('meta[name="twitter:card"]', 'name', 'twitter:card').setAttribute('content', 'summary_large_image');
     ensureMeta('meta[name="twitter:title"]', 'name', 'twitter:title').setAttribute('content', title);
     ensureMeta('meta[name="twitter:description"]', 'name', 'twitter:description').setAttribute('content', description);
 
     if (ogImage) {
       ensureMeta('meta[property="og:image"]', 'property', 'og:image').setAttribute('content', ogImage);
       ensureMeta('meta[name="twitter:image"]', 'name', 'twitter:image').setAttribute('content', ogImage);
+      if (ogImageAlt) {
+        ensureMeta('meta[property="og:image:alt"]', 'property', 'og:image:alt').setAttribute('content', ogImageAlt);
+        ensureMeta('meta[name="twitter:image:alt"]', 'name', 'twitter:image:alt').setAttribute('content', ogImageAlt);
+      }
     }
 
     const robots = ensureMeta('meta[name="robots"]', 'name', 'robots');
@@ -53,24 +62,5 @@ export function usePageMeta({ title, description, canonical, ogImage, noindex = 
       noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large'
     );
 
-    const dispatchSeoReady = () => {
-      document.dispatchEvent(
-        new CustomEvent('aurora-seo-ready', {
-          detail: { title, canonical },
-        })
-      );
-    };
-
-    const frame = window.requestAnimationFrame
-      ? window.requestAnimationFrame(dispatchSeoReady)
-      : window.setTimeout(dispatchSeoReady, 0);
-
-    return () => {
-      if (window.cancelAnimationFrame && typeof frame === 'number') {
-        window.cancelAnimationFrame(frame);
-      } else {
-        window.clearTimeout(frame);
-      }
-    };
-  }, [title, description, canonical, ogImage, noindex]);
+  }, [title, description, canonical, ogImage, ogImageAlt, ogType, noindex]);
 }

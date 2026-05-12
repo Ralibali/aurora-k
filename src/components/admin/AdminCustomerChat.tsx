@@ -35,14 +35,12 @@ export function AdminCustomerChat({ customerId, customerName }: AdminCustomerCha
   useEffect(() => {
     const load = async () => {
       const { data, error } = await supabase
-        .from('portal_messages' as any)
+        .from('portal_messages')
         .select('*')
         .eq('customer_id', customerId)
         .order('created_at', { ascending: true });
-      if (error) {
-        console.error('[AdminChat] load error:', error);
-      } else {
-        setMessages((data as unknown as Message[]) || []);
+      if (!error) {
+        setMessages((data as Message[]) || []);
       }
       setLoading(false);
     };
@@ -87,7 +85,7 @@ export function AdminCustomerChat({ customerId, customerName }: AdminCustomerCha
     setSending(true);
 
     try {
-      const { error } = await (supabase.from('portal_messages' as any) as any).insert({
+      const { error } = await supabase.from('portal_messages').insert({
         customer_id: customerId,
         company_id: companyId,
         sender_type: 'admin',
@@ -96,9 +94,8 @@ export function AdminCustomerChat({ customerId, customerName }: AdminCustomerCha
       });
       if (error) throw error;
       setNewMessage('');
-    } catch (err: any) {
+    } catch {
       toast.error('Kunde inte skicka meddelandet');
-      console.error('[AdminChat] send error:', err);
     } finally {
       setSending(false);
     }

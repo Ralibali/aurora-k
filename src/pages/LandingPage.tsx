@@ -5,14 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useBreadcrumbJsonLd } from '@/lib/breadcrumb-jsonld';
 import { usePageMeta } from '@/lib/use-page-meta';
 import { Button } from '@/components/ui/button';
-import {
-  Truck, Clock, Users, MapPin, Zap, FileText,
-  MessageSquare, FileSpreadsheet, Phone, Check, X,
-  BarChart3, Route, Bell, Package, Headphones,
-  Wallet, LayoutDashboard, ClipboardList, UserCog,
-  Settings, Search, Plus, ArrowRight, Mail, Shield,
-  Sparkles, Map as MapIcon, CheckCircle2, Minus, Loader2,
-} from 'lucide-react';
+import { Truck, Clock, Users, MapPin, Zap, FileText, MessageSquare, FileSpreadsheet, Phone, Check, X, ChartBar as BarChart3, Route, Bell, Package, Headphones, Wallet, LayoutDashboard, ClipboardList, UserCog, Settings, Search, Plus, ArrowRight, Mail, Shield, Sparkles, Map as MapIcon, CircleCheck as CheckCircle2, Minus, Loader as Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { supabase } from '@/integrations/supabase/client';
@@ -45,7 +38,36 @@ export default function LandingPage() {
     description: 'Aurora Transport samlar uppdrag, förare, tidrapporter och fakturering i ett enkelt svenskt system. 449 kr/mån. Ingen bindningstid. Boka 15 min demo.',
     canonical: 'https://auroratransport.se/',
     ogImage: 'https://auroratransport.se/og-image.png',
+    ogImageAlt: 'Aurora Transport — transportledningssystem för åkerier',
+    ogType: 'website',
   });
+
+  useEffect(() => {
+    const id = 'org-jsonld';
+    if (document.getElementById(id)) return;
+    const script = document.createElement('script');
+    script.id = id;
+    script.type = 'application/ld+json';
+    script.text = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'SoftwareApplication',
+      name: 'Aurora Transport',
+      applicationCategory: 'BusinessApplication',
+      operatingSystem: 'Web, iOS, Android',
+      offers: { '@type': 'Offer', price: '449', priceCurrency: 'SEK', priceSpecification: { billingDuration: 'P1M' } },
+      description: 'Transportledningssystem för svenska åkerier och budtjänster. Samlar uppdrag, förare, GPS, fakturering och tidrapportering.',
+      url: 'https://auroratransport.se',
+      publisher: {
+        '@type': 'Organization',
+        name: 'Aurora Media',
+        url: 'https://auroratransport.se',
+        logo: 'https://auroratransport.se/aurora-logo.png',
+        contactPoint: { '@type': 'ContactPoint', contactType: 'sales', email: 'info@auroramedia.se', availableLanguage: 'Swedish' },
+      },
+    });
+    document.head.appendChild(script);
+    return () => { document.getElementById(id)?.remove(); };
+  }, []);
 
   useEffect(() => {
     if (theme !== 'light') setTheme('light');

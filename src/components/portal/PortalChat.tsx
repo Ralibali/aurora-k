@@ -38,11 +38,11 @@ export function PortalChat({ token, customerName }: PortalChatProps) {
 
         // Also get customer_id for realtime subscription
         const { data: tokenData } = await supabase.rpc('validate_customer_token', { p_token: token });
-        if (tokenData && typeof tokenData === 'object' && 'customer_id' in (tokenData as any)) {
-          customerIdRef.current = (tokenData as any).customer_id;
+        if (tokenData && typeof tokenData === 'object' && 'customer_id' in tokenData) {
+          customerIdRef.current = (tokenData as Record<string, unknown>).customer_id as string;
         }
-      } catch (err: any) {
-        console.error('[PortalChat] load error:', err);
+      } catch {
+        // silently handled — UI shows empty state
       } finally {
         setLoading(false);
       }
@@ -110,12 +110,11 @@ export function PortalChat({ token, customerName }: PortalChatProps) {
             customerUrl: `${window.location.origin}/admin/customers/${customerIdRef.current}`,
           },
         }),
-      }).catch((err) => console.error('[PortalChat] email notify failed:', err));
+      }).catch(() => {});
 
       setNewMessage('');
-    } catch (err: any) {
+    } catch {
       toast.error('Kunde inte skicka meddelandet');
-      console.error('[PortalChat] send error:', err);
     } finally {
       setSending(false);
     }

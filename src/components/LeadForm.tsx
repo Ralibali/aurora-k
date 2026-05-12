@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Building2, User, Mail, Phone, Hash, Truck, Send, CheckCircle2, Clock, Mail as MailIcon, Sparkles } from 'lucide-react';
+import { Building2, User, Mail, Phone, Hash, Truck, Send, CircleCheck as CheckCircle2, Clock, Mail as MailIcon, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface LeadFormProps {
@@ -103,11 +103,10 @@ export function LeadForm({ onSuccess, compact = false }: LeadFormProps) {
       message: form.message.trim() || null,
       ...utmParams,
       lead_score: leadScore,
-    } as any);
+    });
     setSubmitting(false);
     if (error) {
       toast.error('Något gick fel. Försök igen.');
-      console.error('[LeadForm]', error);
       return;
     }
 
@@ -125,7 +124,7 @@ export function LeadForm({ onSuccess, compact = false }: LeadFormProps) {
           message: form.message.trim() || null,
         },
       },
-    }).catch((err) => console.error('[LeadForm] email notification failed:', err));
+    }).catch(() => {});
 
     setSubmitted(true);
     toast.success('Tack! Vi hör av oss inom kort.');

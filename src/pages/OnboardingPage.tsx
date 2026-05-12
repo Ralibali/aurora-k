@@ -65,6 +65,10 @@ export default function OnboardingPage() {
 
   const handleStep1 = async () => {
     if (!resolvedCompanyId) return;
+    if (!companyName.trim()) {
+      toast.error('Fyll i företagsnamn');
+      return;
+    }
     setSubmitting(true);
     try {
       await supabase.from('companies').update({ name: companyName, org_nr: orgNr || null }).eq('id', resolvedCompanyId);
@@ -192,12 +196,19 @@ export default function OnboardingPage() {
 
         {/* Progress bar */}
         <div className="mb-2">
-          <div className="flex gap-2 mb-2">
+          <div
+            className="flex gap-2 mb-2"
+            role="progressbar"
+            aria-valuenow={step}
+            aria-valuemin={1}
+            aria-valuemax={3}
+            aria-label={`Steg ${step} av 3`}
+          >
             {[1, 2, 3].map(s => (
               <div key={s} className={`flex-1 h-1.5 rounded-full transition-colors ${s <= step ? 'bg-primary' : 'bg-slate-200'}`} />
             ))}
           </div>
-          <p className="text-sm text-muted-foreground text-center">Steg {step} av 3</p>
+          <p className="text-sm text-muted-foreground text-center" aria-hidden="true">Steg {step} av 3</p>
         </div>
 
         <div className="bg-white rounded-2xl border shadow-sm p-8 mt-4">
@@ -242,7 +253,11 @@ export default function OnboardingPage() {
                       <Input type="email" placeholder="E-post" value={inv.email} onChange={e => updateInvite(i, 'email', e.target.value)} className="h-10" />
                     </div>
                     {invites.length > 1 && (
-                      <button onClick={() => removeInviteRow(i)} className="mt-2 text-muted-foreground hover:text-destructive">
+                      <button
+                        onClick={() => removeInviteRow(i)}
+                        className="mt-2 text-muted-foreground hover:text-destructive"
+                        aria-label={`Ta bort rad ${i + 1}`}
+                      >
                         <Trash2 className="h-4 w-4" />
                       </button>
                     )}
@@ -258,7 +273,10 @@ export default function OnboardingPage() {
                 <Button onClick={handleStep2Send} className="w-full h-12 rounded-xl font-semibold" disabled={submitting}>
                   {submitting ? 'Skickar...' : 'Skicka inbjudningar'}
                 </Button>
-                <button onClick={goNext} className="w-full text-center text-sm text-muted-foreground hover:text-foreground py-2">
+                <button
+                  onClick={goNext}
+                  className="w-full text-center text-sm text-muted-foreground hover:text-foreground py-2 rounded-lg hover:bg-slate-100 transition-colors"
+                >
                   Hoppa över →
                 </button>
               </div>
@@ -308,7 +326,10 @@ export default function OnboardingPage() {
                     <>Skapa och gå till dashboarden <Check className="ml-2 h-4 w-4" /></>
                   )}
                 </Button>
-                <button onClick={completeOnboarding} className="w-full text-center text-sm text-muted-foreground hover:text-foreground py-2">
+                <button
+                  onClick={completeOnboarding}
+                  className="w-full text-center text-sm text-muted-foreground hover:text-foreground py-2 rounded-lg hover:bg-slate-100 transition-colors"
+                >
                   Hoppa över →
                 </button>
               </div>

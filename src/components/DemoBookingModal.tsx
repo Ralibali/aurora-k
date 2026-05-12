@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Building2, User, Mail, Phone, CalendarClock, CheckCircle2, Send, Sparkles, Clock } from 'lucide-react';
+import { Building2, User, Mail, Phone, CalendarClock, CircleCheck as CheckCircle2, Send, Sparkles, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -200,12 +200,11 @@ export function DemoBookingModal({ open, onOpenChange, lang = 'sv' }: DemoBookin
       phone: parsed.data.phone || null,
       message,
       ...utm,
-      lead_score: 25, // demo bookings are warm
-    } as any);
+      lead_score: 25,
+    });
 
     setSubmitting(false);
     if (error) {
-      console.error('[DemoBookingModal]', error);
       toast.error(copy.error);
       return;
     }
@@ -224,7 +223,7 @@ export function DemoBookingModal({ open, onOpenChange, lang = 'sv' }: DemoBookin
           },
         },
       })
-      .catch((err) => console.error('[DemoBookingModal] notify failed:', err));
+      .catch(() => {});
 
     setSubmitted(true);
   };
