@@ -239,3 +239,27 @@ input:-webkit-autofill:focus {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* Swedish hyphenation & robust overflow for hero/headline titles.
+   Relies on <html lang="sv"> so the browser uses Swedish hyphenation rules. */
+h1, h2, h3,
+.hero-title,
+[data-hero-title] {
+  -webkit-hyphens: auto;
+  -ms-hyphens: auto;
+  hyphens: auto;
+  -webkit-hyphenate-limit-before: 3;
+  -webkit-hyphenate-limit-after: 3;
+  hyphenate-limit-chars: 8 4 4;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  text-wrap: balance;
+}
+
+/* Avoid mid-word breaks on wide screens where there's space to flow normally. */
+@media (min-width: 1024px) {
+  h1, h2, h3 {
+    hyphens: manual;
+    overflow-wrap: normal;
+  }
+}
