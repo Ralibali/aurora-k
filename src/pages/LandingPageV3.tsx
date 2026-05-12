@@ -225,6 +225,8 @@ export default function LandingPageV3() {
           </div>
         </section>
 
+        <IncludedSection lang={lang} onDemo={() => setDemoModalOpen(true)} />
+
         <section className="bg-[#f7f9fc] py-18 sm:py-22">
           <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
             <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-80px' }} variants={fadeUp} custom={0}>
@@ -484,5 +486,293 @@ function Metric({ icon: Icon, value, label, tone }: { icon: any; value: string; 
       <div className="mt-4 text-3xl font-black tracking-tight text-slate-950">{value}</div>
       <div className="mt-1 text-[0.68rem] font-black uppercase tracking-[0.14em] text-slate-400">{label}</div>
     </div>
+  );
+}
+
+const includedCopy = {
+  sv: {
+    eyebrow: 'Detta ingår — exakt vad du får',
+    h2: 'Hela transportledningssystemet, ingenting tillagt mot extra avgift',
+    sub: 'Ett enda fast pris ger dig hela plattformen: alla moduler, obegränsat antal förare, kunder och uppdrag, support och uppdateringar. Inga tillval, inga paket, inga överraskningar på fakturan.',
+    cta: 'Boka demo',
+    sub2: 'Logga in i en demomiljö',
+    note: 'Allt nedan ingår i 449 kr / månad. 30 dagars uppsägning. Inget år, ingen bindningstid.',
+    groups: [
+      {
+        title: 'Uppdrag & order',
+        items: [
+          'Skapa, redigera och tilldela uppdrag på sekunder',
+          'Återkommande uppdrag och ordermallar',
+          'Gruppera uppdrag i ordrar för projekt och perioder',
+          'Status i realtid: planerat, pågående, slutfört, fakturerat',
+          'Bokningsförfrågningar från kund via formulär eller portal',
+          'Tilldela om förare när som helst utan att tappa historik',
+        ],
+      },
+      {
+        title: 'Förare & mobil app',
+        items: [
+          'Mobil förarvy (PWA) — fungerar på iOS och Android utan App Store',
+          'Digital tidrapportering direkt i mobilen',
+          'Foto- och signaturdokumentation per uppdrag',
+          'Avvikelser, väntetid och OB-tillägg via tidsöverlapp',
+          'Frånvaro­hantering (sjuk, semester, VAB)',
+          'Inbjudan via /join-länk eller direktregistrering',
+        ],
+      },
+      {
+        title: 'Kunder & portal',
+        items: [
+          'Komplett kundregister med pris, betalvillkor och historik',
+          'Två prismodeller: fast pris eller timpris per kund',
+          'Kundportal med token-länk — chatt, spårning, fakturor',
+          'Realtidschatt mellan kund och kontor',
+          'Kund kan skicka in bokningsförfrågningar själv',
+          'Artikelregister med pris­prioritet (kund → standard → globalt)',
+        ],
+      },
+      {
+        title: 'Fakturering & ekonomi',
+        items: [
+          '4-stegs fakturaguide (full eller underlags-läge för Fortnox)',
+          'PDF-fakturor med din logga och dina avtalsuppgifter',
+          'Fakturaunderlag direkt från utförda uppdrag',
+          'Momsstöd: 0%, 6%, 12%, 25%',
+          'Bokföringsexport: SIE (CP437), Fortnox CSV, Visma CSV, Excel',
+          'Automatisk konto­mappning för intäkter och moms',
+        ],
+      },
+      {
+        title: 'Lön & ersättning',
+        items: [
+          'Tre lönemodeller: tim, uppdrag eller fast månads­lön',
+          'OB beräknas via tids­överlapp mot regler',
+          'Trakta­menten och utlägg per uppdrag',
+          'Lönesummering per förare och period',
+          'Export till lön och bokföring',
+          'Underlag som matchar utförda uppdrag — inget dubbelarbete',
+        ],
+      },
+      {
+        title: 'GPS, karta & rutt',
+        items: [
+          'Live-position på förare, uppdaterad var 15:e sekund',
+          'Karta byggd på Leaflet / OpenStreetMap (ingen Google-kostnad)',
+          'Geofence — automatisk in- och utstämpling vid kund',
+          'Ruttoptimering för dagens uppdrag',
+          'Kalender­vy: vecka och månad, färgkodad per status',
+          'Filtrera på förare, kund, status eller område',
+        ],
+      },
+      {
+        title: 'Rapporter & uppföljning',
+        items: [
+          'KPI-dashboard: omsättning, antal uppdrag, snittpris, marginal',
+          'Diagram via Recharts — utveckling över tid',
+          'PDF- och Excel-export på alla rapporter',
+          'Lönesummerings­rutor per förare och månad',
+          'Aktivitetsdashboard: vad som händer just nu',
+          'Aviseringar och realtids­uppdateringar i admin',
+        ],
+      },
+      {
+        title: 'Säkerhet, support & övrigt',
+        items: [
+          'Multi-tenant: full isolering mellan företag (RLS)',
+          'Roller: Admin och Förare med separata behörigheter',
+          'Audit-logg på känsliga åtgärder',
+          'Inbyggd backup, kryptering och svensk dataskydd',
+          'Modul­hantering — slå av funktioner ni inte använder',
+          'Svensk support, svenska språket genom hela appen',
+        ],
+      },
+    ] as { title: string; items: string[] }[],
+    notIncluded: {
+      title: 'Vad du INTE behöver betala extra för',
+      items: [
+        'Antal förare — obegränsat ingår',
+        'Antal kunder — obegränsat ingår',
+        'Antal uppdrag — obegränsat ingår',
+        'Uppdateringar och nya funktioner — ingår',
+        'Support via mejl — ingår',
+        'Bindningstid — ingen, 30 dagars uppsägning',
+      ],
+    },
+  },
+  en: {
+    eyebrow: 'Exactly what you get',
+    h2: 'The full transport management system, nothing locked behind upsells',
+    sub: 'One flat price gives you the whole platform: every module, unlimited drivers, customers and jobs, support and updates included. No add-ons, no tiers, no surprises on the invoice.',
+    cta: 'Book a demo',
+    sub2: 'Try the demo environment',
+    note: 'Everything below is included for 449 SEK / month. 30 days notice. No annual contract.',
+    groups: [
+      {
+        title: 'Jobs & orders',
+        items: [
+          'Create, edit and assign jobs in seconds',
+          'Recurring jobs and order templates',
+          'Group jobs into orders for projects or periods',
+          'Real-time status: planned, in progress, completed, invoiced',
+          'Customer booking requests via form or portal',
+          'Reassign drivers anytime without losing history',
+        ],
+      },
+      {
+        title: 'Drivers & mobile app',
+        items: [
+          'Mobile driver PWA — works on iOS and Android, no App Store',
+          'Digital time reporting directly on the phone',
+          'Photo and signature documentation per job',
+          'Deviations, waiting time and shift premiums via overlap',
+          'Absence management (sick, vacation, leave)',
+          'Invite via /join link or direct registration',
+        ],
+      },
+      {
+        title: 'Customers & portal',
+        items: [
+          'Full CRM with pricing, terms and history',
+          'Two pricing models: fixed price or hourly per customer',
+          'Customer portal with token link — chat, tracking, invoices',
+          'Real-time chat between customer and office',
+          'Customer can submit booking requests themselves',
+          'Article register with price priority (customer → default → global)',
+        ],
+      },
+      {
+        title: 'Invoicing & finance',
+        items: [
+          '4-step invoice wizard (full or basis mode for Fortnox)',
+          'PDF invoices with your logo and details',
+          'Invoice basis generated directly from completed jobs',
+          'VAT support: 0%, 6%, 12%, 25%',
+          'Accounting export: SIE (CP437), Fortnox CSV, Visma CSV, Excel',
+          'Automatic account mapping for revenue and VAT',
+        ],
+      },
+      {
+        title: 'Payroll & compensation',
+        items: [
+          'Three models: hourly, per job, or fixed monthly',
+          'Overtime calculated via shift overlap against rules',
+          'Per diem and expenses per job',
+          'Payroll summary per driver and period',
+          'Export to payroll and accounting systems',
+          'Basis matches completed jobs — no double work',
+        ],
+      },
+      {
+        title: 'GPS, map & route',
+        items: [
+          'Live driver position, refreshed every 15 seconds',
+          'Map powered by Leaflet / OpenStreetMap (no Google fees)',
+          'Geofence — automatic check-in/out at customer site',
+          'Route optimization for the day’s jobs',
+          'Calendar view: week and month, color coded by status',
+          'Filter by driver, customer, status or area',
+        ],
+      },
+      {
+        title: 'Reports & analytics',
+        items: [
+          'KPI dashboard: revenue, jobs, average price, margin',
+          'Charts via Recharts — trend over time',
+          'PDF and Excel export on every report',
+          'Payroll summary cards per driver and month',
+          'Live activity dashboard',
+          'Notifications and real-time updates in admin',
+        ],
+      },
+      {
+        title: 'Security, support & more',
+        items: [
+          'Multi-tenant: full isolation between companies (RLS)',
+          'Roles: Admin and Driver with separate permissions',
+          'Audit log on sensitive actions',
+          'Built-in backup, encryption and EU data protection',
+          'Module management — turn off features you don’t use',
+          'Swedish support, Swedish UI throughout',
+        ],
+      },
+    ] as { title: string; items: string[] }[],
+    notIncluded: {
+      title: 'What you do NOT pay extra for',
+      items: [
+        'Number of drivers — unlimited included',
+        'Number of customers — unlimited included',
+        'Number of jobs — unlimited included',
+        'Updates and new features — included',
+        'Email support — included',
+        'Lock-in — none, 30 days notice',
+      ],
+    },
+  },
+} as const;
+
+function IncludedSection({ lang, onDemo }: { lang: Lang; onDemo: () => void }) {
+  const c = includedCopy[lang];
+  return (
+    <section id="ingar" className="bg-white py-20 sm:py-24">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-3xl text-center">
+          <p className="text-sm font-bold uppercase tracking-[0.22em] text-[#123b88]">{c.eyebrow}</p>
+          <h2 className="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl" lang={lang}>
+            {c.h2}
+          </h2>
+          <p className="mt-5 text-lg leading-8 text-slate-600">{c.sub}</p>
+        </div>
+
+        <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+          {c.groups.map((group, index) => (
+            <motion.div
+              key={group.title}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: '-60px' }}
+              variants={fadeUp}
+              custom={index}
+              className="flex h-full flex-col rounded-[1.75rem] border border-slate-200 bg-[#f7f9fc] p-6 shadow-[0_18px_60px_rgba(15,23,42,0.05)]"
+            >
+              <h3 className="text-lg font-black tracking-tight text-slate-950">{group.title}</h3>
+              <ul className="mt-4 space-y-2.5">
+                {group.items.map((item) => (
+                  <li key={item} className="flex items-start gap-2.5 text-sm leading-6 text-slate-700">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#123b88]" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          ))}
+        </div>
+
+        <div className="mt-10 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="rounded-[2rem] border border-emerald-200 bg-emerald-50/60 p-7">
+            <h3 className="text-xl font-black tracking-tight text-emerald-900">{c.notIncluded.title}</h3>
+            <ul className="mt-5 grid gap-2.5 sm:grid-cols-2">
+              {c.notIncluded.items.map((item) => (
+                <li key={item} className="flex items-start gap-2.5 text-sm font-semibold leading-6 text-emerald-900">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="flex flex-col justify-between rounded-[2rem] bg-[#0b1730] p-7 text-white shadow-[0_30px_90px_rgba(15,47,110,0.28)]">
+            <p className="text-sm leading-7 text-slate-300">{c.note}</p>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <Button onClick={onDemo} size="lg" className="rounded-2xl bg-white px-6 font-black text-[#0b1730] hover:bg-blue-50">
+                {c.cta}
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+              <Button asChild size="lg" variant="outline" className="rounded-2xl border-white/20 bg-transparent px-6 font-black text-white hover:bg-white/10 hover:text-white">
+                <a href="#pris">{c.sub2}</a>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
