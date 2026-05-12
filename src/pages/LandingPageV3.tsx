@@ -214,9 +214,6 @@ export default function LandingPageV3() {
 
         <section className="bg-[#f7f9fc] py-18 sm:py-22">
           <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
-
-        <IncludedSection lang={lang} />
-
             <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-80px' }} variants={fadeUp} custom={0}>
               <p className="text-sm font-bold uppercase tracking-[0.22em] text-[#123b88]">{t.seoIntro.eyebrow}</p>
               <h2 className="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">{t.seoIntro.h2}</h2>
