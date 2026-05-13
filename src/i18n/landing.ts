@@ -99,9 +99,9 @@ export interface LandingCopy {
 const SV: LandingCopy = {
   htmlLang: 'sv',
   meta: {
-    title: 'Transportledningssystem för åkerier och budfirmor | Aurora Transport',
+    title: 'Transportledningssystem för åkerier | Aurora Transport',
     description:
-      'Aurora Transport är ett svenskt transportledningssystem för åkerier, budfirmor och transportbemanning. Hantera uppdrag, förare, tidrapportering och fakturaunderlag för 449 kr per månad.',
+      'Svenskt transportledningssystem för åkerier, budfirmor och bemanning. Uppdrag, förare, tidrapportering och fakturaunderlag – 449 kr/mån.',
   },
   nav: {
     features: 'Funktioner',
@@ -250,9 +250,9 @@ const SV: LandingCopy = {
 const EN: LandingCopy = {
   htmlLang: 'en',
   meta: {
-    title: 'Transport management system for hauliers and couriers | Aurora Transport',
+    title: 'Transport management system for hauliers | Aurora Transport',
     description:
-      'Aurora Transport is a Swedish transport management system for hauliers, couriers and transport staffing companies. Manage jobs, drivers, time reporting and invoice drafts from 449 SEK per month.',
+      'Swedish TMS for hauliers, couriers and transport staffing. Jobs, drivers, time reporting and invoice drafts from 449 SEK/month.',
   },
   nav: {
     features: 'Features',
