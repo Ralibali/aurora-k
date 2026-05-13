@@ -23,6 +23,7 @@ export function BlogLayout({ slug, title, seoTitle, metaDescription, publishDate
     description: metaDescription,
     canonical,
     ogImage: 'https://auroratransport.se/og-image.png',
+    ogType: 'article',
   });
 
   useBreadcrumbJsonLd(useMemo(() => [

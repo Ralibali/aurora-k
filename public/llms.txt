@@ -1,0 +1,39 @@
+# Aurora Transport
+
+> Svenskt transportledningssystem (TMS) för åkerier, budfirmor och transportbemanning. Hantera uppdrag, förare, tidrapportering och fakturaunderlag – 449 kr/månad, ingen bindningstid.
+
+Aurora Transport är en molnbaserad SaaS-plattform byggd av Aurora Media AB. Systemet riktar sig till små och medelstora transportföretag i Sverige som vill digitalisera dispatch, förarapp, körordrar, tidrapportering och fakturaunderlag i ett gränssnitt. Onboarding sker självständigt på under en dag.
+
+## Pages
+
+- [Startsida](/): Översikt av Aurora Transport, funktioner och pris.
+- [Tjänster](/tjanster): Vad som ingår i plattformen.
+- [Transportledningssystem](/transportledningssystem): TMS för åkerier och transportbolag.
+- [Åkerisystem](/akeri-system): System anpassat för åkerier.
+- [Dispatchsystem](/dispatch-system): Dispatch för förare och uppdrag.
+- [Budtjänst-app](/budtjanst-app): Förarapp och dispatch för budfirmor.
+- [Tidrapportering transport](/tidrapportering-transport): Digital tidrapportering för förare.
+- [Vad kostar ett TMS](/vad-kostar-transportledningssystem): Pris och jämförelse.
+- [Coredination-alternativ](/coredination-alternativ): Jämförelse mot Coredination.
+- [Om oss](/om-oss): Om Aurora Media AB.
+- [Kontakt](/kontakt): Kontakta oss för demo eller frågor.
+- [Boka demo](/boka): Boka en kostnadsfri genomgång.
+
+## Blog
+
+- [Blogg](/blogg): Artiklar om transportbranschen, digitalisering och systemval.
+- [Bästa dispatchsystemet för åkeri 2026](/blogg/basta-dispatchsystemet-for-akeri-2026)
+- [Hur digitaliserar man sin budtjänst](/blogg/hur-digitaliserar-man-sin-budtjanst)
+- [Vad kostar ett transportledningssystem](/blogg/vad-kostar-ett-transportledningssystem)
+- [Transportledningssystem för små åkerier](/blogg/transportledningssystem-for-sma-akerier)
+- [Dispatch-app för förare](/blogg/dispatch-app-forare-transport)
+- [System för bemanningsbolag inom transport](/blogg/bemanningsbolag-transport-system)
+- [TMS vs dispatchsystem – skillnaden](/blogg/skillnad-tms-dispatch-system)
+- [Transportapp utan bindningstid](/blogg/transportapp-utan-bindningstid)
+- [Fördelar med digitalt körordersystem](/blogg/digitalt-korordrersystem-fordelar)
+- [Byta dispatchsystem – guide](/blogg/byta-dispatchsystem-guide)
+
+## Optional
+
+- [English landing](/en): English version of the site.
+- [Integritetspolicy](/privacy): Privacy policy.
