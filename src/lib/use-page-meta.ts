@@ -62,5 +62,14 @@ export function usePageMeta({ title, description, canonical, ogImage, ogImageAlt
       noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large'
     );
 
+    // Signalera till prerender-pluginet (vite.config.ts → renderAfterDocumentEvent)
+    // att SEO-headen nu är komplett. Utan detta event föll förrenderingen tillbaka
+    // på en 5s-timeout per route, vilket var långsamt och kunde fånga ofärdig HTML.
+    if (typeof document !== 'undefined') {
+      requestAnimationFrame(() => {
+        document.dispatchEvent(new Event('aurora-seo-ready'));
+      });
+    }
+
   }, [title, description, canonical, ogImage, ogImageAlt, ogType, noindex]);
 }
