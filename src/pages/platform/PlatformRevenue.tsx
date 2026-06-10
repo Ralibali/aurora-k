@@ -14,7 +14,6 @@ interface PlatformCompany {
   name: string;
   subscription_status: SubscriptionStatus;
   created_at: string;
-  updated_at: string | null;
   org_nr: string | null;
 }
 
@@ -24,9 +23,9 @@ export default function PlatformRevenue() {
     queryFn: async () => {
       const { data } = await supabase
         .from('companies')
-        .select('id, name, subscription_status, created_at, org_nr, updated_at')
+        .select('id, name, subscription_status, created_at, org_nr')
         .order('created_at', { ascending: false });
-      return (data ?? []) as PlatformCompany[];
+      return ((data ?? []) as unknown) as PlatformCompany[];
     },
   });
 
@@ -43,7 +42,7 @@ export default function PlatformRevenue() {
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const churnThisMonth = cancelled.filter((c) => {
-    const d = new Date(c.updated_at || c.created_at);
+    const d = new Date(c.created_at);
     return d >= monthStart;
   }).length;
 
