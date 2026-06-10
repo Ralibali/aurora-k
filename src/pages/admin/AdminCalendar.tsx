@@ -128,13 +128,13 @@ export default function AdminCalendar() {
         {/* Toolbar */}
         <div className="flex flex-wrap items-center gap-3 justify-between">
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={() => navigate_period(-1)}>
+            <Button variant="outline" size="icon" aria-label="Föregående period" onClick={() => navigate_period(-1)}>
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <Button variant="outline" size="sm" onClick={() => setCurrentDate(new Date())}>
               Idag
             </Button>
-            <Button variant="outline" size="icon" onClick={() => navigate_period(1)}>
+            <Button variant="outline" size="icon" aria-label="Nästa period" onClick={() => navigate_period(1)}>
               <ChevronRight className="h-4 w-4" />
             </Button>
             <h2 className="text-lg font-semibold capitalize ml-2">{headerLabel}</h2>
@@ -166,8 +166,15 @@ export default function AdminCalendar() {
           </div>
         </div>
 
+        {/* Skeleton during load */}
+        {isLoading && effectiveAssignments.length === 0 && (
+          <div className="grid grid-cols-7 gap-2">
+            {[...Array(7)].map((_, i) => <Skeleton key={i} className="h-[180px] w-full rounded-lg" />)}
+          </div>
+        )}
+
         {/* CTA overlay when no assignments at all */}
-        {effectiveAssignments.length === 0 && (
+        {!isLoading && effectiveAssignments.length === 0 && (
           <div className="rounded-lg border border-dashed border-border bg-card/50 p-8 text-center">
             <div className="inline-flex items-center justify-center h-12 w-12 rounded-2xl bg-primary/5 border border-primary/10 mb-3">
               <CalendarDays className="h-6 w-6 text-primary/70" />
