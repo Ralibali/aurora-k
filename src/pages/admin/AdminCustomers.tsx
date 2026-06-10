@@ -110,7 +110,13 @@ export default function AdminCustomers() {
                   </StaggeredTableBody>
                 )}
                 {!isLoading && filtered.length === 0 && (
-                  <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Inga kunder hittades</TableCell></TableRow>
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center text-muted-foreground py-12">
+                      <p className="font-medium text-foreground mb-1">Inga kunder ännu</p>
+                      <p className="text-sm mb-4">Lägg till din första kund för att börja skapa uppdrag och fakturor.</p>
+                      <Button size="sm" onClick={() => navigate('/admin/customers/new')}>Skapa kund</Button>
+                    </TableCell>
+                  </TableRow>
                 )}
               </TableBody>
             </Table>
