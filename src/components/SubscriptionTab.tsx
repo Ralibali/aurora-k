@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,8 @@ export default function SubscriptionTab() {
   const [loading, setLoading] = useState(true);
   const [portalLoading, setPortalLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const loadingRef = useRef(loading);
+  useEffect(() => { loadingRef.current = loading; }, [loading]);
 
   const loadSubscription = useCallback(async () => {
     if (authLoading && !companyId) return;
@@ -57,17 +59,17 @@ export default function SubscriptionTab() {
     void loadSubscription();
   }, [loadSubscription]);
 
-  // Safety: if auth stays loading for >5s, stop showing spinner
+  // Safety: if auth stays loading for >5s without companyId, stop spinner
   useEffect(() => {
     if (!authLoading || companyId) return;
     const timer = setTimeout(() => {
-      if (loading) {
+      if (loadingRef.current && !companyId) {
         setLoading(false);
         setError('Autentiseringen tog för lång tid. Försök ladda om sidan.');
       }
     }, 5000);
     return () => clearTimeout(timer);
-  }, [authLoading, loading]);
+  }, [authLoading, companyId]);
 
   const openPortal = async () => {
     setPortalLoading(true);

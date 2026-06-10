@@ -48,7 +48,7 @@ export function useDriverLocationTracker(
   }, [geofence, onGeofenceEnter, onGeofenceExit]);
 
   useEffect(() => {
-    if (!driverId || !activeAssignmentId) {
+    if (!driverId || !activeAssignmentId || !companyId) {
       cleanup(driverId);
       return;
     }
@@ -73,12 +73,12 @@ export function useDriverLocationTracker(
     );
 
     const sendPosition = async () => {
-      if (!lastPos.current) return;
+      if (!lastPos.current || !companyId) return;
       const { lat, lng } = lastPos.current;
       const { error } = await supabase
         .from('driver_locations')
         .upsert(
-          { driver_id: driverId, assignment_id: activeAssignmentId, latitude: lat, longitude: lng, company_id: companyId ?? undefined },
+          { driver_id: driverId, assignment_id: activeAssignmentId, latitude: lat, longitude: lng, company_id: companyId },
           { onConflict: 'driver_id' }
         );
       if (error) console.warn('[GPS] Upsert error:', error.message);
@@ -88,7 +88,7 @@ export function useDriverLocationTracker(
     intervalId.current = setInterval(sendPosition, INTERVAL_MS);
 
     return () => { cleanup(driverId); };
-  }, [driverId, activeAssignmentId, checkGeofence]);
+  }, [driverId, activeAssignmentId, companyId, checkGeofence]);
 
   function cleanup(dId?: string) {
     if (watchId.current !== null) {
