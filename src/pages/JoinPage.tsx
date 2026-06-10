@@ -61,7 +61,9 @@ export default function JoinPage() {
           .eq('id', inv.company_id)
           .single();
         if (company?.name) companyName = company.name;
-      } catch {}
+      } catch {
+        // Företagsnamn är inte kritiskt — fortsätt med fallback.
+      }
 
       setInvitation({
         ...inv,
