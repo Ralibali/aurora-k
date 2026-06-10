@@ -17,7 +17,7 @@ export function DriverLayout() {
           </div>
           <h1 className="text-sm font-semibold text-foreground">Aurora Transport</h1>
         </div>
-        <button className="text-muted-foreground hover:text-foreground p-2 rounded-md hover:bg-secondary transition-colors">
+        <button aria-label="Notiser" className="text-muted-foreground hover:text-foreground p-2 rounded-md hover:bg-secondary transition-colors min-h-11 min-w-11 flex items-center justify-center">
           <Bell className="h-5 w-5" />
         </button>
       </header>
