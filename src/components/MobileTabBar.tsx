@@ -83,7 +83,8 @@ export function MobileTabBar() {
         })}
         <button
           onClick={() => setMenuOpen(true)}
-          className="flex flex-col items-center justify-center gap-0.5 text-muted-foreground min-w-[56px] py-1"
+          aria-label="Öppna mer-meny"
+          className="flex flex-col items-center justify-center gap-0.5 text-muted-foreground min-w-[56px] min-h-11 py-1"
         >
           <Menu className="h-5 w-5" />
           <span className="text-[10px] font-medium">Mer</span>
@@ -110,7 +111,7 @@ export function MobileTabBar() {
             >
               <div className="flex items-center justify-between px-5 py-4 border-b border-border">
                 <h3 className="text-sm font-semibold text-foreground">Mer</h3>
-                <button onClick={() => setMenuOpen(false)} className="p-1 text-muted-foreground">
+                <button onClick={() => setMenuOpen(false)} aria-label="Stäng meny" className="p-2 text-muted-foreground min-h-11 min-w-11 flex items-center justify-center">
                   <X className="h-5 w-5" />
                 </button>
               </div>
