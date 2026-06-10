@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { usePageMeta } from '@/lib/use-page-meta';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -10,6 +10,26 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ClipboardList, ShoppingCart, Receipt, Building2, CalendarPlus, MessageCircle, ArrowUpRight, Clock, MapPin, Route, Truck, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { BookingRequestForm } from '@/components/portal/BookingRequestForm';
 import { PortalChat } from '@/components/portal/PortalChat';
+
+interface PortalCustomer { id: string; name: string; }
+interface PortalAssignment {
+  id: string; title: string; status: string; scheduled_start?: string;
+  pickup_address?: string | null; delivery_address?: string | null; address?: string | null;
+  service_type?: string | null;
+}
+interface PortalOrder { id: string; order_number: string; title: string; status: string; }
+interface PortalInvoice {
+  id: string; invoice_number: number; invoice_date: string; due_date: string;
+  total_inc_vat?: number; status: string;
+}
+interface PortalBooking { id: string; [key: string]: unknown; }
+interface PortalData {
+  customer?: PortalCustomer;
+  assignments?: PortalAssignment[];
+  orders?: PortalOrder[];
+  invoices?: PortalInvoice[];
+  bookings?: PortalBooking[];
+}
 
 const statusLabels: Record<string, string> = {
   pending: 'Väntande', active: 'Aktiv', in_progress: 'Pågår', completed: 'Slutförd',
@@ -23,7 +43,7 @@ const statusVariant = (s: string): 'default' | 'secondary' | 'destructive' | 'ou
   return 'outline';
 };
 
-function routeText(a: any) {
+function routeText(a: PortalAssignment) {
   if (a.pickup_address && a.delivery_address) return `${a.pickup_address} → ${a.delivery_address}`;
   return a.pickup_address || a.delivery_address || a.address || 'Adress saknas';
 }
@@ -37,7 +57,7 @@ export default function CustomerPortal() {
   usePageMeta({ title: 'Kundportal | Aurora Transport', description: '', canonical: 'https://auroratransport.se/portal', noindex: true });
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<PortalData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
