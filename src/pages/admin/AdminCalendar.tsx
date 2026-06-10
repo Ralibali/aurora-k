@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AdminLayout } from '@/components/AdminLayout';
 import { useAssignments, useDrivers } from '@/hooks/useData';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { StatusBadge } from '@/components/StatusBadge';
@@ -30,7 +31,7 @@ type ViewMode = 'week' | 'month';
 
 export default function AdminCalendar() {
   const navigate = useNavigate();
-  const { data: assignments } = useAssignments();
+  const { data: assignments, isLoading } = useAssignments();
   const { data: drivers } = useDrivers();
   const { enabled: demoEnabled } = useDemoMode();
   const [currentDate, setCurrentDate] = useState(new Date());
