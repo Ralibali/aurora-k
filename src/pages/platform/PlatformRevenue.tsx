@@ -8,22 +8,33 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 const PRICE_PER_MONTH = 449;
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'Maj', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'];
 
+type SubscriptionStatus = 'active' | 'pending' | 'past_due' | 'cancelled';
+interface PlatformCompany {
+  id: string;
+  name: string;
+  subscription_status: SubscriptionStatus;
+  created_at: string;
+  updated_at: string | null;
+  org_nr: string | null;
+}
+
 export default function PlatformRevenue() {
-  const { data: companies, isLoading } = useQuery({
+  const { data: companies, isLoading } = useQuery<PlatformCompany[]>({
     queryKey: ['platform-companies-revenue'],
     queryFn: async () => {
       const { data } = await supabase
         .from('companies')
         .select('id, name, subscription_status, created_at, org_nr, updated_at')
         .order('created_at', { ascending: false });
-      return data || [];
+      return (data ?? []) as PlatformCompany[];
     },
   });
 
-  const active = companies?.filter((c: any) => c.subscription_status === 'active') || [];
-  const pending = companies?.filter((c: any) => c.subscription_status === 'pending') || [];
-  const pastDue = companies?.filter((c: any) => c.subscription_status === 'past_due') || [];
-  const cancelled = companies?.filter((c: any) => c.subscription_status === 'cancelled') || [];
+  const list: PlatformCompany[] = companies ?? [];
+  const active = list.filter((c) => c.subscription_status === 'active');
+  const pending = list.filter((c) => c.subscription_status === 'pending');
+  const pastDue = list.filter((c) => c.subscription_status === 'past_due');
+  const cancelled = list.filter((c) => c.subscription_status === 'cancelled');
 
   const mrr = active.length * PRICE_PER_MONTH;
   const arr = mrr * 12;
@@ -31,14 +42,14 @@ export default function PlatformRevenue() {
   // Churn this month
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-  const churnThisMonth = cancelled.filter((c: any) => {
+  const churnThisMonth = cancelled.filter((c) => {
     const d = new Date(c.updated_at || c.created_at);
     return d >= monthStart;
   }).length;
 
   // Average customer age
   const avgAgeDays = active.length > 0
-    ? Math.round(active.reduce((sum: number, c: any) => sum + (Date.now() - new Date(c.created_at).getTime()) / 86400000, 0) / active.length)
+    ? Math.round(active.reduce((sum, c) => sum + (Date.now() - new Date(c.created_at).getTime()) / 86400000, 0) / active.length)
     : 0;
 
   // Chart data: last 6 months cumulative active
@@ -48,7 +59,7 @@ export default function PlatformRevenue() {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const endOfMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
       // Count companies created before end of that month that are active (or were created by then)
-      const count = (companies || []).filter((c: any) => {
+      const count = list.filter((c) => {
         const created = new Date(c.created_at);
         return created <= endOfMonth && (c.subscription_status === 'active' || c.subscription_status === 'past_due');
       }).length;
@@ -57,7 +68,7 @@ export default function PlatformRevenue() {
     return months;
   })();
 
-  const total = (companies || []).length;
+  const total = list.length;
   const statusRows = [
     { label: 'Aktiv', count: active.length, pct: total ? ((active.length / total) * 100).toFixed(0) : '0', mrr: `${(active.length * PRICE_PER_MONTH).toLocaleString('sv-SE')} kr` },
     { label: 'Väntande', count: pending.length, pct: total ? ((pending.length / total) * 100).toFixed(0) : '0', mrr: '—' },
@@ -162,7 +173,7 @@ export default function PlatformRevenue() {
                 </tr>
               </thead>
               <tbody>
-                {recentActivations.map((c: any) => (
+                {recentActivations.map((c) => (
                   <tr key={c.id} className="border-b border-border last:border-0">
                     <td className="py-2 text-foreground font-medium">{c.name}</td>
                     <td className="py-2 text-muted-foreground">{new Date(c.created_at).toLocaleDateString('sv-SE')}</td>
