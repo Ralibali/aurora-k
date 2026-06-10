@@ -60,6 +60,30 @@ export default function CustomerPortal() {
     fetchData();
   }, [token]);
 
+  const assignments: PortalAssignment[] = data?.assignments ?? [];
+  const invoices: PortalInvoice[] = data?.invoices ?? [];
+  const orders: PortalOrder[] = data?.orders ?? [];
+  const bookings: PortalBooking[] = data?.bookings ?? [];
+  const customer: PortalCustomer | undefined = data?.customer;
+
+  const stats = useMemo(() => {
+    const activeAssignments = assignments.filter((a) => ['pending', 'active', 'in_progress'].includes(a.status)).length;
+    const completedAssignments = assignments.filter((a) => a.status === 'completed').length;
+    const openInvoices = invoices.filter((i) => ['draft', 'sent', 'overdue'].includes(i.status)).length;
+    const overdue = invoices.filter((i) => i.status === 'overdue').length;
+    return { activeAssignments, completedAssignments, openInvoices, overdue };
+  }, [assignments, invoices]);
+
+  const nextAssignment = useMemo(() => {
+    return [...assignments]
+      .filter((a) => a.status !== 'completed' && a.status !== 'cancelled')
+      .sort((a, b) => String(a.scheduled_start).localeCompare(String(b.scheduled_start)))[0];
+  }, [assignments]);
+
+  const handleBookingCreated = useCallback((booking: PortalBooking) => {
+    setData((prev: PortalData | null) => prev ? { ...prev, bookings: [booking, ...(prev.bookings || [])] } : prev);
+  }, []);
+
   if (loading) {
     return <div className="min-h-screen bg-slate-950 p-6"><div className="max-w-6xl mx-auto space-y-4"><Skeleton className="h-12 w-64 bg-white/10" /><Skeleton className="h-96 w-full bg-white/10" /></div></div>;
   }
@@ -71,22 +95,6 @@ export default function CustomerPortal() {
       </div>
     );
   }
-
-  const { customer, assignments = [], orders = [], invoices = [], bookings = [] } = data;
-
-  const stats = useMemo(() => {
-    const activeAssignments = assignments.filter((a: any) => ['pending', 'active', 'in_progress'].includes(a.status)).length;
-    const completedAssignments = assignments.filter((a: any) => a.status === 'completed').length;
-    const openInvoices = invoices.filter((i: any) => ['draft', 'sent', 'overdue'].includes(i.status)).length;
-    const overdue = invoices.filter((i: any) => i.status === 'overdue').length;
-    return { activeAssignments, completedAssignments, openInvoices, overdue };
-  }, [assignments, invoices]);
-
-  const nextAssignment = useMemo(() => {
-    return [...assignments].filter((a: any) => a.status !== 'completed' && a.status !== 'cancelled').sort((a: any, b: any) => String(a.scheduled_start).localeCompare(String(b.scheduled_start)))[0];
-  }, [assignments]);
-
-  const handleBookingCreated = (booking: any) => setData((prev: any) => ({ ...prev, bookings: [booking, ...(prev.bookings || [])] }));
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50">
