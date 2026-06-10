@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { AdminLayout } from '@/components/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -401,7 +401,7 @@ function InvitationsList({ companyId }: { companyId: string }) {
   const [resending, setResending] = useState<string | null>(null);
   const { user } = useAuth();
 
-  const fetchInvitations = async () => {
+  const fetchInvitations = useCallback(async () => {
     setLoading(true);
     const { data } = await supabase
       .from('invitations')
@@ -410,9 +410,9 @@ function InvitationsList({ companyId }: { companyId: string }) {
       .order('created_at', { ascending: false });
     setInvitations(data ?? []);
     setLoading(false);
-  };
+  }, [companyId]);
 
-  useEffect(() => { fetchInvitations(); }, [companyId]);
+  useEffect(() => { void fetchInvitations(); }, [fetchInvitations]);
 
   const handleResend = async (inv: any) => {
     setResending(inv.id);

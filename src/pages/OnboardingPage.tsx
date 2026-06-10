@@ -71,12 +71,14 @@ export default function OnboardingPage() {
     }
     setSubmitting(true);
     try {
-      await supabase.from('companies').update({ name: companyName, org_nr: orgNr || null }).eq('id', resolvedCompanyId);
+      const { error } = await supabase.from('companies').update({ name: companyName, org_nr: orgNr || null }).eq('id', resolvedCompanyId);
+      if (error) throw error;
       sessionStorage.setItem('onboarding_company_name', companyName);
       sessionStorage.setItem('onboarding_org_nr', orgNr);
       goNext();
-    } catch {
-      toast.error('Kunde inte spara');
+    } catch (err) {
+      console.error('[Onboarding] Step 1 failed:', err);
+      toast.error('Kunde inte spara företagsuppgifterna. Kontrollera uppgifterna och försök igen.');
     } finally {
       setSubmitting(false);
     }
@@ -119,8 +121,9 @@ export default function OnboardingPage() {
       }
       toast.success(`${valid.length} inbjudan(ar) skickade!`);
       goNext();
-    } catch {
-      toast.error('Kunde inte skicka inbjudningar');
+    } catch (err) {
+      console.error('[Onboarding] Step 2 failed:', err);
+      toast.error('Kunde inte skicka inbjudningarna. Kontrollera e-postadresserna och försök igen.');
     } finally {
       setSubmitting(false);
     }
@@ -159,23 +162,31 @@ export default function OnboardingPage() {
         }
       }
       await completeOnboarding();
-    } catch {
-      toast.error('Kunde inte skapa uppdraget');
+    } catch (err) {
+      console.error('[Onboarding] Step 3 failed:', err);
+      toast.error('Kunde inte skapa uppdraget. Kontrollera fälten och försök igen, eller hoppa över steget.');
     } finally {
       setSubmitting(false);
     }
   };
 
   const completeOnboarding = async () => {
-    if (resolvedCompanyId) {
-      await supabase.from('companies').update({ onboarding_completed: true }).eq('id', resolvedCompanyId);
+    try {
+      if (resolvedCompanyId) {
+        const { error } = await supabase.from('companies').update({ onboarding_completed: true }).eq('id', resolvedCompanyId);
+        if (error) throw error;
+      }
+      sessionStorage.removeItem(STORAGE_KEY);
+      sessionStorage.removeItem('onboarding_company_id');
+      sessionStorage.removeItem('onboarding_company_name');
+      sessionStorage.removeItem('onboarding_org_nr');
+      toast.success('Välkommen! Ditt konto är redo.', { duration: 5000 });
+      navigate('/admin', { replace: true });
+    } catch (err) {
+      console.error('[Onboarding] completeOnboarding failed:', err);
+      toast.error('Kunde inte slutföra onboardingen. Försök igen.');
+      setSubmitting(false);
     }
-    sessionStorage.removeItem(STORAGE_KEY);
-    sessionStorage.removeItem('onboarding_company_id');
-    sessionStorage.removeItem('onboarding_company_name');
-    sessionStorage.removeItem('onboarding_org_nr');
-    toast.success('Välkommen! Ditt konto är redo.', { duration: 5000 });
-    navigate('/admin', { replace: true });
   };
 
   const addInviteRow = () => setInvites(prev => [...prev, { name: '', email: '' }]);

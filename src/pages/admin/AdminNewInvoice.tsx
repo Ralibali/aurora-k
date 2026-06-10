@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AdminLayout } from '@/components/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -79,7 +79,7 @@ export default function AdminNewInvoice() {
 
   const toggleAssignment = (id: string) => setSelectedAssignments(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
 
-  const buildLines = async () => {
+  const buildLines = useCallback(async () => {
     const newLines: InvoiceLine[] = [];
 
     for (const aId of selectedAssignments) {
@@ -109,14 +109,19 @@ export default function AdminNewInvoice() {
     }
 
     setLines(newLines);
-  };
+  }, [selectedAssignments, uninvoiced, allAssignments, priceMap, customer]);
+
+  // Reset autobuild when customer changes so lines rebuild for the new selection
+  useEffect(() => {
+    setDidAutobuild(false);
+  }, [customerId]);
 
   useEffect(() => {
     if (!didAutobuild && customerId && selectedAssignments.length > 0 && (allAssignments?.length ?? 0) > 0) {
       setDidAutobuild(true);
-      buildLines();
+      void buildLines();
     }
-  }, [didAutobuild, customerId, selectedAssignments.length, allAssignments?.length]);
+  }, [didAutobuild, customerId, selectedAssignments.length, allAssignments?.length, buildLines]);
 
   const addArticleLine = (articleId: string) => {
     const article = (articles ?? []).find(a => a.id === articleId);
