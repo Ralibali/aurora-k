@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { usePageMeta } from '@/lib/use-page-meta';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -10,6 +10,26 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ClipboardList, ShoppingCart, Receipt, Building2, CalendarPlus, MessageCircle, ArrowUpRight, Clock, MapPin, Route, Truck, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { BookingRequestForm } from '@/components/portal/BookingRequestForm';
 import { PortalChat } from '@/components/portal/PortalChat';
+
+interface PortalCustomer { id: string; name: string; }
+interface PortalAssignment {
+  id: string; title: string; status: string; scheduled_start?: string;
+  pickup_address?: string | null; delivery_address?: string | null; address?: string | null;
+  service_type?: string | null;
+}
+interface PortalOrder { id: string; order_number: string; title: string; status: string; }
+interface PortalInvoice {
+  id: string; invoice_number: number; invoice_date: string; due_date: string;
+  total_inc_vat?: number; status: string;
+}
+interface PortalBooking { id: string; [key: string]: unknown; }
+interface PortalData {
+  customer?: PortalCustomer;
+  assignments?: PortalAssignment[];
+  orders?: PortalOrder[];
+  invoices?: PortalInvoice[];
+  bookings?: PortalBooking[];
+}
 
 const statusLabels: Record<string, string> = {
   pending: 'Väntande', active: 'Aktiv', in_progress: 'Pågår', completed: 'Slutförd',
@@ -23,7 +43,7 @@ const statusVariant = (s: string): 'default' | 'secondary' | 'destructive' | 'ou
   return 'outline';
 };
 
-function routeText(a: any) {
+function routeText(a: PortalAssignment) {
   if (a.pickup_address && a.delivery_address) return `${a.pickup_address} → ${a.delivery_address}`;
   return a.pickup_address || a.delivery_address || a.address || 'Adress saknas';
 }
@@ -37,7 +57,7 @@ export default function CustomerPortal() {
   usePageMeta({ title: 'Kundportal | Aurora Transport', description: '', canonical: 'https://auroratransport.se/portal', noindex: true });
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<PortalData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -60,6 +80,30 @@ export default function CustomerPortal() {
     fetchData();
   }, [token]);
 
+  const assignments: PortalAssignment[] = data?.assignments ?? [];
+  const invoices: PortalInvoice[] = data?.invoices ?? [];
+  const orders: PortalOrder[] = data?.orders ?? [];
+  const bookings: PortalBooking[] = data?.bookings ?? [];
+  const customer: PortalCustomer | undefined = data?.customer;
+
+  const stats = useMemo(() => {
+    const activeAssignments = assignments.filter((a) => ['pending', 'active', 'in_progress'].includes(a.status)).length;
+    const completedAssignments = assignments.filter((a) => a.status === 'completed').length;
+    const openInvoices = invoices.filter((i) => ['draft', 'sent', 'overdue'].includes(i.status)).length;
+    const overdue = invoices.filter((i) => i.status === 'overdue').length;
+    return { activeAssignments, completedAssignments, openInvoices, overdue };
+  }, [assignments, invoices]);
+
+  const nextAssignment = useMemo(() => {
+    return [...assignments]
+      .filter((a) => a.status !== 'completed' && a.status !== 'cancelled')
+      .sort((a, b) => String(a.scheduled_start).localeCompare(String(b.scheduled_start)))[0];
+  }, [assignments]);
+
+  const handleBookingCreated = useCallback((booking: PortalBooking) => {
+    setData((prev: PortalData | null) => prev ? { ...prev, bookings: [booking, ...(prev.bookings || [])] } : prev);
+  }, []);
+
   if (loading) {
     return <div className="min-h-screen bg-slate-950 p-6"><div className="max-w-6xl mx-auto space-y-4"><Skeleton className="h-12 w-64 bg-white/10" /><Skeleton className="h-96 w-full bg-white/10" /></div></div>;
   }
@@ -71,22 +115,6 @@ export default function CustomerPortal() {
       </div>
     );
   }
-
-  const { customer, assignments = [], orders = [], invoices = [], bookings = [] } = data;
-
-  const stats = useMemo(() => {
-    const activeAssignments = assignments.filter((a: any) => ['pending', 'active', 'in_progress'].includes(a.status)).length;
-    const completedAssignments = assignments.filter((a: any) => a.status === 'completed').length;
-    const openInvoices = invoices.filter((i: any) => ['draft', 'sent', 'overdue'].includes(i.status)).length;
-    const overdue = invoices.filter((i: any) => i.status === 'overdue').length;
-    return { activeAssignments, completedAssignments, openInvoices, overdue };
-  }, [assignments, invoices]);
-
-  const nextAssignment = useMemo(() => {
-    return [...assignments].filter((a: any) => a.status !== 'completed' && a.status !== 'cancelled').sort((a: any, b: any) => String(a.scheduled_start).localeCompare(String(b.scheduled_start)))[0];
-  }, [assignments]);
-
-  const handleBookingCreated = (booking: any) => setData((prev: any) => ({ ...prev, bookings: [booking, ...(prev.bookings || [])] }));
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50">
