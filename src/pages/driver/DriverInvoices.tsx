@@ -98,7 +98,7 @@ export default function DriverInvoices() {
                     <span className="text-muted-foreground font-mono">Förfaller: {inv.due_date}</span>
                     <span className="font-medium ml-3 font-mono">{inv.total_inc_vat.toFixed(0)} kr</span>
                   </div>
-                  <Button variant="ghost" size="icon" onClick={() => handleDownload(inv)} title="Ladda ner PDF">
+                  <Button variant="ghost" size="icon" onClick={() => handleDownload(inv)} title="Ladda ner PDF" aria-label={`Ladda ner faktura ${inv.invoice_number}`} className="min-h-11 min-w-11">
                     <Download className="h-4 w-4" />
                   </Button>
                 </div>

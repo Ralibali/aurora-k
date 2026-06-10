@@ -86,7 +86,7 @@ function AddressButton({ address, label }: { address: string; label: string }) {
 export default function DriverAssignmentDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, companyId } = useAuth();
   const { data: assignment, isLoading } = useAssignment(id);
   const updateAssignment = useDriverUpdateAssignment();
   const [driverComment, setDriverComment] = useState('');
@@ -94,7 +94,7 @@ export default function DriverAssignmentDetail() {
   const [showDeviation, setShowDeviation] = useState(false);
 
   const activeAssignmentId = assignment?.status === 'active' ? assignment.id : undefined;
-  useDriverLocationTracker(user?.id, activeAssignmentId, undefined);
+  useDriverLocationTracker(user?.id, activeAssignmentId, companyId);
 
   useEffect(() => {
     if (assignment?.driver_comment) setDriverComment(assignment.driver_comment as string);
@@ -176,7 +176,7 @@ export default function DriverAssignmentDetail() {
     <div className="min-h-screen bg-background pb-28">
       <div className="sticky top-0 z-20 border-b bg-background/95 px-5 py-4 backdrop-blur">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate(-1)} className="flex h-10 w-10 items-center justify-center rounded-full bg-muted active:scale-95"><ArrowLeft className="h-5 w-5" /></button>
+          <button onClick={() => navigate(-1)} aria-label="Tillbaka" className="flex h-11 w-11 items-center justify-center rounded-full bg-muted active:scale-95"><ArrowLeft className="h-5 w-5" /></button>
           <div className="min-w-0 flex-1">
             <p className="truncate text-lg font-bold">{assignment.title}</p>
             <p className="font-mono text-xs text-muted-foreground">#{assignment.id.slice(0, 8).toUpperCase()}</p>
