@@ -916,6 +916,17 @@ export default function LandingPage() {
       </footer>
 
       <LeadFormModal open={leadModalOpen} onOpenChange={setLeadModalOpen} />
+
+      {/* Mobil sticky CTA */}
+      <div className="fixed bottom-0 inset-x-0 z-40 md:hidden border-t border-border bg-background/95 backdrop-blur px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
+        <Button
+          onClick={() => openLead('sticky_mobile')}
+          className="w-full h-12 text-base bg-primary hover:bg-primary-hover text-primary-foreground"
+        >
+          Boka 15 min demo
+          <ArrowRight className="ml-1 h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 }
