@@ -106,6 +106,7 @@ export function LeadForm({ onSuccess, compact = false }: LeadFormProps) {
     });
     setSubmitting(false);
     if (error) {
+      try { (await import('@/lib/track')).track('lead_submit_error', { message: error.message }); } catch { /* noop */ }
       toast.error('Något gick fel. Försök igen.');
       return;
     }
@@ -127,6 +128,7 @@ export function LeadForm({ onSuccess, compact = false }: LeadFormProps) {
     }).catch(() => {});
 
     setSubmitted(true);
+    try { (await import('@/lib/track')).track('lead_submit_success', { fleet_size: form.fleet_size || 'unspecified', has_phone: Boolean(form.phone), lead_score: leadScore }); } catch { /* noop */ }
     toast.success('Tack! Vi hör av oss inom kort.');
     onSuccess?.();
   };
