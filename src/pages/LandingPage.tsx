@@ -897,6 +897,8 @@ export default function LandingPage() {
                 <li><Link to="/akeri-system" className="hover:text-sidebar-foreground transition-colors">Åkerisystem</Link></li>
                 <li><Link to="/dispatch-system" className="hover:text-sidebar-foreground transition-colors">Dispatch system</Link></li>
                 <li><Link to="/budtjanst-app" className="hover:text-sidebar-foreground transition-colors">Budtjänst app</Link></li>
+                <li><Link to="/transportplanering" className="hover:text-sidebar-foreground transition-colors">Transportplanering</Link></li>
+                <li><Link to="/digital-foljesedel" className="hover:text-sidebar-foreground transition-colors">Digital följesedel</Link></li>
               </ul>
             </div>
             <div>
