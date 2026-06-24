@@ -359,7 +359,7 @@ export default function LandingPage() {
             <div className="mt-10 text-center">
               <Button
                 size="lg"
-                onClick={() => setLeadModalOpen(true)}
+                onClick={() => openLead("section")}
                 className="bg-primary hover:bg-primary-hover text-primary-foreground h-12 px-6"
               >
                 Boka 15 min demo
@@ -503,7 +503,7 @@ export default function LandingPage() {
                 </p>
                 <Button
                   size="lg"
-                  onClick={() => setLeadModalOpen(true)}
+                  onClick={() => openLead("section")}
                   className="mt-7 bg-primary hover:bg-primary-hover text-primary-foreground h-12 px-6"
                 >
                   Ansök som pilotkund
@@ -596,7 +596,7 @@ export default function LandingPage() {
                 ))}
               </ul>
               <Button
-                onClick={() => setLeadModalOpen(true)}
+                onClick={() => openLead("section")}
                 size="lg"
                 className="mt-8 bg-background text-primary hover:bg-background/90 h-12"
               >
@@ -843,7 +843,7 @@ export default function LandingPage() {
             <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
               <Button
                 size="lg"
-                onClick={() => setLeadModalOpen(true)}
+                onClick={() => openLead("section")}
                 className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 h-12 px-8 text-base"
               >
                 Boka 15 min demo
