@@ -225,6 +225,7 @@ export function DemoBookingModal({ open, onOpenChange, lang = 'sv' }: DemoBookin
       })
       .catch(() => {});
 
+    try { (await import('@/lib/track')).track('demo_booking_submit', { has_time: Boolean(form.preferred_time), has_phone: Boolean(form.phone) }); } catch { /* noop */ }
     setSubmitted(true);
   };
 
