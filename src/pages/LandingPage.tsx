@@ -11,6 +11,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { LeadFormModal } from '@/components/LeadFormModal';
+import { track, useScrollDepthTracking } from '@/lib/track';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -29,6 +30,13 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const [demoLoading, setDemoLoading] = useState(false);
   const [leadModalOpen, setLeadModalOpen] = useState(false);
+
+  useScrollDepthTracking('landing');
+
+  const openLead = (source: string) => {
+    track('cta_click', { cta: 'book_demo', source });
+    setLeadModalOpen(true);
+  };
 
   useBreadcrumbJsonLd(useMemo(() => [
     { name: 'Hem', url: 'https://auroratransport.se/' },
@@ -74,6 +82,7 @@ export default function LandingPage() {
   }, [theme, setTheme]);
 
   const handleDemo = async () => {
+    track('cta_click', { cta: 'sample_demo', source: 'hero' });
     setDemoLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('demo-login', {
@@ -86,8 +95,10 @@ export default function LandingPage() {
       });
       if (signInError) throw signInError;
       toast.success(`Inloggad som ${data.companyName} — omdirigerar...`);
+      track('demo_login_success', {});
       setTimeout(() => navigate('/admin'), 500);
     } catch (err: any) {
+      track('demo_login_error', { message: err?.message || 'unknown' });
       toast.error(err.message || 'Demo-inloggning misslyckades');
     } finally {
       setDemoLoading(false);
@@ -155,7 +166,7 @@ export default function LandingPage() {
               <div className="mt-8 flex flex-col sm:flex-row gap-3">
                 <Button
                   size="lg"
-                  onClick={() => setLeadModalOpen(true)}
+                  onClick={() => openLead('hero')}
                   className="bg-primary hover:bg-primary-hover text-primary-foreground shadow-lg shadow-primary/20 h-12 px-6 text-base"
                 >
                   Boka 15 min demo
@@ -348,7 +359,7 @@ export default function LandingPage() {
             <div className="mt-10 text-center">
               <Button
                 size="lg"
-                onClick={() => setLeadModalOpen(true)}
+                onClick={() => openLead("solution")}
                 className="bg-primary hover:bg-primary-hover text-primary-foreground h-12 px-6"
               >
                 Boka 15 min demo
@@ -492,7 +503,7 @@ export default function LandingPage() {
                 </p>
                 <Button
                   size="lg"
-                  onClick={() => setLeadModalOpen(true)}
+                  onClick={() => openLead("features")}
                   className="mt-7 bg-primary hover:bg-primary-hover text-primary-foreground h-12 px-6"
                 >
                   Ansök som pilotkund
@@ -585,7 +596,7 @@ export default function LandingPage() {
                 ))}
               </ul>
               <Button
-                onClick={() => setLeadModalOpen(true)}
+                onClick={() => openLead("pricing")}
                 size="lg"
                 className="mt-8 bg-background text-primary hover:bg-background/90 h-12"
               >
@@ -832,7 +843,7 @@ export default function LandingPage() {
             <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
               <Button
                 size="lg"
-                onClick={() => setLeadModalOpen(true)}
+                onClick={() => openLead("final")}
                 className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 h-12 px-8 text-base"
               >
                 Boka 15 min demo
@@ -886,6 +897,8 @@ export default function LandingPage() {
                 <li><Link to="/akeri-system" className="hover:text-sidebar-foreground transition-colors">Åkerisystem</Link></li>
                 <li><Link to="/dispatch-system" className="hover:text-sidebar-foreground transition-colors">Dispatch system</Link></li>
                 <li><Link to="/budtjanst-app" className="hover:text-sidebar-foreground transition-colors">Budtjänst app</Link></li>
+                <li><Link to="/transportplanering" className="hover:text-sidebar-foreground transition-colors">Transportplanering</Link></li>
+                <li><Link to="/digital-foljesedel" className="hover:text-sidebar-foreground transition-colors">Digital följesedel</Link></li>
               </ul>
             </div>
             <div>
@@ -905,6 +918,17 @@ export default function LandingPage() {
       </footer>
 
       <LeadFormModal open={leadModalOpen} onOpenChange={setLeadModalOpen} />
+
+      {/* Mobil sticky CTA */}
+      <div className="fixed bottom-0 inset-x-0 z-40 md:hidden border-t border-border bg-background/95 backdrop-blur px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
+        <Button
+          onClick={() => openLead('sticky_mobile')}
+          className="w-full h-12 text-base bg-primary hover:bg-primary-hover text-primary-foreground"
+        >
+          Boka 15 min demo
+          <ArrowRight className="ml-1 h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 }
