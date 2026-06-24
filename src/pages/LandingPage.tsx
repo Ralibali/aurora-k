@@ -11,6 +11,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { LeadFormModal } from '@/components/LeadFormModal';
+import { track, useScrollDepthTracking } from '@/lib/track';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -29,6 +30,13 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const [demoLoading, setDemoLoading] = useState(false);
   const [leadModalOpen, setLeadModalOpen] = useState(false);
+
+  useScrollDepthTracking('landing');
+
+  const openLead = (source: string) => {
+    track('cta_click', { cta: 'book_demo', source });
+    setLeadModalOpen(true);
+  };
 
   useBreadcrumbJsonLd(useMemo(() => [
     { name: 'Hem', url: 'https://auroratransport.se/' },
@@ -74,6 +82,7 @@ export default function LandingPage() {
   }, [theme, setTheme]);
 
   const handleDemo = async () => {
+    track('cta_click', { cta: 'sample_demo', source: 'hero' });
     setDemoLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('demo-login', {
@@ -86,8 +95,10 @@ export default function LandingPage() {
       });
       if (signInError) throw signInError;
       toast.success(`Inloggad som ${data.companyName} — omdirigerar...`);
+      track('demo_login_success', {});
       setTimeout(() => navigate('/admin'), 500);
     } catch (err: any) {
+      track('demo_login_error', { message: err?.message || 'unknown' });
       toast.error(err.message || 'Demo-inloggning misslyckades');
     } finally {
       setDemoLoading(false);
@@ -155,7 +166,7 @@ export default function LandingPage() {
               <div className="mt-8 flex flex-col sm:flex-row gap-3">
                 <Button
                   size="lg"
-                  onClick={() => setLeadModalOpen(true)}
+                  onClick={() => openLead('hero')}
                   className="bg-primary hover:bg-primary-hover text-primary-foreground shadow-lg shadow-primary/20 h-12 px-6 text-base"
                 >
                   Boka 15 min demo
