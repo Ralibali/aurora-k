@@ -157,6 +157,28 @@ const STATIC_PAGES = [
     ],
   },
   {
+    route: "/transportplanering",
+    title: "Transportplanering — system för planering av uppdrag & förare | Aurora Transport",
+    description:
+      "Planera transportuppdrag och förare i ett enkelt system. Drag-and-drop, GPS, notiser och tidrapporter. 449 kr/mån, ingen bindningstid.",
+    h1: "Transportplanering som verkligen sparar tid",
+    body: [
+      "Aurora Transport är ett komplett verktyg för transportplanering: dra och släpp uppdrag till rätt förare, se förarstatus i realtid och få automatiska tidrapporter. Sluta jaga förare på telefon och WhatsApp.",
+      "Allt sker i samma system som hanterar fakturering, kundregister och löneunderlag. 449 kr per månad, ingen bindningstid och igång samma dag.",
+    ],
+  },
+  {
+    route: "/digital-foljesedel",
+    title: "Digital följesedel — signatur, foto & POD i appen | Aurora Transport",
+    description:
+      "Ersätt papperssedlar med digital följesedel: kundsignatur, foton och POD direkt i förar-appen. Skickas automatiskt till kund.",
+    h1: "Slut på papperssedlar — digital följesedel i mobilen",
+    body: [
+      "Med Aurora Transport får dina förare en digital följesedel direkt i mobilen. Mottagaren signerar på skärmen, föraren fotar gods och leveransplats och en POD i PDF skickas automatiskt till kunden.",
+      "Allt fungerar offline, loggas med tid och plats och triggar fakturaunderlag direkt — så ni får betalt snabbare och slipper försvunna pappersedlar.",
+    ],
+  },
+  {
     route: "/om-oss",
     title: "Om Aurora Transport — Svenskt transportledningssystem",
     description:
