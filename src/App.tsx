@@ -80,6 +80,8 @@ const AboutPage = lazy(() => import("./pages/AboutPage"));
 const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
 const BudtjanstAppPage = lazy(() => import("./pages/BudtjanstAppPage"));
 const AkeriSystemPage = lazy(() => import("./pages/AkeriSystemPage"));
+const TransportplaneringPage = lazy(() => import("./pages/TransportplaneringPage"));
+const DigitalFoljesedelPage = lazy(() => import("./pages/DigitalFoljesedelPage"));
 const DispatchSystemPage = lazy(() => import("./pages/DispatchSystemPage"));
 const AdsBudtjanstPage = lazy(() => import("./pages/AdsBudtjanstPage"));
 const AdsAkeriPage = lazy(() => import("./pages/AdsAkeriPage"));
@@ -179,6 +181,8 @@ const App = () => (
                 <Route path="/privacy" element={<PrivacyPage />} />
                 <Route path="/budtjanst-app" element={<BudtjanstAppPage />} />
                 <Route path="/akeri-system" element={<AkeriSystemPage />} />
+                <Route path="/transportplanering" element={<TransportplaneringPage />} />
+                <Route path="/digital-foljesedel" element={<DigitalFoljesedelPage />} />
                 <Route path="/dispatch-system" element={<DispatchSystemPage />} />
                 <Route path="/ads/budtjanst" element={<AdsBudtjanstPage />} />
                 <Route path="/ads/akeri" element={<AdsAkeriPage />} />
