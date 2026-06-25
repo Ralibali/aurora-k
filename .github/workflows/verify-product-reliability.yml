@@ -1,0 +1,38 @@
+name: Verify product reliability
+
+on:
+  pull_request:
+    paths:
+      - 'src/features/**'
+      - 'src/hooks/useInvoiceTransactions.ts'
+      - 'src/lib/invoice-lines.ts'
+      - 'src/pages/admin/AdminDashboard.tsx'
+      - 'src/pages/admin/AdminNewInvoice.tsx'
+      - 'supabase/functions/public-booking/**'
+      - 'supabase/migrations/2026062522*.sql'
+      - '.github/workflows/verify-product-reliability.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Lint dashboard
+        run: npx eslint src/features/dashboard/AdminDashboardPage.tsx src/pages/admin/AdminDashboard.tsx
+      - name: Lint invoice editor
+        run: npx eslint src/features/invoicing/InvoiceLineEditor.tsx
+      - name: Lint invoice workflow
+        run: npx eslint src/features/invoicing/NewInvoicePage.tsx src/pages/admin/AdminNewInvoice.tsx
+      - name: Lint invoice data layer
+        run: npx eslint src/hooks/useInvoiceTransactions.ts src/lib/invoice-lines.ts
+      - name: Lint route engine
+        run: npx eslint src/features/routes/route-order.ts
+      - name: Build
+        run: npm run build
+      - name: Test
+        run: npm test
