@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ClipboardList, ShoppingCart, Receipt, Building2, CalendarPlus, MessageCircle, ArrowUpRight, Clock, MapPin, Route, Truck, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { BookingRequestForm } from '@/components/portal/BookingRequestForm';
 import { PortalChat } from '@/components/portal/PortalChat';
+import { PortalInvoiceDownloadButton } from '@/components/portal/PortalInvoiceDownloadButton';
 
 interface PortalCustomer { id: string; name: string; }
 interface PortalAssignment {
@@ -20,11 +21,17 @@ interface PortalAssignment {
 interface PortalOrder { id: string; order_number: string; title: string; status: string; }
 interface PortalInvoice {
   id: string; invoice_number: number; invoice_date: string; due_date: string;
-  total_inc_vat?: number; status: string;
+  total_inc_vat?: number; status: string; lines?: unknown; assignment_ids?: string[];
+  total_ex_vat?: number; vat_amount?: number; reference?: string | null; message?: string | null;
 }
 interface PortalBooking { id: string; [key: string]: unknown; }
+interface PortalSettings {
+  company_name: string; org_number: string | null; address: string | null; zip_city: string | null;
+  email: string | null; phone: string | null; bankgiro: string | null; plusgiro: string | null; vat_number: string | null;
+}
 interface PortalData {
   customer?: PortalCustomer;
+  settings?: PortalSettings | null;
   assignments?: PortalAssignment[];
   orders?: PortalOrder[];
   invoices?: PortalInvoice[];
@@ -85,6 +92,7 @@ export default function CustomerPortal() {
   const orders: PortalOrder[] = data?.orders ?? [];
   const bookings: PortalBooking[] = data?.bookings ?? [];
   const customer: PortalCustomer | undefined = data?.customer;
+  const settings = data?.settings;
 
   const stats = useMemo(() => {
     const activeAssignments = assignments.filter((a) => ['pending', 'active', 'in_progress'].includes(a.status)).length;
@@ -174,7 +182,7 @@ export default function CustomerPortal() {
           </TabsContent>
 
           <TabsContent value="invoices">
-            <Card><CardContent className="p-0"><Table><TableHeader><TableRow><TableHead>Fakturanr</TableHead><TableHead>Datum</TableHead><TableHead>Förfallodatum</TableHead><TableHead className="text-right">Belopp</TableHead><TableHead>Status</TableHead></TableRow></TableHeader><TableBody>{invoices.length === 0 && <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">Inga fakturor</TableCell></TableRow>}{invoices.map((inv: any) => <TableRow key={inv.id}><TableCell className="font-medium">#{inv.invoice_number}</TableCell><TableCell>{inv.invoice_date}</TableCell><TableCell>{inv.due_date}</TableCell><TableCell className="text-right font-mono">{inv.total_inc_vat?.toFixed(0)} kr</TableCell><TableCell><Badge variant={statusVariant(inv.status)}>{statusLabels[inv.status] || inv.status}</Badge></TableCell></TableRow>)}</TableBody></Table></CardContent></Card>
+            <Card><CardContent className="p-0"><Table><TableHeader><TableRow><TableHead>Fakturanr</TableHead><TableHead>Datum</TableHead><TableHead>Förfallodatum</TableHead><TableHead className="text-right">Belopp</TableHead><TableHead>Status</TableHead><TableHead /></TableRow></TableHeader><TableBody>{invoices.length === 0 && <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Inga fakturor</TableCell></TableRow>}{invoices.map((inv: any) => <TableRow key={inv.id}><TableCell className="font-medium">#{inv.invoice_number}</TableCell><TableCell>{inv.invoice_date}</TableCell><TableCell>{inv.due_date}</TableCell><TableCell className="text-right font-mono">{inv.total_inc_vat?.toFixed(0)} kr</TableCell><TableCell><Badge variant={statusVariant(inv.status)}>{statusLabels[inv.status] || inv.status}</Badge></TableCell><TableCell className="text-right"><PortalInvoiceDownloadButton invoice={{ ...inv, customer }} assignments={assignments as Record<string, any>[]} settings={settings as Record<string, any> | null | undefined} /></TableCell></TableRow>)}</TableBody></Table></CardContent></Card>
           </TabsContent>
 
           <TabsContent value="booking"><BookingRequestForm token={token!} bookings={bookings} onCreated={handleBookingCreated} /></TabsContent>
