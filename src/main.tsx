@@ -3,6 +3,8 @@ import { Capacitor } from "@capacitor/core";
 import { registerSW } from "virtual:pwa-register";
 import * as Sentry from "@sentry/react";
 import App from "./App.tsx";
+import { FormAnalyticsObserver } from "./components/FormAnalyticsObserver";
+import { MobileConversionShell, StandaloneDemoPage } from "./components/MobileConversionShell";
 import "./index.css";
 
 Sentry.init({
@@ -52,4 +54,16 @@ if (shouldUseServiceWorker) {
   });
 }
 
-createRoot(document.getElementById("root")!).render(<App />);
+const root = createRoot(document.getElementById("root")!);
+
+if (window.location.pathname === "/boka-demo") {
+  root.render(<StandaloneDemoPage />);
+} else {
+  root.render(
+    <>
+      <App />
+      <FormAnalyticsObserver />
+      <MobileConversionShell />
+    </>,
+  );
+}
