@@ -17,6 +17,11 @@ export function FormAnalyticsObserver() {
   useEffect(() => {
     const attached = new WeakSet<HTMLFormElement>();
     const successful = new Set<string>();
+    const marketingPage = window.location.pathname === '/' || window.location.pathname === '/en';
+
+    if (marketingPage && window.innerWidth < 768) {
+      document.body.style.paddingBottom = '76px';
+    }
 
     const attach = (form: HTMLFormElement) => {
       if (attached.has(form)) return;
@@ -39,6 +44,24 @@ export function FormAnalyticsObserver() {
 
     const scan = () => {
       document.querySelectorAll<HTMLFormElement>('form').forEach(attach);
+
+      if (marketingPage) {
+        document.querySelectorAll<HTMLElement>('p').forEach((paragraph) => {
+          const text = paragraph.textContent?.trim();
+          if (text === 'Installera appen på din hemskärm') {
+            const prompt = paragraph.closest<HTMLElement>('.fixed');
+            if (prompt) prompt.style.display = 'none';
+          }
+        });
+
+        if (window.innerWidth < 768) {
+          document.querySelectorAll<HTMLElement>('.fixed.bottom-0').forEach((element) => {
+            if (element.textContent?.includes('Vi använder cookies')) {
+              element.style.bottom = '72px';
+            }
+          });
+        }
+      }
 
       const visibleText = document.body.innerText.toLowerCase();
       const successSignals: Array<[string, string, boolean]> = [
@@ -63,7 +86,10 @@ export function FormAnalyticsObserver() {
     scan();
     const observer = new MutationObserver(scan);
     observer.observe(document.body, { childList: true, subtree: true });
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      document.body.style.paddingBottom = '';
+    };
   }, []);
 
   if (legacyDemoRoute) {
