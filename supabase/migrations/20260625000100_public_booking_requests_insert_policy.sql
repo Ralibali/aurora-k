@@ -1,1 +1,0 @@
--- Public booking request policy migration.
