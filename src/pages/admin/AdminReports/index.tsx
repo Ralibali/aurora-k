@@ -1,5 +1,5 @@
 import ReportsPage from '@/features/reports/ReportsPage';
 
-export default function AdminReports() {
+export default function AdminReportsPage() {
   return <ReportsPage />;
 }

@@ -3,12 +3,14 @@ import { Outlet } from 'react-router-dom';
 import { Briefcase, Clock, FileText, User, Truck, Bell } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/hooks/useAuth';
+import { DriverLocationRuntime } from '@/components/DriverLocationRuntime';
 
 export function DriverLayout() {
   const { user } = useAuth();
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F8FAFC]">
+      <DriverLocationRuntime />
       {/* Top header */}
       <header className="h-14 pt-safe flex items-center justify-between border-b border-border bg-white px-4 shrink-0 sticky top-0 z-30">
         <div className="flex items-center gap-2.5">
