@@ -23,32 +23,16 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Lint dashboard
-        continue-on-error: true
         run: npx eslint src/features/dashboard/AdminDashboardPage.tsx src/pages/admin/AdminDashboard.tsx
       - name: Lint invoice editor
-        continue-on-error: true
         run: npx eslint src/features/invoicing/InvoiceLineEditor.tsx
       - name: Lint invoice workflow
-        continue-on-error: true
         run: npx eslint src/features/invoicing/NewInvoicePage.tsx src/pages/admin/AdminNewInvoice.tsx
       - name: Lint invoice data layer
-        continue-on-error: true
         run: npx eslint src/hooks/useInvoiceTransactions.ts src/lib/invoice-lines.ts
       - name: Lint route engine
-        continue-on-error: true
         run: npx eslint src/features/routes/route-order.ts
       - name: Build
         run: npm run build
       - name: Test
         run: npm test
-      - name: Enforce changed-file lint
-        run: >-
-          npx eslint
-          src/features/dashboard/AdminDashboardPage.tsx
-          src/features/invoicing/InvoiceLineEditor.tsx
-          src/features/invoicing/NewInvoicePage.tsx
-          src/features/routes/route-order.ts
-          src/hooks/useInvoiceTransactions.ts
-          src/lib/invoice-lines.ts
-          src/pages/admin/AdminDashboard.tsx
-          src/pages/admin/AdminNewInvoice.tsx
