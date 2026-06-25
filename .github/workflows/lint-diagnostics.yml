@@ -1,0 +1,23 @@
+name: Lint diagnostics
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/lint-diagnostics.yml'
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx eslint . --format json --output-file eslint-report.json || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: eslint-diagnostics
+          path: eslint-report.json
+          retention-days: 1
