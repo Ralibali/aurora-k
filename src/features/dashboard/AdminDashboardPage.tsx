@@ -13,6 +13,12 @@ import { calculateDecimalHours, formatSwedishTime } from '@/lib/format';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 
+type ActivityItem = {
+  key: string;
+  text: string;
+  time: string;
+};
+
 function startOfDayIso(date = new Date()) {
   const copy = new Date(date);
   copy.setHours(0, 0, 0, 0);
@@ -84,11 +90,15 @@ export default function AdminDashboardPage() {
     return (order[a.status] ?? 9) - (order[b.status] ?? 9) || a.scheduled_start.localeCompare(b.scheduled_start);
   });
 
-  const activity = demoOn
-    ? demoActivity
+  const activity: ActivityItem[] = demoOn
+    ? demoActivity.map(item => ({
+      key: item.key,
+      text: `${item.driver} ${item.action} ${item.title}`,
+      time: item.time,
+    }))
     : assignments
       .flatMap(item => {
-        const rows: { key: string; text: string; time: string }[] = [];
+        const rows: ActivityItem[] = [];
         if (item.actual_start?.startsWith(today)) rows.push({ key: `${item.id}-start`, text: `${item.driver?.full_name ?? 'Förare'} startade ${item.title}`, time: formatSwedishTime(item.actual_start) });
         if (item.actual_stop?.startsWith(today)) rows.push({ key: `${item.id}-stop`, text: `${item.driver?.full_name ?? 'Förare'} slutförde ${item.title}`, time: formatSwedishTime(item.actual_stop) });
         return rows;
@@ -132,7 +142,7 @@ export default function AdminDashboardPage() {
           <section className="space-y-3 lg:col-span-2">
             <h3 className="font-semibold">Aktivitetsflöde</h3>
             <div className="divide-y rounded-xl border bg-card">
-              {activity.length === 0 ? <p className="p-8 text-center text-sm text-muted-foreground">Ingen aktivitet idag.</p> : activity.map((item: any) => <div key={item.key ?? item.id} className="flex items-start justify-between gap-3 p-3 text-sm"><p>{item.text ?? item.action}</p><span className="shrink-0 font-mono text-xs text-muted-foreground">{item.time}</span></div>)}
+              {activity.length === 0 ? <p className="p-8 text-center text-sm text-muted-foreground">Ingen aktivitet idag.</p> : activity.map(item => <div key={item.key} className="flex items-start justify-between gap-3 p-3 text-sm"><p>{item.text}</p><span className="shrink-0 font-mono text-xs text-muted-foreground">{item.time}</span></div>)}
             </div>
             <div className="grid grid-cols-2 gap-2"><Button variant="outline" size="sm" asChild><Link to="/admin/live-map"><MapPin className="mr-1 h-4 w-4" /> Live-karta</Link></Button><Button variant="outline" size="sm" asChild><Link to="/admin/reports"><Clock className="mr-1 h-4 w-4" /> Tidrapporter</Link></Button></div>
           </section>
