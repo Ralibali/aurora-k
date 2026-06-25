@@ -55,6 +55,9 @@ export function FormAnalyticsObserver() {
         });
 
         if (window.innerWidth < 768) {
+          const contactButton = document.querySelector<HTMLElement>('button[aria-label="Kontakta oss"]');
+          contactButton?.style.setProperty('display', 'none', 'important');
+
           document.querySelectorAll<HTMLElement>('.fixed.bottom-0').forEach((element) => {
             if (element.textContent?.includes('Vi använder cookies')) {
               element.style.bottom = '72px';
