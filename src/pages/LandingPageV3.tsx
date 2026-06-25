@@ -107,7 +107,7 @@ export default function LandingPageV3() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f7f9fc] text-slate-950">
+    <div className="min-h-screen overflow-x-hidden bg-[#f7f9fc] text-slate-950">
       <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link to={lang === 'en' ? '/en' : '/'} className="flex items-center gap-3">
@@ -148,7 +148,7 @@ export default function LandingPageV3() {
         <section className="relative overflow-hidden border-b border-slate-200 bg-[radial-gradient(circle_at_15%_10%,rgba(18,59,136,0.16),transparent_32rem),linear-gradient(180deg,#eef5ff_0%,#f8fafc_58%,#ffffff_100%)]">
           <div className="absolute inset-0 bg-[linear-gradient(rgba(15,47,110,0.055)_1px,transparent_1px),linear-gradient(90deg,rgba(15,47,110,0.055)_1px,transparent_1px)] bg-[size:72px_72px] [mask-image:linear-gradient(to_bottom,black,transparent_80%)]" />
           <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-4 py-16 sm:px-6 md:py-20 lg:grid-cols-[0.98fr_1.02fr] lg:px-8 lg:py-24">
-            <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="max-w-2xl">
+            <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="w-full min-w-0 max-w-2xl">
               <div className="inline-flex items-center gap-2 rounded-full border border-blue-900/15 bg-white/85 px-3 py-1.5 text-xs font-bold text-[#123b88] shadow-sm">
                 <Sparkles className="h-3.5 w-3.5" />
                 {t.hero.badge}
@@ -184,7 +184,7 @@ export default function LandingPageV3() {
               </div>
             </motion.div>
 
-            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.12 }}>
+            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.12 }} className="w-full min-w-0">
               <HeroProductMockup />
             </motion.div>
           </div>
@@ -402,7 +402,7 @@ export default function LandingPageV3() {
 
 function HeroProductMockup() {
   return (
-    <div className="relative mx-auto max-w-2xl lg:max-w-none">
+    <div className="relative mx-auto w-full min-w-0 max-w-2xl lg:max-w-none">
       <div className="absolute inset-6 rounded-[2rem] bg-blue-900/20 blur-3xl" />
       <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_30px_100px_rgba(15,47,110,0.18)]">
         <div className="flex h-12 items-center gap-2 border-b border-slate-200 bg-slate-50 px-4">
@@ -411,7 +411,7 @@ function HeroProductMockup() {
           <span className="h-3 w-3 rounded-full bg-emerald-400" />
           <div className="ml-3 flex-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 font-mono text-xs text-slate-400">app.auroratransport.se</div>
         </div>
-        <div className="grid min-h-[430px] grid-cols-[170px_1fr]">
+        <div className="grid min-h-[430px] grid-cols-1 sm:grid-cols-[170px_1fr]">
           <aside className="hidden bg-[#0b1730] p-5 text-white sm:block">
             <div className="flex items-center gap-2 font-black">
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-500"><Truck className="h-4 w-4" /></div>
@@ -423,8 +423,8 @@ function HeroProductMockup() {
               ))}
             </div>
           </aside>
-          <div className="p-5 sm:p-7">
-            <div className="grid gap-4 sm:grid-cols-3">
+          <div className="min-w-0 p-5 sm:p-7">
+            <div className="grid grid-cols-3 gap-3 sm:gap-4">
               <Metric icon={PackageCheck} value="12" label="Pågående uppdrag" tone="blue" />
               <Metric icon={Users} value="8" label="Tilldelade förare" tone="green" />
               <Metric icon={Clock} value="6" label="Rapporter idag" tone="amber" />
