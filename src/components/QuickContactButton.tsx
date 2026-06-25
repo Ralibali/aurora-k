@@ -13,7 +13,7 @@ export function QuickContactButton() {
         onClick={() => setOpen(true)}
         aria-label="Kontakta oss"
         className={cn(
-          "fixed bottom-5 right-5 z-40 flex items-center gap-2 rounded-full",
+          "fixed bottom-5 right-5 z-40 hidden items-center gap-2 rounded-full sm:flex",
           "bg-primary text-primary-foreground shadow-lg",
           "px-5 py-3 text-sm font-medium",
           "transition-all hover:bg-primary-hover hover:shadow-xl hover:-translate-y-0.5",
@@ -21,7 +21,7 @@ export function QuickContactButton() {
         )}
       >
         <MessageCircle className="h-5 w-5" />
-        <span className="hidden sm:inline">Kontakta oss</span>
+        <span>Kontakta oss</span>
       </button>
       <LeadFormModal open={open} onOpenChange={setOpen} />
     </>
