@@ -1,22 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { AlertTriangle, Lock, RefreshCw, XCircle } from 'lucide-react';
+import { AlertTriangle, Lock, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-
-type RawStatus = 'active' | 'trialing' | 'pending' | 'incomplete' | 'paused' | 'past_due' | 'unpaid' | 'cancelled' | 'canceled' | 'incomplete_expired' | null;
-type ViewStatus = 'active' | 'pending' | 'past_due' | 'cancelled' | 'paused' | null;
-
-function normalizeStatus(status: RawStatus): ViewStatus {
-  if (status === 'active' || status === 'trialing') return 'active';
-  if (status === 'pending' || status === 'incomplete') return 'pending';
-  if (status === 'past_due' || status === 'unpaid') return 'past_due';
-  if (status === 'cancelled' || status === 'canceled' || status === 'incomplete_expired') return 'cancelled';
-  if (status === 'paused') return 'paused';
-  return null;
-}
+import {
+  normalizeSubscriptionStatus,
+  type RawSubscriptionStatus,
+  type SubscriptionViewStatus,
+} from '@/lib/subscription-status';
 
 function AccountCard({ icon, title, text, action, actionLabel, busy }: {
   icon: React.ReactNode;
@@ -40,7 +33,7 @@ function AccountCard({ icon, title, text, action, actionLabel, busy }: {
 
 export function SubscriptionGuard({ children }: { children: React.ReactNode }) {
   const { companyId, loading: authLoading } = useAuth();
-  const [status, setStatus] = useState<ViewStatus>(null);
+  const [status, setStatus] = useState<SubscriptionViewStatus>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
@@ -53,7 +46,7 @@ export function SubscriptionGuard({ children }: { children: React.ReactNode }) {
     try {
       const { data, error } = await supabase.from('companies').select('subscription_status').eq('id', companyId).single();
       if (error) throw error;
-      setStatus(normalizeStatus((data?.subscription_status ?? null) as RawStatus));
+      setStatus(normalizeSubscriptionStatus((data?.subscription_status ?? null) as RawSubscriptionStatus));
     } catch (error) {
       console.error('[SubscriptionGuard] Failed to load status', error);
       setLoadError(true);
@@ -65,7 +58,8 @@ export function SubscriptionGuard({ children }: { children: React.ReactNode }) {
   const redirect = async (functionName: 'stripe-portal' | 'create-checkout') => {
     setRedirecting(true);
     try {
-      const { data, error } = await supabase.functions.invoke(functionName, functionName === 'create-checkout' ? { body: { companyId } } : undefined);
+      const options = functionName === 'create-checkout' ? { body: { companyId } } : undefined;
+      const { data, error } = await supabase.functions.invoke(functionName, options);
       if (error || !data?.url) throw error || new Error('Ingen betalningslänk returnerades');
       window.location.assign(data.url);
     } catch (error: unknown) {
