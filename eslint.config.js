@@ -9,8 +9,6 @@ export default tseslint.config(
     ignores: [
       "dist",
       "src/features/order-inbox/**",
-      "src/lib/order-parser.ts",
-      "src/lib/order-parser.test.ts",
       "src/pages/admin/AdminOrders.tsx",
     ],
   },
