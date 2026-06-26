@@ -6,11 +6,13 @@ import { DriverLocationRuntime } from '@/components/DriverLocationRuntime';
 import { DriverNotificationCenter } from '@/components/DriverNotificationCenter';
 import { DriverDeliveryProofRuntime } from '@/components/DriverDeliveryProofRuntime';
 import { DriverOfflineSyncRuntime } from '@/components/DriverOfflineSyncRuntime';
+import { DriverStatusOfflineRuntime } from '@/components/DriverStatusOfflineRuntime';
 
 export function DriverLayout() {
   return (
     <div className="min-h-screen flex flex-col bg-[#F8FAFC]">
       <DriverLocationRuntime />
+      <DriverStatusOfflineRuntime />
       <DriverDeliveryProofRuntime />
       <DriverOfflineSyncRuntime />
       <header className="h-14 pt-safe flex items-center justify-between border-b border-border bg-white px-4 shrink-0 sticky top-0 z-30">
