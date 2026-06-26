@@ -1,0 +1,32 @@
+name: Verify driver offline synchronization
+
+on:
+  pull_request:
+    paths:
+      - 'src/lib/driver-offline-queue.ts'
+      - 'src/components/DriverOfflineSyncRuntime.tsx'
+      - 'src/components/DriverStatusOfflineRuntime.tsx'
+      - 'src/components/DriverDeliveryProofRuntime.tsx'
+      - 'src/components/DriverLayout/**'
+      - 'src/features/delivery-proof/**'
+      - 'supabase/functions/driver-sync/**'
+      - 'supabase/migrations/20260626170000_driver_offline_sync.sql'
+      - '.github/workflows/verify-driver-offline.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Lint offline queue and UI
+        run: npx eslint src/lib/driver-offline-queue.ts src/components/DriverOfflineSyncRuntime.tsx src/components/DriverStatusOfflineRuntime.tsx src/components/DriverDeliveryProofRuntime.tsx src/components/DriverLayout/index.tsx src/features/delivery-proof
+      - name: Lint sync function
+        run: npx eslint supabase/functions/driver-sync/index.ts
+      - run: npm run build
+      - run: npm test

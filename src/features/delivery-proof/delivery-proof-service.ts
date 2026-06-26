@@ -1,4 +1,4 @@
-import { supabase } from '@/integrations/supabase/client';
+import { syncOrQueueDriverOperation } from '@/lib/driver-offline-queue';
 
 export type DeliveryProofResult = {
   photoUrl: string | null;
@@ -7,20 +7,9 @@ export type DeliveryProofResult = {
   note: string;
   latitude: number | null;
   longitude: number | null;
+  queued: boolean;
+  operationId: string;
 };
-
-async function upload(userId: string, assignmentId: string, file: Blob, filename: string) {
-  const path = `${userId}/${assignmentId}/${Date.now()}-${filename}`;
-  const { error } = await supabase.storage.from('consignment-notes').upload(path, file, {
-    contentType: file.type || 'application/octet-stream',
-  });
-  if (error) throw error;
-  const { data, error: signedError } = await supabase.storage
-    .from('consignment-notes')
-    .createSignedUrl(path, 60 * 60 * 24 * 365);
-  if (signedError) throw signedError;
-  return data.signedUrl;
-}
 
 function locate(): Promise<{ latitude: number | null; longitude: number | null }> {
   if (!('geolocation' in navigator)) return Promise.resolve({ latitude: null, longitude: null });
@@ -41,33 +30,35 @@ export async function saveDeliveryProof(input: {
   existingSignatureUrl?: string | null;
   recipientName: string;
   note: string;
+  requirePhoto?: boolean | null;
+  requireSignature?: boolean | null;
 }) {
   const location = await locate();
-  const extension = input.photo?.name.split('.').pop() || 'jpg';
-  const photoUrl = input.photo
-    ? await upload(input.userId, input.assignmentId, input.photo, `delivery.${extension}`)
-    : input.existingPhotoUrl ?? null;
-  const signatureUrl = input.signature
-    ? await upload(input.userId, input.assignmentId, input.signature, 'signature.png')
-    : input.existingSignatureUrl ?? null;
-
-  const result: DeliveryProofResult = {
-    photoUrl,
-    signatureUrl,
+  const completedAt = new Date().toISOString();
+  const operation = await syncOrQueueDriverOperation({
+    assignmentId: input.assignmentId,
+    operationType: 'delivery_proof',
+    photo: input.photo,
+    signature: input.signature,
+    metadata: {
+      recipientName: input.recipientName.trim(),
+      note: input.note.trim(),
+      existingPhotoUrl: input.existingPhotoUrl ?? null,
+      existingSignatureUrl: input.existingSignatureUrl ?? null,
+      requirePhoto: Boolean(input.requirePhoto),
+      requireSignature: Boolean(input.requireSignature),
+      completedAt,
+      ...location,
+    },
+  });
+  const serverResult = operation.result ?? {};
+  return {
+    photoUrl: typeof serverResult.photoUrl === 'string' ? serverResult.photoUrl : input.existingPhotoUrl ?? null,
+    signatureUrl: typeof serverResult.signatureUrl === 'string' ? serverResult.signatureUrl : input.existingSignatureUrl ?? null,
     recipientName: input.recipientName.trim(),
     note: input.note.trim(),
     ...location,
-  };
-
-  const { error } = await supabase.from('assignment_protocols').insert({
-    assignment_id: input.assignmentId,
-    company_id: input.companyId ?? null,
-    created_by: input.userId,
-    protocol_type: 'delivery_proof',
-    title: 'Digitalt leveransbevis',
-    signature_url: signatureUrl,
-    content: JSON.stringify({ ...result, completedAt: new Date().toISOString() }),
-  });
-  if (error) throw error;
-  return result;
+    queued: operation.queued,
+    operationId: operation.operationId,
+  } satisfies DeliveryProofResult;
 }
