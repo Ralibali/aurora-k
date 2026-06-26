@@ -1,168 +1,79 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { Navigate } from 'react-router-dom';
+import { AlertTriangle, Lock, XCircle } from 'lucide-react';
+import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Lock, AlertTriangle, XCircle, RefreshCw } from 'lucide-react';
+import {
+  normalizeSubscriptionStatus,
+  type RawSubscriptionStatus,
+  type SubscriptionViewStatus,
+} from '@/lib/subscription-status';
 
-type SubStatus = 'active' | 'pending' | 'past_due' | 'cancelled' | null;
+function AccountCard({ icon, title, text, action, actionLabel, busy }: {
+  icon: React.ReactNode;
+  title: string;
+  text: string;
+  action: () => void;
+  actionLabel: string;
+  busy: boolean;
+}) {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+      <div className="max-w-md rounded-2xl border bg-card p-8 text-center shadow-sm">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-muted">{icon}</div>
+        <h2 className="mb-2 text-lg font-semibold">{title}</h2>
+        <p className="mb-6 text-sm text-muted-foreground">{text}</p>
+        <Button onClick={action} className="h-12 w-full rounded-xl font-semibold" disabled={busy}>{busy ? 'Laddar…' : actionLabel}</Button>
+      </div>
+    </div>
+  );
+}
 
 export function SubscriptionGuard({ children }: { children: React.ReactNode }) {
   const { companyId, loading: authLoading } = useAuth();
-  const [status, setStatus] = useState<SubStatus>(null);
+  const [status, setStatus] = useState<SubscriptionViewStatus>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
 
   const loadStatus = useCallback(async () => {
     if (authLoading) return;
-    if (!companyId) {
-      setLoading(false);
-      return;
-    }
+    if (!companyId) { setLoading(false); return; }
     setLoadError(false);
+    setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('companies')
-        .select('subscription_status')
-        .eq('id', companyId)
-        .single();
+      const { data, error } = await supabase.from('companies').select('subscription_status').eq('id', companyId).single();
       if (error) throw error;
-      setStatus((data?.subscription_status as SubStatus) || 'pending');
-    } catch (err) {
-      console.error('[SubscriptionGuard] Failed to load subscription status:', err);
+      setStatus(normalizeSubscriptionStatus((data?.subscription_status ?? null) as RawSubscriptionStatus));
+    } catch (error) {
+      console.error('[SubscriptionGuard] Failed to load status', error);
       setLoadError(true);
-      setStatus(null);
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   }, [authLoading, companyId]);
 
-  useEffect(() => {
-    loadStatus();
-  }, [loadStatus]);
+  useEffect(() => { void loadStatus(); }, [loadStatus]);
 
-  const openPortal = async () => {
+  const redirect = async (functionName: 'stripe-portal' | 'create-checkout') => {
     setRedirecting(true);
     try {
-      const { data, error } = await supabase.functions.invoke('stripe-portal');
-      if (error || !data?.url) throw new Error('Could not open portal');
-      window.location.href = data.url;
-    } catch {
+      const options = functionName === 'create-checkout' ? { body: { companyId } } : undefined;
+      const { data, error } = await supabase.functions.invoke(functionName, options);
+      if (error || !data?.url) throw error || new Error('Ingen betalningslänk returnerades');
+      window.location.assign(data.url);
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : 'Betalningssidan kunde inte öppnas');
       setRedirecting(false);
     }
   };
 
-  const retryCheckout = async () => {
-    setRedirecting(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { companyId },
-      });
-      if (error || !data?.url) throw new Error('Could not create checkout');
-      window.location.href = data.url;
-    } catch {
-      setRedirecting(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-      </div>
-    );
-  }
-
-  // Error loading subscription status — don't grant access
-  if (loadError) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-4">
-        <div className="bg-card rounded-2xl border shadow-sm p-8 max-w-md text-center">
-          <div className="mx-auto w-14 h-14 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
-            <AlertTriangle className="h-7 w-7 text-destructive" />
-          </div>
-          <h2 className="text-lg font-semibold mb-2">Kunde inte ladda kontostatus</h2>
-          <p className="text-sm text-muted-foreground mb-6">
-            Det gick inte att verifiera din prenumeration. Kontrollera din internetanslutning och försök igen.
-          </p>
-          <Button
-            onClick={() => {
-              setLoading(true);
-              loadStatus();
-            }}
-            className="w-full h-12 rounded-xl font-semibold"
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Försök igen
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  // No company linked — let them through (edge case during setup)
-  if (!companyId) {
-    return <>{children}</>;
-  }
-
-  // Active subscription — render normally
-  if (status === 'active') {
-    return <>{children}</>;
-  }
-
-  // Pending — full overlay
-  if (status === 'pending') {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-4">
-        <div className="bg-card rounded-2xl border shadow-sm p-8 max-w-md text-center">
-          <div className="mx-auto w-14 h-14 rounded-full bg-muted flex items-center justify-center mb-4">
-            <Lock className="h-7 w-7 text-muted-foreground" />
-          </div>
-          <h2 className="text-lg font-semibold mb-2">Slutför betalning</h2>
-          <p className="text-sm text-muted-foreground mb-6">
-            Ditt konto är skapat men betalningen har inte slutförts ännu. Slutför betalningen för att komma igång.
-          </p>
-          <Button onClick={retryCheckout} className="w-full h-12 rounded-xl font-semibold" disabled={redirecting}>
-            {redirecting ? 'Laddar...' : 'Slutför betalning'}
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  // Cancelled — overlay with reactivation
-  if (status === 'cancelled') {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-4">
-        <div className="bg-card rounded-2xl border shadow-sm p-8 max-w-md text-center">
-          <div className="mx-auto w-14 h-14 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
-            <XCircle className="h-7 w-7 text-destructive" />
-          </div>
-          <h2 className="text-lg font-semibold mb-2">Prenumerationen avslutad</h2>
-          <p className="text-sm text-muted-foreground mb-6">
-            Din prenumeration har avslutats. Aktivera den igen för att fortsätta använda Aurora Transport.
-          </p>
-          <Button onClick={retryCheckout} className="w-full h-12 rounded-xl font-semibold" disabled={redirecting}>
-            {redirecting ? 'Laddar...' : 'Återaktivera prenumeration'}
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  // Past due — show banner + allow access
-  return (
-    <>
-      <div className="bg-amber-50 border-b border-amber-200 px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-2 text-sm text-amber-800">
-          <AlertTriangle className="h-4 w-4 shrink-0" />
-          <span>Betalning misslyckades — uppdatera dina kortuppgifter</span>
-        </div>
-        <Button variant="outline" size="sm" onClick={openPortal} disabled={redirecting} className="border-amber-300 text-amber-800 hover:bg-amber-100">
-          {redirecting ? 'Laddar...' : 'Uppdatera betalning'}
-        </Button>
-      </div>
-      {children}
-    </>
-  );
+  if (loading || authLoading) return <div className="flex min-h-screen items-center justify-center bg-background"><div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" /></div>;
+  if (!companyId) return <Navigate to="/onboarding" replace />;
+  if (loadError || status === null) return <AccountCard icon={<AlertTriangle className="h-7 w-7 text-destructive" />} title="Kunde inte verifiera kontot" text="Kontostatusen kunde inte hämtas. Försök igen innan du fortsätter." action={() => void loadStatus()} actionLabel="Försök igen" busy={loading} />;
+  if (status === 'active') return <>{children}</>;
+  if (status === 'past_due') return <><div className="flex items-center justify-between gap-3 border-b border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"><span className="flex items-center gap-2"><AlertTriangle className="h-4 w-4" />Betalningen misslyckades. Uppdatera betalningsmetoden.</span><Button variant="outline" size="sm" disabled={redirecting} onClick={() => void redirect('stripe-portal')}>Hantera betalning</Button></div>{children}</>;
+  if (status === 'paused') return <AccountCard icon={<Lock className="h-7 w-7" />} title="Prenumerationen är pausad" text="Öppna betalningsportalen för att återuppta tjänsten." action={() => void redirect('stripe-portal')} actionLabel="Hantera prenumeration" busy={redirecting} />;
+  if (status === 'cancelled') return <AccountCard icon={<XCircle className="h-7 w-7 text-destructive" />} title="Prenumerationen är avslutad" text="Starta en ny prenumeration för att använda Aurora Transport igen." action={() => void redirect('create-checkout')} actionLabel="Återaktivera" busy={redirecting} />;
+  return <AccountCard icon={<Lock className="h-7 w-7" />} title="Slutför betalningen" text="Kontot är skapat men betalningen är inte slutförd." action={() => void redirect('create-checkout')} actionLabel="Slutför betalning" busy={redirecting} />;
 }
