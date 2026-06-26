@@ -88,6 +88,7 @@ Deno.serve(async request => {
       const recipientName = String(metadata.recipientName ?? '').trim();
       const note = String(metadata.note ?? '').trim();
       const proof = {
+        operationId: operationKey,
         photoUrl,
         signatureUrl,
         recipientName,
@@ -96,23 +97,36 @@ Deno.serve(async request => {
         longitude: typeof metadata.longitude === 'number' ? metadata.longitude : null,
         completedAt,
       };
-      const { error: protocolError } = await admin.from('assignment_protocols').insert({
-        assignment_id: assignmentId,
-        company_id: assignment.company_id,
-        created_by: user.id,
-        protocol_type: 'delivery_proof',
-        title: 'Digitalt leveransbevis',
-        signature_url: signatureUrl,
-        content: JSON.stringify(proof),
-      });
-      if (protocolError) throw protocolError;
+
+      const { data: existingProtocol } = await admin
+        .from('assignment_protocols')
+        .select('id')
+        .eq('assignment_id', assignmentId)
+        .eq('protocol_type', 'delivery_proof')
+        .ilike('content', `%${operationKey}%`)
+        .maybeSingle();
+      if (!existingProtocol) {
+        const { error: protocolError } = await admin.from('assignment_protocols').insert({
+          assignment_id: assignmentId,
+          company_id: assignment.company_id,
+          created_by: user.id,
+          protocol_type: 'delivery_proof',
+          title: 'Digitalt leveransbevis',
+          signature_url: signatureUrl,
+          content: JSON.stringify(proof),
+        });
+        if (protocolError) throw protocolError;
+      }
+
       const event = `[${new Date(completedAt).toLocaleString('sv-SE')}] Uppdrag slutfört${recipientName ? `: Mottagare ${recipientName}` : ''}${note ? ` · ${note}` : ''}`;
+      const commentAlreadyAdded = String(assignment.driver_comment ?? '').includes(operationKey);
+      const comment = commentAlreadyAdded ? assignment.driver_comment : [assignment.driver_comment, `${event} [sync:${operationKey}]`].filter(Boolean).join('\n');
       const { error: assignmentError } = await admin.from('assignments').update({
         status: 'completed',
         actual_stop: completedAt,
         consignment_photo_url: photoUrl,
         signature_url: signatureUrl,
-        driver_comment: [assignment.driver_comment, event].filter(Boolean).join('\n'),
+        driver_comment: comment,
       }).eq('id', assignmentId);
       if (assignmentError) throw assignmentError;
       result = proof;
