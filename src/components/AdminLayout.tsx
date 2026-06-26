@@ -9,6 +9,7 @@ import { QuickCreateMenu } from '@/components/admin/QuickCreateMenu';
 import { CommandPalette } from '@/components/admin/CommandPalette';
 import { DemoBanner } from '@/components/admin/DemoBanner';
 import { AssignmentCustomerStatusRuntime } from '@/components/admin/AssignmentCustomerStatusRuntime';
+import { FortnoxRuntime } from '@/components/admin/FortnoxRuntime';
 import { DemoModeProvider, useDemoMode } from '@/hooks/useDemoMode';
 import { toast } from 'sonner';
 
@@ -20,6 +21,7 @@ export function AdminShell() {
         <MobileTabBar />
         <CommandPalette />
         <AssignmentCustomerStatusRuntime />
+        <FortnoxRuntime />
         <div className="md:ml-60 flex flex-col min-h-screen pb-16 md:pb-0">
           <Suspense fallback={<div className="flex-1 flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>}>
             <Outlet />
