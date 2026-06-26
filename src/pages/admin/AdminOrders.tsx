@@ -14,6 +14,9 @@ import { Plus, ShoppingCart, Sparkles } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SmartOrderImportDialog } from '@/features/order-inbox/SmartOrderImportDialog';
+import { PdfOrderImportDialog } from '@/features/order-inbox/PdfOrderImportDialog';
+import { OrderEmailQueue } from '@/features/order-inbox/OrderEmailQueue';
+import { OrderQueuePanel } from '@/features/order-inbox/OrderQueuePanel';
 
 const statusLabels: Record<string, string> = {
   active: 'Aktiv',
@@ -54,14 +57,16 @@ export default function AdminOrders() {
   };
 
   return (
-    <AdminLayout title="Beställningar" description="Importera ordermejl eller samla flera uppdrag under en beställning">
+    <AdminLayout title="Beställningar" description="Ta emot order via e-post, PDF, text eller CSV">
       <div className="space-y-5">
         <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-card to-card">
           <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
-            <div><div className="flex items-center gap-2 font-semibold"><Sparkles className="h-4 w-4 text-primary" /> Gör ordermejl till uppdrag</div><p className="mt-1 text-sm text-muted-foreground">Klistra in text eller ladda upp CSV. Aurora plockar ut kund, adresser, datum och instruktioner.</p></div>
-            <SmartOrderImportDialog />
+            <div><div className="flex items-center gap-2 font-semibold"><Sparkles className="h-4 w-4 text-primary" /> Gör orderunderlag till uppdrag</div><p className="mt-1 text-sm text-muted-foreground">Ta emot order automatiskt eller tolka PDF, mejltext och CSV.</p></div>
+            <div className="flex flex-wrap gap-2"><SmartOrderImportDialog /><PdfOrderImportDialog /></div>
           </CardContent>
         </Card>
+
+        <div className="grid gap-4 lg:grid-cols-2"><OrderEmailQueue /><OrderQueuePanel /></div>
 
         <div className="flex items-center justify-between gap-3">
           <p className="text-sm text-muted-foreground">Beställningar grupperar flera transportuppdrag.</p>
@@ -84,7 +89,7 @@ export default function AdminOrders() {
             {isLoading ? (
               <div className="space-y-3 p-6">{[1, 2, 3].map(item => <Skeleton key={item} className="h-10 w-full" />)}</div>
             ) : !orders?.length ? (
-              <div className="py-12 text-center text-muted-foreground"><ShoppingCart className="mx-auto mb-3 h-10 w-10 opacity-30" /><p>Inga beställningar ännu</p><p className="text-sm">Importera ett ordermejl eller skapa en beställning manuellt.</p></div>
+              <div className="py-12 text-center text-muted-foreground"><ShoppingCart className="mx-auto mb-3 h-10 w-10 opacity-30" /><p>Inga beställningar ännu</p><p className="text-sm">Importera ett orderunderlag eller skapa en beställning manuellt.</p></div>
             ) : (
               <Table>
                 <TableHeader><TableRow><TableHead>#</TableHead><TableHead>Titel</TableHead><TableHead>Kund</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Uppdrag</TableHead></TableRow></TableHeader>
