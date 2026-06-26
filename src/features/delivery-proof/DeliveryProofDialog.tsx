@@ -62,7 +62,7 @@ export function DeliveryProofDialog({ open, onOpenChange, assignment, userId, co
           <div className="space-y-2"><Label className="flex gap-2"><PenLine className="h-4 w-4" />Signatur {assignment.require_signature && '*'}</Label><SignaturePad onChange={setSignature} /></div>
           <div className="space-y-2"><Label>Kommentar eller avvikelse</Label><Textarea value={note} onChange={event => setNote(event.target.value)} /></div>
           <Button className="h-12 w-full bg-green-600 hover:bg-green-700" disabled={saving} onClick={() => void submit()}>{saving ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Sparar säkert…</> : <><CheckCircle2 className="mr-2 h-4 w-4" />Slutför uppdrag</>}</Button>
-          <p className="text-center text-xs text-muted-foreground">Utan internet sparas foto och signatur krypterat i webbläsarens lokala databas tills anslutningen är tillbaka.</p>
+          <p className="text-center text-xs text-muted-foreground">Utan internet sparas foto och signatur lokalt på enheten tills anslutningen är tillbaka.</p>
         </div>
       </DialogContent>
     </Dialog>
