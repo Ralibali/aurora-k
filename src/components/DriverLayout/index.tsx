@@ -5,12 +5,14 @@ import { NavLink } from '@/components/NavLink';
 import { DriverLocationRuntime } from '@/components/DriverLocationRuntime';
 import { DriverNotificationCenter } from '@/components/DriverNotificationCenter';
 import { DriverDeliveryProofRuntime } from '@/components/DriverDeliveryProofRuntime';
+import { DriverOfflineSyncRuntime } from '@/components/DriverOfflineSyncRuntime';
 
 export function DriverLayout() {
   return (
     <div className="min-h-screen flex flex-col bg-[#F8FAFC]">
       <DriverLocationRuntime />
       <DriverDeliveryProofRuntime />
+      <DriverOfflineSyncRuntime />
       <header className="h-14 pt-safe flex items-center justify-between border-b border-border bg-white px-4 shrink-0 sticky top-0 z-30">
         <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center"><Truck className="h-3.5 w-3.5 text-white" /></div>
