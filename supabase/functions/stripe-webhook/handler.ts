@@ -54,46 +54,62 @@ async function getAdmin(context: HandlerContext, companyId: string) {
 }
 
 async function sendEmail(context: HandlerContext, to: string, template: { subject: string; html: string }) {
-  const response = await fetch(`${context.supabaseUrl}/functions/v1/send-email`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${context.serviceRoleKey}`,
-    },
-    body: JSON.stringify({ to, subject: template.subject, html: template.html }),
-  });
-  if (!response.ok) throw new Error(`Email failed: ${await response.text()}`);
+  try {
+    const response = await fetch(`${context.supabaseUrl}/functions/v1/send-email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${context.serviceRoleKey}`,
+      },
+      body: JSON.stringify({ to, subject: template.subject, html: template.html }),
+    });
+    if (!response.ok) console.error('[stripe-webhook] Email failed', await response.text());
+  } catch (error) {
+    console.error('[stripe-webhook] Email delivery error', error);
+  }
 }
 
 async function notifyActive(context: HandlerContext, company: Company) {
   if (company.subscription_status === 'active') return;
-  const admin = await getAdmin(context, company.id);
-  if (!admin?.email) return;
-  await sendEmail(context, admin.email, welcomeEmail({
-    firstName: admin.full_name?.split(' ')[0] || 'där',
-    companyName: company.name || 'Ditt företag',
-    dashboardUrl: `${context.siteUrl}/admin`,
-  }));
+  try {
+    const admin = await getAdmin(context, company.id);
+    if (!admin?.email) return;
+    await sendEmail(context, admin.email, welcomeEmail({
+      firstName: admin.full_name?.split(' ')[0] || 'där',
+      companyName: company.name || 'Ditt företag',
+      dashboardUrl: `${context.siteUrl}/admin`,
+    }));
+  } catch (error) {
+    console.error('[stripe-webhook] Welcome notification failed', error);
+  }
 }
 
 async function notifyPaymentFailed(context: HandlerContext, company: Company) {
   if (company.subscription_status === 'past_due') return;
-  const admin = await getAdmin(context, company.id);
-  if (!admin?.email) return;
-  await sendEmail(context, admin.email, paymentFailedEmail({
-    firstName: admin.full_name?.split(' ')[0] || 'där',
-    portalUrl: `${context.siteUrl}/admin/settings`,
-  }));
+  try {
+    const admin = await getAdmin(context, company.id);
+    if (!admin?.email) return;
+    await sendEmail(context, admin.email, paymentFailedEmail({
+      firstName: admin.full_name?.split(' ')[0] || 'där',
+      portalUrl: `${context.siteUrl}/admin/settings`,
+    }));
+  } catch (error) {
+    console.error('[stripe-webhook] Payment notification failed', error);
+  }
 }
 
 async function notifyCancelled(context: HandlerContext, company: Company) {
   if (company.subscription_status === 'cancelled') return;
-  const admin = await getAdmin(context, company.id);
-  if (!admin?.email) return;
-  await sendEmail(context, admin.email, subscriptionCancelledEmail({
-    firstName: admin.full_name?.split(' ')[0] || 'där',
-    reactivateUrl: `${context.siteUrl}/admin/settings`,
-  }));
+  try {
+    const admin = await getAdmin(context, company.id);
+    if (!admin?.email) return;
+    await sendEmail(context, admin.email, subscriptionCancelledEmail({
+      firstName: admin.full_name?.split(' ')[0] || 'där',
+      reactivateUrl: `${context.siteUrl}/admin/settings`,
+    }));
+  } catch (error) {
+    console.error('[stripe-webhook] Cancellation notification failed', error);
+  }
 }
 
 export async function handleStripeEvent(event: Stripe.Event, context: HandlerContext) {
