@@ -4,6 +4,7 @@ import { registerSW } from "virtual:pwa-register";
 import * as Sentry from "@sentry/react";
 import App from "./App.tsx";
 import { FormAnalyticsObserver } from "./components/FormAnalyticsObserver";
+import { LandingMobileNavigation } from "./components/LandingMobileNavigation";
 import { MobileConversionShell, StandaloneDemoPage } from "./components/MobileConversionShell";
 import "./index.css";
 
@@ -64,6 +65,7 @@ if (window.location.pathname === "/boka-demo") {
       <App />
       <FormAnalyticsObserver />
       <MobileConversionShell />
+      <LandingMobileNavigation />
     </>,
   );
 }
