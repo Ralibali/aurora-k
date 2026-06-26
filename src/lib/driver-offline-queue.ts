@@ -134,8 +134,18 @@ export function flushDriverOfflineQueue() {
 export async function syncOrQueueDriverOperation(input: Omit<DriverOfflineOperation, 'id' | 'createdAt' | 'attempts' | 'nextAttemptAt'>) {
   const operation = await enqueueDriverOperation(input);
   if (!navigator.onLine) return { queued: true, operationId: operation.id, result: null };
-  await flushDriverOfflineQueue();
-  const remaining = await listDriverOperations();
-  const queued = remaining.some(item => item.id === operation.id);
-  return { queued, operationId: operation.id, result: queued ? null : { synced: true } };
+  try {
+    const result = await sendOperation(operation);
+    await removeOperation(operation.id);
+    return { queued: false, operationId: operation.id, result };
+  } catch (error) {
+    const attempts = operation.attempts + 1;
+    await updateOperation({
+      ...operation,
+      attempts,
+      nextAttemptAt: Date.now() + retryDelay(attempts),
+      lastError: error instanceof Error ? error.message : 'Synkningen misslyckades',
+    });
+    return { queued: true, operationId: operation.id, result: null };
+  }
 }
