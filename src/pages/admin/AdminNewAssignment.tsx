@@ -37,6 +37,7 @@ export default function AdminNewAssignment() {
   const state = (location.state as any) || {};
   const copyFrom = state.copy;
   const bookingRequestId = state.bookingRequestId as string | undefined;
+  const importedOrder = state.source === 'smart-order-import';
 
   const { data: customers } = useCustomers();
   const { data: drivers } = useDrivers();
@@ -52,8 +53,8 @@ export default function AdminNewAssignment() {
   const [deliveryAddress, setDeliveryAddress] = useState(copyFrom?.delivery_address || '');
   const [instructions, setInstructions] = useState(copyFrom?.instructions || '');
   const [priority, setPriority] = useState(copyFrom?.priority || 'normal');
-  const [scheduledStart, setScheduledStart] = useState('');
-  const [scheduledEnd, setScheduledEnd] = useState('');
+  const [scheduledStart, setScheduledStart] = useState(copyFrom?.scheduled_start || state.importedScheduledStart || '');
+  const [scheduledEnd, setScheduledEnd] = useState(copyFrom?.scheduled_end || '');
   const [driverId, setDriverId] = useState(copyFrom?.assigned_driver_id || '');
   const [adminComment, setAdminComment] = useState(copyFrom?.admin_comment || '');
   const [requireSignature, setRequireSignature] = useState(copyFrom?.require_signature ?? false);
@@ -163,7 +164,10 @@ export default function AdminNewAssignment() {
           <CardHeader>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <CardTitle>Skapa nytt uppdrag</CardTitle>
-              {bookingRequestId && <Badge variant="outline">Skapas från bokningsförfrågan</Badge>}
+              <div className="flex flex-wrap gap-2">
+                {bookingRequestId && <Badge variant="outline">Skapas från bokningsförfrågan</Badge>}
+                {importedOrder && <Badge>Smart orderimport</Badge>}
+              </div>
             </div>
           </CardHeader>
           <CardContent>

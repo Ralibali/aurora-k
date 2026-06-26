@@ -20,6 +20,7 @@ import { PlatformAdminShell } from "@/components/PlatformAdminLayout";
 
 const LandingPage = lazy(() => import("./pages/LandingPageV3"));
 const PublicBookingPage = lazy(() => import("./pages/PublicBookingPage"));
+const PublicTrackingPage = lazy(() => import("./pages/PublicTrackingPage"));
 const TransportledningssystemPage = lazy(() => import("./pages/TransportledningssystemPage"));
 const TidrapporteringTransportPage = lazy(() => import("./pages/TidrapporteringTransportPage"));
 const VadKostarTransportledningssystemPage = lazy(() => import("./pages/VadKostarTransportledningssystemPage"));
@@ -104,12 +105,7 @@ const queryClient = new QueryClient();
 
 function PageLoader() {
   return (
-    <div
-      className="min-h-screen flex items-center justify-center bg-background"
-      role="status"
-      aria-live="polite"
-      aria-label="Laddar sida"
-    >
+    <div className="min-h-screen flex items-center justify-center bg-background" role="status" aria-live="polite" aria-label="Laddar sida">
       <div className="space-y-4 w-full max-w-md px-4">
         <div className="h-8 w-2/3 mx-auto rounded bg-muted animate-pulse" />
         <div className="h-4 w-full rounded bg-muted animate-pulse" />
@@ -121,148 +117,127 @@ function PageLoader() {
 
 function ScrollToTop() {
   const { pathname } = useLocation();
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
-  }, [pathname]);
+  useEffect(() => { window.scrollTo({ top: 0, behavior: 'instant' }); }, [pathname]);
   return null;
 }
 
 function PublicSiteEnhancements() {
   const location = useLocation();
-  const isAppRoute =
-    location.pathname.startsWith("/admin") ||
-    location.pathname.startsWith("/driver") ||
-    location.pathname.startsWith("/platform") ||
-    location.pathname.startsWith("/portal") ||
-    location.pathname.startsWith("/onboarding");
-
+  const isAppRoute = location.pathname.startsWith('/admin') || location.pathname.startsWith('/driver') || location.pathname.startsWith('/platform') || location.pathname.startsWith('/portal') || location.pathname.startsWith('/onboarding') || location.pathname.startsWith('/track/');
   if (isAppRoute) return null;
-
-  return (
-    <>
-      <PwaInstallPrompt />
-      <CookieConsent />
-      <ExitIntentPopup />
-      <QuickContactButton />
-    </>
-  );
+  return <><PwaInstallPrompt /><CookieConsent /><ExitIntentPopup /><QuickContactButton /></>;
 }
 
 const App = () => (
   <ThemeProvider attribute="class" defaultTheme="system" enableSystem={true}>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Sonner />
+        <Toaster /><Sonner />
         <BrowserRouter>
           <AuthProvider>
-          <ErrorBoundary>
+            <ErrorBoundary>
               <ScrollToTop />
               <Suspense fallback={<PageLoader />}>
                 <Routes>
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/boka" element={<PublicBookingPage />} />
-                <Route path="/boka/:slug" element={<PublicBookingPage />} />
-                <Route path="/en" element={<LandingPage />} />
-                <Route path="/en/book" element={<LandingPage />} />
-                <Route path="/transportledningssystem" element={<TransportledningssystemPage />} />
-                <Route path="/tidrapportering-transport" element={<TidrapporteringTransportPage />} />
-                <Route path="/vad-kostar-transportledningssystem" element={<VadKostarTransportledningssystemPage />} />
-                <Route path="/coredination-alternativ" element={<CoredinationAlternativPage />} />
-                <Route path="/tjanster" element={<TjansterPage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/kontakt" element={<ContactPage />} />
-                <Route path="/onboarding" element={<OnboardingPage />} />
-                <Route path="/join" element={<JoinPage />} />
-                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-                <Route path="/portal" element={<CustomerPortal />} />
-                <Route path="/reset-password" element={<ResetPasswordPage />} />
-                <Route path="/om-oss" element={<AboutPage />} />
-                <Route path="/privacy" element={<PrivacyPage />} />
-                <Route path="/budtjanst-app" element={<BudtjanstAppPage />} />
-                <Route path="/akeri-system" element={<AkeriSystemPage />} />
-                <Route path="/transportplanering" element={<TransportplaneringPage />} />
-                <Route path="/digital-foljesedel" element={<DigitalFoljesedelPage />} />
-                <Route path="/dispatch-system" element={<DispatchSystemPage />} />
-                <Route path="/ads/budtjanst" element={<AdsBudtjanstPage />} />
-                <Route path="/ads/akeri" element={<AdsAkeriPage />} />
-                <Route path="/ads/transport" element={<AdsTransportPage />} />
-                <Route path="/ads/flotta" element={<AdsFlottaPage />} />
+                  <Route path="/" element={<LandingPage />} />
+                  <Route path="/boka" element={<PublicBookingPage />} />
+                  <Route path="/boka/:slug" element={<PublicBookingPage />} />
+                  <Route path="/track/:token" element={<PublicTrackingPage />} />
+                  <Route path="/en" element={<LandingPage />} />
+                  <Route path="/en/book" element={<LandingPage />} />
+                  <Route path="/transportledningssystem" element={<TransportledningssystemPage />} />
+                  <Route path="/tidrapportering-transport" element={<TidrapporteringTransportPage />} />
+                  <Route path="/vad-kostar-transportledningssystem" element={<VadKostarTransportledningssystemPage />} />
+                  <Route path="/coredination-alternativ" element={<CoredinationAlternativPage />} />
+                  <Route path="/tjanster" element={<TjansterPage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/kontakt" element={<ContactPage />} />
+                  <Route path="/onboarding" element={<OnboardingPage />} />
+                  <Route path="/join" element={<JoinPage />} />
+                  <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                  <Route path="/portal" element={<CustomerPortal />} />
+                  <Route path="/reset-password" element={<ResetPasswordPage />} />
+                  <Route path="/om-oss" element={<AboutPage />} />
+                  <Route path="/privacy" element={<PrivacyPage />} />
+                  <Route path="/budtjanst-app" element={<BudtjanstAppPage />} />
+                  <Route path="/akeri-system" element={<AkeriSystemPage />} />
+                  <Route path="/transportplanering" element={<TransportplaneringPage />} />
+                  <Route path="/digital-foljesedel" element={<DigitalFoljesedelPage />} />
+                  <Route path="/dispatch-system" element={<DispatchSystemPage />} />
+                  <Route path="/ads/budtjanst" element={<AdsBudtjanstPage />} />
+                  <Route path="/ads/akeri" element={<AdsAkeriPage />} />
+                  <Route path="/ads/transport" element={<AdsTransportPage />} />
+                  <Route path="/ads/flotta" element={<AdsFlottaPage />} />
+                  <Route path="/blogg" element={<BlogIndex />} />
+                  <Route path="/blogg/basta-dispatchsystemet-for-akeri-2026" element={<BlogBastaDispatch />} />
+                  <Route path="/blogg/hur-digitaliserar-man-sin-budtjanst" element={<BlogDigitaliseraBudtjanst />} />
+                  <Route path="/blogg/vad-kostar-ett-transportledningssystem" element={<BlogVadKostarTms />} />
+                  <Route path="/blogg/transportledningssystem-for-sma-akerier" element={<BlogTmsSmaaAkerier />} />
+                  <Route path="/blogg/transportledningssystem-for-sma-akeries" element={<Navigate to="/blogg/transportledningssystem-for-sma-akerier" replace />} />
+                  <Route path="/blogg/dispatch-app-forare-transport" element={<BlogDispatchAppForare />} />
+                  <Route path="/blogg/bemanningsbolag-transport-system" element={<BlogBemanningsbolag />} />
+                  <Route path="/blogg/skillnad-tms-dispatch-system" element={<BlogTmsVsDispatch />} />
+                  <Route path="/blogg/transportapp-utan-bindningstid" element={<BlogUtanBindningstid />} />
+                  <Route path="/blogg/digitalt-korordrersystem-fordelar" element={<BlogDigitaltKororder />} />
+                  <Route path="/blogg/byta-dispatchsystem-guide" element={<BlogBytaDispatch />} />
 
-                {/* Blog routes */}
-                <Route path="/blogg" element={<BlogIndex />} />
-                <Route path="/blogg/basta-dispatchsystemet-for-akeri-2026" element={<BlogBastaDispatch />} />
-                <Route path="/blogg/hur-digitaliserar-man-sin-budtjanst" element={<BlogDigitaliseraBudtjanst />} />
-                <Route path="/blogg/vad-kostar-ett-transportledningssystem" element={<BlogVadKostarTms />} />
-                <Route path="/blogg/transportledningssystem-for-sma-akerier" element={<BlogTmsSmaaAkerier />} />
-                <Route path="/blogg/transportledningssystem-for-sma-akeries" element={<Navigate to="/blogg/transportledningssystem-for-sma-akerier" replace />} />
-                <Route path="/blogg/dispatch-app-forare-transport" element={<BlogDispatchAppForare />} />
-                <Route path="/blogg/bemanningsbolag-transport-system" element={<BlogBemanningsbolag />} />
-                <Route path="/blogg/skillnad-tms-dispatch-system" element={<BlogTmsVsDispatch />} />
-                <Route path="/blogg/transportapp-utan-bindningstid" element={<BlogUtanBindningstid />} />
-                <Route path="/blogg/digitalt-korordrersystem-fordelar" element={<BlogDigitaltKororder />} />
-                <Route path="/blogg/byta-dispatchsystem-guide" element={<BlogBytaDispatch />} />
+                  <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><SubscriptionGuard><AdminShell /></SubscriptionGuard></ProtectedRoute>}>
+                    <Route index element={<AdminDashboard />} />
+                    <Route path="assignments" element={<AdminAssignments />} />
+                    <Route path="assignments/new" element={<AdminNewAssignment />} />
+                    <Route path="assignments/:id" element={<AdminAssignmentDetail />} />
+                    <Route path="customers" element={<AdminCustomers />} />
+                    <Route path="customers/new" element={<AdminNewCustomer />} />
+                    <Route path="customers/:id" element={<AdminCustomerDetail />} />
+                    <Route path="drivers" element={<AdminDrivers />} />
+                    <Route path="invoices" element={<AdminInvoices />} />
+                    <Route path="invoices/new" element={<AdminNewInvoice />} />
+                    <Route path="invoice-basis" element={<AdminInvoiceBasis />} />
+                    <Route path="reports" element={<AdminReports />} />
+                    <Route path="statistics" element={<AdminStatistics />} />
+                    <Route path="settings" element={<AdminSettings />} />
+                    <Route path="driver-settings" element={<AdminDriverSettings />} />
+                    <Route path="live-map" element={<AdminLiveMap />} />
+                    <Route path="calendar" element={<AdminCalendar />} />
+                    <Route path="articles" element={<AdminArticles />} />
+                    <Route path="vehicles" element={<AdminVehicles />} />
+                    <Route path="orders" element={<AdminOrders />} />
+                    <Route path="order-templates" element={<AdminOrderTemplates />} />
+                    <Route path="absences" element={<AdminAbsences />} />
+                    <Route path="approvals" element={<AdminApprovals />} />
+                    <Route path="invoice-templates" element={<AdminInvoiceTemplates />} />
+                    <Route path="notifications" element={<AdminNotifications />} />
+                    <Route path="booking-requests" element={<AdminBookingRequests />} />
+                    <Route path="external-resources" element={<AdminExternalResources />} />
+                    <Route path="satisfaction" element={<AdminSatisfaction />} />
+                    <Route path="environment" element={<AdminEnvironment />} />
+                    <Route path="api" element={<AdminApiDocs />} />
+                    <Route path="routes" element={<AdminRouteOptimizer />} />
+                    <Route path="compensation" element={<AdminCompensation />} />
+                    <Route path="audit-log" element={<AdminAuditLog />} />
+                  </Route>
 
-                {/* Admin routes — share a single sidebar shell */}
-                <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><SubscriptionGuard><AdminShell /></SubscriptionGuard></ProtectedRoute>}>
-                  <Route index element={<AdminDashboard />} />
-                  <Route path="assignments" element={<AdminAssignments />} />
-                  <Route path="assignments/new" element={<AdminNewAssignment />} />
-                  <Route path="assignments/:id" element={<AdminAssignmentDetail />} />
-                  <Route path="customers" element={<AdminCustomers />} />
-                  <Route path="customers/new" element={<AdminNewCustomer />} />
-                  <Route path="customers/:id" element={<AdminCustomerDetail />} />
-                  <Route path="drivers" element={<AdminDrivers />} />
-                  <Route path="invoices" element={<AdminInvoices />} />
-                  <Route path="invoices/new" element={<AdminNewInvoice />} />
-                  <Route path="invoice-basis" element={<AdminInvoiceBasis />} />
-                  <Route path="reports" element={<AdminReports />} />
-                  <Route path="statistics" element={<AdminStatistics />} />
-                  <Route path="settings" element={<AdminSettings />} />
-                  <Route path="driver-settings" element={<AdminDriverSettings />} />
-                  <Route path="live-map" element={<AdminLiveMap />} />
-                  <Route path="calendar" element={<AdminCalendar />} />
-                  <Route path="articles" element={<AdminArticles />} />
-                  <Route path="vehicles" element={<AdminVehicles />} />
-                  <Route path="orders" element={<AdminOrders />} />
-                  <Route path="order-templates" element={<AdminOrderTemplates />} />
-                  <Route path="absences" element={<AdminAbsences />} />
-                  <Route path="approvals" element={<AdminApprovals />} />
-                  <Route path="invoice-templates" element={<AdminInvoiceTemplates />} />
-                  <Route path="notifications" element={<AdminNotifications />} />
-                  <Route path="booking-requests" element={<AdminBookingRequests />} />
-                  <Route path="external-resources" element={<AdminExternalResources />} />
-                  <Route path="satisfaction" element={<AdminSatisfaction />} />
-                  <Route path="environment" element={<AdminEnvironment />} />
-                  <Route path="api" element={<AdminApiDocs />} />
-                  <Route path="routes" element={<AdminRouteOptimizer />} />
-                  <Route path="compensation" element={<AdminCompensation />} />
-                  <Route path="audit-log" element={<AdminAuditLog />} />
-                </Route>
+                  <Route path="/platform" element={<PlatformAdminGuard><PlatformAdminShell /></PlatformAdminGuard>}>
+                    <Route index element={<PlatformDashboard />} />
+                    <Route path="companies" element={<PlatformCompanies />} />
+                    <Route path="support" element={<PlatformSupport />} />
+                    <Route path="announcements" element={<PlatformAnnouncements />} />
+                    <Route path="revenue" element={<PlatformRevenue />} />
+                    <Route path="leads" element={<PlatformLeads />} />
+                  </Route>
 
-                {/* Platform admin routes */}
-                <Route path="/platform" element={<PlatformAdminGuard><PlatformAdminShell /></PlatformAdminGuard>}>
-                  <Route index element={<PlatformDashboard />} />
-                  <Route path="companies" element={<PlatformCompanies />} />
-                  <Route path="support" element={<PlatformSupport />} />
-                  <Route path="announcements" element={<PlatformAnnouncements />} />
-                  <Route path="revenue" element={<PlatformRevenue />} />
-                  <Route path="leads" element={<PlatformLeads />} />
-                </Route>
-
-                {/* Driver routes — share a single layout shell */}
-                <Route path="/driver" element={<ProtectedRoute requiredRole="driver"><DriverLayout /></ProtectedRoute>}>
-                  <Route index element={<DriverAssignments />} />
-                  <Route path="assignments" element={<DriverAssignments />} />
-                  <Route path="assignment/:id" element={<DriverAssignmentDetail />} />
-                  <Route path="time-report" element={<DriverTimeReport />} />
-                  <Route path="profile" element={<DriverProfile />} />
-                  <Route path="invoices" element={<DriverInvoices />} />
-                </Route>
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
-          </ErrorBoundary>
+                  <Route path="/driver" element={<ProtectedRoute requiredRole="driver"><DriverLayout /></ProtectedRoute>}>
+                    <Route index element={<DriverAssignments />} />
+                    <Route path="assignments" element={<DriverAssignments />} />
+                    <Route path="assignment/:id" element={<DriverAssignmentDetail />} />
+                    <Route path="time-report" element={<DriverTimeReport />} />
+                    <Route path="profile" element={<DriverProfile />} />
+                    <Route path="invoices" element={<DriverInvoices />} />
+                  </Route>
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Suspense>
+            </ErrorBoundary>
           </AuthProvider>
           <PublicSiteEnhancements />
         </BrowserRouter>

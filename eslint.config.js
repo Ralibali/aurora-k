@@ -21,10 +21,6 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "@typescript-eslint/no-unused-vars": "off",
-      // The existing codebase contains legacy dynamic Supabase/API shapes.
-      // Keep these visible while preventing historical typing debt from
-      // blocking tested product changes. New/changed product files are linted
-      // separately and should continue to use concrete types.
       "@typescript-eslint/no-explicit-any": "warn",
     },
   },
