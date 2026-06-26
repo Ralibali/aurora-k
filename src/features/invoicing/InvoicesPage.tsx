@@ -33,9 +33,9 @@ export default function InvoicesPage() {
   const source = showingDemo ? demoInvoices as InvoiceRecord[] : (invoices ?? []) as InvoiceRecord[];
   const today = new Date().toISOString().slice(0, 10);
 
-  const filtered = useMemo(() => source
+  const filtered: InvoiceRecord[] = useMemo(() => source
     .map(invoice => ({ ...invoice, status: invoice.status === 'sent' && invoice.due_date < today ? 'overdue' : invoice.status }))
-    .filter(invoice => {
+    .filter((invoice: InvoiceRecord) => {
       if (statusFilter !== 'all' && invoice.status !== statusFilter) return false;
       if (customerFilter !== 'all' && invoice.customer_id !== customerFilter) return false;
       if (!search) return true;

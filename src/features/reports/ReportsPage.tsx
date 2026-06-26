@@ -55,14 +55,14 @@ export default function ReportsPage() {
   const visibleDrivers = driverFilter === 'all' ? (drivers ?? []) : (drivers ?? []).filter(driver => driver.id === driverFilter);
   const visibleCompensations = driverFilter === 'all' ? (compensations ?? []) : (compensations ?? []).filter(item => item.driver_id === driverFilter);
   const salary = computeSalary(
-    periodAssignments,
+    periodAssignments as any,
     visibleDrivers,
     visibleCompensations,
     obRates ?? [],
     perDiemRates ?? [],
     viewMode,
   );
-  const totalHours = workedHours(periodAssignments);
+  const totalHours = workedHours(periodAssignments as any);
   const periodLabel = viewMode === 'week'
     ? `Vecka ${getISOWeek(weekStart)}, ${format(weekStart, 'd MMM', { locale: sv })}–${format(weekEnd, 'd MMM yyyy', { locale: sv })}`
     : format(monthDate, 'MMMM yyyy', { locale: sv });
@@ -76,7 +76,7 @@ export default function ReportsPage() {
       Uppdrag: item.title,
       Start: formatSwedishTime(item.actual_start),
       Stopp: formatSwedishTime(item.actual_stop),
-      Timmar: workedHours([item]),
+      Timmar: workedHours([item] as any),
     }));
     const salaryRows = salary.rows.map(row => ({
       Chaufför: row.name,
@@ -110,7 +110,7 @@ export default function ReportsPage() {
         item.title,
         formatSwedishTime(item.actual_start),
         formatSwedishTime(item.actual_stop),
-        workedHours([item]).toFixed(2),
+        workedHours([item] as any).toFixed(2),
       ]),
       styles: { fontSize: 8 },
     });

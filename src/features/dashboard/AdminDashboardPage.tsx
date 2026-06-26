@@ -63,7 +63,7 @@ export default function AdminDashboardPage() {
     return () => { void supabase.removeChannel(channel); };
   }, [queryClient]);
 
-  const assignments = demoOn ? demoAssignments : (realAssignments ?? []);
+  const assignments: any[] = demoOn ? demoAssignments : (realAssignments ?? []);
   const today = new Date().toISOString().slice(0, 10);
   const weekStart = new Date();
   weekStart.setDate(weekStart.getDate() - 6);
