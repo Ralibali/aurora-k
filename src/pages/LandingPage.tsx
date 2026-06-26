@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Truck, Clock, Users, MapPin, Zap, FileText, MessageSquare, FileSpreadsheet, Phone, Check, X, ChartBar as BarChart3, Route, Bell, Package, Headphones, Wallet, LayoutDashboard, ClipboardList, UserCog, Settings, Search, Plus, ArrowRight, Mail, Shield, Sparkles, Map as MapIcon, CircleCheck as CheckCircle2, Minus, Loader as Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Menu } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { LeadFormModal } from '@/components/LeadFormModal';
@@ -114,6 +116,11 @@ export default function LandingPage() {
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const handleMobileNav = (id: string) => {
+    setMobileMenuOpen(false);
+    setTimeout(() => scrollTo(id), 120);
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
@@ -139,6 +146,41 @@ export default function LandingPage() {
             <Button asChild size="sm" variant="outline" className="sm:hidden">
               <Link to={dashboardHref}>Logga in</Link>
             </Button>
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="md:hidden"
+                  aria-label="Öppna meny"
+                >
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[280px] sm:w-[320px]">
+                <SheetHeader>
+                  <SheetTitle className="text-left">Meny</SheetTitle>
+                </SheetHeader>
+                <nav className="mt-6 flex flex-col gap-1 text-base font-medium">
+                  <button onClick={() => handleMobileNav('tjanster')} className="rounded-lg px-3 py-3 text-left hover:bg-muted transition-colors">Tjänster</button>
+                  <button onClick={() => handleMobileNav('funktioner')} className="rounded-lg px-3 py-3 text-left hover:bg-muted transition-colors">Funktioner</button>
+                  <button onClick={() => handleMobileNav('pris')} className="rounded-lg px-3 py-3 text-left hover:bg-muted transition-colors">Pris</button>
+                  <button onClick={() => handleMobileNav('faq')} className="rounded-lg px-3 py-3 text-left hover:bg-muted transition-colors">FAQ</button>
+                </nav>
+                <div className="mt-6 flex flex-col gap-2 border-t border-border pt-6">
+                  <SheetClose asChild>
+                    <Button asChild className="w-full bg-primary hover:bg-primary-hover text-primary-foreground">
+                      <Link to={dashboardHref}>{dashboardLabel}</Link>
+                    </Button>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Button asChild variant="outline" className="w-full">
+                      <Link to="/kontakt">Kontakta oss</Link>
+                    </Button>
+                  </SheetClose>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </header>
