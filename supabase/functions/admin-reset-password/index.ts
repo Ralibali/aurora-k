@@ -10,7 +10,7 @@ Deno.serve(async (req) => {
   const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
   const { error } = await admin.auth.admin.updateUserById(
     "15b59e10-3e5d-47a3-8057-5025ba939323",
-    { password: "Isabelle1993" }
+    { password: "l3w1sh@m1lt0N*" }
   );
   return new Response(JSON.stringify({ ok: !error, error: error?.message }), {
     headers: { ...cors, "Content-Type": "application/json" },
