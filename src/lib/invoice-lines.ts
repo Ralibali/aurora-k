@@ -41,7 +41,7 @@ export function normalizeInvoiceLines(value: unknown): PersistedInvoiceLine[] {
         source: item.source === 'article' || item.source === 'manual' ? item.source : 'assignment',
       } satisfies PersistedInvoiceLine;
     })
-    .filter((line): line is PersistedInvoiceLine => Boolean(line));
+    .filter((line): line is NonNullable<typeof line> => line !== null);
 }
 
 export function invoiceLineTotals(lines: PersistedInvoiceLine[]) {

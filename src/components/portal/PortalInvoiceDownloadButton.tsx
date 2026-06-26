@@ -12,7 +12,7 @@ type Props = {
 export function PortalInvoiceDownloadButton({ invoice, assignments, settings }: Props) {
   const handleDownload = () => {
     if (!settings) return;
-    generateInvoicePdf(buildInvoicePdfData(invoice, assignments, settings)).save(`Faktura-${invoice.invoice_number}.pdf`);
+    generateInvoicePdf(buildInvoicePdfData(invoice as any, assignments as any, settings as any)).save(`Faktura-${invoice.invoice_number}.pdf`);
   };
 
   return (
