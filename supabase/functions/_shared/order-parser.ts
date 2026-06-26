@@ -32,7 +32,8 @@ const labels: Record<string, keyof ParsedInboundOrder> = {
 };
 
 function clean(value: string) {
-  return value.replace(/[\u0000-\u001f]+/g, ' ').replace(/^[-–—•\s]+/, '').replace(/\s+/g, ' ').trim();
+  const printable = Array.from(value, character => character.charCodeAt(0) < 32 ? ' ' : character).join('');
+  return printable.replace(/^[-–—•\s]+/, '').replace(/\s+/g, ' ').trim();
 }
 
 export function htmlToText(html: string) {
