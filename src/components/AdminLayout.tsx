@@ -8,10 +8,10 @@ import { Button } from '@/components/ui/button';
 import { QuickCreateMenu } from '@/components/admin/QuickCreateMenu';
 import { CommandPalette } from '@/components/admin/CommandPalette';
 import { DemoBanner } from '@/components/admin/DemoBanner';
+import { AssignmentCustomerStatusRuntime } from '@/components/admin/AssignmentCustomerStatusRuntime';
 import { DemoModeProvider, useDemoMode } from '@/hooks/useDemoMode';
 import { toast } from 'sonner';
 
-/** Shared shell — rendered once, sidebar stays mounted across route changes */
 export function AdminShell() {
   return (
     <DemoModeProvider>
@@ -19,14 +19,9 @@ export function AdminShell() {
         <AdminSidebar />
         <MobileTabBar />
         <CommandPalette />
+        <AssignmentCustomerStatusRuntime />
         <div className="md:ml-60 flex flex-col min-h-screen pb-16 md:pb-0">
-          <Suspense
-            fallback={
-              <div className="flex-1 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-              </div>
-            }
-          >
+          <Suspense fallback={<div className="flex-1 flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>}>
             <Outlet />
           </Suspense>
         </div>
@@ -39,7 +34,6 @@ interface AdminLayoutProps {
   children: ReactNode;
   title: string;
   description?: string;
-  /** Optional right-side actions, replaces default Quick Create when provided */
   actions?: ReactNode;
 }
 
@@ -73,20 +67,14 @@ function SearchTrigger() {
     window.dispatchEvent(event);
   };
   return (
-    <button
-      onClick={trigger}
-      className="hidden md:inline-flex items-center gap-2 h-9 px-3 rounded-md border border-input bg-card hover:bg-secondary text-xs text-muted-foreground transition-colors min-w-[200px]"
-    >
+    <button onClick={trigger} className="hidden md:inline-flex items-center gap-2 h-9 px-3 rounded-md border border-input bg-card hover:bg-secondary text-xs text-muted-foreground transition-colors min-w-[200px]">
       <Search className="h-3.5 w-3.5" />
       <span className="flex-1 text-left">Sök eller hoppa till…</span>
-      <kbd className="hidden lg:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-border bg-muted/40 text-[10px] font-mono font-medium text-muted-foreground">
-        {isMac ? '⌘' : 'Ctrl'}K
-      </kbd>
+      <kbd className="hidden lg:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-border bg-muted/40 text-[10px] font-mono font-medium text-muted-foreground">{isMac ? '⌘' : 'Ctrl'}K</kbd>
     </button>
   );
 }
 
-/** Per-page wrapper — only the header + content area re-renders */
 export function AdminLayout({ children, title, description, actions }: AdminLayoutProps) {
   return (
     <>
