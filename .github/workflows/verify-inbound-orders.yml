@@ -7,6 +7,7 @@ on:
       - 'src/pages/admin/AdminOrders.tsx'
       - 'supabase/functions/_shared/order-**'
       - 'supabase/functions/_shared/pdf-text.ts'
+      - 'supabase/functions/_shared/azure-document-ocr.ts'
       - 'supabase/functions/_shared/resend-receiving.ts'
       - 'supabase/functions/order-inbox-api/**'
       - 'supabase/functions/parse-order-document/**'
@@ -27,6 +28,6 @@ jobs:
       - name: Lint inbound order frontend
         run: npx eslint src/features/order-inbox src/pages/admin/AdminOrders.tsx
       - name: Lint inbound order functions
-        run: npx eslint supabase/functions/_shared/order-parser.ts supabase/functions/_shared/order-attachments.ts supabase/functions/_shared/pdf-text.ts supabase/functions/_shared/resend-receiving.ts supabase/functions/order-inbox-api/index.ts supabase/functions/parse-order-document/index.ts supabase/functions/resend-inbound-order/index.ts
+        run: npx eslint supabase/functions/_shared/order-parser.ts supabase/functions/_shared/order-attachments.ts supabase/functions/_shared/pdf-text.ts supabase/functions/_shared/azure-document-ocr.ts supabase/functions/_shared/resend-receiving.ts supabase/functions/order-inbox-api/index.ts supabase/functions/parse-order-document/index.ts supabase/functions/resend-inbound-order/index.ts
       - run: npm run build
       - run: npm test
