@@ -70,7 +70,7 @@ function parseDateTime(value: string) {
     const [, year, month, day, hour = '08', minute = '00'] = iso;
     return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${hour.padStart(2, '0')}:${minute.padStart(2, '0')}`;
   }
-  const european = normalized.match(/(\d{1,2})[-\/]([01]?\d)(?:[-\/](20\d{2}))?(?:\s+(\d{1,2})[:.]?(\d{2})?)?/);
+  const european = normalized.match(/(\d{1,2})[-/]([01]?\d)(?:[-/](20\d{2}))?(?:\s+(\d{1,2})[:.]?(\d{2})?)?/);
   if (european) {
     const [, day, month, year = String(new Date().getFullYear()), hour = '08', minute = '00'] = european;
     return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${hour.padStart(2, '0')}:${minute.padStart(2, '0')}`;
