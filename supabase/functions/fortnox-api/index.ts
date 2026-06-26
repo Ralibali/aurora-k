@@ -52,7 +52,7 @@ Deno.serve(async request => {
       .maybeSingle();
     if (invoiceError || !invoice) throw invoiceError ?? new Error('Fakturan hittades inte');
 
-    const { data: lines, error: linesError } = await admin.from('invoice_lines').select('*').eq('invoice_id', body.invoiceId).order('sort_order', { ascending: true });
+    const { data: lines, error: linesError } = await admin.from('invoice_lines').select('*').eq('invoice_id', body.invoiceId);
     if (linesError) throw linesError;
     const accessToken = await getValidFortnoxToken(admin, role.company_id, user.id);
 
