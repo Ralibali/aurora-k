@@ -1,0 +1,32 @@
+name: Verify inbound orders
+
+on:
+  pull_request:
+    paths:
+      - 'src/features/order-inbox/**'
+      - 'src/pages/admin/AdminOrders.tsx'
+      - 'supabase/functions/_shared/order-**'
+      - 'supabase/functions/_shared/pdf-text.ts'
+      - 'supabase/functions/_shared/resend-receiving.ts'
+      - 'supabase/functions/order-inbox-api/**'
+      - 'supabase/functions/parse-order-document/**'
+      - 'supabase/functions/resend-inbound-order/**'
+      - 'supabase/migrations/20260626130000_inbound_order_inbox.sql'
+      - '.github/workflows/verify-inbound-orders.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Lint inbound order frontend
+        run: npx eslint src/features/order-inbox src/pages/admin/AdminOrders.tsx
+      - name: Lint inbound order functions
+        run: npx eslint supabase/functions/_shared/order-parser.ts supabase/functions/_shared/order-attachments.ts supabase/functions/_shared/pdf-text.ts supabase/functions/_shared/resend-receiving.ts supabase/functions/order-inbox-api/index.ts supabase/functions/parse-order-document/index.ts supabase/functions/resend-inbound-order/index.ts
+      - run: npm run build
+      - run: npm test
