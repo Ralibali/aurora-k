@@ -5,6 +5,8 @@ import { AdminLayout } from '@/components/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { StatusBadge } from '@/components/StatusBadge';
+import { AttentionQueue } from '@/features/dashboard/AttentionQueue';
+import { buildAttentionItems } from '@/features/dashboard/attention-items';
 import { useAssignments, useDrivers, useInvoices } from '@/hooks/useData';
 import { useAuth } from '@/hooks/useAuth';
 import { useDemoMode } from '@/hooks/useDemoMode';
@@ -84,6 +86,7 @@ export default function AdminDashboardPage() {
   const availableDrivers = demoOn ? demoKpis.availableDrivers : (drivers ?? []).filter(item => item.is_available).length;
   const displayedHours = demoOn ? demoKpis.reportedHoursWeek : reportedHours;
   const displayedInvoiceable = demoOn ? demoKpis.invoiceableAmount : invoiceable;
+  const attentionItems = demoOn ? [] : buildAttentionItems(assignments, invoices ?? []);
 
   const liveJobs = [...todayAssignments].sort((a, b) => {
     const order: Record<string, number> = { active: 0, delayed: 1, pending: 2, completed: 3 };
@@ -107,13 +110,12 @@ export default function AdminDashboardPage() {
       .reverse();
 
   const firstName = user?.user_metadata?.full_name?.split(' ')[0] ?? 'där';
-  const openInvoices = (invoices ?? []).filter(item => ['sent', 'overdue'].includes(item.status)).length;
 
   return (
     <AdminLayout title="Dashboard" description="Översikt över dagens transportverksamhet">
       <div className="space-y-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div><h2 className="text-2xl font-semibold">{greeting()}, {firstName}</h2><p className="text-sm text-muted-foreground">Här visas riktiga drift- och ekonomivärden från verksamheten.</p></div>
+          <div><h2 className="text-2xl font-semibold">{greeting()}, {firstName}</h2><p className="text-sm text-muted-foreground">Börja med avvikelserna nedan — resten av verksamheten flyter på.</p></div>
           {isLive && <span className="inline-flex items-center gap-2 text-xs text-muted-foreground"><span className="h-2 w-2 rounded-full bg-green-500" /> Realtidsdata</span>}
         </div>
 
@@ -124,7 +126,7 @@ export default function AdminDashboardPage() {
           <Kpi icon={Wallet} value={`${Math.round(displayedInvoiceable).toLocaleString('sv-SE')} kr`} label="Slutfört och ofakturerat" loading={isLoading} />
         </div>
 
-        {openInvoices > 0 && <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">{openInvoices} skickade eller förfallna fakturor väntar på betalning.</div>}
+        <AttentionQueue items={attentionItems} />
 
         <div className="grid gap-6 lg:grid-cols-5">
           <section className="space-y-3 lg:col-span-3">
