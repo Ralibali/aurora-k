@@ -3,8 +3,9 @@ import { Buffer } from 'npm:buffer@6.0.3';
 
 export async function extractPdfText(bytes: Uint8Array) {
   const result = await pdf(Buffer.from(bytes));
+  const text = Array.from(String(result.text ?? ''), character => character.charCodeAt(0) === 0 ? '' : character).join('').trim();
   return {
-    text: String(result.text ?? '').replace(/\u0000/g, '').trim(),
+    text,
     pages: Number(result.numpages ?? 0),
     metadata: result.info ?? null,
   };
