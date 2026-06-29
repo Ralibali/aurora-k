@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from 'next-themes';
 import { motion } from 'framer-motion';
 import { ArrowRight, ChartBar as BarChart3, Check, CircleCheck as CheckCircle2, Clock, FileText, Globe, Loader as Loader2, Menu, PackageCheck, Route, ShieldCheck, Sparkles, TimerReset, Truck, Users, Wallet, Zap } from 'lucide-react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { LeadFormModal } from '@/components/LeadFormModal';
