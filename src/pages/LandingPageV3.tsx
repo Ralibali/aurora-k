@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from 'next-themes';
 import { motion } from 'framer-motion';
 import { ArrowRight, ChartBar as BarChart3, Check, CircleCheck as CheckCircle2, Clock, FileText, Globe, Loader as Loader2, Menu, PackageCheck, Route, ShieldCheck, Sparkles, TimerReset, Truck, Users, Wallet, Zap } from 'lucide-react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { LeadFormModal } from '@/components/LeadFormModal';
@@ -137,9 +138,52 @@ export default function LandingPageV3() {
             <Button size="sm" onClick={() => setDemoModalOpen(true)} className="hidden rounded-xl bg-[#123b88] px-4 font-bold text-white hover:bg-[#0f2f6e] md:inline-flex">
               {t.nav.bookDemo}
             </Button>
-            <Button variant="outline" size="icon" className="md:hidden" aria-label={t.nav.menu}>
-              <Menu className="h-4 w-4" />
-            </Button>
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="icon" className="md:hidden" aria-label={t.nav.menu}>
+                  <Menu className="h-4 w-4" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[280px] sm:w-[320px]">
+                <SheetHeader>
+                  <SheetTitle className="text-left">{t.nav.menu}</SheetTitle>
+                </SheetHeader>
+                <nav className="mt-6 flex flex-col gap-1 text-base font-semibold text-slate-700">
+                  <SheetClose asChild>
+                    <button onClick={() => scrollTo('funktioner')} className="rounded-lg px-3 py-3 text-left hover:bg-slate-100">{t.nav.features}</button>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <button onClick={() => scrollTo('flode')} className="rounded-lg px-3 py-3 text-left hover:bg-slate-100">{t.nav.flow}</button>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <button onClick={() => scrollTo('pris')} className="rounded-lg px-3 py-3 text-left hover:bg-slate-100">{t.nav.pricing}</button>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <button onClick={() => scrollTo('faq')} className="rounded-lg px-3 py-3 text-left hover:bg-slate-100">{t.nav.faq}</button>
+                  </SheetClose>
+                </nav>
+                <div className="mt-6 flex flex-col gap-2 border-t border-slate-200 pt-6">
+                  <SheetClose asChild>
+                    <Button onClick={() => setDemoModalOpen(true)} className="h-11 w-full rounded-xl bg-[#123b88] font-bold text-white hover:bg-[#0f2f6e]">
+                      {t.nav.bookDemo}
+                    </Button>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Button asChild variant="outline" className="h-11 w-full rounded-xl font-bold">
+                      <Link to={dashboardHref}>{dashboardLabel}</Link>
+                    </Button>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Link to={otherPath} hrefLang={otherLang} className="mt-2 inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700">
+                      <Globe className="h-3.5 w-3.5" />
+                      <span className={lang === 'sv' ? 'text-slate-950' : 'text-slate-400'}>{t.langSwitch.sv}</span>
+                      <span className="text-slate-300">/</span>
+                      <span className={lang === 'en' ? 'text-slate-950' : 'text-slate-400'}>{t.langSwitch.en}</span>
+                    </Link>
+                  </SheetClose>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </header>
