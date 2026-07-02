@@ -58,7 +58,7 @@ export default function ContactPage() {
                 <Phone className="h-4 w-4 text-primary mt-0.5" />
                 <div>
                   <p className="font-medium text-foreground">Telefon</p>
-                  <span className="text-muted-foreground">[DITT RIKTIGA NUMMER]</span>
+                  <a href="tel:+46722254993" className="text-muted-foreground hover:text-foreground">072-225 49 93</a>
                 </div>
               </div>
               <div className="flex items-start gap-3">
