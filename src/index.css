@@ -224,6 +224,19 @@ input:-webkit-autofill:focus {
   touch-action: pan-x pinch-zoom;
 }
 
+/* Landing page V3 — Midnight Indigo dark theme scope */
+.landing-v3 {
+  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+  color-scheme: dark;
+}
+.landing-v3 h1,
+.landing-v3 h2,
+.landing-v3 h3,
+.landing-v3 .font-display {
+  font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  letter-spacing: -0.02em;
+}
+
 /* Shimmer skeleton effect */
 @keyframes shimmer {
   0% { background-position: -200% 0; }
