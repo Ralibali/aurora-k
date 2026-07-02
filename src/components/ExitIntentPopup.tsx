@@ -51,6 +51,8 @@ export function ExitIntentPopup() {
           body: {
             templateName: 'new-lead-notification',
             templateData: {
+              companyName: '(exit-intent)',
+              contactPerson: email.split('@')[0],
               email,
               phone: phone || null,
               message: 'Exit intent-lead',

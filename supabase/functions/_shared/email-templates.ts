@@ -275,7 +275,7 @@ export function newLeadNotificationEmail(data: {
       ${data.fleetSize ? detailRow('Fordon/förare', data.fleetSize) : ''}
     `)}
     ${data.message ? alertBox(`<strong>Meddelande:</strong> ${data.message}`, BRAND.primary) : ''}
-    ${button('Se alla leads', 'https://aurora-k.lovable.app/platform/leads')}
+    ${button('Se alla leads', 'https://auroratransport.se/platform/leads')}
     ${divider()}
     ${smallText('Detta mail skickades automatiskt från Aurora Transport.')}
   `;

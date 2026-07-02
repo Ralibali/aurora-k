@@ -144,9 +144,9 @@ export default function LandingPageV3() {
                   <Menu className="h-4 w-4" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[280px] sm:w-[320px]">
+              <SheetContent side="right" className="w-[280px] border-[#1e1e5a] bg-[#0a0a1a] text-white sm:w-[320px]">
                 <SheetHeader>
-                  <SheetTitle className="text-left">{t.nav.menu}</SheetTitle>
+                  <SheetTitle className="text-left text-white">{t.nav.menu}</SheetTitle>
                 </SheetHeader>
                 <nav className="mt-6 flex flex-col gap-1 text-base font-semibold text-slate-200">
                   <SheetClose asChild>
