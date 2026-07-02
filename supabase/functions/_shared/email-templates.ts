@@ -306,3 +306,66 @@ export function newCustomerMessageEmail(data: {
     html: layout(html),
   };
 }
+
+export function bookingRequestCreatedEmail(data: {
+  companyName: string;
+  orderNumber: string;
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  preferredDate: string;
+  title: string;
+  description?: string | null;
+  attachmentPaths?: string[];
+  adminUrl: string;
+}) {
+  const attachments = (data.attachmentPaths ?? []).filter(Boolean);
+  const html = `
+    ${heading('Ny transportförfrågan')}
+    ${subheading(`En ny förfrågan har kommit in via ${data.companyName}s bokningssida.`)}
+    ${infoBox(`
+      ${detailRow('Ordernummer', data.orderNumber)}
+      ${detailRow('Uppdrag', data.title)}
+      ${detailRow('Önskat datum', data.preferredDate)}
+      ${detailRow('Kund', data.customerName)}
+      ${detailRow('E-post', data.customerEmail)}
+      ${detailRow('Telefon', data.customerPhone)}
+      ${attachments.length ? detailRow('Bilagor', String(attachments.length)) : ''}
+    `)}
+    ${data.description ? alertBox(`<strong>Beskrivning:</strong><br>${data.description.replace(/\n/g, '<br>')}`, BRAND.primary) : ''}
+    ${button('Öppna i admin', data.adminUrl)}
+    ${divider()}
+    ${smallText('Detta mail skickades automatiskt när kunden fyllde i bokningsformuläret.')}
+  `;
+  return {
+    subject: `Ny transportförfrågan ${data.orderNumber} – ${data.title}`,
+    html: layout(html),
+  };
+}
+
+export function bookingRequestConfirmationEmail(data: {
+  customerName: string;
+  companyName: string;
+  orderNumber: string;
+  title: string;
+  preferredDate: string;
+  description?: string | null;
+}) {
+  const html = `
+    ${heading('Tack för din förfrågan!')}
+    ${subheading(`Hej ${data.customerName}, vi har tagit emot din transportförfrågan.`)}
+    ${paragraph(`${data.companyName} granskar uppdraget och återkommer så snart som möjligt med bekräftelse, pris eller kompletterande frågor.`)}
+    ${infoBox(`
+      ${detailRow('Ordernummer', data.orderNumber)}
+      ${detailRow('Uppdrag', data.title)}
+      ${detailRow('Önskat datum', data.preferredDate)}
+    `)}
+    ${data.description ? alertBox(`<strong>Din beskrivning:</strong><br>${data.description.replace(/\n/g, '<br>')}`, BRAND.primary) : ''}
+    ${divider()}
+    ${smallText('Spara ordernumret ovan – du kan hänvisa till det när du kontaktar oss.')}
+  `;
+  return {
+    subject: `Vi har tagit emot din transportförfrågan ${data.orderNumber}`,
+    html: layout(html),
+  };
+}
