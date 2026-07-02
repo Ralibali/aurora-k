@@ -397,7 +397,7 @@ export default function LandingPageV3() {
                       </div>
                     ))}
                   </div>
-                  <Button size="lg" onClick={() => setDemoModalOpen(true)} className="mt-8 rounded-2xl bg-[#141432] px-7 font-black text-[#0a0a1a] hover:bg-[#4f46e5]/15">
+                  <Button size="lg" onClick={() => setDemoModalOpen(true)} className="mt-8 rounded-2xl bg-[#4f46e5] px-7 font-black text-white shadow-[0_0_30px_rgba(79,70,229,0.45)] hover:bg-[#4338ca]">
                     {t.pricing.cta}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
@@ -436,7 +436,7 @@ export default function LandingPageV3() {
             <h2 className="text-4xl font-black tracking-tight sm:text-5xl">{t.finalCta.h2}</h2>
             <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-slate-400">{t.finalCta.sub}</p>
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-              <Button size="lg" onClick={() => setDemoModalOpen(true)} className="rounded-2xl bg-[#141432] px-7 font-black text-white hover:bg-[#4f46e5]/15">
+              <Button size="lg" onClick={() => setDemoModalOpen(true)} className="rounded-2xl bg-[#4f46e5] px-7 font-black text-white shadow-[0_0_30px_rgba(79,70,229,0.45)] hover:bg-[#4338ca]">
                 {t.finalCta.primary}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
