@@ -66,6 +66,28 @@ const STATIC_PAGES = [
     ],
   },
   {
+    route: "/en",
+    title: "Transport management system for hauliers | Aurora Transport",
+    description:
+      "Swedish TMS for hauliers, couriers and transport staffing. Jobs, drivers, time reporting and invoice drafts from 449 SEK/month.",
+    h1: "Transport management system for hauliers and couriers",
+    body: [
+      "Aurora Transport is a Swedish transport management system that replaces spreadsheets, WhatsApp and whiteboards. Manage jobs, drivers, time reporting and invoice drafts in one product built for hauliers, couriers and transport staffing teams.",
+      "Flat pricing from 449 SEK per month. Unlimited drivers. No lock-in. Book a free 15-minute demo and see how you can get started today.",
+    ],
+  },
+  {
+    route: "/boka",
+    title: "Boka transport | Aurora Transport",
+    description:
+      "Boka en transport hos våra åkerier direkt online. Fyll i uppdrag, adresser och önskad tid – vi återkommer med bekräftelse och pris.",
+    h1: "Boka transport",
+    body: [
+      "Behöver du boka en transport? Fyll i formuläret så matchar vi ditt uppdrag med rätt åkeri och återkommer med bekräftelse och pris.",
+      "Ange upphämtnings- och leveransadress, gods och önskad tid – det tar mindre än en minut.",
+    ],
+  },
+  {
     route: "/tjanster",
     title: "Tjänster — Transportledning & GPS | Aurora Transport",
     description:

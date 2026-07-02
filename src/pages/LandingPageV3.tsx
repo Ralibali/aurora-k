@@ -74,7 +74,7 @@ export default function LandingPageV3() {
   }, [theme, setTheme]);
 
   useEffect(() => {
-    if (location.pathname === '/boka' || location.pathname === '/en/book') {
+    if (location.pathname === '/en/book') {
       setDemoModalOpen(true);
     }
   }, [location.pathname]);
