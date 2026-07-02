@@ -32,6 +32,7 @@ const OnboardingPage = lazy(() => import("./pages/OnboardingPage"));
 const JoinPage = lazy(() => import("./pages/JoinPage"));
 const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage"));
 const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage"));
+const RegisterPage = lazy(() => import("./pages/RegisterPage"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminAssignments = lazy(() => import("./pages/admin/AdminAssignments"));
 const AdminAssignmentDetail = lazy(() => import("./pages/admin/AdminAssignmentDetail"));
@@ -151,6 +152,7 @@ const App = () => (
                   <Route path="/coredination-alternativ" element={<CoredinationAlternativPage />} />
                   <Route path="/tjanster" element={<TjansterPage />} />
                   <Route path="/login" element={<LoginPage />} />
+                  <Route path="/register" element={<RegisterPage />} />
                   <Route path="/kontakt" element={<ContactPage />} />
                   <Route path="/onboarding" element={<OnboardingPage />} />
                   <Route path="/join" element={<JoinPage />} />
