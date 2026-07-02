@@ -8,3 +8,15 @@ verify_jwt = false
 
 [functions.stripe-webhook]
 verify_jwt = false
+
+[functions.track-assignment]
+verify_jwt = false
+
+[functions.customer-portal]
+verify_jwt = false
+
+[functions.public-booking]
+verify_jwt = false
+
+[functions.notify-admin]
+verify_jwt = false
