@@ -103,6 +103,7 @@ export function PortalChat({ token, customerName }: PortalChatProps) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          token,
           type: 'new-customer-message',
           data: {
             customerName,
