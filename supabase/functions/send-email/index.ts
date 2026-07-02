@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.100.1";
 import { corsHeaders } from "npm:@supabase/supabase-js@2.100.1/cors";
-import { assignmentConfirmationEmail, driverWelcomeEmail, driverInviteEmail, newLeadNotificationEmail, newCustomerMessageEmail } from "../_shared/email-templates.ts";
+import { assignmentConfirmationEmail, driverWelcomeEmail, driverInviteEmail, newLeadNotificationEmail, newCustomerMessageEmail, bookingRequestCreatedEmail, bookingRequestConfirmationEmail } from "../_shared/email-templates.ts";
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
 
@@ -10,6 +10,8 @@ const TEMPLATE_MAP: Record<string, (data: any) => { subject: string; html: strin
   'driver-invite': driverInviteEmail,
   'new-lead-notification': newLeadNotificationEmail,
   'new-customer-message': newCustomerMessageEmail,
+  'booking-request-created': bookingRequestCreatedEmail,
+  'booking-request-confirmation': bookingRequestConfirmationEmail,
 };
 
 Deno.serve(async (req) => {

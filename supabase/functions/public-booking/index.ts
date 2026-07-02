@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { z } from 'https://esm.sh/zod@3';
+import { bookingRequestCreatedEmail, bookingRequestConfirmationEmail } from '../_shared/email-templates.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -67,7 +68,7 @@ Deno.serve(async (req) => {
 
     if (bookingError) throw bookingError;
 
-    await admin.from('notification_outbox').insert([
+    const { data: outboxRows } = await admin.from('notification_outbox').insert([
       {
         channel: 'email',
         type: 'booking_request_created',
@@ -94,6 +95,74 @@ Deno.serve(async (req) => {
         },
         status: 'pending',
       },
+    ]).select('id, type');
+
+    // Resolve admin recipient
+    const { data: adminProfile } = await admin
+      .from('profiles')
+      .select('email')
+      .eq('company_id', company.id)
+      .eq('role', 'admin')
+      .limit(1)
+      .maybeSingle();
+    const adminEmail = adminProfile?.email || 'info@auroramedia.se';
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
+    const sendMail = async (to: string, tpl: { subject: string; html: string }) => {
+      const res = await fetch(`${supabaseUrl}/functions/v1/send-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${serviceRoleKey}`,
+        },
+        body: JSON.stringify({ to, subject: tpl.subject, html: tpl.html }),
+      });
+      if (!res.ok) {
+        console.error('[public-booking] send-email failed', await res.text());
+        return false;
+      }
+      return true;
+    };
+
+    const adminTpl = bookingRequestCreatedEmail({
+      companyName: company.name,
+      orderNumber: parsed.data.order_number,
+      customerName: parsed.data.customer_name,
+      customerEmail: parsed.data.customer_email,
+      customerPhone: parsed.data.customer_phone,
+      preferredDate: parsed.data.preferred_date,
+      title: parsed.data.title,
+      description: parsed.data.description ?? null,
+      attachmentPaths: parsed.data.attachment_paths,
+      adminUrl: `https://auroratransport.se/admin/booking-requests`,
+    });
+    const customerTpl = bookingRequestConfirmationEmail({
+      customerName: parsed.data.customer_name,
+      companyName: company.name,
+      orderNumber: parsed.data.order_number,
+      title: parsed.data.title,
+      preferredDate: parsed.data.preferred_date,
+      description: parsed.data.description ?? null,
+    });
+
+    const [adminOk, customerOk] = await Promise.all([
+      sendMail(adminEmail, adminTpl),
+      sendMail(parsed.data.customer_email, customerTpl),
+    ]);
+
+    const updateStatus = async (type: string, ok: boolean) => {
+      const row = outboxRows?.find(r => r.type === type);
+      if (!row) return;
+      await admin.from('notification_outbox').update({
+        status: ok ? 'sent' : 'failed',
+        sent_at: ok ? new Date().toISOString() : null,
+      }).eq('id', row.id);
+    };
+    await Promise.all([
+      updateStatus('booking_request_created', adminOk),
+      updateStatus('booking_request_customer_confirmation', customerOk),
     ]);
 
     return new Response(JSON.stringify({ booking, order_number: parsed.data.order_number }), {

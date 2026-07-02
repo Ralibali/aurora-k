@@ -96,36 +96,20 @@ export default function PublicBookingPage() {
       const attachmentPaths = await uploadFiles(number);
       const title = `${form.serviceType} - ${form.pickupAddress}`;
       const description = buildDescription(form, attachmentPaths, number, brand.name);
-      const payload = {
-        customer_name: form.company || form.contactName,
-        customer_email: form.email,
-        customer_phone: form.phone,
-        preferred_date: form.preferredDate,
-        title,
-        description,
-        status: 'pending',
-      };
-
-      const { error } = await supabase.from('booking_requests').insert(payload);
+      const { error } = await supabase.functions.invoke('public-booking', {
+        body: {
+          slug: slug ?? 'aurora-transport',
+          customer_name: form.company || form.contactName,
+          customer_email: form.email,
+          customer_phone: form.phone,
+          preferred_date: form.preferredDate,
+          title,
+          description,
+          attachment_paths: attachmentPaths,
+          order_number: number,
+        },
+      });
       if (error) throw error;
-
-      await (supabase as any).from('notification_outbox').insert([
-        {
-          channel: 'email',
-          type: 'booking_request_created',
-          subject: `Ny transportförfrågan ${number}`,
-          payload: { orderNumber: number, brand: brand.name, ...payload, attachmentPaths },
-          status: 'pending',
-        },
-        {
-          channel: 'email',
-          type: 'booking_request_customer_confirmation',
-          recipient_email: form.email,
-          subject: `Vi har tagit emot din transportförfrågan ${number}`,
-          payload: { orderNumber: number, brand: brand.name, contactName: form.contactName, ...payload },
-          status: 'pending',
-        },
-      ]);
 
       setOrderNumber(number);
       toast.success('Förfrågan skickad!');

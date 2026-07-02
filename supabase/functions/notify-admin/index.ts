@@ -1,4 +1,5 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2.100.1/cors";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.100.1";
 import { newCustomerMessageEmail } from "../_shared/email-templates.ts";
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
@@ -17,11 +18,34 @@ Deno.serve(async (req) => {
     if (!RESEND_API_KEY) throw new Error("RESEND_API_KEY is not configured");
 
     const body = await req.json();
-    const { type, data } = body;
+    const { type, data, token } = body;
 
-    if (!type || !data) {
-      return new Response(JSON.stringify({ error: "Missing type or data" }), {
+    if (!type || !data || !token) {
+      return new Response(JSON.stringify({ error: "Missing type, data or token" }), {
         status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Validate portal token against customer_access_tokens (including expiry)
+    const admin = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
+    const { data: tokenRow, error: tokenError } = await admin
+      .from("customer_access_tokens")
+      .select("customer_id, expires_at")
+      .eq("token", token)
+      .maybeSingle();
+    if (tokenError || !tokenRow) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (tokenRow.expires_at && new Date(tokenRow.expires_at as string) < new Date()) {
+      return new Response(JSON.stringify({ error: "Token expired" }), {
+        status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
