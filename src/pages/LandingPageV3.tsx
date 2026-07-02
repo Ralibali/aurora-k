@@ -319,7 +319,7 @@ export default function LandingPageV3() {
                 const Icon = featureIcons[index] ?? Route;
                 return (
                   <motion.div key={group.title} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-80px' }} variants={fadeUp} custom={index} className="rounded-[2rem] border border-[#1e1e5a] bg-[#141432] p-8 shadow-[0_22px_80px_rgba(0,0,0,0.5)]">
-                    <div className="flex h-13 w-13 items-center justify-center rounded-2xl bg-[#4f46e5] text-white">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#4f46e5] text-white">
                       <Icon className="h-6 w-6" />
                     </div>
                     <h3 className="mt-6 text-2xl font-black tracking-tight text-white">{group.title}</h3>
