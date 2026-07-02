@@ -58,14 +58,14 @@ export default function ContactPage() {
                 <Phone className="h-4 w-4 text-primary mt-0.5" />
                 <div>
                   <p className="font-medium text-foreground">Telefon</p>
-                  <a href="tel:+46101234567" className="text-muted-foreground hover:text-foreground">010-123 45 67</a>
+                  <span className="text-muted-foreground">[DITT RIKTIGA NUMMER]</span>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <Mail className="h-4 w-4 text-primary mt-0.5" />
                 <div>
                   <p className="font-medium text-foreground">E-post</p>
-                  <a href="mailto:info@auroratransport.se" className="text-muted-foreground hover:text-foreground">info@auroratransport.se</a>
+                  <a href="mailto:info@auroramedia.se" className="text-muted-foreground hover:text-foreground">info@auroramedia.se</a>
                 </div>
               </div>
               <div className="flex items-start gap-3">
