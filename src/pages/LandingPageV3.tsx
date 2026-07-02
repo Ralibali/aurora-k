@@ -126,7 +126,7 @@ export default function LandingPageV3() {
           </nav>
 
           <div className="flex items-center gap-2">
-            <Link to={otherPath} hrefLang={otherLang} aria-label={t.langSwitch.aria} className="hidden items-center gap-1.5 rounded-xl border border-[#1e1e5a] bg-white px-3 py-1.5 text-xs font-bold text-slate-200 transition hover:border-[#1e1e5a] hover:text-white sm:inline-flex">
+            <Link to={otherPath} hrefLang={otherLang} aria-label={t.langSwitch.aria} className="hidden items-center gap-1.5 rounded-xl border border-[#1e1e5a] bg-[#141432] px-3 py-1.5 text-xs font-bold text-slate-200 transition hover:border-[#1e1e5a] hover:text-white sm:inline-flex">
               <Globe className="h-3.5 w-3.5" />
               <span className={lang === 'sv' ? 'text-white' : 'text-slate-400'}>{t.langSwitch.sv}</span>
               <span className="text-slate-400">/</span>
@@ -174,7 +174,7 @@ export default function LandingPageV3() {
                     </Button>
                   </SheetClose>
                   <SheetClose asChild>
-                    <Link to={otherPath} hrefLang={otherLang} className="mt-2 inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#1e1e5a] bg-white px-3 py-2 text-xs font-bold text-slate-200">
+                    <Link to={otherPath} hrefLang={otherLang} className="mt-2 inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#1e1e5a] bg-[#141432] px-3 py-2 text-xs font-bold text-slate-200">
                       <Globe className="h-3.5 w-3.5" />
                       <span className={lang === 'sv' ? 'text-white' : 'text-slate-400'}>{t.langSwitch.sv}</span>
                       <span className="text-slate-400">/</span>
@@ -211,7 +211,7 @@ export default function LandingPageV3() {
                   {t.hero.ctaPrimary}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
-                <Button size="lg" variant="outline" onClick={handleDemo} disabled={demoLoading} className="h-13 rounded-2xl border-[#1e1e5a] bg-white px-7 text-base font-bold text-white hover:bg-[#141432]">
+                <Button size="lg" variant="outline" onClick={handleDemo} disabled={demoLoading} className="h-13 rounded-2xl border-[#1e1e5a] bg-[#141432] px-7 text-base font-bold text-white hover:bg-[#141432]">
                   {demoLoading ? (
                     <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{t.hero.ctaSecondaryLoading}</>
                   ) : t.hero.ctaSecondaryIdle}
@@ -240,13 +240,13 @@ export default function LandingPageV3() {
           </div>
         </section>
 
-        <section className="bg-white py-16 sm:py-20">
+        <section className="bg-[#141432] py-16 sm:py-20">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid gap-5 md:grid-cols-3">
               {t.values.map((card, index) => {
                 const Icon = valueIcons[index] ?? TimerReset;
                 return (
-                  <motion.div key={card.title} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-80px' }} variants={fadeUp} custom={index} className="rounded-[2rem] border border-[#1e1e5a] bg-white p-7 shadow-[0_20px_70px_rgba(0,0,0,0.4)]">
+                  <motion.div key={card.title} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-80px' }} variants={fadeUp} custom={index} className="rounded-[2rem] border border-[#1e1e5a] bg-[#141432] p-7 shadow-[0_20px_70px_rgba(0,0,0,0.4)]">
                     <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#1e1e5a]/20 text-[#818cf8]">
                       <Icon className="h-5 w-5" />
                     </div>
@@ -267,7 +267,7 @@ export default function LandingPageV3() {
               <p className="text-sm font-bold uppercase tracking-[0.22em] text-[#818cf8]">{t.seoIntro.eyebrow}</p>
               <h2 className="mt-4 text-4xl font-black tracking-tight text-white sm:text-5xl">{t.seoIntro.h2}</h2>
             </motion.div>
-            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-80px' }} variants={fadeUp} custom={1} className="rounded-[2rem] border border-[#1e1e5a] bg-white p-8 shadow-[0_22px_80px_rgba(0,0,0,0.5)]">
+            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-80px' }} variants={fadeUp} custom={1} className="rounded-[2rem] border border-[#1e1e5a] bg-[#141432] p-8 shadow-[0_22px_80px_rgba(0,0,0,0.5)]">
               <p className="text-lg leading-8 text-slate-400">{t.seoIntro.text}</p>
               <ul className="mt-6 grid gap-3 sm:grid-cols-3">
                 {t.seoIntro.bullets.map((bullet) => (
@@ -318,7 +318,7 @@ export default function LandingPageV3() {
               {t.features.groups.map((group, index) => {
                 const Icon = featureIcons[index] ?? Route;
                 return (
-                  <motion.div key={group.title} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-80px' }} variants={fadeUp} custom={index} className="rounded-[2rem] border border-[#1e1e5a] bg-white p-8 shadow-[0_22px_80px_rgba(0,0,0,0.5)]">
+                  <motion.div key={group.title} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-80px' }} variants={fadeUp} custom={index} className="rounded-[2rem] border border-[#1e1e5a] bg-[#141432] p-8 shadow-[0_22px_80px_rgba(0,0,0,0.5)]">
                     <div className="flex h-13 w-13 items-center justify-center rounded-2xl bg-[#4f46e5] text-white">
                       <Icon className="h-6 w-6" />
                     </div>
@@ -339,7 +339,7 @@ export default function LandingPageV3() {
           </div>
         </section>
 
-        <section className="bg-white py-20 sm:py-24">
+        <section className="bg-[#141432] py-20 sm:py-24">
           <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
             <div>
               <p className="text-sm font-bold uppercase tracking-[0.22em] text-[#818cf8]">{t.audiences.eyebrow}</p>
@@ -352,7 +352,7 @@ export default function LandingPageV3() {
                 return (
                   <div key={item.title} className="rounded-[1.5rem] border border-[#1e1e5a] bg-[#141432] p-5">
                     <div className="flex items-start gap-4">
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-[#818cf8] shadow-sm">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#141432] text-[#818cf8] shadow-sm">
                         <Icon className="h-5 w-5" />
                       </div>
                       <div>
@@ -375,7 +375,7 @@ export default function LandingPageV3() {
               <p className="mt-5 text-lg leading-8 text-slate-400">{t.pricing.sub}</p>
             </div>
             <div className="mx-auto mt-12 grid max-w-4xl gap-6 md:grid-cols-[0.85fr_1.15fr]">
-              <div className="rounded-[2rem] border border-[#1e1e5a] bg-white p-8 shadow-[0_22px_70px_rgba(0,0,0,0.4)]">
+              <div className="rounded-[2rem] border border-[#1e1e5a] bg-[#141432] p-8 shadow-[0_22px_70px_rgba(0,0,0,0.4)]">
                 <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">{t.pricing.setupLabel}</p>
                 <div className="mt-4 text-5xl font-black tracking-tight text-white">{t.pricing.setupPrice}</div>
                 <p className="mt-3 leading-7 text-slate-400">{t.pricing.setupText}</p>
@@ -397,7 +397,7 @@ export default function LandingPageV3() {
                       </div>
                     ))}
                   </div>
-                  <Button size="lg" onClick={() => setDemoModalOpen(true)} className="mt-8 rounded-2xl bg-white px-7 font-black text-[#0a0a1a] hover:bg-[#4f46e5]/15">
+                  <Button size="lg" onClick={() => setDemoModalOpen(true)} className="mt-8 rounded-2xl bg-[#141432] px-7 font-black text-[#0a0a1a] hover:bg-[#4f46e5]/15">
                     {t.pricing.cta}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
@@ -413,7 +413,7 @@ export default function LandingPageV3() {
           </div>
         </section>
 
-        <section id="faq" className="bg-white py-20 sm:py-24">
+        <section id="faq" className="bg-[#141432] py-20 sm:py-24">
           <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[0.85fr_1.15fr] lg:px-8">
             <div>
               <p className="text-sm font-bold uppercase tracking-[0.22em] text-[#818cf8]">{t.faq.eyebrow}</p>
@@ -436,7 +436,7 @@ export default function LandingPageV3() {
             <h2 className="text-4xl font-black tracking-tight sm:text-5xl">{t.finalCta.h2}</h2>
             <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-slate-400">{t.finalCta.sub}</p>
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-              <Button size="lg" onClick={() => setDemoModalOpen(true)} className="rounded-2xl bg-white px-7 font-black text-white hover:bg-[#4f46e5]/15">
+              <Button size="lg" onClick={() => setDemoModalOpen(true)} className="rounded-2xl bg-[#141432] px-7 font-black text-white hover:bg-[#4f46e5]/15">
                 {t.finalCta.primary}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -466,12 +466,12 @@ function HeroProductMockup() {
   return (
     <div className="relative mx-auto w-full min-w-0 max-w-2xl lg:max-w-none">
       <div className="absolute inset-6 rounded-[2rem] bg-[#4f46e5]/25 blur-3xl" />
-      <div className="relative overflow-hidden rounded-[2rem] border border-[#1e1e5a] bg-white shadow-[0_30px_100px_rgba(79,70,229,0.25)]">
+      <div className="relative overflow-hidden rounded-[2rem] border border-[#1e1e5a] bg-[#141432] shadow-[0_30px_100px_rgba(79,70,229,0.25)]">
         <div className="flex h-12 items-center gap-2 border-b border-[#1e1e5a] bg-[#141432] px-4">
           <span className="h-3 w-3 rounded-full bg-red-500/60" />
           <span className="h-3 w-3 rounded-full bg-amber-500/60" />
           <span className="h-3 w-3 rounded-full bg-emerald-500/60" />
-          <div className="ml-3 flex-1 rounded-lg border border-[#1e1e5a] bg-white px-3 py-1.5 font-mono text-xs text-slate-400">app.auroratransport.se</div>
+          <div className="ml-3 flex-1 rounded-lg border border-[#1e1e5a] bg-[#141432] px-3 py-1.5 font-mono text-xs text-slate-400">app.auroratransport.se</div>
         </div>
         <div className="grid min-h-[430px] grid-cols-1 sm:grid-cols-[170px_1fr]">
           <aside className="hidden bg-[#141432] p-5 text-white sm:block">
@@ -492,7 +492,7 @@ function HeroProductMockup() {
               <Metric icon={Clock} value="6" label="Rapporter idag" tone="amber" />
             </div>
             <div className="mt-5 grid gap-5 lg:grid-cols-[1.15fr_0.85fr]">
-              <div className="rounded-2xl border border-[#1e1e5a] bg-white p-5 shadow-sm">
+              <div className="rounded-2xl border border-[#1e1e5a] bg-[#141432] p-5 shadow-sm">
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Aktuellt uppdrag</p>
                   <span className="rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs font-black text-emerald-300">Pågående</span>
@@ -507,7 +507,7 @@ function HeroProductMockup() {
               </div>
               <div className="rounded-2xl border border-[#1e1e5a] bg-[#1e1e5a]/20 p-5">
                 <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Live-rutt</p>
-                <div className="relative mt-5 h-48 overflow-hidden rounded-2xl bg-white">
+                <div className="relative mt-5 h-48 overflow-hidden rounded-2xl bg-[#141432]">
                   <div className="absolute inset-0 bg-[linear-gradient(rgba(79,70,229,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(79,70,229,0.12)_1px,transparent_1px)] bg-[size:28px_28px]" />
                   <div className="absolute bottom-6 left-8 h-3 w-3 rounded-full bg-emerald-500/150" />
                   <div className="absolute right-10 top-8 h-3 w-3 rounded-full bg-[#4f46e5]" />
@@ -529,7 +529,7 @@ function Metric({ icon: Icon, value, label, tone }: { icon: any; value: string; 
     amber: 'bg-amber-500/15 text-amber-300',
   };
   return (
-    <div className="rounded-2xl border border-[#1e1e5a] bg-white p-4 shadow-sm">
+    <div className="rounded-2xl border border-[#1e1e5a] bg-[#141432] p-4 shadow-sm">
       <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${tones[tone]}`}><Icon className="h-4 w-4" /></div>
       <div className="mt-4 text-3xl font-black tracking-tight text-white">{value}</div>
       <div className="mt-1 text-[0.68rem] font-black uppercase tracking-[0.14em] text-slate-400">{label}</div>
@@ -761,7 +761,7 @@ const includedCopy = {
 function IncludedSection({ lang, onDemo }: { lang: Lang; onDemo: () => void }) {
   const c = includedCopy[lang];
   return (
-    <section id="ingar" className="bg-white py-20 sm:py-24">
+    <section id="ingar" className="bg-[#141432] py-20 sm:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-sm font-bold uppercase tracking-[0.22em] text-[#818cf8]">{c.eyebrow}</p>
@@ -810,7 +810,7 @@ function IncludedSection({ lang, onDemo }: { lang: Lang; onDemo: () => void }) {
           <div className="flex flex-col justify-between rounded-[2rem] bg-[#141432] p-7 text-white shadow-[0_30px_90px_rgba(79,70,229,0.35)]">
             <p className="text-sm leading-7 text-slate-400">{c.note}</p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-              <Button onClick={onDemo} size="lg" className="rounded-2xl bg-white px-6 font-black text-[#0a0a1a] hover:bg-[#4f46e5]/15">
+              <Button onClick={onDemo} size="lg" className="rounded-2xl bg-[#141432] px-6 font-black text-[#0a0a1a] hover:bg-[#4f46e5]/15">
                 {c.cta}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
