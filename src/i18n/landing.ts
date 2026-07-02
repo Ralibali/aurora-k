@@ -27,6 +27,7 @@ export interface LandingCopy {
     ctaPrimary: string;
     ctaSecondaryIdle: string;
     ctaSecondaryLoading: string;
+    ctaRegister: string;
     trustPoints: string[];
   };
   values: { title: string; text: string }[];
@@ -67,6 +68,7 @@ export interface LandingCopy {
     monthlyText: string;
     monthlyBenefits: string[];
     cta: string;
+    ctaRegister: string;
   };
   faq: {
     eyebrow: string;
@@ -80,6 +82,7 @@ export interface LandingCopy {
     primary: string;
     secondaryIdle: string;
     secondaryLoading: string;
+    ctaRegister: string;
   };
   toasts: {
     demoSuccess: (companyName: string) => string;
