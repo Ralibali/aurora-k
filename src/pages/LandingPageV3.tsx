@@ -216,6 +216,12 @@ export default function LandingPageV3() {
                     <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{t.hero.ctaSecondaryLoading}</>
                   ) : t.hero.ctaSecondaryIdle}
                 </Button>
+                <Button asChild size="lg" variant="ghost" className="h-13 rounded-2xl px-7 text-base font-bold text-[#123b88] hover:bg-[#123b88]/5">
+                  <Link to="/register">
+                    {t.hero.ctaRegister}
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
               </div>
 
               <div className="mt-8 grid gap-3 text-sm font-medium text-slate-600 sm:grid-cols-2">
@@ -395,6 +401,12 @@ export default function LandingPageV3() {
                     {t.pricing.cta}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
+                  <Button asChild size="lg" variant="outline" className="mt-3 rounded-2xl border-white/30 bg-transparent px-7 font-black text-white hover:bg-white/10 hover:text-white">
+                    <Link to="/register">
+                      {t.pricing.ctaRegister}
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -432,6 +444,12 @@ export default function LandingPageV3() {
                 {demoLoading ? (
                   <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{t.finalCta.secondaryLoading}</>
                 ) : t.finalCta.secondaryIdle}
+              </Button>
+              <Button asChild size="lg" variant="ghost" className="rounded-2xl px-7 font-black text-white hover:bg-white/10 hover:text-white">
+                <Link to="/register">
+                  {t.finalCta.ctaRegister}
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
               </Button>
             </div>
           </div>

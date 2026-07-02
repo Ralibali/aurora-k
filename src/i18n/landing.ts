@@ -27,6 +27,7 @@ export interface LandingCopy {
     ctaPrimary: string;
     ctaSecondaryIdle: string;
     ctaSecondaryLoading: string;
+    ctaRegister: string;
     trustPoints: string[];
   };
   values: { title: string; text: string }[];
@@ -67,6 +68,7 @@ export interface LandingCopy {
     monthlyText: string;
     monthlyBenefits: string[];
     cta: string;
+    ctaRegister: string;
   };
   faq: {
     eyebrow: string;
@@ -80,6 +82,7 @@ export interface LandingCopy {
     primary: string;
     secondaryIdle: string;
     secondaryLoading: string;
+    ctaRegister: string;
   };
   toasts: {
     demoSuccess: (companyName: string) => string;
@@ -121,6 +124,7 @@ const SV: LandingCopy = {
     ctaPrimary: 'Boka demo',
     ctaSecondaryIdle: 'Se demo med exempeldata',
     ctaSecondaryLoading: 'Loggar in...',
+    ctaRegister: 'Kom igång – skapa konto',
     trustPoints: [
       'Fast pris: 449 kr per månad',
       'Ingen bindningstid',
@@ -209,6 +213,7 @@ const SV: LandingCopy = {
     monthlyText: 'Obegränsat antal förare, admins och uppdrag. Support på svenska ingår.',
     monthlyBenefits: ['Ingen bindningstid', 'Support på svenska', 'Obegränsat antal förare', 'Fakturaunderlag ingår'],
     cta: 'Boka demo',
+    ctaRegister: 'Kom igång – skapa konto',
   },
   faq: {
     eyebrow: 'FAQ',
@@ -231,6 +236,7 @@ const SV: LandingCopy = {
     primary: 'Boka demo',
     secondaryIdle: 'Se demo med exempeldata',
     secondaryLoading: 'Loggar in...',
+    ctaRegister: 'Kom igång – skapa konto',
   },
   toasts: {
     demoSuccess: (companyName) => `Inloggad som ${companyName} — omdirigerar...`,
@@ -272,6 +278,7 @@ const EN: LandingCopy = {
     ctaPrimary: 'Book a demo',
     ctaSecondaryIdle: 'Try the live demo',
     ctaSecondaryLoading: 'Signing in...',
+    ctaRegister: 'Get started',
     trustPoints: [
       'Flat price: 449 SEK per month',
       'No lock-in',
@@ -360,6 +367,7 @@ const EN: LandingCopy = {
     monthlyText: 'Unlimited drivers, admins and jobs. Human support included.',
     monthlyBenefits: ['No lock-in', 'Human support', 'Unlimited drivers', 'Invoice drafts included'],
     cta: 'Book a demo',
+    ctaRegister: 'Get started',
   },
   faq: {
     eyebrow: 'FAQ',
@@ -382,6 +390,7 @@ const EN: LandingCopy = {
     primary: 'Book a demo',
     secondaryIdle: 'Try the live demo',
     secondaryLoading: 'Signing in...',
+    ctaRegister: 'Get started',
   },
   toasts: {
     demoSuccess: (companyName) => `Signed in as ${companyName} — redirecting...`,
