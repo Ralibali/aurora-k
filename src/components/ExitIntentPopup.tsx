@@ -45,6 +45,20 @@ export function ExitIntentPopup() {
 
       if (error) throw error;
 
+      // Fire-and-forget admin notification
+      supabase.functions
+        .invoke('send-email', {
+          body: {
+            templateName: 'new-lead-notification',
+            templateData: {
+              email,
+              phone: phone || null,
+              message: 'Exit intent-lead',
+            },
+          },
+        })
+        .catch((err) => console.warn('Failed to send exit-intent lead notification:', err));
+
       setSubmitted(true);
       toast.success('Tack! Vi hör av oss inom kort.');
       setTimeout(() => setOpen(false), 2000);

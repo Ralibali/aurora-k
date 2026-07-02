@@ -125,7 +125,7 @@ export function LeadForm({ onSuccess, compact = false }: LeadFormProps) {
           message: form.message.trim() || null,
         },
       },
-    }).catch(() => {});
+    }).catch((err) => console.warn('Failed to send lead notification:', err));
 
     setSubmitted(true);
     try { (await import('@/lib/track')).track('lead_submit_success', { fleet_size: form.fleet_size || 'unspecified', has_phone: Boolean(form.phone), lead_score: leadScore }); } catch { /* noop */ }

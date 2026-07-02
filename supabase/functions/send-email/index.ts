@@ -20,34 +20,43 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Authenticate the caller — only authenticated users or internal service calls
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    // Parse body first so we know which template is requested
+    const body = await req.json();
+    const { templateName, templateData } = body;
+    let { to, subject, html } = body;
 
+    const authHeader = req.headers.get("Authorization");
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 
-    const callerClient = createClient(supabaseUrl, anonKey, {
-      global: { headers: { Authorization: authHeader } },
-    });
-    const { data: claimsData, error: claimsError } = await callerClient.auth.getClaims(
-      authHeader.replace("Bearer ", "")
-    );
+    // Public exception: anonymous visitors can trigger new-lead-notification,
+    // but the recipient is hard-coded and any client-supplied `to` is ignored.
+    const isPublicLeadNotification = templateName === "new-lead-notification";
 
-    // Allow if it's a valid user JWT OR if it's the service_role key (internal calls)
-    const isServiceRole = claimsData?.claims?.role === "service_role";
-    const isAuthenticated = !claimsError && claimsData?.claims?.sub;
-
-    if (!isServiceRole && !isAuthenticated) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+    if (!isPublicLeadNotification) {
+      if (!authHeader) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const callerClient = createClient(supabaseUrl, anonKey, {
+        global: { headers: { Authorization: authHeader } },
       });
+      const { data: claimsData, error: claimsError } = await callerClient.auth.getClaims(
+        authHeader.replace("Bearer ", "")
+      );
+      const isServiceRole = claimsData?.claims?.role === "service_role";
+      const isAuthenticated = !claimsError && claimsData?.claims?.sub;
+      if (!isServiceRole && !isAuthenticated) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    } else {
+      // Force recipient regardless of what the client sent.
+      to = "info@auroramedia.se";
     }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
@@ -55,10 +64,6 @@ Deno.serve(async (req) => {
 
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
     if (!RESEND_API_KEY) throw new Error("RESEND_API_KEY is not configured");
-
-    const body = await req.json();
-    const { to, templateName, templateData } = body;
-    let { subject, html } = body;
 
     // If a template is specified, use it to generate subject + html
     if (templateName) {
