@@ -796,12 +796,12 @@ function IncludedSection({ lang, onDemo }: { lang: Lang; onDemo: () => void }) {
         </div>
 
         <div className="mt-10 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="rounded-[2rem] border border-emerald-200 bg-emerald-500/15/60 p-7">
-            <h3 className="text-xl font-black tracking-tight text-emerald-900">{c.notIncluded.title}</h3>
+          <div className="rounded-[2rem] border border-emerald-500/30 bg-emerald-500/10 p-7">
+            <h3 className="text-xl font-black tracking-tight text-emerald-300">{c.notIncluded.title}</h3>
             <ul className="mt-5 grid gap-2.5 sm:grid-cols-2">
               {c.notIncluded.items.map((item) => (
-                <li key={item} className="flex items-start gap-2.5 text-sm font-semibold leading-6 text-emerald-900">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                <li key={item} className="flex items-start gap-2.5 text-sm font-semibold leading-6 text-emerald-100">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
                   <span>{item}</span>
                 </li>
               ))}
@@ -810,7 +810,7 @@ function IncludedSection({ lang, onDemo }: { lang: Lang; onDemo: () => void }) {
           <div className="flex flex-col justify-between rounded-[2rem] bg-[#141432] p-7 text-white shadow-[0_30px_90px_rgba(79,70,229,0.35)]">
             <p className="text-sm leading-7 text-slate-400">{c.note}</p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-              <Button onClick={onDemo} size="lg" className="rounded-2xl bg-[#141432] px-6 font-black text-[#0a0a1a] hover:bg-[#4f46e5]/15">
+              <Button onClick={onDemo} size="lg" className="rounded-2xl bg-[#4f46e5] px-6 font-black text-white shadow-[0_0_30px_rgba(79,70,229,0.4)] hover:bg-[#4338ca]">
                 {c.cta}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
