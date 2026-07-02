@@ -135,16 +135,15 @@ Deno.serve(async (req) => {
       preferredDate: parsed.data.preferred_date,
       title: parsed.data.title,
       description: parsed.data.description ?? null,
-      attachmentPaths: parsed.data.attachment_paths,
+      attachmentCount: parsed.data.attachment_paths?.length ?? 0,
       adminUrl: `https://auroratransport.se/admin/booking-requests`,
     });
     const customerTpl = bookingRequestConfirmationEmail({
-      customerName: parsed.data.customer_name,
+      contactName: parsed.data.customer_name,
       companyName: company.name,
       orderNumber: parsed.data.order_number,
       title: parsed.data.title,
       preferredDate: parsed.data.preferred_date,
-      description: parsed.data.description ?? null,
     });
 
     const [adminOk, customerOk] = await Promise.all([
