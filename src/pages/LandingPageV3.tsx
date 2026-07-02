@@ -132,7 +132,7 @@ export default function LandingPageV3() {
               <span className="text-slate-400">/</span>
               <span className={lang === 'en' ? 'text-white' : 'text-slate-400'}>{t.langSwitch.en}</span>
             </Link>
-            <Button asChild variant="ghost" size="sm" className="hidden text-slate-200 hover:text-white sm:inline-flex">
+            <Button asChild variant="ghost" size="sm" className="hidden text-slate-200 hover:bg-white/10 hover:text-white sm:inline-flex">
               <Link to={dashboardHref}>{dashboardLabel}</Link>
             </Button>
             <Button size="sm" onClick={() => setDemoModalOpen(true)} className="hidden rounded-xl bg-[#4f46e5] px-4 font-bold text-white hover:bg-[#4338ca] md:inline-flex">
@@ -206,7 +206,7 @@ export default function LandingPageV3() {
                 {t.hero.sub}
               </p>
 
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <div className="mt-8 flex flex-col flex-wrap gap-3 sm:flex-row">
                 <Button size="lg" onClick={() => setDemoModalOpen(true)} className="h-13 rounded-2xl bg-[#4f46e5] px-7 text-base font-bold text-white shadow-xl shadow-[#4f46e5]/30 hover:bg-[#4338ca]">
                   {t.hero.ctaPrimary}
                   <ArrowRight className="ml-2 h-4 w-4" />
