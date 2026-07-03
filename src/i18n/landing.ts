@@ -196,6 +196,16 @@ const SV: LandingCopy = {
       },
     ],
   },
+  emailOrder: {
+    eyebrow: 'Nytt',
+    h2: 'Mejla in ordern – klart',
+    sub: 'Kunden mejlar sin order. Systemet läser PDF eller text med AI. Transportledaren godkänner utkastet med ett klick.',
+    steps: [
+      { title: 'Kunder mejlar sin order till er adress', text: 'Skicka in befintlig kund till er inbox – ingen ny portal, inget nytt formulär.' },
+      { title: 'Systemet läser PDF/text med AI', text: 'Automatisk tolkning av adresser, gods och tidsfönster direkt från mejlet eller den bifogade PDF:en.' },
+      { title: 'Transportledaren godkänner utkastet med ett klick', text: 'Se det AI-genererade uppdraget, justera vid behov och lägg ut det på rätt förare.' },
+    ],
+  },
   audiences: {
     eyebrow: 'För vem?',
     h2: 'Transportledningssystem för åkerier, budfirmor och transportbemanning',
