@@ -49,6 +49,12 @@ export interface LandingCopy {
     sub: string;
     groups: { title: string; text: string; items: string[] }[];
   };
+  emailOrder: {
+    eyebrow: string;
+    h2: string;
+    sub: string;
+    steps: { title: string; text: string }[];
+  };
   audiences: {
     eyebrow: string;
     h2: string;
