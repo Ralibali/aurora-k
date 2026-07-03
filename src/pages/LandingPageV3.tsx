@@ -333,6 +333,36 @@ export default function LandingPageV3() {
           </div>
         </section>
 
+        <section id="mejla-in-order" className="border-y border-[#1e1e5a] bg-[#0a0a1a] py-20 sm:py-24">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="max-w-3xl">
+              <p className="text-sm font-bold uppercase tracking-[0.22em] text-[#818cf8]">{t.emailOrder.eyebrow}</p>
+              <h2 className="mt-4 text-4xl font-black tracking-tight text-white sm:text-5xl">{t.emailOrder.h2}</h2>
+              <p className="mt-5 text-lg leading-8 text-slate-400">{t.emailOrder.sub}</p>
+            </div>
+            <div className="mt-12 grid gap-6 lg:grid-cols-3">
+              {t.emailOrder.steps.map((step, index) => (
+                <motion.div
+                  key={step.title}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, margin: '-80px' }}
+                  variants={fadeUp}
+                  custom={index}
+                  className="rounded-[2rem] border border-[#1e1e5a] bg-[#141432] p-8 shadow-[0_22px_80px_rgba(0,0,0,0.5)]"
+                >
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#4f46e5] text-white">
+                    <Mail className="h-6 w-6" />
+                  </div>
+                  <p className="mt-6 text-xs font-black uppercase tracking-[0.3em] text-[#818cf8]">{String(index + 1).padStart(2, '0')}</p>
+                  <h3 className="mt-2 text-2xl font-black tracking-tight text-white">{step.title}</h3>
+                  <p className="mt-3 leading-7 text-slate-400">{step.text}</p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         <section className="bg-[#141432] py-20 sm:py-24">
           <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
             <div>
