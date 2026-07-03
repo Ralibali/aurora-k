@@ -35,7 +35,6 @@ export default function LandingPageV3() {
   const auth = useAuth();
   const { user, role } = auth;
   const isPlatformAdmin = auth.isPlatformAdmin;
-  const { setTheme, theme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [leadModalOpen, setLeadModalOpen] = useState(false);
@@ -68,10 +67,6 @@ export default function LandingPageV3() {
       },
     })),
   }), [t.faq.items]));
-
-  useEffect(() => {
-    if (theme !== 'light') setTheme('light');
-  }, [theme, setTheme]);
 
   useEffect(() => {
     if (location.pathname === '/en/book') {
