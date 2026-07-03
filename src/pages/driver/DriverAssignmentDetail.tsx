@@ -60,6 +60,39 @@ function appendEvent(existing: string | null | undefined, label: string, details
   return [existing, row].filter(Boolean).join('\n');
 }
 
+function shouldNotifyCustomer(a: any) {
+  return (
+    a?.tracking_enabled !== false &&
+    !!a?.tracking_token &&
+    !!a?.customer?.email
+  );
+}
+
+function sendCustomerTrackingEmail(kind: 'tracking-started' | 'delivery-completed', a: any) {
+  if (!shouldNotifyCustomer(a)) return;
+  const trackingUrl = `${window.location.origin}/track/${a.tracking_token}`;
+  const templateData =
+    kind === 'tracking-started'
+      ? {
+          orderNumber: a.order_number ?? a.id?.slice(0, 8)?.toUpperCase(),
+          driverName: a.driver?.full_name ?? null,
+          assignmentTitle: a.title,
+          trackingUrl,
+        }
+      : {
+          orderNumber: a.order_number ?? a.id?.slice(0, 8)?.toUpperCase(),
+          assignmentTitle: a.title,
+          completedAt: new Date().toLocaleString('sv-SE', { dateStyle: 'short', timeStyle: 'short' }),
+          recipientName: a.customer?.name ?? null,
+          trackingUrl,
+        };
+  supabase.functions
+    .invoke('send-email', {
+      body: { to: a.customer.email, templateName: kind, templateData },
+    })
+    .catch((err) => console.warn(`[${kind}] send-email failed`, err));
+}
+
 function InfoRow({ icon: Icon, label, children }: { icon: any; label: string; children: React.ReactNode }) {
   return (
     <div className="flex gap-3 border-b py-3 last:border-0">
@@ -124,7 +157,10 @@ export default function DriverAssignmentDetail() {
   };
 
   const handleStart = () => {
-    updateAssignment.mutate({ id: assignment.id, status: 'active', actual_start: new Date().toISOString(), driver_comment: appendEvent(assignment.driver_comment as string | null, 'Körning startad') });
+    updateAssignment.mutate(
+      { id: assignment.id, status: 'active', actual_start: new Date().toISOString(), driver_comment: appendEvent(assignment.driver_comment as string | null, 'Körning startad') },
+      { onSuccess: () => sendCustomerTrackingEmail('tracking-started', a) },
+    );
   };
 
   const handleQuickEvent = (label: string) => {
@@ -148,7 +184,10 @@ export default function DriverAssignmentDetail() {
   const handleSaveComment = () => saveDriverComment(driverComment, 'Kommentar sparad');
 
   const completeAssignment = (photoUrl?: string | null) => {
-    updateAssignment.mutate({ id: assignment.id, status: 'completed', actual_stop: new Date().toISOString(), consignment_photo_url: photoUrl ?? a.consignment_photo_url ?? null, driver_comment: appendEvent(assignment.driver_comment as string | null, 'Uppdrag slutfört') });
+    updateAssignment.mutate(
+      { id: assignment.id, status: 'completed', actual_stop: new Date().toISOString(), consignment_photo_url: photoUrl ?? a.consignment_photo_url ?? null, driver_comment: appendEvent(assignment.driver_comment as string | null, 'Uppdrag slutfört') },
+      { onSuccess: () => sendCustomerTrackingEmail('delivery-completed', a) },
+    );
   };
 
   const handleTakePhotoAndComplete = () => {
