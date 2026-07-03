@@ -360,6 +360,16 @@ const EN: LandingCopy = {
       },
     ],
   },
+  emailOrder: {
+    eyebrow: 'New',
+    h2: 'Email the order – done',
+    sub: 'Customers email their order. The system reads the PDF or text with AI. Your dispatcher approves the draft with one click.',
+    steps: [
+      { title: 'Customers email the order to your address', text: 'They send to your inbox – no new portal, no new form.' },
+      { title: 'The system reads the PDF/text with AI', text: 'Addresses, goods and time windows are parsed automatically from the email or attached PDF.' },
+      { title: 'Your dispatcher approves the draft in one click', text: 'Review the AI-generated job, adjust if needed and assign the right driver.' },
+    ],
+  },
   audiences: {
     eyebrow: 'Who is it for?',
     h2: 'Transport management system for hauliers, couriers and transport staffing teams',
