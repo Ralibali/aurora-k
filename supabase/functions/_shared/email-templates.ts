@@ -382,3 +382,55 @@ export function bookingRequestConfirmationEmail(data: {
     html: layout(html),
   };
 }
+
+// ── Kundnotiser för spårning ──────────────────────────
+
+export function trackingStartedEmail(data: {
+  orderNumber?: string;
+  driverName?: string;
+  assignmentTitle?: string;
+  trackingUrl: string;
+}) {
+  const orderNumber = escapeHtml(data.orderNumber || 'uppdraget');
+  const html = `
+    ${heading('Din transport är på väg')}
+    ${subheading(`Uppdrag ${orderNumber} har startats av föraren.`)}
+    ${infoBox(`
+      ${detailRow('Ordernummer', orderNumber)}
+      ${detailRow('Uppdrag', escapeHtml(data.assignmentTitle || 'Transportuppdrag'))}
+      ${data.driverName ? detailRow('Förare', escapeHtml(data.driverName)) : ''}
+    `)}
+    ${button('Följ transporten', data.trackingUrl)}
+    ${smallText('Länken visar den senaste statusen för transporten.')}
+  `;
+  return {
+    subject: `Din transport är på väg – ${escapeHtml(data.orderNumber || '')}`.trim(),
+    html: layout(html),
+  };
+}
+
+export function deliveryCompletedEmail(data: {
+  orderNumber?: string;
+  assignmentTitle?: string;
+  completedAt?: string;
+  recipientName?: string | null;
+  trackingUrl?: string;
+}) {
+  const orderNumber = escapeHtml(data.orderNumber || 'uppdraget');
+  const html = `
+    ${heading('Din leverans är utförd')}
+    ${subheading(`Uppdrag ${orderNumber} har markerats som slutfört.`)}
+    ${infoBox(`
+      ${detailRow('Ordernummer', orderNumber)}
+      ${detailRow('Uppdrag', escapeHtml(data.assignmentTitle || 'Transportuppdrag'))}
+      ${data.completedAt ? detailRow('Leveranstid', escapeHtml(data.completedAt)) : ''}
+      ${data.recipientName ? detailRow('Mottagare', escapeHtml(data.recipientName)) : ''}
+    `)}
+    ${data.trackingUrl ? button('Visa leveransstatus', data.trackingUrl) : ''}
+    ${smallText('Tack för att du använde vår transporttjänst.')}
+  `;
+  return {
+    subject: `Din leverans är utförd – ${escapeHtml(data.orderNumber || '')}`.trim(),
+    html: layout(html),
+  };
+}

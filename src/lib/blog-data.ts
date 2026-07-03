@@ -11,6 +11,16 @@ export interface BlogPost {
 
 export const blogPosts: BlogPost[] = [
   {
+    slug: 'basta-transportledningssystemet-for-sma-akerier-2026',
+    title: 'Bästa transportledningssystemet för små åkerier 2026',
+    seoTitle: 'Bästa transportledningssystemet för små åkerier 2026',
+    metaDescription: 'En ärlig guide till transportledningssystem för små åkerier 2026: enterprise-system, fältappar, moderna molnlösningar och när Aurora Transport passar in.',
+    publishDate: '2026-07-03',
+    readTime: '6 min',
+    excerpt: 'En praktisk genomgång av enterprise-system, fältappar och moderna molnlösningar – och vad små åkerier faktiskt behöver.',
+    tags: ['transportledningssystem', 'små åkerier', 'jämförelse'],
+  },
+  {
     slug: 'basta-dispatchsystemet-for-akeri-2026',
     title: 'Bästa dispatchsystemet för åkeri 2026 – så väljer du rätt',
     seoTitle: 'Bästa dispatchsystemet för åkeri 2026 – Jämförelse & Guide',
@@ -104,7 +114,7 @@ export const blogPosts: BlogPost[] = [
     slug: 'byta-dispatchsystem-guide',
     title: 'Byta dispatchsystem? Så gör du utan att tappa fart',
     seoTitle: 'Byta dispatchsystem? Så gör du utan att tappa fart i verksamheten',
-    metaDescription: 'Att byta dispatchsystem mitt i löpande drift verkar riskabelt – men det behöver det inte vara. Här är en guide för smidig migrering utan stopp i flödet.',
+    metaDescription: 'Att byta dispatchsystem mitt i löpande drift verkar riskabelt – men det behöver det inte. Här är en guide för smidig migrering utan stopp i flödet.',
     publishDate: '2026-02-24',
     readTime: '4 min',
     excerpt: 'Byta system mitt i drift låter riskabelt. Vi visar hur du gör det smidigt i 5 steg.',

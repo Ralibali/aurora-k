@@ -49,6 +49,12 @@ export interface LandingCopy {
     sub: string;
     groups: { title: string; text: string; items: string[] }[];
   };
+  emailOrder: {
+    eyebrow: string;
+    h2: string;
+    sub: string;
+    steps: { title: string; text: string }[];
+  };
   audiences: {
     eyebrow: string;
     h2: string;
@@ -188,6 +194,16 @@ const SV: LandingCopy = {
         text: 'Samla arbetstid, rapporter, historik och fakturaunderlag utan dubbelarbete.',
         items: ['Digital tidrapportering', 'Fakturaunderlag', 'Rapporter och överblick'],
       },
+    ],
+  },
+  emailOrder: {
+    eyebrow: 'Nytt',
+    h2: 'Mejla in ordern – klart',
+    sub: 'Kunden mejlar sin order. Systemet läser PDF eller text med AI. Transportledaren godkänner utkastet med ett klick.',
+    steps: [
+      { title: 'Kunder mejlar sin order till er adress', text: 'Skicka in befintlig kund till er inbox – ingen ny portal, inget nytt formulär.' },
+      { title: 'Systemet läser PDF/text med AI', text: 'Automatisk tolkning av adresser, gods och tidsfönster direkt från mejlet eller den bifogade PDF:en.' },
+      { title: 'Transportledaren godkänner utkastet med ett klick', text: 'Se det AI-genererade uppdraget, justera vid behov och lägg ut det på rätt förare.' },
     ],
   },
   audiences: {
@@ -342,6 +358,16 @@ const EN: LandingCopy = {
         text: 'Collect working time, reports, history and invoice drafts without doing the work twice.',
         items: ['Digital time reporting', 'Invoice drafts', 'Reports and overview'],
       },
+    ],
+  },
+  emailOrder: {
+    eyebrow: 'New',
+    h2: 'Email the order – done',
+    sub: 'Customers email their order. The system reads the PDF or text with AI. Your dispatcher approves the draft with one click.',
+    steps: [
+      { title: 'Customers email the order to your address', text: 'They send to your inbox – no new portal, no new form.' },
+      { title: 'The system reads the PDF/text with AI', text: 'Addresses, goods and time windows are parsed automatically from the email or attached PDF.' },
+      { title: 'Your dispatcher approves the draft in one click', text: 'Review the AI-generated job, adjust if needed and assign the right driver.' },
     ],
   },
   audiences: {

@@ -25,6 +25,7 @@ const TransportledningssystemPage = lazy(() => import("./pages/Transportlednings
 const TidrapporteringTransportPage = lazy(() => import("./pages/TidrapporteringTransportPage"));
 const VadKostarTransportledningssystemPage = lazy(() => import("./pages/VadKostarTransportledningssystemPage"));
 const CoredinationAlternativPage = lazy(() => import("./pages/CoredinationAlternativPage"));
+const KonkurrentAlternativPage = lazy(() => import("./pages/KonkurrentAlternativPage"));
 const TjansterPage = lazy(() => import("./pages/TjansterPage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const ContactPage = lazy(() => import("./pages/ContactPage"));
@@ -94,6 +95,7 @@ const BlogBastaDispatch = lazy(() => import("./pages/blog/BlogBastaDispatch"));
 const BlogDigitaliseraBudtjanst = lazy(() => import("./pages/blog/BlogDigitaliseraBudtjanst"));
 const BlogVadKostarTms = lazy(() => import("./pages/blog/BlogVadKostarTms"));
 const BlogTmsSmaaAkerier = lazy(() => import("./pages/blog/BlogTmsSmaaAkerier"));
+const BlogBastaTransportledningssystemSmaaAkerier = lazy(() => import("./pages/blog/BlogBastaTransportledningssystemSmaaAkerier"));
 const BlogDispatchAppForare = lazy(() => import("./pages/blog/BlogDispatchAppForare"));
 const BlogBemanningsbolag = lazy(() => import("./pages/blog/BlogBemanningsbolag"));
 const BlogTmsVsDispatch = lazy(() => import("./pages/blog/BlogTmsVsDispatch"));
@@ -150,6 +152,11 @@ const App = () => (
                   <Route path="/tidrapportering-transport" element={<TidrapporteringTransportPage />} />
                   <Route path="/vad-kostar-transportledningssystem" element={<VadKostarTransportledningssystemPage />} />
                   <Route path="/coredination-alternativ" element={<CoredinationAlternativPage />} />
+                  <Route path="/opter-alternativ" element={<KonkurrentAlternativPage />} />
+                  <Route path="/workify-alternativ" element={<KonkurrentAlternativPage />} />
+                  <Route path="/hogia-transport-alternativ" element={<KonkurrentAlternativPage />} />
+                  <Route path="/pindeliver-alternativ" element={<KonkurrentAlternativPage />} />
+                  <Route path="/alystra-alternativ" element={<KonkurrentAlternativPage />} />
                   <Route path="/tjanster" element={<TjansterPage />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/register" element={<RegisterPage />} />
@@ -175,6 +182,7 @@ const App = () => (
                   <Route path="/blogg/hur-digitaliserar-man-sin-budtjanst" element={<BlogDigitaliseraBudtjanst />} />
                   <Route path="/blogg/vad-kostar-ett-transportledningssystem" element={<BlogVadKostarTms />} />
                   <Route path="/blogg/transportledningssystem-for-sma-akerier" element={<BlogTmsSmaaAkerier />} />
+                  <Route path="/blogg/basta-transportledningssystemet-for-sma-akerier-2026" element={<BlogBastaTransportledningssystemSmaaAkerier />} />
                   <Route path="/blogg/transportledningssystem-for-sma-akeries" element={<Navigate to="/blogg/transportledningssystem-for-sma-akerier" replace />} />
                   <Route path="/blogg/dispatch-app-forare-transport" element={<BlogDispatchAppForare />} />
                   <Route path="/blogg/bemanningsbolag-transport-system" element={<BlogBemanningsbolag />} />

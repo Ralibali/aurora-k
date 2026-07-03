@@ -115,106 +115,112 @@ export default function RegisterPage() {
 
   const strength = getPasswordStrength(password);
 
+  const inputCls = "h-11 border-[#1e1e5a] bg-[#0f0f2a] text-white placeholder:text-slate-600 focus-visible:ring-[#4f46e5]";
+  const iconCls = "absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500";
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-      <div className="w-full max-w-lg">
-        {/* Logo */}
+    <div className="relative min-h-screen overflow-hidden bg-[#0a0a1a] px-4 py-8 text-white">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(79,70,229,0.25),transparent_40rem)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(79,70,229,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(79,70,229,0.08)_1px,transparent_1px)] bg-[size:72px_72px] [mask-image:linear-gradient(to_bottom,black,transparent_80%)]" />
+      <div className="relative z-10 mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-lg items-center justify-center">
+       <div className="w-full">
         <div className="text-center mb-8">
-          <div className="mx-auto w-14 h-14 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 mb-3">
-            <Truck className="h-7 w-7 text-primary-foreground" />
+          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#4f46e5] shadow-xl shadow-[#4f46e5]/30">
+            <Truck className="h-7 w-7 text-white" />
           </div>
-          <h1 className="text-xl font-bold text-foreground">Aurora Transport</h1>
+          <h1 className="text-xl font-black text-white">Aurora Transport</h1>
         </div>
 
         {cancelled && (
-          <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-4 mb-4 text-sm">
+          <div className="mb-4 flex items-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-200">
             <AlertCircle className="h-4 w-4 shrink-0" />
             <p>Betalningen avbröts. Du kan försöka igen.</p>
           </div>
         )}
 
-        <div className="bg-white rounded-2xl border shadow-sm p-8">
-          <h2 className="text-lg font-semibold text-foreground mb-1">Skapa konto</h2>
-          <p className="text-sm text-muted-foreground mb-6">Kom igång med ditt transportföretag</p>
+        <div className="rounded-[2rem] border border-[#1e1e5a] bg-[#141432]/90 p-8 shadow-[0_30px_100px_rgba(0,0,0,0.35)] backdrop-blur">
+          <h2 className="mb-1 text-lg font-bold text-white">Skapa konto</h2>
+          <p className="mb-6 text-sm text-slate-400">Kom igång med ditt transportföretag</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Company Name */}
             <div className="space-y-1.5">
-              <Label htmlFor="companyName" className="text-sm font-medium">Företagsnamn *</Label>
+              <Label htmlFor="companyName" className="text-sm font-bold text-slate-200">Företagsnamn *</Label>
               <div className="relative">
-                <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
-                <Input id="companyName" placeholder="AB Transport" value={companyName} onChange={e => setCompanyName(e.target.value)} className="pl-10 h-11" />
+                <Building2 className={iconCls} />
+                <Input id="companyName" placeholder="AB Transport" value={companyName} onChange={e => setCompanyName(e.target.value)} className={`pl-10 ${inputCls}`} />
               </div>
-              {errors.companyName && <p className="text-xs text-destructive">{errors.companyName}</p>}
+              {errors.companyName && <p className="text-xs text-red-400">{errors.companyName}</p>}
             </div>
 
             {/* Org Number */}
             <div className="space-y-1.5">
-              <Label htmlFor="orgNumber" className="text-sm font-medium">Organisationsnummer</Label>
-              <Input id="orgNumber" placeholder="556xxx-xxxx" value={orgNumber} onChange={e => setOrgNumber(e.target.value)} className="h-11" />
+              <Label htmlFor="orgNumber" className="text-sm font-bold text-slate-200">Organisationsnummer</Label>
+              <Input id="orgNumber" placeholder="556xxx-xxxx" value={orgNumber} onChange={e => setOrgNumber(e.target.value)} className={inputCls} />
             </div>
 
             {/* Name */}
             <div className="space-y-1.5">
-              <Label htmlFor="fullName" className="text-sm font-medium">Ditt namn *</Label>
+              <Label htmlFor="fullName" className="text-sm font-bold text-slate-200">Ditt namn *</Label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
-                <Input id="fullName" placeholder="Anna Andersson" value={fullName} onChange={e => setFullName(e.target.value)} className="pl-10 h-11" />
+                <User className={iconCls} />
+                <Input id="fullName" placeholder="Anna Andersson" value={fullName} onChange={e => setFullName(e.target.value)} className={`pl-10 ${inputCls}`} />
               </div>
-              {errors.fullName && <p className="text-xs text-destructive">{errors.fullName}</p>}
+              {errors.fullName && <p className="text-xs text-red-400">{errors.fullName}</p>}
             </div>
 
             {/* Email */}
             <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-sm font-medium">E-postadress *</Label>
+              <Label htmlFor="email" className="text-sm font-bold text-slate-200">E-postadress *</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
-                <Input id="email" type="email" placeholder="anna@foretag.se" value={email} onChange={e => setEmail(e.target.value)} className="pl-10 h-11" />
+                <Mail className={iconCls} />
+                <Input id="email" type="email" placeholder="anna@foretag.se" value={email} onChange={e => setEmail(e.target.value)} className={`pl-10 ${inputCls}`} />
               </div>
-              {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
+              {errors.email && <p className="text-xs text-red-400">{errors.email}</p>}
             </div>
 
             {/* Password */}
             <div className="space-y-1.5">
-              <Label htmlFor="password" className="text-sm font-medium">Lösenord *</Label>
+              <Label htmlFor="password" className="text-sm font-bold text-slate-200">Lösenord *</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
-                <Input id="password" type={showPassword ? 'text' : 'password'} placeholder="Minst 8 tecken" value={password} onChange={e => setPassword(e.target.value)} className="pl-10 pr-10 h-11" />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-muted-foreground">
+                <Lock className={iconCls} />
+                <Input id="password" type={showPassword ? 'text' : 'password'} placeholder="Minst 8 tecken" value={password} onChange={e => setPassword(e.target.value)} className={`pl-10 pr-10 ${inputCls}`} />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white">
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
               {password && (
                 <div className="flex items-center gap-2">
-                  <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="flex-1 h-1.5 bg-[#0f0f2a] rounded-full overflow-hidden">
                     <div className={`h-full ${strength.color} rounded-full transition-all`} style={{ width: `${strength.pct}%` }} />
                   </div>
-                  <span className="text-xs text-muted-foreground">{strength.label}</span>
+                  <span className="text-xs text-slate-400">{strength.label}</span>
                 </div>
               )}
-              {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
+              {errors.password && <p className="text-xs text-red-400">{errors.password}</p>}
             </div>
 
             {/* Confirm Password */}
             <div className="space-y-1.5">
-              <Label htmlFor="confirmPassword" className="text-sm font-medium">Bekräfta lösenord *</Label>
+              <Label htmlFor="confirmPassword" className="text-sm font-bold text-slate-200">Bekräfta lösenord *</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
-                <Input id="confirmPassword" type="password" placeholder="Upprepa lösenord" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="pl-10 h-11" />
+                <Lock className={iconCls} />
+                <Input id="confirmPassword" type="password" placeholder="Upprepa lösenord" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className={`pl-10 ${inputCls}`} />
               </div>
-              {errors.confirmPassword && <p className="text-xs text-destructive">{errors.confirmPassword}</p>}
+              {errors.confirmPassword && <p className="text-xs text-red-400">{errors.confirmPassword}</p>}
             </div>
 
-            <Button type="submit" className="w-full h-12 text-sm font-semibold rounded-xl mt-2" disabled={submitting}>
+            <Button type="submit" className="mt-2 h-12 w-full rounded-2xl bg-[#4f46e5] text-sm font-black text-white shadow-lg shadow-[#4f46e5]/25 hover:bg-[#4338ca]" disabled={submitting}>
               {submitting ? 'Skapar konto...' : 'Skapa konto'}
             </Button>
           </form>
         </div>
 
-        <p className="text-center text-sm text-muted-foreground mt-6">
+        <p className="mt-6 text-center text-sm text-slate-500">
           Har du redan ett konto?{' '}
-          <Link to="/login" className="text-primary font-medium hover:underline">Logga in</Link>
+          <Link to="/login" className="font-bold text-[#818cf8] hover:text-white">Logga in</Link>
         </p>
+       </div>
       </div>
     </div>
   );

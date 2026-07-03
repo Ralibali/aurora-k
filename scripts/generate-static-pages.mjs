@@ -138,11 +138,66 @@ const STATIC_PAGES = [
     route: "/coredination-alternativ",
     title: "Coredination-alternativ — enklare | Aurora Transport",
     description:
-      "Letar du efter alternativ till Coredination? Fast pris 449 kr/mån, obegränsat antal användare. Kom igång på 5 min.",
+      "Letar du efter alternativ till Coredination? Fast pris 449 kr/mån, obegränsat antal användare och ingen bindningstid.",
     h1: "Alternativ till Coredination",
     body: [
-      "Coredination är ett kraftfullt system, men prissättningen per användare och de långa avtalen passar inte alla. Aurora Transport är ett enklare och mer prisvärt alternativ som är byggt för små och medelstora transportföretag.",
-      "Fast pris 449 kr per månad. Obegränsat antal förare. Ingen bindningstid. Kom igång på under fem minuter – utan implementation och utan setup-avgift.",
+      "Coredination är ett kraftfullt system, men prissättningen per användare passar inte alla. Aurora Transport är ett enklare och mer prisvärt alternativ som är byggt för små och medelstora transportföretag.",
+      "Fast pris 449 kr per månad. Obegränsat antal förare. Ingen bindningstid.",
+    ],
+  },
+  {
+    route: "/opter-alternativ",
+    title: "Opter-alternativ för mindre transportföretag | Aurora Transport",
+    description:
+      "Alternativ till Opter för mindre åkerier och budfirmor. Fast pris 449 kr/mån, obegränsat antal användare, ingen bindningstid.",
+    h1: "Opter-alternativet för mindre transportföretag",
+    body: [
+      "Opter är ett välkänt transportledningssystem för större transportorganisationer. För mindre åkerier och budfirmor blir det ofta i tyngsta laget – både i funktioner och pris.",
+      "Aurora Transport ger dig ett enkelt dispatchflöde med förarapp, tidrapportering och fakturaunderlag för 449 kr per månad, med obegränsat antal förare och ingen bindningstid.",
+    ],
+  },
+  {
+    route: "/workify-alternativ",
+    title: "Workify-alternativ med fast teampris | Aurora Transport",
+    description:
+      "Söker du ett alternativ till Workify? Aurora Transport erbjuder uppdrag, förarapp och tidrapportering till fast teampris.",
+    h1: "Workify-alternativet med fast teampris",
+    body: [
+      "Workify är populärt bland service- och installationsteam. För transportföretag som vill ha ett tydligt uppdrags- och dispatchflöde kan Aurora Transport vara ett mer renodlat alternativ.",
+      "Fast pris 449 kr per månad för hela teamet. Uppdrag, förarapp, tidrapportering och fakturaunderlag – utan pris per användare.",
+    ],
+  },
+  {
+    route: "/hogia-transport-alternativ",
+    title: "Hogia Transport-alternativ för små åkerier | Aurora Transport",
+    description:
+      "Enklare alternativ till Hogia Transport för mindre åkerier. Fast pris 449 kr/mån, obegränsat antal förare, ingen bindningstid.",
+    h1: "Hogia Transport-alternativet för små åkerier",
+    body: [
+      "Hogia Transport är byggt för större transportorganisationer med tunga integrationskrav. Aurora Transport är istället byggt för små åkerier och budfirmor som vill komma igång snabbt.",
+      "Ett fast pris på 449 kr per månad, obegränsat antal förare och ett fokuserat flöde för uppdrag, förare, tidrapporter och fakturaunderlag.",
+    ],
+  },
+  {
+    route: "/pindeliver-alternativ",
+    title: "PinDeliver-alternativ för B2B-transport | Aurora Transport",
+    description:
+      "Alternativ till PinDeliver för B2B-transport och åkerier. Fast pris 449 kr/mån, obegränsat antal användare och ingen bindningstid.",
+    h1: "PinDeliver-alternativet för B2B-transport",
+    body: [
+      "PinDeliver är starkt inom e-handelns sista mil. För B2B-åkerier och transportbemanning ger Aurora Transport ett tydligare dispatchflöde med uppdrag, förarapp och tidrapportering.",
+      "Fast pris 449 kr per månad, obegränsat antal förare och ingen bindningstid.",
+    ],
+  },
+  {
+    route: "/alystra-alternativ",
+    title: "Alystra-alternativ för åkerier med 1–20 bilar | Aurora Transport",
+    description:
+      "Enklare alternativ till Alystra för åkerier med 1–20 bilar. Fast pris 449 kr/mån, obegränsat antal förare, ingen bindningstid.",
+    h1: "Alystra-alternativet för åkerier med 1–20 bilar",
+    body: [
+      "Alystra är etablerat hos större transportorganisationer. För åkerier med 1–20 bilar blir det ofta för tungt att implementera och för dyrt att växa i.",
+      "Aurora Transport ger dig ett fokuserat transportledningssystem för 449 kr per månad – obegränsat antal förare och utan bindningstid.",
     ],
   },
   {
