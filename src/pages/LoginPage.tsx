@@ -1,19 +1,14 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { usePageMeta } from '@/lib/use-page-meta';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Truck, Mail, Lock, Play } from 'lucide-react';
+import { Truck, Mail, Lock, Play, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -26,14 +21,9 @@ export default function LoginPage() {
   const handleDemo = async (type: 'akeri' | 'bemanning') => {
     setDemoLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('demo-login', {
-        body: { type },
-      });
+      const { data, error } = await supabase.functions.invoke('demo-login', { body: { type } });
       if (error || !data?.email) throw new Error(data?.error || 'Kunde inte skapa demo');
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: data.email,
-        password: data.password,
-      });
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email: data.email, password: data.password });
       if (signInError) throw signInError;
       toast.success(`Inloggad som ${data.companyName} — omdirigerar...`);
       setTimeout(() => navigate('/admin'), 500);
@@ -61,132 +51,55 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-
     if (error) {
-      const msg = error.message?.includes('Invalid login credentials')
-        ? 'Fel e-post eller lösenord. Försök igen.'
-        : error.message || 'Inloggningen misslyckades.';
+      const msg = error.message?.includes('Invalid login credentials') ? 'Fel e-post eller lösenord. Försök igen.' : error.message || 'Inloggningen misslyckades.';
       toast.error(msg);
       setSubmitting(false);
       return;
     }
-
     toast.success('Välkommen!');
     setSubmitting(false);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-sidebar p-4 relative overflow-hidden">
-      {/* Decorative background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-1/2 -right-1/4 w-[600px] h-[600px] rounded-full bg-primary/5 blur-3xl" />
-        <div className="absolute -bottom-1/4 -left-1/4 w-[400px] h-[400px] rounded-full bg-success/5 blur-3xl" />
-      </div>
+    <div className="min-h-screen overflow-hidden bg-[#0a0a1a] px-4 py-8 text-white">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(79,70,229,0.25),transparent_40rem)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(79,70,229,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(79,70,229,0.08)_1px,transparent_1px)] bg-[size:72px_72px] [mask-image:linear-gradient(to_bottom,black,transparent_80%)]" />
 
-      <div className="w-full max-w-sm relative z-10">
-        {/* Logo / Branding */}
-        <div className="text-center mb-8">
-          <div className="mx-auto w-16 h-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30 mb-4">
-            <Truck className="h-8 w-8 text-primary-foreground" />
+      <div className="relative z-10 mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-6xl items-center justify-center">
+        <div className="w-full max-w-md">
+          <Link to="/" className="mb-8 inline-flex items-center gap-2 text-sm font-semibold text-slate-400 transition hover:text-white"><ArrowLeft className="h-4 w-4" /> Till startsidan</Link>
+          <div className="mb-8 text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#4f46e5] shadow-xl shadow-[#4f46e5]/30"><Truck className="h-8 w-8 text-white" /></div>
+            <h1 className="text-3xl font-black tracking-tight text-white">Aurora Transport</h1>
+            <p className="mt-2 text-sm text-slate-400">Logga in på ditt konto</p>
           </div>
-          <h1 className="text-2xl font-bold text-sidebar-foreground">Aurora Transport</h1>
-          <p className="text-sm text-sidebar-foreground/60 mt-1">Logga in på ditt konto</p>
-        </div>
 
-        {/* Login Card */}
-        <div className="rounded-2xl border border-sidebar-border bg-sidebar-accent/50 backdrop-blur-sm p-6 shadow-xl">
-          <form onSubmit={handleLogin} className="space-y-5">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sidebar-foreground/80 text-sm font-medium">
-                E-post
-              </Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-sidebar-foreground/40" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="namn@aurora.se"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="pl-10 bg-sidebar border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/30 focus-visible:ring-primary h-11"
-                />
+          <div className="rounded-[2rem] border border-[#1e1e5a] bg-[#141432]/90 p-6 shadow-[0_30px_100px_rgba(0,0,0,0.35)] backdrop-blur">
+            <form onSubmit={handleLogin} className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-sm font-bold text-slate-200">E-post</Label>
+                <div className="relative"><Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" /><Input id="email" type="email" placeholder="namn@foretag.se" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-12 border-[#1e1e5a] bg-[#0f0f2a] pl-10 text-white placeholder:text-slate-600 focus-visible:ring-[#4f46e5]" /></div>
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-sidebar-foreground/80 text-sm font-medium">
-                  Lösenord
-                </Label>
-                <Link
-                  to="/forgot-password"
-                  className="text-xs text-primary hover:text-primary/80 transition-colors"
-                >
-                  Glömt lösenord?
-                </Link>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between"><Label htmlFor="password" className="text-sm font-bold text-slate-200">Lösenord</Label><Link to="/forgot-password" className="text-xs font-semibold text-[#818cf8] hover:text-white">Glömt lösenord?</Link></div>
+                <div className="relative"><Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" /><Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required className="h-12 border-[#1e1e5a] bg-[#0f0f2a] pl-10 text-white placeholder:text-slate-600 focus-visible:ring-[#4f46e5]" /></div>
               </div>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-sidebar-foreground/40" />
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="pl-10 bg-sidebar border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/30 focus-visible:ring-primary h-11"
-                />
-              </div>
-            </div>
+              <Button type="submit" disabled={submitting} className="h-12 w-full rounded-2xl bg-[#4f46e5] text-sm font-black text-white shadow-lg shadow-[#4f46e5]/25 hover:bg-[#4338ca]">{submitting ? 'Loggar in...' : 'Logga in'}</Button>
+            </form>
+          </div>
 
-            <Button
-              type="submit"
-              className="w-full h-12 text-sm font-semibold rounded-xl shadow-lg shadow-primary/20"
-              disabled={submitting}
-            >
-              {submitting ? 'Loggar in...' : 'Logga in'}
-            </Button>
-          </form>
+          <div className="mt-4 text-center">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild><Button variant="outline" size="sm" disabled={demoLoading} className="gap-1.5 rounded-xl border-[#1e1e5a] bg-[#141432] text-slate-200 hover:bg-[#1e1e5a]/60 hover:text-white"><Play className="h-3.5 w-3.5" />{demoLoading ? 'Laddar...' : 'Testa demo'}</Button></DropdownMenuTrigger>
+              <DropdownMenuContent align="center" className="w-56"><DropdownMenuItem onClick={() => handleDemo('akeri')} className="cursor-pointer"><div><p className="font-medium">Demo Åkeri AB</p><p className="text-xs text-muted-foreground">Transport & logistik</p></div></DropdownMenuItem><DropdownMenuItem onClick={() => handleDemo('bemanning')} className="cursor-pointer"><div><p className="font-medium">Demo Bemanning AB</p><p className="text-xs text-muted-foreground">Bemanning & personal</p></div></DropdownMenuItem></DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          <p className="mt-6 text-center text-sm text-slate-500">Inget konto? <Link to="/register" className="font-bold text-[#818cf8] hover:text-white">Skapa konto</Link> eller <Link to="/kontakt" className="font-bold text-[#818cf8] hover:text-white">kontakta oss</Link></p>
+          <p className="mt-3 text-center text-xs text-slate-600">© {new Date().getFullYear()} Aurora Transport</p>
         </div>
-
-        {/* Demo button */}
-        <div className="mt-4 text-center">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" disabled={demoLoading} className="gap-1.5 border-sidebar-border text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent">
-                <Play className="h-3.5 w-3.5" />
-                {demoLoading ? 'Laddar...' : 'Testa demo'}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="center" className="w-56">
-              <DropdownMenuItem onClick={() => handleDemo('akeri')} className="cursor-pointer">
-                <div>
-                  <p className="font-medium">Demo Åkeri AB</p>
-                  <p className="text-xs text-muted-foreground">Transport & logistik</p>
-                </div>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleDemo('bemanning')} className="cursor-pointer">
-                <div>
-                  <p className="font-medium">Demo Bemanning AB</p>
-                  <p className="text-xs text-muted-foreground">Bemanning & personal</p>
-                </div>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-
-        <p className="text-center text-xs text-sidebar-foreground/40 mt-4">
-          Inget konto?{' '}
-          <Link to="/register" className="text-primary hover:underline">Skapa konto</Link>
-          {' '}eller{' '}
-          <Link to="/kontakt" className="text-primary hover:underline">kontakta oss</Link>
-        </p>
-        <p className="text-center text-xs text-sidebar-foreground/40 mt-2">
-          © {new Date().getFullYear()} Aurora Medias Transport
-        </p>
       </div>
     </div>
   );

@@ -75,9 +75,10 @@ function withinRateWindow(rate: ObRate, date: Date) {
   return start < end ? minute >= start && minute < end : minute >= start || minute < end;
 }
 
-export function calculateObAmount(assignments: SalaryAssignment[], rates: ObRate[]) {
+export function calculateObBreakdown(assignments: SalaryAssignment[], rates: ObRate[]) {
   const activeRates = rates.filter(rate => rate.active);
   let amount = 0;
+  let minutesWithOb = 0;
 
   assignments.forEach(assignment => {
     const interval = validInterval(assignment);
@@ -91,11 +92,16 @@ export function calculateObAmount(assignments: SalaryAssignment[], rates: ObRate
       const rate = activeRates
         .filter(item => appliesOnDate(item, minute) && withinRateWindow(item, minute))
         .reduce((highest, item) => Math.max(highest, Number(item.rate_per_hour) || 0), 0);
+      if (rate > 0) minutesWithOb += 1;
       amount += rate / 60;
     }
   });
 
-  return amount;
+  return { hours: minutesWithOb / 60, amount };
+}
+
+export function calculateObAmount(assignments: SalaryAssignment[], rates: ObRate[]) {
+  return calculateObBreakdown(assignments, rates).amount;
 }
 
 export function calculatePerDiem(assignments: SalaryAssignment[], rates: PerDiemRate[]) {
