@@ -19,6 +19,7 @@ import { ArrowLeft, Save, Plus, Trash2, Link2, Copy, ExternalLink, Loader2, Mess
 import { AdminCustomerChat } from '@/components/admin/AdminCustomerChat';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
+import { PUBLIC_SITE_URL } from '@/lib/constants';
 import { toast } from 'sonner';
 
 export default function AdminCustomerDetail() {

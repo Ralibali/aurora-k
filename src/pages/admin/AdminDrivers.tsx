@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
+import { PUBLIC_SITE_URL } from '@/lib/constants';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
@@ -214,7 +215,7 @@ function InviteDriverModal({ companyId }: { companyId: string }) {
 
       if (insertErr || !inserted?.token) throw insertErr || new Error('Kunde inte skapa inbjudan');
 
-      const joinUrl = `${window.location.origin}/join?token=${inserted.token}`;
+      const joinUrl = `${PUBLIC_SITE_URL}/join?token=${inserted.token}`;
       const adminName = user?.user_metadata?.full_name || 'Admin';
 
       // Get company name
@@ -417,7 +418,7 @@ function InvitationsList({ companyId }: { companyId: string }) {
   const handleResend = async (inv: any) => {
     setResending(inv.id);
     try {
-      const joinUrl = `${window.location.origin}/join?token=${inv.token}`;
+      const joinUrl = `${PUBLIC_SITE_URL}/join?token=${inv.token}`;
       const adminName = user?.user_metadata?.full_name || 'Admin';
       const { data: settings } = await supabase
         .from('settings')
