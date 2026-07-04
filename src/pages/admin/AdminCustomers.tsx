@@ -7,16 +7,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useCustomers } from '@/hooks/useData';
 import { pricingTypeLabels } from '@/lib/types';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, Upload } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { StaggeredTableBody, StaggeredTableRow } from '@/components/StaggeredList';
 import { useDemoMode } from '@/hooks/useDemoMode';
 import { demoCustomersFull } from '@/lib/demo-data';
+import { CustomerImportDialog } from '@/features/customers/CustomerImportDialog';
 
 export default function AdminCustomers() {
   const [search, setSearch] = useState('');
   const [pricingFilter, setPricingFilter] = useState<string>('all');
+  const [importOpen, setImportOpen] = useState(false);
   const navigate = useNavigate();
   const { data: customers, isLoading } = useCustomers();
   const { enabled: demoEnabled } = useDemoMode();
@@ -62,9 +64,13 @@ export default function AdminCustomers() {
               <SelectItem value="manual">Manuellt</SelectItem>
             </SelectContent>
           </Select>
+          <Button variant="outline" onClick={() => setImportOpen(true)}>
+            <Upload className="h-4 w-4 mr-1" /> Importera CSV
+          </Button>
           <Button asChild>
             <Link to="/admin/customers/new"><Plus className="h-4 w-4 mr-1" /> Ny kund</Link>
           </Button>
+          <CustomerImportDialog open={importOpen} onOpenChange={setImportOpen} />
         </div>
 
         <div className="admin-table-card">
