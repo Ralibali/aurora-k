@@ -2,7 +2,6 @@
 // Auth: service role bearer OR admin whose company matches all recipients.
 // Signs OAuth2 JWT (RS256) using FCM_SERVICE_ACCOUNT (Firebase service account JSON).
 // Cleans up UNREGISTERED tokens.
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.100.1";
 import { getEdgeCaller, getSupabaseClients, requireAdminForRecipientCompany } from "../_shared/auth-helpers.ts";
 
 const corsHeaders = {
@@ -198,6 +197,3 @@ Deno.serve(async (req) => {
 
   return json(200, { sent, failed, removed });
 });
-
-// createClient is re-exported to keep the import graph explicit for the runtime.
-export { createClient };
