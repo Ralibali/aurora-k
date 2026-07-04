@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, useCallback, useRef, Re
 
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { removeCurrentDevicePushToken } from '@/lib/push-notifications';
 
 interface AuthContextType {
   session: Session | null;
@@ -135,6 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = useCallback(async () => {
     const currentUserId = session?.user?.id;
+    await removeCurrentDevicePushToken(currentUserId);
     await supabase.auth.signOut();
     if (currentUserId) delete profileCache[currentUserId];
     setSession(null);
