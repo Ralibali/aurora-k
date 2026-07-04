@@ -11,6 +11,7 @@ import { StatusBadge } from '@/components/StatusBadge';
 import { PriorityBadge } from '@/components/PriorityBadge';
 import { useAssignment, useUpdateAssignment, useDeleteAssignment, useDrivers, useAssignmentLogs, useCreateAssignmentLog } from '@/hooks/useData';
 import { useAuth } from '@/hooks/useAuth';
+import { sendDriverAssignmentPush } from '@/lib/driver-notifications';
 import { formatSwedishDateTime, calculateDuration } from '@/lib/format';
 import { Trash2, Copy, History, Mail, Bell, X, MapPin, Calendar, Clock, User, FileText, AlertTriangle, CheckCircle2, MessageSquare, Navigation, Receipt } from 'lucide-react';
 import { toast } from 'sonner';
