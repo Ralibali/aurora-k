@@ -17,6 +17,7 @@ import { PlatformAdminGuard } from "@/components/PlatformAdminGuard";
 import { AdminShell } from "@/components/AdminLayout";
 import { DriverLayout } from "@/components/DriverLayout";
 import { PlatformAdminShell } from "@/components/PlatformAdminLayout";
+import { DriverPushNotifications } from "@/components/DriverPushNotifications";
 
 const LandingPage = lazy(() => import("./pages/LandingPageV3"));
 const PublicBookingPage = lazy(() => import("./pages/PublicBookingPage"));
@@ -140,6 +141,7 @@ const App = () => (
           <AuthProvider>
             <ErrorBoundary>
               <ScrollToTop />
+              <DriverPushNotifications />
               <Suspense fallback={<PageLoader />}>
                 <Routes>
                   <Route path="/" element={<LandingPage />} />
@@ -239,6 +241,7 @@ const App = () => (
                   <Route path="/driver" element={<ProtectedRoute requiredRole="driver"><DriverLayout /></ProtectedRoute>}>
                     <Route index element={<DriverAssignments />} />
                     <Route path="assignments" element={<DriverAssignments />} />
+                    <Route path="assignments/:id" element={<DriverAssignmentDetail />} />
                     <Route path="assignment/:id" element={<DriverAssignmentDetail />} />
                     <Route path="time-report" element={<DriverTimeReport />} />
                     <Route path="profile" element={<DriverProfile />} />
