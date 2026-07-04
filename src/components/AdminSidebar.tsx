@@ -4,7 +4,7 @@ import {
   Users, UserX, CheckSquare, Building, ShoppingCart, Inbox,
   Star, FileText, Package, Leaf, BarChart, TrendingUp,
   Bell, Globe, Code, Settings, LogOut, Truck, Car,
-  ClipboardList, FileImage, Smartphone, Shield, ChevronDown,
+  ClipboardList, FileImage, Smartphone, Shield, ChevronDown, Repeat,
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { Link, useNavigate } from 'react-router-dom';
@@ -65,6 +65,7 @@ const secondarySections = [
     items: [
       { title: 'Ruttoptimering', url: '/admin/routes', icon: Navigation },
       { title: 'Fordon', url: '/admin/vehicles', icon: Car },
+      { title: 'Återkommande uppdrag', url: '/admin/recurring-series', icon: Repeat },
     ],
   },
   {
