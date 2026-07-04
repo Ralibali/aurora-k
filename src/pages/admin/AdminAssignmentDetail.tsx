@@ -11,6 +11,7 @@ import { StatusBadge } from '@/components/StatusBadge';
 import { PriorityBadge } from '@/components/PriorityBadge';
 import { useAssignment, useUpdateAssignment, useDeleteAssignment, useDrivers, useAssignmentLogs, useCreateAssignmentLog } from '@/hooks/useData';
 import { useAuth } from '@/hooks/useAuth';
+import { sendDriverAssignmentPush } from '@/lib/driver-notifications';
 import { formatSwedishDateTime, calculateDuration } from '@/lib/format';
 import { Trash2, Copy, History, Mail, Bell, X, MapPin, Calendar, Clock, User, FileText, AlertTriangle, CheckCircle2, MessageSquare, Navigation, Receipt } from 'lucide-react';
 import { toast } from 'sonner';
@@ -117,6 +118,9 @@ export default function AdminAssignmentDetail() {
     updateAssignment.mutate({ id: assignment.id, assigned_driver_id: driverId }, {
       onSuccess: () => {
         if (user) createLog.mutate({ assignment_id: assignment.id, user_id: user.id, action: 'driver_changed', old_value: oldDriver, new_value: newDriver });
+        if (driverId && driverId !== assignment.assigned_driver_id) {
+          sendDriverAssignmentPush(driverId, 'Uppdrag tilldelat dig', assignment.title, assignment.id);
+        }
       },
     });
   };
@@ -134,6 +138,9 @@ export default function AdminAssignmentDetail() {
     updateAssignment.mutate({ id: assignment.id, status }, {
       onSuccess: () => {
         if (user) createLog.mutate({ assignment_id: assignment.id, user_id: user.id, action: 'status_changed', old_value: assignment.status, new_value: status });
+        if (status === 'cancelled' && assignment.assigned_driver_id) {
+          sendDriverAssignmentPush(assignment.assigned_driver_id, 'Uppdrag avbokat', assignment.title, assignment.id);
+        }
       },
     });
   };

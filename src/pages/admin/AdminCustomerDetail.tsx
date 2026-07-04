@@ -19,6 +19,7 @@ import { ArrowLeft, Save, Plus, Trash2, Link2, Copy, ExternalLink, Loader2, Mess
 import { AdminCustomerChat } from '@/components/admin/AdminCustomerChat';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
+import { PUBLIC_SITE_URL } from '@/lib/constants';
 import { toast } from 'sonner';
 
 export default function AdminCustomerDetail() {
@@ -318,10 +319,7 @@ function CustomerPortalSection({ customerId }: { customerId: string }) {
     toast.success('Portallänk skapad!');
   };
 
-  const getPortalUrl = (token: string) => {
-    const base = window.location.origin;
-    return `${base}/portal?token=${token}`;
-  };
+  const getPortalUrl = (token: string) => `${PUBLIC_SITE_URL}/portal?token=${token}`;
 
   const copyLink = (token: string) => {
     navigator.clipboard.writeText(getPortalUrl(token));

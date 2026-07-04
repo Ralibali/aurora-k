@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { PUBLIC_SITE_URL } from '@/lib/constants';
 
 export type DriverInvite = { name: string; email: string };
 
@@ -32,7 +33,7 @@ export async function sendOnboardingInvites(input: {
       continue;
     }
 
-    const joinUrl = `${window.location.origin}/join?token=${data.token}`;
+    const joinUrl = `${PUBLIC_SITE_URL}/join?token=${data.token}`;
     const { error: emailError } = await supabase.functions.invoke('send-email', {
       body: {
         to: email,
