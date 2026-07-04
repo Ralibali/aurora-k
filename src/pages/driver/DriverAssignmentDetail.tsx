@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { formatSwedishDateTime, calculateDuration } from '@/lib/format';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { PUBLIC_SITE_URL } from '@/lib/constants';
 import {
   AlertTriangle,
   ArrowLeft,
@@ -70,7 +71,7 @@ function shouldNotifyCustomer(a: any) {
 
 function sendCustomerTrackingEmail(kind: 'tracking-started' | 'delivery-completed', a: any) {
   if (!shouldNotifyCustomer(a)) return;
-  const trackingUrl = `${window.location.origin}/track/${a.tracking_token}`;
+  const trackingUrl = `${PUBLIC_SITE_URL}/track/${a.tracking_token}`;
   const templateData =
     kind === 'tracking-started'
       ? {
