@@ -118,7 +118,21 @@ export function CustomerImportDialog({ open, onOpenChange }: { open: boolean; on
     const okRows = results.filter((r): r is Extract<RowResult, { ok: true }> => r.ok);
     if (okRows.length === 0) return;
     setImporting(true);
-    const payload = okRows.map(r => ({ ...r.data, company_id: companyId }));
+    const payload = okRows.map(r => ({
+      name: r.data.name,
+      org_number: r.data.org_number ?? null,
+      invoice_address: r.data.invoice_address ?? null,
+      visit_address: r.data.visit_address ?? null,
+      contact_person: r.data.contact_person ?? null,
+      email: r.data.email ?? null,
+      phone: r.data.phone ?? null,
+      pricing_type: r.data.pricing_type,
+      price_per_delivery: r.data.price_per_delivery ?? null,
+      price_per_hour: r.data.price_per_hour ?? null,
+      payment_terms_days: r.data.payment_terms_days,
+      notes: r.data.notes ?? null,
+      company_id: companyId,
+    }));
     const { error, count } = await supabase.from('customers').insert(payload, { count: 'exact' });
     setImporting(false);
     if (error) {
