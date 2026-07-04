@@ -32,3 +32,51 @@ workflows:
         key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
         issuer_id: $APP_STORE_CONNECT_ISSUER_ID
         submit_to_testflight: true
+
+  android-release:
+    name: Aurora Transport Android Release
+    max_build_duration: 60
+    environment:
+      android_signing:
+        - aurora_keystore
+      node: 20
+      java: 17
+      groups:
+        - google_play
+      vars:
+        PACKAGE_NAME: se.auroramedia.auroratransport
+    scripts:
+      - name: Install deps
+        script: npm ci
+      - name: Build web
+        script: npm run build
+      - name: Add Android platform if missing
+        script: |
+          if [ ! -d "android" ]; then
+            npx cap add android
+          fi
+      - name: Patch AndroidManifest (permissions, FCM)
+        script: node scripts/android-post-add.mjs
+      - name: Capacitor sync
+        script: npx cap sync android
+      - name: Set version code
+        script: |
+          cd android
+          VERSION_CODE=$(($(google-play get-latest-build-number --package-name "$PACKAGE_NAME" --tracks=internal 2>/dev/null || echo 0) + 1))
+          sed -i.bak "s/versionCode .*/versionCode $VERSION_CODE/" app/build.gradle
+      - name: Build AAB
+        script: |
+          cd android
+          ./gradlew bundleRelease \
+            -PMYAPP_UPLOAD_STORE_FILE="$CM_KEYSTORE_PATH" \
+            -PMYAPP_UPLOAD_KEY_ALIAS="$CM_KEY_ALIAS" \
+            -PMYAPP_UPLOAD_STORE_PASSWORD="$CM_KEYSTORE_PASSWORD" \
+            -PMYAPP_UPLOAD_KEY_PASSWORD="$CM_KEY_PASSWORD"
+    artifacts:
+      - android/app/build/outputs/**/*.aab
+      - android/app/build/outputs/**/mapping.txt
+    publishing:
+      google_play:
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        track: internal
+        submit_as_draft: false

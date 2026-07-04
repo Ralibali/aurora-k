@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { AdminLayout } from '@/components/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,10 +7,14 @@ import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useArticles, useCreateArticle, useUpdateArticle, useDeleteArticle } from '@/hooks/useNewFeatures';
-import { Plus, Pencil, Trash2, Package } from 'lucide-react';
+import { Plus, Pencil, Trash2, Package, Search, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { UsageInfoCard } from '@/components/admin/UsageInfoCard';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+type SortKey = 'article_number' | 'name' | 'unit' | 'default_price' | 'vat_rate';
+type SortDir = 'asc' | 'desc';
 
 export default function AdminArticles() {
   const { data: articles, isLoading } = useArticles();
@@ -26,6 +30,56 @@ export default function AdminArticles() {
   const [price, setPrice] = useState('');
   const [articleNumber, setArticleNumber] = useState('');
   const [vatRate, setVatRate] = useState('0');
+
+  const [search, setSearch] = useState('');
+  const [unitFilter, setUnitFilter] = useState<string>('all');
+  const [sortKey, setSortKey] = useState<SortKey>('name');
+  const [sortDir, setSortDir] = useState<SortDir>('asc');
+
+  const unitOptions = useMemo(() => {
+    const set = new Set<string>();
+    (articles ?? []).forEach((a: any) => { if (a.unit) set.add(a.unit); });
+    return Array.from(set).sort();
+  }, [articles]);
+
+  const filtered = useMemo(() => {
+    const list = articles ?? [];
+    const q = search.trim().toLowerCase();
+    const matched = list.filter((a: any) => {
+      if (unitFilter !== 'all' && a.unit !== unitFilter) return false;
+      if (!q) return true;
+      return (
+        (a.name || '').toLowerCase().includes(q) ||
+        (a.description || '').toLowerCase().includes(q) ||
+        (a.article_number || '').toLowerCase().includes(q)
+      );
+    });
+    const dir = sortDir === 'asc' ? 1 : -1;
+    matched.sort((a: any, b: any) => {
+      const av = a[sortKey];
+      const bv = b[sortKey];
+      if (av == null && bv == null) return 0;
+      if (av == null) return 1;
+      if (bv == null) return -1;
+      if (typeof av === 'number' && typeof bv === 'number') return (av - bv) * dir;
+      return String(av).localeCompare(String(bv), 'sv') * dir;
+    });
+    return matched;
+  }, [articles, search, unitFilter, sortKey, sortDir]);
+
+  const toggleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir(d => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+  };
+
+  const SortIcon = ({ col }: { col: SortKey }) =>
+    sortKey !== col ? <ArrowUpDown className="inline h-3 w-3 ml-1 opacity-40" />
+      : sortDir === 'asc' ? <ArrowUp className="inline h-3 w-3 ml-1" />
+      : <ArrowDown className="inline h-3 w-3 ml-1" />;
 
   const resetForm = () => {
     setEditId(null); setName(''); setDescription(''); setUnit('st'); setPrice(''); setArticleNumber(''); setVatRate('0');
@@ -104,6 +158,27 @@ export default function AdminArticles() {
           </Dialog>
         </div>
 
+        {!!articles?.length && (
+          <div className="flex flex-col sm:flex-row gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Sök namn, beskrivning eller artikelnummer"
+                className="pl-9"
+              />
+            </div>
+            <Select value={unitFilter} onValueChange={setUnitFilter}>
+              <SelectTrigger className="w-full sm:w-48"><SelectValue placeholder="Alla enheter" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Alla enheter</SelectItem>
+                {unitOptions.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
         <Card>
           <CardContent className="p-0">
             {isLoading ? (
@@ -117,20 +192,39 @@ export default function AdminArticles() {
                   <Plus className="h-3.5 w-3.5 mr-1" /> Skapa artikel
                 </Button>
               </div>
+            ) : !filtered.length ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <Search className="h-10 w-10 mx-auto mb-3 opacity-30" />
+                <p className="font-medium">Inga artiklar matchar</p>
+                <p className="text-sm mt-1">Prova att rensa sökning eller filter.</p>
+                <Button size="sm" variant="outline" className="mt-4" onClick={() => { setSearch(''); setUnitFilter('all'); }}>
+                  Rensa filter
+                </Button>
+              </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Art.nr</TableHead>
-                    <TableHead>Namn</TableHead>
-                    <TableHead>Enhet</TableHead>
-                    <TableHead className="text-right">Pris</TableHead>
-                    <TableHead className="text-right">Moms</TableHead>
+                    <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('article_number')}>
+                      Art.nr <SortIcon col="article_number" />
+                    </TableHead>
+                    <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('name')}>
+                      Namn <SortIcon col="name" />
+                    </TableHead>
+                    <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('unit')}>
+                      Enhet <SortIcon col="unit" />
+                    </TableHead>
+                    <TableHead className="text-right cursor-pointer select-none" onClick={() => toggleSort('default_price')}>
+                      Pris <SortIcon col="default_price" />
+                    </TableHead>
+                    <TableHead className="text-right cursor-pointer select-none" onClick={() => toggleSort('vat_rate')}>
+                      Moms <SortIcon col="vat_rate" />
+                    </TableHead>
                     <TableHead className="w-[100px]" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {articles.map(a => (
+                  {filtered.map((a: any) => (
                     <TableRow key={a.id}>
                       <TableCell className="font-mono text-xs">{a.article_number || '—'}</TableCell>
                       <TableCell>
