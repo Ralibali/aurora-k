@@ -68,6 +68,7 @@ const AdminApiDocs = lazy(() => import("./pages/admin/AdminApiDocs"));
 const AdminRouteOptimizer = lazy(() => import("./pages/admin/AdminRouteOptimizer"));
 const AdminCompensation = lazy(() => import("./pages/admin/AdminCompensation"));
 const AdminAuditLog = lazy(() => import("./pages/admin/AdminAuditLog"));
+const AdminRecurringSeries = lazy(() => import("./pages/admin/AdminRecurringSeries"));
 const CustomerPortal = lazy(() => import("./pages/CustomerPortal"));
 const DriverAssignments = lazy(() => import("./pages/driver/DriverAssignments"));
 const DriverAssignmentDetail = lazy(() => import("./pages/driver/DriverAssignmentDetail"));
@@ -227,6 +228,7 @@ const App = () => (
                     <Route path="routes" element={<AdminRouteOptimizer />} />
                     <Route path="compensation" element={<AdminCompensation />} />
                     <Route path="audit-log" element={<AdminAuditLog />} />
+                    <Route path="recurring-series" element={<AdminRecurringSeries />} />
                   </Route>
 
                   <Route path="/platform" element={<PlatformAdminGuard><PlatformAdminShell /></PlatformAdminGuard>}>

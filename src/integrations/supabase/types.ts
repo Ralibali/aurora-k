@@ -300,6 +300,8 @@ export type Database = {
           require_signature: boolean
           scheduled_end: string | null
           scheduled_start: string
+          series_date: string | null
+          series_id: string | null
           signature_url: string | null
           status: string
           title: string
@@ -332,6 +334,8 @@ export type Database = {
           require_signature?: boolean
           scheduled_end?: string | null
           scheduled_start: string
+          series_date?: string | null
+          series_id?: string | null
           signature_url?: string | null
           status?: string
           title: string
@@ -364,6 +368,8 @@ export type Database = {
           require_signature?: boolean
           scheduled_end?: string | null
           scheduled_start?: string
+          series_date?: string | null
+          series_id?: string | null
           signature_url?: string | null
           status?: string
           title?: string
@@ -396,6 +402,13 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignments_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "recurring_assignment_series"
             referencedColumns: ["id"]
           },
           {
@@ -1691,6 +1704,101 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recurring_assignment_series: {
+        Row: {
+          active: boolean
+          address: string
+          assigned_driver_id: string
+          company_id: string
+          created_at: string
+          customer_id: string
+          day_of_month: number | null
+          duration_minutes: number
+          end_date: string | null
+          frequency: string
+          id: string
+          instructions: string | null
+          priority: string
+          scheduled_time: string
+          start_date: string
+          title: string
+          updated_at: string
+          vehicle_id: string | null
+          weekdays: number[]
+        }
+        Insert: {
+          active?: boolean
+          address: string
+          assigned_driver_id: string
+          company_id: string
+          created_at?: string
+          customer_id: string
+          day_of_month?: number | null
+          duration_minutes?: number
+          end_date?: string | null
+          frequency: string
+          id?: string
+          instructions?: string | null
+          priority?: string
+          scheduled_time?: string
+          start_date?: string
+          title: string
+          updated_at?: string
+          vehicle_id?: string | null
+          weekdays?: number[]
+        }
+        Update: {
+          active?: boolean
+          address?: string
+          assigned_driver_id?: string
+          company_id?: string
+          created_at?: string
+          customer_id?: string
+          day_of_month?: number | null
+          duration_minutes?: number
+          end_date?: string | null
+          frequency?: string
+          id?: string
+          instructions?: string | null
+          priority?: string
+          scheduled_time?: string
+          start_date?: string
+          title?: string
+          updated_at?: string
+          vehicle_id?: string | null
+          weekdays?: number[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recurring_assignment_series_assigned_driver_id_fkey"
+            columns: ["assigned_driver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recurring_assignment_series_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recurring_assignment_series_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recurring_assignment_series_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
             referencedColumns: ["id"]
           },
         ]
