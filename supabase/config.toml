@@ -20,6 +20,3 @@ verify_jwt = false
 
 [functions.notify-admin]
 verify_jwt = false
-
-[functions.send-push]
-verify_jwt = false
