@@ -13,6 +13,8 @@ import { useCustomers, useDrivers, useCreateAssignment } from '@/hooks/useData';
 import { useVehicles, useOrders } from '@/hooks/useNewFeatures';
 import { useUpdateBookingRequest } from '@/hooks/useAllFeatures';
 import { priorityLabels } from '@/lib/types';
+import { PUBLIC_SITE_URL } from '@/lib/constants';
+import { sendDriverAssignmentPush } from '@/lib/driver-notifications';
 import { ArrowLeft, MapPin, PackageCheck, Route, Truck } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -68,6 +70,50 @@ export default function AdminNewAssignment() {
   const [recurrenceEndDate, setRecurrenceEndDate] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const notifyDriver = (assignment: any, scheduledStartIso: string) => {
+    const driver = (drivers ?? []).find((d) => d.id === driverId);
+    const customer = (customers ?? []).find((c) => c.id === customerId);
+    if (!driver) return;
+
+    const formattedDate = new Date(scheduledStartIso).toLocaleString('sv-SE', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
+    if (driver.email && customer) {
+      supabase.functions.invoke('send-email', {
+        body: {
+          to: driver.email,
+          subject: `Nytt uppdrag: ${title}`,
+          templateName: 'assignment-confirmation',
+          templateData: {
+            driverName: driver.full_name,
+            title,
+            address: buildAddress(pickupAddress, deliveryAddress),
+            scheduledStart: formattedDate,
+            customerName: customer.name,
+            priority,
+            serviceType,
+            instructions: instructions || null,
+            adminComment: adminComment || null,
+            appUrl: `${PUBLIC_SITE_URL}/driver/assignments/${assignment.id}`,
+          },
+        },
+      }).catch((err) => console.warn('[assignment-confirmation] send-email failed', err));
+    }
+
+    sendDriverAssignmentPush(
+      driver.id,
+      'Nytt uppdrag',
+      `${title} · ${formattedDate}`,
+      assignment.id,
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -109,44 +155,14 @@ export default function AdminNewAssignment() {
           vehicle_id: vehicleId || null,
           order_id: orderId || null,
         };
-        await new Promise<void>((resolve, reject) => {
-          createAssignment.mutate(payload, { onSuccess: () => resolve(), onError: (err) => reject(err) });
+        const createdAssignment = await new Promise<any>((resolve, reject) => {
+          createAssignment.mutate(payload, { onSuccess: (data) => resolve(data), onError: (err) => reject(err) });
         });
+        notifyDriver(createdAssignment, d.start.toISOString());
       }
 
       if (bookingRequestId) {
         updateBookingRequest.mutate({ id: bookingRequestId, status: 'accepted', admin_note: 'Omgjord till uppdrag' });
-      }
-
-      try {
-        const driver = (drivers ?? []).find(d => d.id === driverId);
-        const customer = (customers ?? []).find(c => c.id === customerId);
-        if (driver?.email && customer) {
-          const formattedDate = new Date(scheduledStart).toLocaleString('sv-SE', {
-            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
-          });
-          await supabase.functions.invoke('send-email', {
-            body: {
-              to: driver.email,
-              subject: `Nytt uppdrag: ${title}`,
-              templateName: 'assignment-confirmation',
-              templateData: {
-                driverName: driver.full_name,
-                title,
-                address: buildAddress(pickupAddress, deliveryAddress),
-                scheduledStart: formattedDate,
-                customerName: customer.name,
-                priority,
-                serviceType,
-                instructions: instructions || null,
-                adminComment: adminComment || null,
-                appUrl: `${window.location.origin}/driver/assignments`,
-              },
-            },
-          });
-        }
-      } catch (emailErr) {
-        console.error('Failed to send assignment email:', emailErr);
       }
 
       navigate('/admin/assignments');
