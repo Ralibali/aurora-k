@@ -6,6 +6,7 @@ import { Send, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
+import { PUBLIC_SITE_URL } from '@/lib/constants';
 
 interface PortalChatProps {
   token: string;
@@ -108,7 +109,7 @@ export function PortalChat({ token, customerName }: PortalChatProps) {
           data: {
             customerName,
             message: newMessage.trim(),
-            customerUrl: `${window.location.origin}/admin/customers/${customerIdRef.current}`,
+            customerUrl: `${PUBLIC_SITE_URL}/admin/customers/${customerIdRef.current}`,
           },
         }),
       }).catch(() => {});
