@@ -1,9 +1,10 @@
 import { Copy, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { PUBLIC_SITE_URL } from '@/lib/constants';
 
 export function CustomerStatusLink({ token }: { token: string }) {
-  const url = `${window.location.origin}/track/${token}`;
+  const url = `${PUBLIC_SITE_URL}/track/${token}`;
   const copy = async () => {
     await navigator.clipboard.writeText(url);
     toast.success('Kundlänken kopierades');
