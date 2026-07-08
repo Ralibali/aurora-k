@@ -13,7 +13,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useCustomers, useDrivers } from '@/hooks/useData';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Play, Trash2, Pencil, RefreshCw } from 'lucide-react';
+import { Plus, Play, Trash2, Pencil, RefreshCw, CheckCircle2, XCircle } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { sv } from 'date-fns/locale';
 import type { Database } from '@/integrations/supabase/types';
 
 type Series = Database['public']['Tables']['recurring_assignment_series']['Row'];
@@ -248,6 +250,8 @@ export default function AdminRecurringSeries() {
           <strong>Idempotens:</strong> uppdrag är unika per (serie, datum). Klicka "Generera nu" flera gånger — redan skapade dagar hoppas över.
           Sätt upp en cron (t.ex. Codemagic-schemalagd webhook eller pg_cron) som kallar edge-funktionen dagligen så håller sig 14-dagars horisonten fylld automatiskt.
         </div>
+
+        <GenerationRunsPanel />
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -381,5 +385,131 @@ export default function AdminRecurringSeries() {
         </DialogContent>
       </Dialog>
     </AdminLayout>
+  );
+}
+
+type RunRow = {
+  id: string;
+  triggered_by: string;
+  started_at: string;
+  finished_at: string | null;
+  generated: number;
+  considered: number;
+  series_count: number;
+  horizon_days: number | null;
+  status: 'success' | 'error';
+  error: string | null;
+};
+
+function GenerationRunsPanel() {
+  const { data: runs, isLoading, refetch, isFetching } = useQuery({
+    queryKey: ['recurring-generation-runs'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('recurring_generation_runs')
+        .select('id, triggered_by, started_at, finished_at, generated, considered, series_count, horizon_days, status, error')
+        .order('started_at', { ascending: false })
+        .limit(20);
+      if (error) throw error;
+      return (data ?? []) as RunRow[];
+    },
+    refetchInterval: 30_000,
+  });
+
+  const last = runs?.[0];
+  const lastSuccess = runs?.find((r) => r.status === 'success');
+  const lastError = runs?.find((r) => r.status === 'error');
+
+  return (
+    <div className="border rounded-lg bg-card">
+      <div className="flex items-center justify-between p-4 border-b">
+        <div>
+          <h3 className="text-sm font-semibold">Genereringshistorik</h3>
+          <p className="text-xs text-muted-foreground">Senaste 20 körningarna av generatorn (cron + manuella).</p>
+        </div>
+        <Button size="sm" variant="ghost" onClick={() => refetch()} disabled={isFetching}>
+          <RefreshCw className={`h-4 w-4 mr-1 ${isFetching ? 'animate-spin' : ''}`} /> Uppdatera
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 border-b bg-muted/20">
+        <div>
+          <div className="text-xs text-muted-foreground">Senaste körning</div>
+          <div className="text-sm font-medium">
+            {last ? formatDistanceToNow(new Date(last.started_at), { addSuffix: true, locale: sv }) : '—'}
+          </div>
+          {last && (
+            <div className="text-xs text-muted-foreground">
+              via {last.triggered_by} · {last.status === 'success' ? `${last.generated} nya` : 'fel'}
+            </div>
+          )}
+        </div>
+        <div>
+          <div className="text-xs text-muted-foreground">Senaste lyckade</div>
+          <div className="text-sm font-medium">
+            {lastSuccess ? formatDistanceToNow(new Date(lastSuccess.started_at), { addSuffix: true, locale: sv }) : '—'}
+          </div>
+          {lastSuccess && (
+            <div className="text-xs text-muted-foreground">
+              {lastSuccess.generated} nya · {lastSuccess.series_count} serier · {lastSuccess.horizon_days}d
+            </div>
+          )}
+        </div>
+        <div>
+          <div className="text-xs text-muted-foreground">Senaste fel</div>
+          <div className="text-sm font-medium">
+            {lastError ? formatDistanceToNow(new Date(lastError.started_at), { addSuffix: true, locale: sv }) : 'Inga fel'}
+          </div>
+          {lastError?.error && (
+            <div className="text-xs text-destructive truncate" title={lastError.error}>
+              {lastError.error}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="p-4 text-sm text-muted-foreground">Läser in…</div>
+      ) : !runs?.length ? (
+        <div className="p-6 text-center text-sm text-muted-foreground">
+          Ingen körning loggad ännu. Klicka "Generera nu" för att skapa den första posten.
+        </div>
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-8"></TableHead>
+              <TableHead>Tid</TableHead>
+              <TableHead>Källa</TableHead>
+              <TableHead className="text-right">Skapade</TableHead>
+              <TableHead className="text-right">Övervägda</TableHead>
+              <TableHead className="text-right">Serier</TableHead>
+              <TableHead>Fel</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {runs.map((r) => (
+              <TableRow key={r.id}>
+                <TableCell>
+                  {r.status === 'success'
+                    ? <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                    : <XCircle className="h-4 w-4 text-destructive" />}
+                </TableCell>
+                <TableCell className="whitespace-nowrap text-xs">
+                  {new Date(r.started_at).toLocaleString('sv-SE')}
+                </TableCell>
+                <TableCell className="text-xs capitalize">{r.triggered_by}</TableCell>
+                <TableCell className="text-right font-mono text-xs">{r.generated}</TableCell>
+                <TableCell className="text-right font-mono text-xs">{r.considered}</TableCell>
+                <TableCell className="text-right font-mono text-xs">{r.series_count}</TableCell>
+                <TableCell className="text-xs text-destructive max-w-[240px] truncate" title={r.error ?? ''}>
+                  {r.error ?? ''}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
+    </div>
   );
 }
