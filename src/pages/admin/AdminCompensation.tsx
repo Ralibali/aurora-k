@@ -23,6 +23,7 @@ import { toast } from 'sonner';
 import { UsageInfoCard } from '@/components/admin/UsageInfoCard';
 import { calculateObBreakdown, computeSalary, workedHours } from '@/lib/salary-calculation';
 import { formatSwedishDate } from '@/lib/format';
+import { buildPaxml, paxmlFileName, validatePaxml } from '@/lib/paxml-export';
 
 const COMP_LABELS: Record<string, string> = {
   hourly: 'Timlön',
@@ -256,14 +257,50 @@ function SalaryExportTab() {
     toast.success('Löneunderlag exporterades');
   };
 
+  const exportPaxml = () => {
+    const validation = validatePaxml({
+      periodStart,
+      periodEnd,
+      assignments: periodAssignments as any,
+      drivers: visibleDrivers as any,
+      compensations: visibleCompensations as any,
+      obRates: obRates ?? [],
+      perDiemRates: perDiemRates ?? [],
+    });
+    if (!validation.ok) {
+      toast.error(`PAXml kan inte genereras: ${validation.errors.join(' ')}`);
+      return;
+    }
+    validation.warnings.slice(0, 3).forEach((w) => toast.warning(w));
+    const xml = buildPaxml({
+      periodStart,
+      periodEnd,
+      assignments: periodAssignments as any,
+      drivers: visibleDrivers as any,
+      compensations: visibleCompensations as any,
+      obRates: obRates ?? [],
+      perDiemRates: perDiemRates ?? [],
+    });
+    const blob = new Blob([xml], { type: 'application/xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = paxmlFileName(periodStart);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success(`PAXml exporterades (${validation.transactionCount} transaktioner)`);
+  };
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-base">Exportera löneunderlag</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-sm text-muted-foreground">Välj månad och chaufför. Exporten använder samma löne-, OB- och traktamentelogik som ersättningsvyn.</p>
-        <div className="grid gap-4 sm:grid-cols-[180px_1fr_auto] sm:items-end">
+        <p className="text-sm text-muted-foreground">Välj månad och chaufför. Exporten använder samma löne-, OB- och traktamentelogik som ersättningsvyn. CSV = manuell hantering, PAXml 2.2 = direktimport i lönesystem (Fortnox Lön, Visma, Kontek m.fl.).</p>
+        <div className="grid gap-4 sm:grid-cols-[180px_1fr_auto_auto] sm:items-end">
           <div className="space-y-2"><Label>Månad</Label><Input type="month" value={month} onChange={e => setMonth(e.target.value)} /></div>
           <div className="space-y-2"><Label>Chaufför</Label><Select value={driverFilter} onValueChange={setDriverFilter}><SelectTrigger><SelectValue placeholder="Välj chaufför" /></SelectTrigger><SelectContent><SelectItem value="all">Alla chaufförer</SelectItem>{(drivers ?? []).map((driver: any) => <SelectItem key={driver.id} value={driver.id}>{driver.full_name}</SelectItem>)}</SelectContent></Select></div>
           <TooltipProvider>
@@ -271,6 +308,16 @@ function SalaryExportTab() {
               <TooltipTrigger asChild>
                 <span className="inline-flex">
                   <Button onClick={exportCsv} disabled={!hasRows} className="gap-2"><Download className="h-4 w-4" /> Exportera CSV</Button>
+                </span>
+              </TooltipTrigger>
+              {!hasRows && <TooltipContent>Perioden saknar slutförda uppdrag.</TooltipContent>}
+            </Tooltip>
+          </TooltipProvider>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="inline-flex">
+                  <Button onClick={exportPaxml} disabled={!hasRows} variant="secondary" className="gap-2"><Download className="h-4 w-4" /> PAXml 2.2</Button>
                 </span>
               </TooltipTrigger>
               {!hasRows && <TooltipContent>Perioden saknar slutförda uppdrag.</TooltipContent>}
