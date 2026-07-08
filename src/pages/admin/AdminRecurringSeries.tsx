@@ -13,7 +13,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useCustomers, useDrivers } from '@/hooks/useData';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Play, Trash2, Pencil, RefreshCw } from 'lucide-react';
+import { Plus, Play, Trash2, Pencil, RefreshCw, CheckCircle2, XCircle } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { sv } from 'date-fns/locale';
 import type { Database } from '@/integrations/supabase/types';
 
 type Series = Database['public']['Tables']['recurring_assignment_series']['Row'];
@@ -248,6 +250,8 @@ export default function AdminRecurringSeries() {
           <strong>Idempotens:</strong> uppdrag är unika per (serie, datum). Klicka "Generera nu" flera gånger — redan skapade dagar hoppas över.
           Sätt upp en cron (t.ex. Codemagic-schemalagd webhook eller pg_cron) som kallar edge-funktionen dagligen så håller sig 14-dagars horisonten fylld automatiskt.
         </div>
+
+        <GenerationRunsPanel />
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
