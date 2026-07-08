@@ -1803,6 +1803,62 @@ export type Database = {
           },
         ]
       }
+      recurring_generation_runs: {
+        Row: {
+          company_id: string | null
+          considered: number
+          created_at: string
+          error: string | null
+          finished_at: string | null
+          generated: number
+          horizon_days: number | null
+          id: string
+          series_count: number
+          started_at: string
+          status: string
+          triggered_by: string
+          triggered_by_user: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          considered?: number
+          created_at?: string
+          error?: string | null
+          finished_at?: string | null
+          generated?: number
+          horizon_days?: number | null
+          id?: string
+          series_count?: number
+          started_at?: string
+          status?: string
+          triggered_by: string
+          triggered_by_user?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          considered?: number
+          created_at?: string
+          error?: string | null
+          finished_at?: string | null
+          generated?: number
+          horizon_days?: number | null
+          id?: string
+          series_count?: number
+          started_at?: string
+          status?: string
+          triggered_by?: string
+          triggered_by_user?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recurring_generation_runs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       settings: {
         Row: {
           address: string | null
