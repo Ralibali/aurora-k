@@ -87,6 +87,9 @@ Deno.serve(async (req) => {
   const admin = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
 
   let restrictCompanyId: string | null = null;
+  let triggeredByUser: string | null = null;
+  let triggeredBy: "cron" | "admin" | "service" = isServiceRole ? "cron" : "admin";
+  const startedAt = new Date().toISOString();
 
   if (!isServiceRole) {
     // Validate user + admin role
@@ -105,6 +108,35 @@ Deno.serve(async (req) => {
       return json(403, { error: "admin role required" });
     }
     restrictCompanyId = profile.company_id as string;
+    triggeredByUser = userData.user.id;
+    triggeredBy = "admin";
+  }
+
+  async function logRun(row: {
+    generated: number;
+    considered: number;
+    series_count: number;
+    horizon_days: number | null;
+    status: "success" | "error";
+    error?: string | null;
+  }) {
+    try {
+      await admin.from("recurring_generation_runs").insert({
+        company_id: restrictCompanyId,
+        triggered_by: triggeredBy,
+        triggered_by_user: triggeredByUser,
+        started_at: startedAt,
+        finished_at: new Date().toISOString(),
+        generated: row.generated,
+        considered: row.considered,
+        series_count: row.series_count,
+        horizon_days: row.horizon_days,
+        status: row.status,
+        error: row.error ?? null,
+      });
+    } catch (e) {
+      console.error("log run failed", e);
+    }
   }
 
   let body: { horizon_days?: number; series_id?: string } = {};
@@ -119,8 +151,14 @@ Deno.serve(async (req) => {
   if (body.series_id) query = query.eq("id", body.series_id);
 
   const { data: series, error: seriesErr } = await query;
-  if (seriesErr) return json(500, { error: seriesErr.message });
-  if (!series || series.length === 0) return json(200, { generated: 0, series: 0 });
+  if (seriesErr) {
+    await logRun({ generated: 0, considered: 0, series_count: 0, horizon_days: horizonDays, status: "error", error: seriesErr.message });
+    return json(500, { error: seriesErr.message });
+  }
+  if (!series || series.length === 0) {
+    await logRun({ generated: 0, considered: 0, series_count: 0, horizon_days: horizonDays, status: "success" });
+    return json(200, { generated: 0, series: 0 });
+  }
 
   const today = new Date();
   today.setUTCHours(0, 0, 0, 0);
@@ -168,7 +206,10 @@ Deno.serve(async (req) => {
     }
   }
 
-  if (rows.length === 0) return json(200, { generated: 0, series: series.length });
+  if (rows.length === 0) {
+    await logRun({ generated: 0, considered: 0, series_count: series.length, horizon_days: horizonDays, status: "success" });
+    return json(200, { generated: 0, series: series.length });
+  }
 
   // Idempotent via unique(series_id, series_date). Use upsert with ignoreDuplicates.
   const { data, error } = await admin
@@ -176,8 +217,13 @@ Deno.serve(async (req) => {
     .upsert(rows, { onConflict: "series_id,series_date", ignoreDuplicates: true })
     .select("id");
 
-  if (error) return json(500, { error: error.message });
+  if (error) {
+    await logRun({ generated: 0, considered: rows.length, series_count: series.length, horizon_days: horizonDays, status: "error", error: error.message });
+    return json(500, { error: error.message });
+  }
 
+  const generated = data?.length ?? 0;
+  await logRun({ generated, considered: rows.length, series_count: series.length, horizon_days: horizonDays, status: "success" });
   return json(200, {
     generated: data?.length ?? 0,
     considered: rows.length,
