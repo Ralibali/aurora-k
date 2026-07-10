@@ -14,24 +14,45 @@ function getConsent(): ConsentStatus {
   }
 }
 
+function updateGoogleAnalyticsConsent(status: Exclude<ConsentStatus, null>) {
+  try {
+    const gtag = (window as any).gtag;
+    if (typeof gtag === 'function') {
+      gtag('consent', 'update', {
+        analytics_storage: status === 'accepted' ? 'granted' : 'denied',
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+      });
+    }
+  } catch {
+    // Consent updates must never break the UI.
+  }
+}
+
 export function CookieConsent() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    const existingConsent = getConsent();
+    if (existingConsent) updateGoogleAnalyticsConsent(existingConsent);
+
     // Small delay so it doesn't flash on page load
     const timer = setTimeout(() => {
-      if (!getConsent()) setVisible(true);
+      if (!existingConsent) setVisible(true);
     }, 1500);
     return () => clearTimeout(timer);
   }, []);
 
   const handleAccept = () => {
     localStorage.setItem(COOKIE_CONSENT_KEY, 'accepted');
+    updateGoogleAnalyticsConsent('accepted');
     setVisible(false);
   };
 
   const handleReject = () => {
     localStorage.setItem(COOKIE_CONSENT_KEY, 'rejected');
+    updateGoogleAnalyticsConsent('rejected');
     setVisible(false);
   };
 
