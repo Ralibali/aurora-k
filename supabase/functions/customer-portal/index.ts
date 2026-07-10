@@ -60,7 +60,12 @@ Deno.serve(async (req) => {
     }
 
     const [assignmentsRes, ordersRes, invoicesRes, bookingsRes, settingsRes] = await Promise.all([
-      supabase.from('assignments').select('id, title, address, pickup_address, delivery_address, service_type, status, scheduled_start, scheduled_end, actual_start, actual_stop, priority, driver:profiles!assignments_assigned_driver_id_fkey(full_name)').eq('customer_id', customerId).order('scheduled_start', { ascending: false }).limit(100),
+      supabase
+        .from('assignments')
+        .select('id, title, address, pickup_address, delivery_address, service_type, status, scheduled_start, scheduled_end, actual_start, actual_stop, priority, tracking_token, consignment_photo_url, signature_url, require_photo, require_signature, driver:profiles!assignments_assigned_driver_id_fkey(full_name)')
+        .eq('customer_id', customerId)
+        .order('scheduled_start', { ascending: false })
+        .limit(100),
       supabase.from('orders').select('id, order_number, title, description, status, created_at').eq('customer_id', customerId).order('created_at', { ascending: false }),
       supabase.from('invoices').select('id, invoice_number, invoice_date, due_date, total_ex_vat, vat_amount, total_inc_vat, reference, message, assignment_ids, lines, status').eq('customer_id', customerId).order('invoice_date', { ascending: false }),
       supabase.from('booking_requests').select('id, title, description, preferred_date, status, created_at').eq('customer_id', customerId).order('created_at', { ascending: false }),
