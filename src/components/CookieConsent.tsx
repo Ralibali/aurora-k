@@ -46,8 +46,7 @@ export function CookieConsent() {
           </div>
           <div className="flex-1 space-y-3">
             <p className="text-sm text-foreground leading-relaxed">
-              Vi använder cookies för att förbättra din upplevelse och hålla dig inloggad. 
-              Inga tredjepartscookies används.{' '}
+              Vi använder nödvändiga cookies för inloggning och kan använda analysverktyg för att förstå hur webbplatsen används.{' '}
               <a href="/privacy" className="underline text-primary hover:text-primary/80 transition-colors">
                 Läs vår integritetspolicy
               </a>
