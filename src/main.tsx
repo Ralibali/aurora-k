@@ -18,11 +18,19 @@ import "@fontsource/dm-sans/700.css";
 
 Sentry.init({
   dsn: "https://d838e2cf945e668ad9d1f63d7586ba00@o4511191910383616.ingest.de.sentry.io/4511191916675152",
-  sendDefaultPii: true,
+  sendDefaultPii: false,
   enabled: import.meta.env.PROD,
   tracesSampleRate: 0.2,
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1.0,
+  beforeSend(event) {
+    if (event.request) {
+      delete event.request.cookies;
+      delete event.request.headers;
+      delete event.request.data;
+    }
+    return event;
+  },
 });
 
 // PWA: Guard service worker registration against preview/iframe, prerender and Capacitor native contexts
