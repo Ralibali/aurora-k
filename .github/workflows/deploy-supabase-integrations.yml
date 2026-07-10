@@ -50,13 +50,33 @@ jobs:
         if: steps.credentials.outputs.ready == 'true'
         shell: bash
         run: |
-          for function_name in parse-order-document order-inbox-api fortnox-oauth-start fortnox-api driver-sync
+          for function_name in \
+            parse-order-document \
+            order-inbox-api \
+            fortnox-oauth-start \
+            fortnox-api \
+            driver-sync \
+            send-email \
+            register-company \
+            create-checkout \
+            stripe-portal \
+            demo-login
           do
             npx --yes supabase@latest functions deploy "$function_name" --project-ref "$SUPABASE_PROJECT_REF" --use-api
           done
 
       - name: Deploy verified public callbacks
         if: steps.credentials.outputs.ready == 'true'
+        shell: bash
         run: |
-          npx --yes supabase@latest functions deploy resend-inbound-order --project-ref "$SUPABASE_PROJECT_REF" --use-api --no-verify-jwt
-          npx --yes supabase@latest functions deploy fortnox-oauth-callback --project-ref "$SUPABASE_PROJECT_REF" --use-api --no-verify-jwt
+          for function_name in \
+            resend-inbound-order \
+            fortnox-oauth-callback \
+            stripe-webhook \
+            track-assignment \
+            customer-portal \
+            public-booking \
+            notify-admin
+          do
+            npx --yes supabase@latest functions deploy "$function_name" --project-ref "$SUPABASE_PROJECT_REF" --use-api --no-verify-jwt
+          done
