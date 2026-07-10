@@ -12,6 +12,7 @@ const corsHeaders = {
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") ?? Deno.env.get("SUPABASE_PUBLISHABLE_KEY")!;
+const BUSINESS_TIME_ZONE = "Europe/Stockholm";
 
 type Series = {
   id: string;
@@ -50,6 +51,49 @@ function addDays(d: Date, n: number): Date {
   return x;
 }
 
+function dateInTimeZone(now: Date, timeZone: string): string {
+  const parts = new Intl.DateTimeFormat("sv-SE", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now);
+  const get = (type: string) => parts.find((p) => p.type === type)?.value;
+  return `${get("year")}-${get("month")}-${get("day")}`;
+}
+
+function zonedTimeToUtcIso(dateIso: string, time: string, timeZone: string): string {
+  const [year, month, day] = dateIso.split("-").map(Number);
+  const [hour = 8, minute = 0, second = 0] = time.split(":").map((part) => Number(part));
+  const targetWallClock = Date.UTC(year, month - 1, day, hour, minute, second);
+  let utc = new Date(targetWallClock);
+
+  for (let i = 0; i < 3; i++) {
+    const parts = new Intl.DateTimeFormat("sv-SE", {
+      timeZone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hourCycle: "h23",
+    }).formatToParts(utc);
+    const get = (type: string) => Number(parts.find((p) => p.type === type)?.value);
+    const renderedWallClock = Date.UTC(
+      get("year"),
+      get("month") - 1,
+      get("day"),
+      get("hour"),
+      get("minute"),
+      get("second"),
+    );
+    utc = new Date(utc.getTime() - (renderedWallClock - targetWallClock));
+  }
+
+  return utc.toISOString();
+}
+
 function occurrenceMatches(series: Series, date: Date): boolean {
   const iso = isoDate(date);
   if (iso < series.start_date) return false;
@@ -71,9 +115,8 @@ function occurrenceMatches(series: Series, date: Date): boolean {
 }
 
 function buildScheduledStart(dateIso: string, time: string): string {
-  // Store in UTC — server is Europe/Stockholm business hours but storing UTC preserves the wall clock via TZ config on client
-  const [h = "08", mi = "00", s = "00"] = time.split(":");
-  return `${dateIso}T${h.padStart(2, "0")}:${mi.padStart(2, "0")}:${s.padStart(2, "0")}Z`;
+  // Interpret scheduled_time as Swedish local wall clock, then store as UTC.
+  return zonedTimeToUtcIso(dateIso, time, BUSINESS_TIME_ZONE);
 }
 
 Deno.serve(async (req) => {
@@ -92,22 +135,35 @@ Deno.serve(async (req) => {
   const startedAt = new Date().toISOString();
 
   if (!isServiceRole) {
-    // Validate user + admin role
+    // Validate user + admin role. Keep this in sync with frontend auth resolution.
     const userClient = createClient(SUPABASE_URL, ANON_KEY, {
       global: { headers: { Authorization: `Bearer ${token}` } },
       auth: { persistSession: false },
     });
     const { data: userData, error: userErr } = await userClient.auth.getUser();
     if (userErr || !userData?.user) return json(401, { error: "invalid token" });
-    const { data: profile } = await admin
-      .from("profiles")
-      .select("company_id, role")
-      .eq("id", userData.user.id)
-      .maybeSingle();
-    if (!profile?.company_id || profile.role !== "admin") {
+
+    const [{ data: roleRows }, { data: profile }] = await Promise.all([
+      admin
+        .from("user_roles")
+        .select("role, company_id")
+        .eq("user_id", userData.user.id),
+      admin
+        .from("profiles")
+        .select("company_id, role")
+        .eq("id", userData.user.id)
+        .maybeSingle(),
+    ]);
+
+    const adminRole = roleRows?.find((row) => row.role === "admin");
+    const companyId = adminRole?.company_id ?? profile?.company_id ?? null;
+    const isAdmin = Boolean(adminRole) || profile?.role === "admin";
+
+    if (!companyId || !isAdmin) {
       return json(403, { error: "admin role required" });
     }
-    restrictCompanyId = profile.company_id as string;
+
+    restrictCompanyId = companyId as string;
     triggeredByUser = userData.user.id;
     triggeredBy = "admin";
   }
@@ -160,8 +216,8 @@ Deno.serve(async (req) => {
     return json(200, { generated: 0, series: 0 });
   }
 
-  const today = new Date();
-  today.setUTCHours(0, 0, 0, 0);
+  const todayIso = dateInTimeZone(new Date(), BUSINESS_TIME_ZONE);
+  const today = new Date(`${todayIso}T00:00:00Z`);
   const dates: Date[] = [];
   for (let i = 0; i < horizonDays; i++) dates.push(addDays(today, i));
 
