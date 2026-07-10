@@ -1,22 +1,26 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { usePageMeta } from '@/lib/use-page-meta';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ClipboardList, ShoppingCart, Receipt, Building2, CalendarPlus, MessageCircle, ArrowUpRight, Clock, MapPin, Route, Truck, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { ClipboardList, ShoppingCart, Receipt, Building2, CalendarPlus, MessageCircle, Clock, MapPin, Route, AlertTriangle, CheckCircle2, FileSignature, Camera, ExternalLink } from 'lucide-react';
 import { BookingRequestForm } from '@/components/portal/BookingRequestForm';
 import { PortalChat } from '@/components/portal/PortalChat';
 import { PortalInvoiceDownloadButton } from '@/components/portal/PortalInvoiceDownloadButton';
 
-interface PortalCustomer { id: string; name: string; }
+interface PortalCustomer { id: string; name: string; email?: string | null; phone?: string | null; }
 interface PortalAssignment {
-  id: string; title: string; status: string; scheduled_start?: string;
+  id: string; title: string; status: string; scheduled_start?: string; scheduled_end?: string | null;
+  actual_start?: string | null; actual_stop?: string | null;
   pickup_address?: string | null; delivery_address?: string | null; address?: string | null;
-  service_type?: string | null;
+  service_type?: string | null; priority?: string | null; tracking_token?: string | null;
+  consignment_photo_url?: string | null; signature_url?: string | null;
+  require_photo?: boolean | null; require_signature?: boolean | null;
+  driver?: { full_name?: string | null } | null;
 }
 interface PortalOrder { id: string; order_number: string; title: string; status: string; }
 interface PortalInvoice {
@@ -55,9 +59,61 @@ function routeText(a: PortalAssignment) {
   return a.pickup_address || a.delivery_address || a.address || 'Adress saknas';
 }
 
-function formatDateTime(value?: string) {
+function formatDateTime(value?: string | null) {
   if (!value) return '—';
   return new Date(value).toLocaleString('sv-SE', { dateStyle: 'medium', timeStyle: 'short' });
+}
+
+function hasDeliveryProof(a: PortalAssignment) {
+  return Boolean(a.actual_stop || a.consignment_photo_url || a.signature_url);
+}
+
+function DeliveryProofCard({ assignment }: { assignment: PortalAssignment }) {
+  return (
+    <Card className="overflow-hidden">
+      <CardHeader className="border-b bg-muted/40">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <CardTitle className="text-base">{assignment.title}</CardTitle>
+            <p className="mt-1 text-sm text-muted-foreground">{routeText(assignment)}</p>
+          </div>
+          <Badge variant={statusVariant(assignment.status)}>{statusLabels[assignment.status] || assignment.status}</Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4 p-4">
+        <div className="grid gap-3 sm:grid-cols-3">
+          <div className="rounded-xl border p-3"><p className="text-xs text-muted-foreground">Planerad</p><p className="mt-1 text-sm font-medium">{formatDateTime(assignment.scheduled_start)}</p></div>
+          <div className="rounded-xl border p-3"><p className="text-xs text-muted-foreground">Slutförd</p><p className="mt-1 text-sm font-medium">{formatDateTime(assignment.actual_stop)}</p></div>
+          <div className="rounded-xl border p-3"><p className="text-xs text-muted-foreground">Förare</p><p className="mt-1 text-sm font-medium">{assignment.driver?.full_name || '—'}</p></div>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="rounded-xl border bg-white p-3">
+            <div className="mb-2 flex items-center gap-2 text-sm font-semibold"><Camera className="h-4 w-4" /> Fraktsedel / foto</div>
+            {assignment.consignment_photo_url ? (
+              <a href={assignment.consignment_photo_url} target="_blank" rel="noreferrer" className="block">
+                <img src={assignment.consignment_photo_url} alt="Fraktsedelsfoto" className="max-h-72 w-full rounded-lg border object-contain" />
+              </a>
+            ) : <p className="text-sm text-muted-foreground">Inget foto uppladdat.</p>}
+          </div>
+          <div className="rounded-xl border bg-white p-3">
+            <div className="mb-2 flex items-center gap-2 text-sm font-semibold"><FileSignature className="h-4 w-4" /> Mottagarsignatur</div>
+            {assignment.signature_url ? (
+              <a href={assignment.signature_url} target="_blank" rel="noreferrer" className="block">
+                <img src={assignment.signature_url} alt="Mottagarsignatur" className="max-h-72 w-full rounded-lg border bg-white object-contain p-3" />
+              </a>
+            ) : <p className="text-sm text-muted-foreground">Ingen signatur registrerad.</p>}
+          </div>
+        </div>
+
+        {assignment.tracking_token && (
+          <Button asChild variant="outline" size="sm">
+            <a href={`/track/${assignment.tracking_token}`} target="_blank" rel="noreferrer"><ExternalLink className="mr-2 h-4 w-4" /> Öppna spårningssida</a>
+          </Button>
+        )}
+      </CardContent>
+    </Card>
+  );
 }
 
 export default function CustomerPortal() {
@@ -108,6 +164,8 @@ export default function CustomerPortal() {
       .sort((a, b) => String(a.scheduled_start).localeCompare(String(b.scheduled_start)))[0];
   }, [assignments]);
 
+  const proofAssignments = useMemo(() => assignments.filter((a) => a.status === 'completed' && hasDeliveryProof(a)), [assignments]);
+
   const handleBookingCreated = useCallback((booking: PortalBooking) => {
     setData((prev: PortalData | null) => prev ? { ...prev, bookings: [booking, ...(prev.bookings || [])] } : prev);
   }, []);
@@ -132,7 +190,7 @@ export default function CustomerPortal() {
             <div>
               <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-sm text-blue-100"><Building2 className="h-4 w-4" /> Kundportal</div>
               <h1 className="mt-4 text-3xl font-bold md:text-5xl">{customer?.name}</h1>
-              <p className="mt-2 max-w-2xl text-slate-300">Följ uppdrag, se status, hämta fakturor och skicka nya transportförfrågningar på ett ställe.</p>
+              <p className="mt-2 max-w-2xl text-slate-300">Följ uppdrag, se status, hämta fakturor, se leveransbevis och skicka nya transportförfrågningar på ett ställe.</p>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row">
               <Button asChild variant="secondary"><Link to={`/boka/aurora-transport`} target="_blank"><CalendarPlus className="mr-2 h-4 w-4" /> Ny bokning</Link></Button>
@@ -167,6 +225,7 @@ export default function CustomerPortal() {
         <Tabs defaultValue="assignments" className="space-y-4">
           <TabsList className="flex h-auto flex-wrap justify-start">
             <TabsTrigger value="assignments" className="gap-1"><ClipboardList className="h-3.5 w-3.5" /> Uppdrag</TabsTrigger>
+            <TabsTrigger value="proof" className="gap-1"><CheckCircle2 className="h-3.5 w-3.5" /> Leveransbevis</TabsTrigger>
             <TabsTrigger value="orders" className="gap-1"><ShoppingCart className="h-3.5 w-3.5" /> Beställningar</TabsTrigger>
             <TabsTrigger value="invoices" className="gap-1"><Receipt className="h-3.5 w-3.5" /> Fakturor</TabsTrigger>
             <TabsTrigger value="booking" className="gap-1"><CalendarPlus className="h-3.5 w-3.5" /> Ny förfrågan</TabsTrigger>
@@ -174,15 +233,21 @@ export default function CustomerPortal() {
           </TabsList>
 
           <TabsContent value="assignments">
-            <Card><CardContent className="p-0"><Table><TableHeader><TableRow><TableHead>Uppdrag</TableHead><TableHead>Rutt</TableHead><TableHead>Planerat</TableHead><TableHead>Status</TableHead></TableRow></TableHeader><TableBody>{assignments.length === 0 && <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-8">Inga uppdrag</TableCell></TableRow>}{assignments.map((a: any) => <TableRow key={a.id}><TableCell><div className="font-medium">{a.title}</div>{a.service_type && <Badge variant="outline" className="mt-1">{a.service_type}</Badge>}</TableCell><TableCell className="max-w-[420px]"><div className="flex gap-2 text-sm text-muted-foreground"><MapPin className="mt-0.5 h-4 w-4 shrink-0" /><span>{routeText(a)}</span></div></TableCell><TableCell>{formatDateTime(a.scheduled_start)}</TableCell><TableCell><Badge variant={statusVariant(a.status)}>{statusLabels[a.status] || a.status}</Badge></TableCell></TableRow>)}</TableBody></Table></CardContent></Card>
+            <Card><CardContent className="p-0"><Table><TableHeader><TableRow><TableHead>Uppdrag</TableHead><TableHead>Rutt</TableHead><TableHead>Planerat</TableHead><TableHead>Status</TableHead><TableHead>Bevis</TableHead></TableRow></TableHeader><TableBody>{assignments.length === 0 && <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">Inga uppdrag</TableCell></TableRow>}{assignments.map((a) => <TableRow key={a.id}><TableCell><div className="font-medium">{a.title}</div>{a.service_type && <Badge variant="outline" className="mt-1">{a.service_type}</Badge>}</TableCell><TableCell className="max-w-[420px]"><div className="flex gap-2 text-sm text-muted-foreground"><MapPin className="mt-0.5 h-4 w-4 shrink-0" /><span>{routeText(a)}</span></div></TableCell><TableCell>{formatDateTime(a.scheduled_start)}</TableCell><TableCell><Badge variant={statusVariant(a.status)}>{statusLabels[a.status] || a.status}</Badge></TableCell><TableCell>{hasDeliveryProof(a) ? <Badge variant="secondary">Finns</Badge> : <span className="text-sm text-muted-foreground">—</span>}</TableCell></TableRow>)}</TableBody></Table></CardContent></Card>
+          </TabsContent>
+
+          <TabsContent value="proof">
+            <div className="space-y-4">
+              {proofAssignments.length === 0 ? <Card><CardContent className="py-10 text-center text-muted-foreground">Inga leveransbevis finns ännu.</CardContent></Card> : proofAssignments.map((assignment) => <DeliveryProofCard key={assignment.id} assignment={assignment} />)}
+            </div>
           </TabsContent>
 
           <TabsContent value="orders">
-            <Card><CardContent className="p-0"><Table><TableHeader><TableRow><TableHead>#</TableHead><TableHead>Beställning</TableHead><TableHead>Status</TableHead></TableRow></TableHeader><TableBody>{orders.length === 0 && <TableRow><TableCell colSpan={3} className="text-center text-muted-foreground py-8">Inga beställningar</TableCell></TableRow>}{orders.map((o: any) => <TableRow key={o.id}><TableCell className="font-mono text-xs">{o.order_number}</TableCell><TableCell className="font-medium">{o.title}</TableCell><TableCell><Badge variant={statusVariant(o.status)}>{statusLabels[o.status] || o.status}</Badge></TableCell></TableRow>)}</TableBody></Table></CardContent></Card>
+            <Card><CardContent className="p-0"><Table><TableHeader><TableRow><TableHead>#</TableHead><TableHead>Beställning</TableHead><TableHead>Status</TableHead></TableRow></TableHeader><TableBody>{orders.length === 0 && <TableRow><TableCell colSpan={3} className="text-center text-muted-foreground py-8">Inga beställningar</TableCell></TableRow>}{orders.map((o) => <TableRow key={o.id}><TableCell className="font-mono text-xs">{o.order_number}</TableCell><TableCell className="font-medium">{o.title}</TableCell><TableCell><Badge variant={statusVariant(o.status)}>{statusLabels[o.status] || o.status}</Badge></TableCell></TableRow>)}</TableBody></Table></CardContent></Card>
           </TabsContent>
 
           <TabsContent value="invoices">
-            <Card><CardContent className="p-0"><Table><TableHeader><TableRow><TableHead>Fakturanr</TableHead><TableHead>Datum</TableHead><TableHead>Förfallodatum</TableHead><TableHead className="text-right">Belopp</TableHead><TableHead>Status</TableHead><TableHead /></TableRow></TableHeader><TableBody>{invoices.length === 0 && <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Inga fakturor</TableCell></TableRow>}{invoices.map((inv: any) => <TableRow key={inv.id}><TableCell className="font-medium">#{inv.invoice_number}</TableCell><TableCell>{inv.invoice_date}</TableCell><TableCell>{inv.due_date}</TableCell><TableCell className="text-right font-mono">{inv.total_inc_vat?.toFixed(0)} kr</TableCell><TableCell><Badge variant={statusVariant(inv.status)}>{statusLabels[inv.status] || inv.status}</Badge></TableCell><TableCell className="text-right"><PortalInvoiceDownloadButton invoice={{ ...inv, customer }} assignments={assignments as Record<string, any>[]} settings={settings as Record<string, any> | null | undefined} /></TableCell></TableRow>)}</TableBody></Table></CardContent></Card>
+            <Card><CardContent className="p-0"><Table><TableHeader><TableRow><TableHead>Fakturanr</TableHead><TableHead>Datum</TableHead><TableHead>Förfallodatum</TableHead><TableHead className="text-right">Belopp</TableHead><TableHead>Status</TableHead><TableHead /></TableRow></TableHeader><TableBody>{invoices.length === 0 && <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Inga fakturor</TableCell></TableRow>}{invoices.map((inv) => <TableRow key={inv.id}><TableCell className="font-medium">#{inv.invoice_number}</TableCell><TableCell>{inv.invoice_date}</TableCell><TableCell>{inv.due_date}</TableCell><TableCell className="text-right font-mono">{inv.total_inc_vat?.toFixed(0)} kr</TableCell><TableCell><Badge variant={statusVariant(inv.status)}>{statusLabels[inv.status] || inv.status}</Badge></TableCell><TableCell className="text-right"><PortalInvoiceDownloadButton invoice={{ ...inv, customer }} assignments={assignments as Record<string, any>[]} settings={settings as Record<string, any> | null | undefined} /></TableCell></TableRow>)}</TableBody></Table></CardContent></Card>
           </TabsContent>
 
           <TabsContent value="booking"><BookingRequestForm token={token!} bookings={bookings} onCreated={handleBookingCreated} /></TabsContent>
