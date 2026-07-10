@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { track } from '@/lib/track';
-import { StandaloneDemoPage } from '@/components/MobileConversionShell';
 
 type PublicFormType = 'demo' | 'lead' | 'transport_booking';
 
@@ -12,8 +11,6 @@ function identifyForm(form: HTMLFormElement): PublicFormType | null {
 }
 
 export function FormAnalyticsObserver() {
-  const legacyDemoRoute = window.location.pathname === '/boka';
-
   useEffect(() => {
     const attached = new WeakSet<HTMLFormElement>();
     const successful = new Set<string>();
@@ -94,14 +91,6 @@ export function FormAnalyticsObserver() {
       document.body.style.paddingBottom = '';
     };
   }, []);
-
-  if (legacyDemoRoute) {
-    return (
-      <div className="fixed inset-0 z-[300] overflow-y-auto bg-white">
-        <StandaloneDemoPage />
-      </div>
-    );
-  }
 
   return null;
 }
