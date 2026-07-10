@@ -91,7 +91,7 @@ export function AdminLayout({ children, title, description, actions }: AdminLayo
   return (
     <>
       <DemoBanner />
-      <header className="sticky top-0 z-30 shrink-0 border-b border-border/70 bg-background/74 px-4 py-3 backdrop-blur-xl md:px-6">
+      <header className="sticky top-0 z-30 shrink-0 border-b border-border/70 bg-background/80 px-4 py-3 backdrop-blur-xl md:px-6">
         <div className="mx-auto flex max-w-[1600px] items-center gap-3">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
