@@ -1,3 +1,4 @@
-
-DELETE FROM public.assignments WHERE series_id = 'fce0dfb6-4c2b-4e87-8f8b-7609fdc7846b';
-DELETE FROM public.recurring_assignment_series WHERE id = 'fce0dfb6-4c2b-4e87-8f8b-7609fdc7846b';
+-- Intentionally left as a no-op.
+-- The previous version deleted one hard-coded recurring assignment series and its assignments.
+-- Data cleanup must not live in repeatable source-controlled migrations because it can
+-- delete production/customer data when migrations are replayed in a new environment.
