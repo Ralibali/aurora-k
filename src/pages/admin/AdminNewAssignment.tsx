@@ -15,10 +15,13 @@ import { useUpdateBookingRequest } from '@/hooks/useAllFeatures';
 import { priorityLabels } from '@/lib/types';
 import { PUBLIC_SITE_URL } from '@/lib/constants';
 import { sendDriverAssignmentPush } from '@/lib/driver-notifications';
-import { ArrowLeft, MapPin, PackageCheck, Route, Truck } from 'lucide-react';
+import { ArrowLeft, MapPin, PackageCheck, Route, Sparkles, Truck } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 type RecurrenceFrequency = 'weekly' | 'biweekly' | 'monthly';
+
+const serviceTypes = ['Kranbil', 'Budbil', 'Tippbil', 'Krokbil', 'TMA-skydd', 'Byggsäck', 'Maskintransport', 'Annat'] as const;
 
 function addInterval(date: Date, freq: RecurrenceFrequency): Date {
   const d = new Date(date);
@@ -31,6 +34,74 @@ function addInterval(date: Date, freq: RecurrenceFrequency): Date {
 function buildAddress(pickup: string, delivery: string) {
   if (pickup && delivery) return `${pickup} → ${delivery}`;
   return pickup || delivery;
+}
+
+function toDateTimeLocal(date: Date) {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function inferDate(text: string) {
+  const lower = text.toLowerCase();
+  const date = new Date();
+  if (lower.includes('övermorgon')) date.setDate(date.getDate() + 2);
+  else if (lower.includes('imorgon') || lower.includes('i morgon')) date.setDate(date.getDate() + 1);
+
+  const isoMatch = lower.match(/\b(20\d{2})-(\d{1,2})-(\d{1,2})\b/);
+  if (isoMatch) return new Date(Number(isoMatch[1]), Number(isoMatch[2]) - 1, Number(isoMatch[3]));
+
+  const shortDate = lower.match(/\b(\d{1,2})[/-](\d{1,2})(?:[/-](\d{2,4}))?\b/);
+  if (shortDate) {
+    const year = shortDate[3] ? Number(shortDate[3].length === 2 ? `20${shortDate[3]}` : shortDate[3]) : date.getFullYear();
+    return new Date(year, Number(shortDate[2]) - 1, Number(shortDate[1]));
+  }
+
+  const weekdays: Record<string, number> = { söndag: 0, måndag: 1, tisdag: 2, onsdag: 3, torsdag: 4, fredag: 5, lördag: 6 };
+  const dayName = Object.keys(weekdays).find((day) => lower.includes(day));
+  if (dayName) {
+    const target = weekdays[dayName];
+    const diff = (target - date.getDay() + 7) % 7 || 7;
+    date.setDate(date.getDate() + diff);
+  }
+
+  return date;
+}
+
+function inferScheduledStart(text: string) {
+  const date = inferDate(text);
+  const time = text.toLowerCase().match(/kl\.?\s*(\d{1,2})(?:[:.](\d{2}))?/) || text.match(/\b(\d{1,2})[:.](\d{2})\b/);
+  const hour = time ? Math.min(23, Math.max(0, Number(time[1]))) : 8;
+  const minute = time?.[2] ? Math.min(59, Math.max(0, Number(time[2]))) : 0;
+  date.setHours(hour, minute, 0, 0);
+  return toDateTimeLocal(date);
+}
+
+function cleanExtract(value?: string) {
+  return (value || '')
+    .replace(/\b(imorgon|i morgon|övermorgon|idag|kl\.?\s*\d{1,2}(?::|\.)?\d{0,2})\b/gi, '')
+    .replace(/\s+/g, ' ')
+    .replace(/[,.]$/g, '')
+    .trim();
+}
+
+function parseSmartAssignment(text: string) {
+  const normalized = text.replace(/\n+/g, ' ').trim();
+  const lower = normalized.toLowerCase();
+  const serviceType = serviceTypes.find((type) => lower.includes(type.toLowerCase())) || '';
+
+  const routeMatch = normalized.match(/(?:från|hos|hämta(?:s)? hos|hämta)\s+(.+?)\s+(?:till|->|→|kör(?:s)? till|leverera(?:s)? till|lämna(?:s)? till)\s+(.+?)(?:[.!?]|$)/i);
+  const pickup = cleanExtract(routeMatch?.[1]);
+  const delivery = cleanExtract(routeMatch?.[2]);
+  const titleBase = serviceType || normalized.split(/[.!?]/)[0]?.slice(0, 70) || 'Transportuppdrag';
+
+  return {
+    title: pickup && delivery ? `${serviceType || 'Transport'}: ${pickup} → ${delivery}` : titleBase,
+    serviceType,
+    pickup,
+    delivery,
+    scheduledStart: inferScheduledStart(normalized),
+    instructions: normalized,
+  };
 }
 
 export default function AdminNewAssignment() {
@@ -68,7 +139,23 @@ export default function AdminNewAssignment() {
   const [recurrenceEnabled, setRecurrenceEnabled] = useState(false);
   const [recurrenceFrequency, setRecurrenceFrequency] = useState<RecurrenceFrequency>('weekly');
   const [recurrenceEndDate, setRecurrenceEndDate] = useState('');
+  const [smartInput, setSmartInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const applySmartInput = () => {
+    if (!smartInput.trim()) {
+      toast.error('Klistra in ett mejl, sms eller en ordertext först.');
+      return;
+    }
+    const parsed = parseSmartAssignment(smartInput);
+    setTitle(parsed.title);
+    if (parsed.serviceType) setServiceType(parsed.serviceType);
+    if (parsed.pickup) setPickupAddress(parsed.pickup);
+    if (parsed.delivery) setDeliveryAddress(parsed.delivery);
+    setScheduledStart(parsed.scheduledStart);
+    setInstructions(parsed.instructions);
+    toast.success('Texten tolkades och fyllde i uppdraget. Kontrollera detaljerna innan du sparar.');
+  };
 
   const notifyDriver = (assignment: any, scheduledStartIso: string) => {
     const driver = (drivers ?? []).find((d) => d.id === driverId);
@@ -179,11 +266,20 @@ export default function AdminNewAssignment() {
           <CardHeader><div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"><CardTitle>Skapa nytt uppdrag</CardTitle><div className="flex flex-wrap gap-2">{bookingRequestId && <Badge variant="outline">Skapas från bokningsförfrågan</Badge>}{importedOrder && <Badge>Smart orderimport</Badge>}</div></div></CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="rounded-xl border border-violet-200 bg-violet-50 p-4">
+                <div className="mb-3 flex items-center gap-2 font-semibold text-violet-950"><Sparkles className="h-4 w-4" /> Smart skapa från text</div>
+                <Textarea value={smartInput} onChange={e => setSmartInput(e.target.value)} rows={4} placeholder="Klistra in t.ex. 'Hämta 2 pallar hos Byggmax Linköping imorgon kl 08:00 och kör till Motala. Ring kunden innan.'" />
+                <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-xs text-violet-900/70">Fyller i titel, uppdragstyp, adresser, tid och instruktioner som ett första förslag.</p>
+                  <Button type="button" variant="secondary" onClick={applySmartInput}><Sparkles className="mr-2 h-4 w-4" /> Tolka och fyll i</Button>
+                </div>
+              </div>
+
               <div className="rounded-xl border bg-blue-50/50 p-4">
                 <div className="mb-4 flex items-center gap-2 font-semibold"><Truck className="h-4 w-4" /> Transportuppdrag</div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2 sm:col-span-2"><Label htmlFor="title">Titel</Label><Input id="title" value={title} onChange={e => setTitle(e.target.value)} placeholder="T.ex. Kranbil till byggarbetsplats" required /></div>
-                  <div className="space-y-2"><Label>Uppdragstyp</Label><Select value={serviceType || 'none'} onValueChange={(v) => setServiceType(v === 'none' ? '' : v)}><SelectTrigger><SelectValue placeholder="Välj typ" /></SelectTrigger><SelectContent><SelectItem value="none">Ej angivet</SelectItem>{['Kranbil', 'Budbil', 'Tippbil', 'Krokbil', 'TMA-skydd', 'Byggsäck', 'Maskintransport', 'Annat'].map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select></div>
+                  <div className="space-y-2"><Label>Uppdragstyp</Label><Select value={serviceType || 'none'} onValueChange={(v) => setServiceType(v === 'none' ? '' : v)}><SelectTrigger><SelectValue placeholder="Välj typ" /></SelectTrigger><SelectContent><SelectItem value="none">Ej angivet</SelectItem>{serviceTypes.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select></div>
                   <div className="space-y-2"><Label>Kund</Label><Select value={customerId} onValueChange={setCustomerId} required><SelectTrigger><SelectValue placeholder="Välj kund" /></SelectTrigger><SelectContent>{(customers ?? []).map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent></Select></div>
                 </div>
               </div>
