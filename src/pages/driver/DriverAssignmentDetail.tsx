@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useAssignment, useDriverUpdateAssignment } from '@/hooks/useData';
@@ -18,6 +18,7 @@ import {
   Camera,
   CheckCircle2,
   Clock,
+  FileSignature,
   FileText,
   MapPin,
   MessageSquare,
@@ -117,6 +118,107 @@ function AddressButton({ address, label }: { address: string; label: string }) {
   );
 }
 
+function SignaturePad({ value, onChange }: { value: string | null; onChange: (value: string | null) => void }) {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const drawing = useRef(false);
+  const hasInk = useRef(Boolean(value));
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const resize = () => {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const snapshot = value;
+      canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+      canvas.height = Math.floor(180 * dpr);
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, rect.width, 180);
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = '#0f172a';
+      if (snapshot) {
+        const img = new Image();
+        img.onload = () => ctx.drawImage(img, 0, 0, rect.width, 180);
+        img.src = snapshot;
+      }
+    };
+    resize();
+    window.addEventListener('resize', resize);
+    return () => window.removeEventListener('resize', resize);
+  }, []);
+
+  const point = (event: React.PointerEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current!;
+    const rect = canvas.getBoundingClientRect();
+    return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+  };
+
+  const start = (event: React.PointerEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext('2d');
+    if (!canvas || !ctx) return;
+    canvas.setPointerCapture(event.pointerId);
+    drawing.current = true;
+    const p = point(event);
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+  };
+
+  const move = (event: React.PointerEvent<HTMLCanvasElement>) => {
+    if (!drawing.current) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext('2d');
+    if (!canvas || !ctx) return;
+    const p = point(event);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+    hasInk.current = true;
+  };
+
+  const stop = () => {
+    if (!drawing.current) return;
+    drawing.current = false;
+    const canvas = canvasRef.current;
+    if (canvas && hasInk.current) onChange(canvas.toDataURL('image/png'));
+  };
+
+  const clear = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext('2d');
+    if (!canvas || !ctx) return;
+    const rect = canvas.getBoundingClientRect();
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, rect.width, 180);
+    hasInk.current = false;
+    onChange(null);
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="overflow-hidden rounded-xl border bg-white">
+        <canvas
+          ref={canvasRef}
+          className="block h-[180px] w-full touch-none"
+          onPointerDown={start}
+          onPointerMove={move}
+          onPointerUp={stop}
+          onPointerCancel={stop}
+          aria-label="Rita mottagarsignatur"
+        />
+      </div>
+      <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+        <span>{value ? 'Signatur fångad.' : 'Be mottagaren skriva sin signatur i rutan.'}</span>
+        <Button type="button" size="sm" variant="ghost" onClick={clear}>Rensa</Button>
+      </div>
+    </div>
+  );
+}
+
 export default function DriverAssignmentDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -126,6 +228,7 @@ export default function DriverAssignmentDetail() {
   const [driverComment, setDriverComment] = useState('');
   const [deviationText, setDeviationText] = useState('');
   const [showDeviation, setShowDeviation] = useState(false);
+  const [signatureDataUrl, setSignatureDataUrl] = useState<string | null>(null);
 
   const activeAssignmentId = assignment?.status === 'active' ? assignment.id : undefined;
   useDriverLocationTracker(user?.id, activeAssignmentId, companyId);
@@ -152,6 +255,8 @@ export default function DriverAssignmentDetail() {
   const isPending = assignment.status === 'pending';
   const isActive = assignment.status === 'active';
   const isCompleted = assignment.status === 'completed';
+  const isSignatureRequired = Boolean(a.require_signature);
+  const isPhotoRequired = Boolean(a.require_photo);
 
   const saveDriverComment = (nextComment: string, successText: string) => {
     updateAssignment.mutate({ id: assignment.id, driver_comment: nextComment || null }, { onSuccess: () => toast.success(successText) });
@@ -184,11 +289,46 @@ export default function DriverAssignmentDetail() {
 
   const handleSaveComment = () => saveDriverComment(driverComment, 'Kommentar sparad');
 
-  const completeAssignment = (photoUrl?: string | null) => {
+  const uploadSignature = async () => {
+    if (a.signature_url && !signatureDataUrl) return a.signature_url as string;
+    if (!signatureDataUrl || !user?.id) return null;
+    const blob = await (await fetch(signatureDataUrl)).blob();
+    const path = `${user.id}/${assignment.id}/signature-${Date.now()}.png`;
+    const { error } = await supabase.storage.from('consignment-notes').upload(path, blob, { contentType: 'image/png', upsert: true });
+    if (error) throw error;
+    const { data } = await supabase.storage.from('consignment-notes').createSignedUrl(path, 60 * 60 * 24 * 365);
+    return data?.signedUrl ?? null;
+  };
+
+  const completeAssignment = (photoUrl?: string | null, signatureUrl?: string | null) => {
     updateAssignment.mutate(
-      { id: assignment.id, status: 'completed', actual_stop: new Date().toISOString(), consignment_photo_url: photoUrl ?? a.consignment_photo_url ?? null, driver_comment: appendEvent(assignment.driver_comment as string | null, 'Uppdrag slutfört') },
+      {
+        id: assignment.id,
+        status: 'completed',
+        actual_stop: new Date().toISOString(),
+        consignment_photo_url: photoUrl ?? a.consignment_photo_url ?? null,
+        signature_url: signatureUrl ?? a.signature_url ?? null,
+        driver_comment: appendEvent(assignment.driver_comment as string | null, 'Uppdrag slutfört'),
+      },
       { onSuccess: () => sendCustomerTrackingEmail('delivery-completed', a) },
     );
+  };
+
+  const finalizeCompletion = async (photoUrl?: string | null) => {
+    if (isPhotoRequired && !photoUrl && !a.consignment_photo_url) {
+      toast.error('Det här uppdraget kräver fraktsedelsfoto innan slutförande.');
+      return;
+    }
+    if (isSignatureRequired && !signatureDataUrl && !a.signature_url) {
+      toast.error('Det här uppdraget kräver mottagarsignatur innan slutförande.');
+      return;
+    }
+    try {
+      const signatureUrl = await uploadSignature();
+      completeAssignment(photoUrl, signatureUrl);
+    } catch {
+      toast.error('Kunde inte ladda upp signaturen. Försök igen.');
+    }
   };
 
   const handleTakePhotoAndComplete = () => {
@@ -198,16 +338,17 @@ export default function DriverAssignmentDetail() {
     input.capture = 'environment';
     input.onchange = async () => {
       const file = input.files?.[0];
-      if (!file || !user?.id) return completeAssignment(null);
+      if (!file || !user?.id) return finalizeCompletion(null);
       const extension = file.name.split('.').pop() || 'jpg';
       const path = `${user.id}/${assignment.id}/${Date.now()}.${extension}`;
       const { error } = await supabase.storage.from('consignment-notes').upload(path, file, { upsert: true });
       if (error) {
-        toast.error('Kunde inte ladda upp foto. Uppdraget slutförs utan foto.');
-        return completeAssignment(null);
+        toast.error(isPhotoRequired ? 'Kunde inte ladda upp foto. Försök igen.' : 'Kunde inte ladda upp foto. Uppdraget slutförs utan foto.');
+        if (!isPhotoRequired) return finalizeCompletion(null);
+        return;
       }
       const { data } = await supabase.storage.from('consignment-notes').createSignedUrl(path, 60 * 60 * 24 * 365);
-      completeAssignment(data?.signedUrl ?? null);
+      await finalizeCompletion(data?.signedUrl ?? null);
     };
     input.click();
   };
@@ -272,19 +413,26 @@ export default function DriverAssignmentDetail() {
           <Card className="border-amber-200 bg-amber-50"><CardContent className="space-y-3 p-4"><p className="font-semibold text-amber-800">Vad har hänt?</p><Textarea value={deviationText} onChange={e => setDeviationText(e.target.value)} placeholder="T.ex. kund ej på plats, fel adress, gods saknas, skada upptäckt..." /><Button onClick={handleDeviation} disabled={updateAssignment.isPending} className="w-full">Skicka avvikelse</Button></CardContent></Card>
         )}
 
+        {isActive && isSignatureRequired && (
+          <Card className="border-blue-200 bg-blue-50/50">
+            <CardHeader><CardTitle className="flex items-center gap-2 text-base"><FileSignature className="h-4 w-4" /> Mottagarsignatur krävs</CardTitle></CardHeader>
+            <CardContent><SignaturePad value={signatureDataUrl} onChange={setSignatureDataUrl} /></CardContent>
+          </Card>
+        )}
+
         <Card>
           <CardHeader><CardTitle className="flex items-center gap-2 text-base"><MessageSquare className="h-4 w-4" /> Förarkommentar</CardTitle></CardHeader>
           <CardContent className="space-y-3"><Textarea rows={6} value={driverComment} onChange={e => setDriverComment(e.target.value)} placeholder="Skriv anteckning, status eller information till admin..." /><Button variant="outline" onClick={handleSaveComment} disabled={updateAssignment.isPending} className="w-full"><Send className="mr-2 h-4 w-4" /> Spara kommentar</Button></CardContent>
         </Card>
 
         {isCompleted && (
-          <Card className="border-green-200 bg-green-50"><CardContent className="space-y-3 p-5 text-center"><CheckCircle2 className="mx-auto h-12 w-12 text-green-600" /><p className="text-lg font-bold text-green-900">Uppdraget är slutfört</p>{assignment.actual_start && assignment.actual_stop && <p className="text-sm text-green-800">Tid: {calculateDuration(assignment.actual_start, assignment.actual_stop)}</p>}{a.consignment_photo_url && <img src={a.consignment_photo_url} alt="Fraktsedel" className="mx-auto mt-3 max-w-xs rounded-xl border bg-white" />}</CardContent></Card>
+          <Card className="border-green-200 bg-green-50"><CardContent className="space-y-3 p-5 text-center"><CheckCircle2 className="mx-auto h-12 w-12 text-green-600" /><p className="text-lg font-bold text-green-900">Uppdraget är slutfört</p>{assignment.actual_start && assignment.actual_stop && <p className="text-sm text-green-800">Tid: {calculateDuration(assignment.actual_start, assignment.actual_stop)}</p>}{a.consignment_photo_url && <img src={a.consignment_photo_url} alt="Fraktsedel" className="mx-auto mt-3 max-w-xs rounded-xl border bg-white" />}{a.signature_url && <img src={a.signature_url} alt="Mottagarsignatur" className="mx-auto mt-3 max-w-xs rounded-xl border bg-white p-3" />}</CardContent></Card>
         )}
       </main>
 
       <div className="fixed inset-x-0 bottom-0 z-30 border-t bg-card/95 px-5 py-3 backdrop-blur" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
         {isPending && <Button onClick={handleStart} disabled={updateAssignment.isPending} className="h-14 w-full text-base"><Play className="mr-2 h-5 w-5" /> Starta körning</Button>}
-        {isActive && <div className="grid grid-cols-2 gap-2"><Button variant="outline" onClick={handleTakePhotoAndComplete} disabled={updateAssignment.isPending} className="h-14"><Camera className="mr-2 h-5 w-5" /> Foto & klar</Button><Button onClick={() => completeAssignment(null)} disabled={updateAssignment.isPending} className="h-14 bg-green-600 hover:bg-green-700"><CheckCircle2 className="mr-2 h-5 w-5" /> Slutför</Button></div>}
+        {isActive && <div className="grid grid-cols-2 gap-2"><Button variant="outline" onClick={handleTakePhotoAndComplete} disabled={updateAssignment.isPending} className="h-14"><Camera className="mr-2 h-5 w-5" /> Foto & klar</Button><Button onClick={() => finalizeCompletion(null)} disabled={updateAssignment.isPending} className="h-14 bg-green-600 hover:bg-green-700"><CheckCircle2 className="mr-2 h-5 w-5" /> Slutför</Button></div>}
         {isCompleted && <Button variant="outline" onClick={() => navigate('/driver/assignments')} className="h-14 w-full">Till mina uppdrag</Button>}
       </div>
     </div>
