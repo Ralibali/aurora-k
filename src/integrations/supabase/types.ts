@@ -468,6 +468,8 @@ export type Database = {
           description: string | null
           id: string
           preferred_date: string | null
+          public_order_number: string | null
+          public_request_id: string | null
           status: string
           title: string
           updated_at: string
@@ -483,6 +485,8 @@ export type Database = {
           description?: string | null
           id?: string
           preferred_date?: string | null
+          public_order_number?: string | null
+          public_request_id?: string | null
           status?: string
           title: string
           updated_at?: string
@@ -498,6 +502,8 @@ export type Database = {
           description?: string | null
           id?: string
           preferred_date?: string | null
+          public_order_number?: string | null
+          public_request_id?: string | null
           status?: string
           title?: string
           updated_at?: string
@@ -1708,6 +1714,38 @@ export type Database = {
           },
         ]
       }
+      public_booking_rate_limits: {
+        Row: {
+          bucket_start: string
+          company_id: string
+          created_at: string
+          fingerprint: string
+          request_count: number
+        }
+        Insert: {
+          bucket_start: string
+          company_id: string
+          created_at?: string
+          fingerprint: string
+          request_count?: number
+        }
+        Update: {
+          bucket_start?: string
+          company_id?: string
+          created_at?: string
+          fingerprint?: string
+          request_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_booking_rate_limits_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recurring_assignment_series: {
         Row: {
           active: boolean
@@ -2070,6 +2108,10 @@ export type Database = {
       accept_invitation: {
         Args: { p_token: string; p_user_id: string }
         Returns: undefined
+      }
+      consume_public_booking_rate_limit: {
+        Args: { p_company_id: string; p_fingerprint: string; p_limit?: number }
+        Returns: boolean
       }
       driver_update_assignment: {
         Args: {
