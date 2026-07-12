@@ -5,10 +5,11 @@ import { newCustomerMessageEmail } from "../_shared/email-templates.ts";
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
 const FALLBACK_ADMIN_EMAIL = "info@auroramedia.se";
+const portalToken = z.string().trim().min(20).max(256).regex(/^[A-Za-z0-9._~-]+$/);
 
 const RequestSchema = z.object({
   type: z.literal("new-customer-message"),
-  token: z.string().uuid(),
+  token: portalToken,
   data: z.object({
     message: z.string().trim().min(1).max(4000),
   }),
@@ -44,9 +45,9 @@ Deno.serve(async (req) => {
       return json({ error: "Invalid request", details: parsed.error.flatten().fieldErrors }, 400);
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-    if (!LOVABLE_API_KEY || !RESEND_API_KEY) {
+    const lovableKey = Deno.env.get("LOVABLE_API_KEY");
+    const resendKey = Deno.env.get("RESEND_API_KEY");
+    if (!lovableKey || !resendKey) {
       console.error("[notify-admin] email provider secrets are missing");
       return json({ error: "Email service is not configured" }, 503);
     }
@@ -78,11 +79,9 @@ Deno.serve(async (req) => {
     ]);
 
     const recipient = companySettings?.email || adminProfile?.email || FALLBACK_ADMIN_EMAIL;
-    const safeCustomerName = escapeHtml(customer.name);
-    const safeMessage = escapeHtml(parsed.data.data.message).replace(/\n/g, "<br>");
     const template = newCustomerMessageEmail({
-      customerName: safeCustomerName,
-      message: safeMessage,
+      customerName: escapeHtml(customer.name),
+      message: escapeHtml(parsed.data.data.message).replace(/\n/g, "<br>"),
       customerUrl: `https://auroratransport.se/admin/customers/${customer.id}`,
     });
 
@@ -90,8 +89,8 @@ Deno.serve(async (req) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "X-Connection-Api-Key": RESEND_API_KEY,
+        Authorization: `Bearer ${lovableKey}`,
+        "X-Connection-Api-Key": resendKey,
       },
       body: JSON.stringify({
         from: "Aurora Transport <noreply@auroratransport.se>",
