@@ -15,7 +15,10 @@ const responseHeaders = {
   'X-Content-Type-Options': 'nosniff',
 };
 
-const QuerySchema = z.object({ token: z.string().uuid() });
+// Portal tokens are stored as opaque text. Do not require UUID formatting here,
+// because older links may use a different secure token representation.
+const PortalTokenSchema = z.string().trim().min(20).max(256).regex(/^[A-Za-z0-9._~-]+$/);
+const QuerySchema = z.object({ token: PortalTokenSchema });
 const BookingSchema = z.object({
   title: z.string().trim().min(1).max(255),
   description: z.string().trim().max(2000).optional(),
