@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node scripts/generate-static-pages.mjs",
+    "build": "vite build && node scripts/generate-static-pages.mjs && node scripts/normalize-product-copy.mjs",
     "build:dev": "vite build --mode development",
     "typecheck": "tsc -p tsconfig.app.json --noEmit",
     "lint": "eslint .",
