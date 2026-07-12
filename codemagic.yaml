@@ -47,7 +47,9 @@ workflows:
         PACKAGE_NAME: se.auroramedia.auroratransport
     scripts:
       - name: Install deps
-        script: npm ci
+        script: |
+          npm ci
+          npm install --no-save @capacitor/android@8.3.0
       - name: Build web
         script: npm run build
       - name: Add Android platform if missing

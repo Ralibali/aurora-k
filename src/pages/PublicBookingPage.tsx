@@ -8,9 +8,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, CheckCircle2, FileUp, Loader2, Package, Route, Send, Truck, UploadCloud } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Loader2, Package, Route, Send, Truck, UploadCloud } from 'lucide-react';
 
 const serviceTypes = ['Kranbil', 'Budbil', 'Tippbil', 'Krokbil', 'TMA-skydd', 'Byggsäck', 'Maskintransport', 'Annat uppdrag'];
+const MAX_FILES = 5;
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const ALLOWED_FILE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'application/pdf']);
 
 const brandedPages: Record<string, { name: string; description: string }> = {
   kranbilsakarna: { name: 'Kranbilsåkarna', description: 'Skicka in komplett underlag för kranbil, bygglogistik och transport.' },
@@ -41,10 +44,9 @@ const initialForm: FormState = {
   cargo: '', weight: '', liftNeeded: '', obstacles: '', company: '', contactName: '', phone: '', email: '', orgNumber: '', notes: '',
 };
 
-function buildDescription(form: FormState, attachmentPaths: string[], orderNumber: string, brandName: string) {
+function buildDescription(form: FormState, attachmentPaths: string[], brandName: string) {
   return [
     `Publik bokningssida: ${brandName}`,
-    `Ordernummer: ${orderNumber}`,
     `Uppdragstyp: ${form.serviceType}`,
     `Hämtning: ${form.pickupAddress}`,
     `Leverans: ${form.deliveryAddress || 'Ej angivet'}`,
@@ -60,26 +62,50 @@ function buildDescription(form: FormState, attachmentPaths: string[], orderNumbe
   ].join('\n');
 }
 
+function validateFiles(files: File[]) {
+  if (files.length > MAX_FILES) throw new Error(`Du kan bifoga högst ${MAX_FILES} filer.`);
+  for (const file of files) {
+    if (!ALLOWED_FILE_TYPES.has(file.type)) throw new Error(`${file.name} har ett filformat som inte stöds.`);
+    if (file.size > MAX_FILE_SIZE) throw new Error(`${file.name} är större än 10 MB.`);
+  }
+}
+
 export default function PublicBookingPage() {
   const { slug } = useParams();
   const brand = useMemo(() => brandedPages[slug ?? ''] ?? brandedPages['aurora-transport'], [slug]);
   const [form, setForm] = useState<FormState>(initialForm);
   const [files, setFiles] = useState<File[]>([]);
+  const [website, setWebsite] = useState('');
+  const [requestId] = useState(() => crypto.randomUUID());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
 
   const update = (key: keyof FormState, value: string | boolean) => setForm(prev => ({ ...prev, [key]: value }));
 
-  const uploadFiles = async (number: string) => {
+  const uploadFiles = async () => {
+    validateFiles(files);
     const uploaded: string[] = [];
-    for (const file of files) {
+    for (const [index, file] of files.entries()) {
       const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '-');
-      const path = `public/${number}/${Date.now()}-${safeName}`;
-      const { error } = await supabase.storage.from('booking-attachments').upload(path, file, { upsert: false });
+      const path = `public/${requestId}/${index}-${safeName}`;
+      const { error } = await supabase.storage.from('booking-attachments').upload(path, file, {
+        upsert: true,
+        contentType: file.type,
+      });
       if (error) throw error;
       uploaded.push(path);
     }
     return uploaded;
+  };
+
+  const handleFiles = (selected: File[]) => {
+    try {
+      validateFiles(selected);
+      setFiles(selected);
+    } catch (error) {
+      setFiles([]);
+      toast.error(error instanceof Error ? error.message : 'Bilagorna kunde inte användas.');
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -90,31 +116,32 @@ export default function PublicBookingPage() {
     }
 
     setIsSubmitting(true);
-    const number = `AT-${Math.floor(1000 + Math.random() * 9000)}`;
-
     try {
-      const attachmentPaths = await uploadFiles(number);
+      const attachmentPaths = await uploadFiles();
       const title = `${form.serviceType} - ${form.pickupAddress}`;
-      const description = buildDescription(form, attachmentPaths, number, brand.name);
-      const { error } = await supabase.functions.invoke('public-booking', {
+      const description = buildDescription(form, attachmentPaths, brand.name);
+      const preferredDate = `${form.preferredDate}${form.preferredTime ? ` ${form.preferredTime}` : ''}`;
+      const { data, error } = await supabase.functions.invoke('public-booking', {
         body: {
+          request_id: requestId,
+          website,
           slug: slug ?? 'aurora-transport',
           customer_name: form.company || form.contactName,
           customer_email: form.email,
           customer_phone: form.phone,
-          preferred_date: form.preferredDate,
+          preferred_date: preferredDate,
           title,
           description,
           attachment_paths: attachmentPaths,
-          order_number: number,
         },
       });
       if (error) throw error;
+      if (!data?.order_number) throw new Error('Bokningen saknar ordernummer. Försök igen.');
 
-      setOrderNumber(number);
-      toast.success('Förfrågan skickad!');
-    } catch (error: any) {
-      toast.error(error?.message || 'Kunde inte skicka förfrågan');
+      setOrderNumber(data.order_number);
+      toast.success(data.duplicate ? 'Förfrågan var redan mottagen.' : 'Förfrågan skickad!');
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : 'Kunde inte skicka förfrågan');
     } finally {
       setIsSubmitting(false);
     }
@@ -150,6 +177,11 @@ export default function PublicBookingPage() {
       </section>
 
       <form onSubmit={handleSubmit} className="mx-auto max-w-5xl space-y-5 px-4 py-8">
+        <div className="absolute left-[-10000px] top-auto h-px w-px overflow-hidden" aria-hidden="true">
+          <Label htmlFor="website">Webbplats</Label>
+          <Input id="website" name="website" tabIndex={-1} autoComplete="off" value={website} onChange={e => setWebsite(e.target.value)} />
+        </div>
+
         <Card className="bg-white text-slate-950">
           <CardHeader><CardTitle className="flex items-center gap-2"><Truck className="h-5 w-5" /> Typ av uppdrag</CardTitle></CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -191,7 +223,8 @@ export default function PublicBookingPage() {
             <div className="space-y-2"><Label>Telefon *</Label><Input value={form.phone} onChange={e => update('phone', e.target.value)} /></div>
             <div className="space-y-2"><Label>E-post *</Label><Input type="email" value={form.email} onChange={e => update('email', e.target.value)} /></div>
             <div className="space-y-2"><Label>Organisationsnummer</Label><Input value={form.orgNumber} onChange={e => update('orgNumber', e.target.value)} /></div>
-            <div className="space-y-2"><Label>Bilagor</Label><Input type="file" multiple onChange={e => setFiles(Array.from(e.target.files || []))} /></div>
+            <div className="space-y-2"><Label>Bilagor</Label><Input type="file" accept="image/jpeg,image/png,image/webp,application/pdf" multiple onChange={e => handleFiles(Array.from(e.target.files || []))} /></div>
+            <p className="text-xs text-muted-foreground md:col-span-2">Högst 5 filer och 10 MB per fil. JPG, PNG, WebP eller PDF.</p>
             <div className="space-y-2 md:col-span-2"><Label>Övrigt</Label><Textarea value={form.notes} onChange={e => update('notes', e.target.value)} /></div>
             {files.length > 0 && <div className="md:col-span-2 rounded-xl bg-slate-50 p-3 text-sm"><UploadCloud className="mr-2 inline h-4 w-4" /> {files.length} fil(er) valda</div>}
           </CardContent>

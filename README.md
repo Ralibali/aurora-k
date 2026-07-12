@@ -6,22 +6,48 @@ tidrapportering, GPS-spårning och fakturaunderlag i ett enkelt SaaS-verktyg.
 
 - **Webbplats:** https://auroratransport.se
 - **Ägare:** Aurora Media AB (org.nr 559272-0220)
-- **Stack:** React 18, Vite, TypeScript, Tailwind, Supabase (Lovable Cloud)
-- **Mobil:** PWA + Capacitor (iOS)
+- **Stack:** React 18, Vite, TypeScript, Tailwind och Supabase (Lovable Cloud)
+- **Mobil:** PWA samt Capacitor-byggen för iOS och Android
+- **Pris:** 449 kr/mån, 3 500 kr i setup/onboarding, obegränsat antal förare och ingen bindningstid
 
 ## Utveckling
 
+Projektet använder npm och den committade `package-lock.json` som källa för
+reproducerbara installationer.
+
 ```bash
-bun install
-bun run dev
+npm ci
+npm run dev
 ```
 
-Appen körs på http://localhost:8080. Backend-konfiguration (Supabase) hanteras
-via Lovable Cloud — inga manuella `.env`-ändringar krävs i utveckling.
+Appen körs på http://localhost:8080. Backend-konfigurationen hanteras via
+Lovable Cloud. Publika Supabase-nycklar får ligga i klienten, men privata
+service-role-, Stripe-, Resend- och Fortnox-hemligheter ska alltid sparas som
+secrets i Lovable/Supabase och aldrig committas.
+
+## Verifiering
+
+Kör hela verifieringen före merge eller produktion:
+
+```bash
+npm run validate
+```
+
+Det kör TypeScript-kontroll, ESLint, Vitest och produktionbuild inklusive den
+statiska SEO-genereringen.
 
 ## Struktur
 
 - `src/pages/` – publika SEO-sidor, blogginlägg och inloggade vyer
 - `src/components/` – delade UI-komponenter och layout-shells
-- `supabase/functions/` – edge-funktioner (Stripe, e-post, demo-login m.m.)
-- `public/sitemap.xml` & `public/robots.txt` – SEO-konfiguration
+- `src/features/` – avgränsade produktflöden
+- `supabase/functions/` – edge-funktioner för bland annat Stripe, e-post, kundportal och integrationer
+- `supabase/migrations/` – databasändringar som måste distribueras före beroende funktioner
+- `public/sitemap.xml` och `public/robots.txt` – SEO-konfiguration
+
+## Produktion
+
+Ändringar i `supabase/**` distribueras av GitHub Actions när repository-secrets
+`SUPABASE_ACCESS_TOKEN` och `SUPABASE_DB_PASSWORD` finns konfigurerade. Om de
+saknas hoppar deployjobbet över distributionen och ändringen måste distribueras
+från Lovable Cloud/Supabase innan funktionen kan användas i produktion.

@@ -22,6 +22,7 @@ import { toast } from 'sonner';
 type RecurrenceFrequency = 'weekly' | 'biweekly' | 'monthly';
 
 const serviceTypes = ['Kranbil', 'Budbil', 'Tippbil', 'Krokbil', 'TMA-skydd', 'Byggsäck', 'Maskintransport', 'Annat'] as const;
+const MAX_RECURRING_ASSIGNMENTS = 200;
 
 function addInterval(date: Date, freq: RecurrenceFrequency): Date {
   const d = new Date(date);
@@ -41,44 +42,62 @@ function toDateTimeLocal(date: Date) {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
-function inferDate(text: string) {
+function validDate(year: number, month: number, day: number) {
+  const date = new Date(year, month - 1, day);
+  return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day ? date : null;
+}
+
+function inferDate(text: string): Date | null {
   const lower = text.toLowerCase();
-  const date = new Date();
-  if (lower.includes('övermorgon')) date.setDate(date.getDate() + 2);
-  else if (lower.includes('imorgon') || lower.includes('i morgon')) date.setDate(date.getDate() + 1);
+  const now = new Date();
 
   const isoMatch = lower.match(/\b(20\d{2})-(\d{1,2})-(\d{1,2})\b/);
-  if (isoMatch) return new Date(Number(isoMatch[1]), Number(isoMatch[2]) - 1, Number(isoMatch[3]));
+  if (isoMatch) return validDate(Number(isoMatch[1]), Number(isoMatch[2]), Number(isoMatch[3]));
 
   const shortDate = lower.match(/\b(\d{1,2})[/-](\d{1,2})(?:[/-](\d{2,4}))?\b/);
   if (shortDate) {
-    const year = shortDate[3] ? Number(shortDate[3].length === 2 ? `20${shortDate[3]}` : shortDate[3]) : date.getFullYear();
-    return new Date(year, Number(shortDate[2]) - 1, Number(shortDate[1]));
+    const year = shortDate[3] ? Number(shortDate[3].length === 2 ? `20${shortDate[3]}` : shortDate[3]) : now.getFullYear();
+    return validDate(year, Number(shortDate[2]), Number(shortDate[1]));
   }
+
+  const date = new Date(now);
+  if (lower.includes('övermorgon')) {
+    date.setDate(date.getDate() + 2);
+    return date;
+  }
+  if (lower.includes('imorgon') || lower.includes('i morgon')) {
+    date.setDate(date.getDate() + 1);
+    return date;
+  }
+  if (lower.includes('idag') || lower.includes('i dag')) return date;
 
   const weekdays: Record<string, number> = { söndag: 0, måndag: 1, tisdag: 2, onsdag: 3, torsdag: 4, fredag: 5, lördag: 6 };
-  const dayName = Object.keys(weekdays).find((day) => lower.includes(day));
-  if (dayName) {
-    const target = weekdays[dayName];
-    const diff = (target - date.getDay() + 7) % 7 || 7;
-    date.setDate(date.getDate() + diff);
-  }
+  const dayName = Object.keys(weekdays).find(day => new RegExp(`\\b${day}\\b`, 'i').test(lower));
+  if (!dayName) return null;
 
+  const target = weekdays[dayName];
+  const diff = (target - date.getDay() + 7) % 7 || 7;
+  date.setDate(date.getDate() + diff);
   return date;
 }
 
 function inferScheduledStart(text: string) {
   const date = inferDate(text);
+  if (!date) return '';
+
   const time = text.toLowerCase().match(/kl\.?\s*(\d{1,2})(?:[:.](\d{2}))?/) || text.match(/\b(\d{1,2})[:.](\d{2})\b/);
-  const hour = time ? Math.min(23, Math.max(0, Number(time[1]))) : 8;
-  const minute = time?.[2] ? Math.min(59, Math.max(0, Number(time[2]))) : 0;
+  const hour = time ? Number(time[1]) : 8;
+  const minute = time?.[2] ? Number(time[2]) : 0;
+  if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return '';
+
   date.setHours(hour, minute, 0, 0);
   return toDateTimeLocal(date);
 }
 
 function cleanExtract(value?: string) {
   return (value || '')
-    .replace(/\b(imorgon|i morgon|övermorgon|idag|kl\.?\s*\d{1,2}(?::|\.)?\d{0,2})\b/gi, '')
+    .replace(/\b(imorgon|i morgon|övermorgon|idag|i dag|kl\.?\s*\d{1,2}(?::|\.)?\d{0,2})\b/gi, '')
+    .replace(/\b(?:och\s+)?(?:kör|leverera|lämna)(?:s)?\s*$/i, '')
     .replace(/\s+/g, ' ')
     .replace(/[,.]$/g, '')
     .trim();
@@ -87,11 +106,14 @@ function cleanExtract(value?: string) {
 function parseSmartAssignment(text: string) {
   const normalized = text.replace(/\n+/g, ' ').trim();
   const lower = normalized.toLowerCase();
-  const serviceType = serviceTypes.find((type) => lower.includes(type.toLowerCase())) || '';
+  const serviceType = serviceTypes.find(type => lower.includes(type.toLowerCase())) || '';
 
-  const routeMatch = normalized.match(/(?:från|hos|hämta(?:s)? hos|hämta)\s+(.+?)\s+(?:till|->|→|kör(?:s)? till|leverera(?:s)? till|lämna(?:s)? till)\s+(.+?)(?:[.!?]|$)/i);
-  const pickup = cleanExtract(routeMatch?.[1]);
-  const delivery = cleanExtract(routeMatch?.[2]);
+  const pickupLocation = normalized.match(/\bhos\s+(.+?)(?=\s+(?:imorgon|i morgon|övermorgon|idag|i dag|kl\.?|och\s+(?:kör|leverera|lämna)\b)|[.!?]|$)/i)?.[1];
+  const deliveryLocation = normalized.match(/\b(?:kör|leverera|lämna)(?:s)?\s+till\s+(.+?)(?=\s+(?:imorgon|i morgon|övermorgon|idag|i dag|kl\.?|ring\b|kontakt\b)|[.!?]|$)/i)?.[1];
+  const routeMatch = normalized.match(/(?:från|hämta(?:s)?\s+(?:hos|på))\s+(.+?)\s+(?:och\s+)?(?:till|->|→|kör(?:s)?\s+till|leverera(?:s)?\s+till|lämna(?:s)?\s+till)\s+(.+?)(?:[.!?]|$)/i);
+
+  const pickup = cleanExtract(pickupLocation || routeMatch?.[1]);
+  const delivery = cleanExtract(deliveryLocation || routeMatch?.[2]);
   const titleBase = serviceType || normalized.split(/[.!?]/)[0]?.slice(0, 70) || 'Transportuppdrag';
 
   return {
@@ -152,14 +174,16 @@ export default function AdminNewAssignment() {
     if (parsed.serviceType) setServiceType(parsed.serviceType);
     if (parsed.pickup) setPickupAddress(parsed.pickup);
     if (parsed.delivery) setDeliveryAddress(parsed.delivery);
-    setScheduledStart(parsed.scheduledStart);
+    if (parsed.scheduledStart) setScheduledStart(parsed.scheduledStart);
     setInstructions(parsed.instructions);
-    toast.success('Texten tolkades och fyllde i uppdraget. Kontrollera detaljerna innan du sparar.');
+    toast.success(parsed.scheduledStart
+      ? 'Texten tolkades och fyllde i uppdraget. Kontrollera detaljerna innan du sparar.'
+      : 'Texten tolkades. Datum och tid lämnades oförändrade eftersom inget säkert datum hittades.');
   };
 
   const notifyDriver = (assignment: any, scheduledStartIso: string) => {
-    const driver = (drivers ?? []).find((d) => d.id === driverId);
-    const customer = (customers ?? []).find((c) => c.id === customerId);
+    const driver = (drivers ?? []).find(d => d.id === driverId);
+    const customer = (customers ?? []).find(c => c.id === customerId);
     if (!driver) return;
 
     const formattedDate = new Date(scheduledStartIso).toLocaleString('sv-SE', {
@@ -190,32 +214,42 @@ export default function AdminNewAssignment() {
             appUrl: `${PUBLIC_SITE_URL}/driver/assignments/${assignment.id}`,
           },
         },
-      }).catch((err) => console.warn('[assignment-confirmation] send-email failed', err));
+      }).catch(err => console.warn('[assignment-confirmation] send-email failed', err));
     }
 
-    sendDriverAssignmentPush(
-      driver.id,
-      'Nytt uppdrag',
-      `${title} · ${formattedDate}`,
-      assignment.id,
-    );
+    sendDriverAssignmentPush(driver.id, 'Nytt uppdrag', `${title} · ${formattedDate}`, assignment.id);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
 
     const baseStart = new Date(scheduledStart);
+    if (!scheduledStart || Number.isNaN(baseStart.getTime())) {
+      toast.error('Ange ett giltigt startdatum och en starttid.');
+      return;
+    }
+
     const baseEnd = scheduledEnd ? new Date(scheduledEnd) : null;
+    if (baseEnd && (Number.isNaN(baseEnd.getTime()) || baseEnd <= baseStart)) {
+      toast.error('Sluttiden måste ligga efter starttiden.');
+      return;
+    }
+
+    setIsSubmitting(true);
     const durationMs = baseEnd ? baseEnd.getTime() - baseStart.getTime() : 0;
     const dates: { start: Date; end: Date | null }[] = [{ start: baseStart, end: baseEnd }];
 
     if (recurrenceEnabled && recurrenceEndDate) {
       const endLimit = new Date(recurrenceEndDate + 'T23:59:59');
       let nextStart = addInterval(baseStart, recurrenceFrequency);
-      while (nextStart <= endLimit) {
+      while (nextStart <= endLimit && dates.length < MAX_RECURRING_ASSIGNMENTS) {
         dates.push({ start: nextStart, end: baseEnd ? new Date(nextStart.getTime() + durationMs) : null });
         nextStart = addInterval(nextStart, recurrenceFrequency);
+      }
+      if (nextStart <= endLimit) {
+        setIsSubmitting(false);
+        toast.error(`En serie kan innehålla högst ${MAX_RECURRING_ASSIGNMENTS} uppdrag. Välj ett tidigare slutdatum.`);
+        return;
       }
     }
 
@@ -243,7 +277,7 @@ export default function AdminNewAssignment() {
           order_id: orderId || null,
         };
         const createdAssignment = await new Promise<any>((resolve, reject) => {
-          createAssignment.mutate(payload, { onSuccess: (data) => resolve(data), onError: (err) => reject(err) });
+          createAssignment.mutate(payload, { onSuccess: data => resolve(data), onError: err => reject(err) });
         });
         notifyDriver(createdAssignment, d.start.toISOString());
       }
@@ -252,8 +286,11 @@ export default function AdminNewAssignment() {
         updateBookingRequest.mutate({ id: bookingRequestId, status: 'accepted', admin_note: 'Omgjord till uppdrag' });
       }
 
+      toast.success(dates.length > 1 ? `${dates.length} uppdrag skapades.` : 'Uppdraget skapades.');
       navigate('/admin/assignments');
-    } catch {
+    } catch (error) {
+      console.error('[AdminNewAssignment] create failed', error);
+      toast.error(error instanceof Error ? error.message : 'Uppdraget kunde inte skapas.');
       setIsSubmitting(false);
     }
   };
@@ -279,7 +316,7 @@ export default function AdminNewAssignment() {
                 <div className="mb-4 flex items-center gap-2 font-semibold"><Truck className="h-4 w-4" /> Transportuppdrag</div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2 sm:col-span-2"><Label htmlFor="title">Titel</Label><Input id="title" value={title} onChange={e => setTitle(e.target.value)} placeholder="T.ex. Kranbil till byggarbetsplats" required /></div>
-                  <div className="space-y-2"><Label>Uppdragstyp</Label><Select value={serviceType || 'none'} onValueChange={(v) => setServiceType(v === 'none' ? '' : v)}><SelectTrigger><SelectValue placeholder="Välj typ" /></SelectTrigger><SelectContent><SelectItem value="none">Ej angivet</SelectItem>{serviceTypes.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select></div>
+                  <div className="space-y-2"><Label>Uppdragstyp</Label><Select value={serviceType || 'none'} onValueChange={v => setServiceType(v === 'none' ? '' : v)}><SelectTrigger><SelectValue placeholder="Välj typ" /></SelectTrigger><SelectContent><SelectItem value="none">Ej angivet</SelectItem>{serviceTypes.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select></div>
                   <div className="space-y-2"><Label>Kund</Label><Select value={customerId} onValueChange={setCustomerId} required><SelectTrigger><SelectValue placeholder="Välj kund" /></SelectTrigger><SelectContent>{(customers ?? []).map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent></Select></div>
                 </div>
               </div>
@@ -289,11 +326,11 @@ export default function AdminNewAssignment() {
               <div className="space-y-2"><Label htmlFor="instructions">Instruktioner</Label><Textarea id="instructions" value={instructions} onChange={e => setInstructions(e.target.value)} placeholder="Gods, vikt, hinder, portkod, kontaktperson, övrigt..." /></div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4"><div className="space-y-2"><Label htmlFor="date">Datum och starttid</Label><Input id="date" type="datetime-local" value={scheduledStart} onChange={e => setScheduledStart(e.target.value)} required /></div><div className="space-y-2"><Label htmlFor="end">Sluttid</Label><Input id="end" type="datetime-local" value={scheduledEnd} onChange={e => setScheduledEnd(e.target.value)} /></div></div>
               <div className="space-y-2"><Label>Prioritet</Label><div className="flex gap-2">{(['low', 'normal', 'urgent'] as const).map(p => <label key={p} className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer text-sm ${priority === p ? (p === 'urgent' ? 'border-destructive bg-destructive/5' : 'border-primary bg-primary/5') : 'border-border'}`}><input type="radio" name="priority" checked={priority === p} onChange={() => setPriority(p)} className="accent-primary" />{priorityLabels[p]}</label>)}</div></div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4"><div className="space-y-2"><Label>Tilldela chaufför</Label><Select value={driverId} onValueChange={setDriverId} required><SelectTrigger><SelectValue placeholder="Välj chaufför" /></SelectTrigger><SelectContent>{(drivers ?? []).map(d => <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>)}</SelectContent></Select></div><div className="space-y-2"><Label>Fordon</Label><Select value={vehicleId || 'none'} onValueChange={(v) => setVehicleId(v === 'none' ? '' : v)}><SelectTrigger><SelectValue placeholder="Inget fordon" /></SelectTrigger><SelectContent><SelectItem value="none">Inget fordon</SelectItem>{(vehicles ?? []).map(v => <SelectItem key={v.id} value={v.id}>{v.name} {v.registration_number ? `(${v.registration_number})` : ''}</SelectItem>)}</SelectContent></Select></div></div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4"><div className="space-y-2"><Label>Beställning</Label><Select value={orderId || 'none'} onValueChange={(v) => setOrderId(v === 'none' ? '' : v)}><SelectTrigger><SelectValue placeholder="Ingen beställning" /></SelectTrigger><SelectContent><SelectItem value="none">Ingen beställning</SelectItem>{(orders ?? []).filter(o => o.status === 'active').map(o => <SelectItem key={o.id} value={o.id}>{o.title}</SelectItem>)}</SelectContent></Select></div><div className="space-y-2"><Label htmlFor="cost">Kostnad / fakturabelopp</Label><Input id="cost" type="number" step="0.01" min="0" value={cost} onChange={e => setCost(e.target.value)} placeholder="T.ex. 1500" /></div></div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4"><div className="space-y-2"><Label>Tilldela chaufför</Label><Select value={driverId} onValueChange={setDriverId} required><SelectTrigger><SelectValue placeholder="Välj chaufför" /></SelectTrigger><SelectContent>{(drivers ?? []).map(d => <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>)}</SelectContent></Select></div><div className="space-y-2"><Label>Fordon</Label><Select value={vehicleId || 'none'} onValueChange={v => setVehicleId(v === 'none' ? '' : v)}><SelectTrigger><SelectValue placeholder="Inget fordon" /></SelectTrigger><SelectContent><SelectItem value="none">Inget fordon</SelectItem>{(vehicles ?? []).map(v => <SelectItem key={v.id} value={v.id}>{v.name} {v.registration_number ? `(${v.registration_number})` : ''}</SelectItem>)}</SelectContent></Select></div></div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4"><div className="space-y-2"><Label>Beställning</Label><Select value={orderId || 'none'} onValueChange={v => setOrderId(v === 'none' ? '' : v)}><SelectTrigger><SelectValue placeholder="Ingen beställning" /></SelectTrigger><SelectContent><SelectItem value="none">Ingen beställning</SelectItem>{(orders ?? []).filter(o => o.status === 'active').map(o => <SelectItem key={o.id} value={o.id}>{o.title}</SelectItem>)}</SelectContent></Select></div><div className="space-y-2"><Label htmlFor="cost">Kostnad / fakturabelopp</Label><Input id="cost" type="number" step="0.01" min="0" value={cost} onChange={e => setCost(e.target.value)} placeholder="T.ex. 1500" /></div></div>
               <div className="space-y-2"><Label htmlFor="comment">Meddelande till chauffören</Label><Textarea id="comment" value={adminComment} onChange={e => setAdminComment(e.target.value)} placeholder="Syns i förarappen..." /></div>
               <div className="border rounded-lg p-4 space-y-3"><p className="text-sm font-medium flex items-center gap-2"><PackageCheck className="h-4 w-4" /> Krav vid slutförande</p><div className="flex items-center justify-between"><Label htmlFor="req-sig" className="cursor-pointer">Kräv mottagarsignatur</Label><Switch id="req-sig" checked={requireSignature} onCheckedChange={setRequireSignature} /></div><div className="flex items-center justify-between"><Label htmlFor="req-photo" className="cursor-pointer">Kräv fraktsedelsfoto</Label><Switch id="req-photo" checked={requirePhoto} onCheckedChange={setRequirePhoto} /></div><div className="flex items-center justify-between"><Label htmlFor="tracking-enabled" className="cursor-pointer">Avisera kund automatiskt</Label><Switch id="tracking-enabled" checked={trackingEnabled} onCheckedChange={setTrackingEnabled} /></div></div>
-              <div className="border rounded-lg p-4 space-y-3"><div className="flex items-center justify-between"><Label>Upprepning</Label><Switch checked={recurrenceEnabled} onCheckedChange={setRecurrenceEnabled} /></div>{recurrenceEnabled && <div className="grid gap-3 sm:grid-cols-2"><div className="space-y-2"><Label>Frekvens</Label><Select value={recurrenceFrequency} onValueChange={(v) => setRecurrenceFrequency(v as RecurrenceFrequency)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="weekly">Varje vecka</SelectItem><SelectItem value="biweekly">Varannan vecka</SelectItem><SelectItem value="monthly">Varje månad</SelectItem></SelectContent></Select></div><div className="space-y-2"><Label htmlFor="recurrence-end">Upprepa till och med</Label><Input id="recurrence-end" type="date" value={recurrenceEndDate} onChange={e => setRecurrenceEndDate(e.target.value)} required={recurrenceEnabled} /></div></div>}</div>
+              <div className="border rounded-lg p-4 space-y-3"><div className="flex items-center justify-between"><Label>Upprepning</Label><Switch checked={recurrenceEnabled} onCheckedChange={setRecurrenceEnabled} /></div>{recurrenceEnabled && <div className="grid gap-3 sm:grid-cols-2"><div className="space-y-2"><Label>Frekvens</Label><Select value={recurrenceFrequency} onValueChange={v => setRecurrenceFrequency(v as RecurrenceFrequency)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="weekly">Varje vecka</SelectItem><SelectItem value="biweekly">Varannan vecka</SelectItem><SelectItem value="monthly">Varje månad</SelectItem></SelectContent></Select></div><div className="space-y-2"><Label htmlFor="recurrence-end">Upprepa till och med</Label><Input id="recurrence-end" type="date" value={recurrenceEndDate} onChange={e => setRecurrenceEndDate(e.target.value)} required={recurrenceEnabled} /></div></div>}</div>
               <div className="flex gap-2 pt-2"><Button type="submit" disabled={isSubmitting || createAssignment.isPending}>{isSubmitting ? 'Skapar...' : 'Skapa uppdrag'}</Button><Button type="button" variant="outline" onClick={() => navigate(-1)}>Avbryt</Button></div>
             </form>
           </CardContent>
