@@ -298,6 +298,7 @@ export type Database = {
           priority: string
           require_photo: boolean
           require_signature: boolean
+          route_sequence: number | null
           scheduled_end: string | null
           scheduled_start: string
           series_date: string | null
@@ -305,6 +306,8 @@ export type Database = {
           signature_url: string | null
           status: string
           title: string
+          tracking_enabled: boolean
+          tracking_token: string
           vehicle_id: string | null
         }
         Insert: {
@@ -332,6 +335,7 @@ export type Database = {
           priority?: string
           require_photo?: boolean
           require_signature?: boolean
+          route_sequence?: number | null
           scheduled_end?: string | null
           scheduled_start: string
           series_date?: string | null
@@ -339,6 +343,8 @@ export type Database = {
           signature_url?: string | null
           status?: string
           title: string
+          tracking_enabled?: boolean
+          tracking_token?: string
           vehicle_id?: string | null
         }
         Update: {
@@ -366,6 +372,7 @@ export type Database = {
           priority?: string
           require_photo?: boolean
           require_signature?: boolean
+          route_sequence?: number | null
           scheduled_end?: string | null
           scheduled_start?: string
           series_date?: string | null
@@ -373,6 +380,8 @@ export type Database = {
           signature_url?: string | null
           status?: string
           title?: string
+          tracking_enabled?: boolean
+          tracking_token?: string
           vehicle_id?: string | null
         }
         Relationships: [
@@ -532,6 +541,7 @@ export type Database = {
           name: string
           onboarding_completed: boolean | null
           org_nr: string | null
+          public_booking_slug: string | null
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
           subscription_status: string | null
@@ -543,6 +553,7 @@ export type Database = {
           name: string
           onboarding_completed?: boolean | null
           org_nr?: string | null
+          public_booking_slug?: string | null
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           subscription_status?: string | null
@@ -554,6 +565,7 @@ export type Database = {
           name?: string
           onboarding_completed?: boolean | null
           org_nr?: string | null
+          public_booking_slug?: string | null
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           subscription_status?: string | null
@@ -1030,6 +1042,66 @@ export type Database = {
           },
         ]
       }
+      driver_sync_operations: {
+        Row: {
+          assignment_id: string
+          company_id: string | null
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          idempotency_key: string
+          operation_type: string
+          result: Json | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assignment_id: string
+          company_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          idempotency_key: string
+          operation_type: string
+          result?: Json | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assignment_id?: string
+          company_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          idempotency_key?: string
+          operation_type?: string
+          result?: Json | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_sync_operations_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_sync_operations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       external_resources: {
         Row: {
           active: boolean
@@ -1123,6 +1195,296 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fortnox_connections: {
+        Row: {
+          access_token_secret_id: string
+          company_id: string
+          connected_at: string
+          connected_by: string | null
+          fortnox_company_name: string | null
+          fortnox_organization_number: string | null
+          id: string
+          last_error: string | null
+          refresh_token_secret_id: string
+          scopes: string[]
+          status: string
+          token_expires_at: string
+          updated_at: string
+        }
+        Insert: {
+          access_token_secret_id: string
+          company_id: string
+          connected_at?: string
+          connected_by?: string | null
+          fortnox_company_name?: string | null
+          fortnox_organization_number?: string | null
+          id?: string
+          last_error?: string | null
+          refresh_token_secret_id: string
+          scopes?: string[]
+          status?: string
+          token_expires_at: string
+          updated_at?: string
+        }
+        Update: {
+          access_token_secret_id?: string
+          company_id?: string
+          connected_at?: string
+          connected_by?: string | null
+          fortnox_company_name?: string | null
+          fortnox_organization_number?: string | null
+          id?: string
+          last_error?: string | null
+          refresh_token_secret_id?: string
+          scopes?: string[]
+          status?: string
+          token_expires_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fortnox_connections_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fortnox_customer_mappings: {
+        Row: {
+          company_id: string
+          customer_id: string
+          fortnox_customer_number: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          customer_id: string
+          fortnox_customer_number: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          customer_id?: string
+          fortnox_customer_number?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fortnox_customer_mappings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fortnox_customer_mappings_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fortnox_invoice_syncs: {
+        Row: {
+          company_id: string
+          created_at: string
+          error_message: string | null
+          fortnox_document_number: string | null
+          id: string
+          idempotency_key: string
+          invoice_id: string
+          request_payload: Json | null
+          response_payload: Json | null
+          status: string
+          synced_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          error_message?: string | null
+          fortnox_document_number?: string | null
+          id?: string
+          idempotency_key?: string
+          invoice_id: string
+          request_payload?: Json | null
+          response_payload?: Json | null
+          status?: string
+          synced_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          error_message?: string | null
+          fortnox_document_number?: string | null
+          id?: string
+          idempotency_key?: string
+          invoice_id?: string
+          request_payload?: Json | null
+          response_payload?: Json | null
+          status?: string
+          synced_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fortnox_invoice_syncs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fortnox_invoice_syncs_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fortnox_oauth_states: {
+        Row: {
+          company_id: string
+          created_at: string
+          expires_at: string
+          id: string
+          redirect_after: string
+          state_hash: string
+          used_at: string | null
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          redirect_after?: string
+          state_hash: string
+          used_at?: string | null
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          redirect_after?: string
+          state_hash?: string
+          used_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fortnox_oauth_states_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inbound_order_emails: {
+        Row: {
+          attachments: Json
+          channel_id: string | null
+          company_id: string
+          converted_assignment_id: string | null
+          created_at: string
+          error_message: string | null
+          from_address: string
+          html_body: string | null
+          id: string
+          message_id: string | null
+          parse_confidence: number
+          parsed_payload: Json | null
+          provider: string
+          provider_email_id: string
+          received_at: string
+          reviewed_at: string | null
+          status: string
+          subject: string
+          text_body: string | null
+          to_addresses: string[]
+          updated_at: string
+        }
+        Insert: {
+          attachments?: Json
+          channel_id?: string | null
+          company_id: string
+          converted_assignment_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          from_address: string
+          html_body?: string | null
+          id?: string
+          message_id?: string | null
+          parse_confidence?: number
+          parsed_payload?: Json | null
+          provider?: string
+          provider_email_id: string
+          received_at?: string
+          reviewed_at?: string | null
+          status?: string
+          subject?: string
+          text_body?: string | null
+          to_addresses?: string[]
+          updated_at?: string
+        }
+        Update: {
+          attachments?: Json
+          channel_id?: string | null
+          company_id?: string
+          converted_assignment_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          from_address?: string
+          html_body?: string | null
+          id?: string
+          message_id?: string | null
+          parse_confidence?: number
+          parsed_payload?: Json | null
+          provider?: string
+          provider_email_id?: string
+          received_at?: string
+          reviewed_at?: string | null
+          status?: string
+          subject?: string
+          text_body?: string | null
+          to_addresses?: string[]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inbound_order_emails_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "order_inbox_channels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inbound_order_emails_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inbound_order_emails_converted_assignment_id_fkey"
+            columns: ["converted_assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
             referencedColumns: ["id"]
           },
         ]
@@ -1225,6 +1587,7 @@ export type Database = {
           id: string
           invoice_date: string
           invoice_number: number
+          lines: Json
           message: string | null
           reference: string | null
           status: string
@@ -1241,6 +1604,7 @@ export type Database = {
           id?: string
           invoice_date?: string
           invoice_number: number
+          lines?: Json
           message?: string | null
           reference?: string | null
           status?: string
@@ -1257,6 +1621,7 @@ export type Database = {
           id?: string
           invoice_date?: string
           invoice_number?: number
+          lines?: Json
           message?: string | null
           reference?: string | null
           status?: string
@@ -1338,6 +1703,57 @@ export type Database = {
           utm_content?: string | null
           utm_medium?: string | null
           utm_source?: string | null
+        }
+        Relationships: []
+      }
+      notification_outbox: {
+        Row: {
+          attempts: number
+          channel: string
+          company_id: string | null
+          created_at: string
+          id: string
+          last_error: string | null
+          payload: Json
+          recipient_email: string | null
+          recipient_phone: string | null
+          recipient_user_id: string | null
+          sent_at: string | null
+          status: string
+          subject: string | null
+          type: string
+        }
+        Insert: {
+          attempts?: number
+          channel: string
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          payload?: Json
+          recipient_email?: string | null
+          recipient_phone?: string | null
+          recipient_user_id?: string | null
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+          type: string
+        }
+        Update: {
+          attempts?: number
+          channel?: string
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          payload?: Json
+          recipient_email?: string | null
+          recipient_phone?: string | null
+          recipient_user_id?: string | null
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+          type?: string
         }
         Relationships: []
       }
@@ -1439,6 +1855,41 @@ export type Database = {
             foreignKeyName: "ob_rates_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_inbox_channels: {
+        Row: {
+          company_id: string
+          created_at: string
+          enabled: boolean
+          id: string
+          inbox_key: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          inbox_key?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          inbox_key?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_inbox_channels_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
@@ -2113,6 +2564,45 @@ export type Database = {
         Args: { p_company_id: string; p_fingerprint: string; p_limit?: number }
         Returns: boolean
       }
+      create_invoice_with_lines: {
+        Args: {
+          p_assignment_ids: string[]
+          p_customer_id: string
+          p_due_date: string
+          p_invoice_date: string
+          p_invoice_number: number
+          p_lines?: Json
+          p_message?: string
+          p_reference?: string
+          p_status: string
+          p_total_ex_vat: number
+          p_total_inc_vat: number
+          p_vat_amount: number
+        }
+        Returns: {
+          assignment_ids: string[]
+          company_id: string | null
+          created_at: string
+          customer_id: string
+          due_date: string
+          id: string
+          invoice_date: string
+          invoice_number: number
+          lines: Json
+          message: string | null
+          reference: string | null
+          status: string
+          total_ex_vat: number
+          total_inc_vat: number
+          vat_amount: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "invoices"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       driver_update_assignment: {
         Args: {
           _actual_start?: string
@@ -2154,6 +2644,16 @@ export type Database = {
       is_platform_admin: { Args: { _user_id: string }; Returns: boolean }
       lookup_invitation_by_token: { Args: { p_token: string }; Returns: Json }
       next_invoice_number: { Args: never; Returns: number }
+      read_fortnox_tokens: {
+        Args: { p_company_id: string }
+        Returns: {
+          access_token: string
+          refresh_token: string
+          scopes: string[]
+          status: string
+          token_expires_at: string
+        }[]
+      }
       register_company: {
         Args: { _name: string; _org_nr?: string; _user_full_name?: string }
         Returns: string
@@ -2161,6 +2661,17 @@ export type Database = {
       send_portal_message: {
         Args: { p_message: string; p_sender_name?: string; p_token: string }
         Returns: string
+      }
+      store_fortnox_tokens: {
+        Args: {
+          p_access_token: string
+          p_company_id: string
+          p_expires_at: string
+          p_refresh_token: string
+          p_scopes: string[]
+          p_user_id: string
+        }
+        Returns: undefined
       }
       submit_satisfaction: {
         Args: { p_comment?: string; p_rating: number; p_token: string }
