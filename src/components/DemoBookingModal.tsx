@@ -225,7 +225,10 @@ export function DemoBookingModal({ open, onOpenChange, lang = 'sv' }: DemoBookin
       })
       .catch((err) => console.warn('Failed to send demo booking notification:', err));
 
-    try { (await import('@/lib/track')).track('demo_booking_submit', { has_date: Boolean(form.preferred_date), has_slot: Boolean(form.preferred_slot), has_phone: Boolean(form.phone) }); } catch { /* noop */ }
+    try {
+      const { trackEvent } = await import('@/lib/analytics');
+      trackEvent('Demo Requested', { source: 'demo_modal' });
+    } catch { /* noop */ }
     setSubmitted(true);
   };
 

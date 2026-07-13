@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Truck } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { trackEventOnce } from '@/lib/analytics';
 import { CompanyStep } from '@/features/onboarding/CompanyStep';
 import { InviteStep } from '@/features/onboarding/InviteStep';
 import { FirstAssignmentStep, type FirstAssignmentDraft } from '@/features/onboarding/FirstAssignmentStep';
@@ -28,6 +29,7 @@ export default function OnboardingFlow() {
   const navigate = useNavigate();
   const { user, companyId } = useAuth();
   const resolvedCompanyId = companyId || sessionStorage.getItem('onboarding_company_id');
+  const [searchParams] = useSearchParams();
   const [step, setStep] = useState(() => Number(sessionStorage.getItem('onboarding_step') || 1));
   const [submitting, setSubmitting] = useState(false);
   const [companyName, setCompanyName] = useState(() => sessionStorage.getItem('onboarding_company_name') || '');
@@ -37,6 +39,17 @@ export default function OnboardingFlow() {
   const [assignment, setAssignment] = useState<FirstAssignmentDraft>(emptyAssignment);
 
   useEffect(() => { sessionStorage.setItem('onboarding_step', String(step)); }, [step]);
+
+  // Fire signup + trial events exactly once per company when the user returns
+  // from a successful Stripe Checkout session. We only rely on the presence of
+  // the `?checkout=success` query param that the create-checkout function sets.
+  useEffect(() => {
+    if (searchParams.get('checkout') !== 'success') return;
+    if (!resolvedCompanyId) return;
+    trackEventOnce(resolvedCompanyId, 'Signup Completed', { source: 'onboarding', role: 'admin' });
+    trackEventOnce(resolvedCompanyId, 'Trial Started', { plan: 'aurora_449', billing_interval: 'monthly' });
+  }, [searchParams, resolvedCompanyId]);
+
   useEffect(() => {
     if (step !== 3 || !resolvedCompanyId) return;
     supabase.from('profiles').select('id, full_name').eq('company_id', resolvedCompanyId).eq('role', 'driver').order('full_name')
