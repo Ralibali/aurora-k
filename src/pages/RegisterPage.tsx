@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Truck, Building2, User, Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { trackEvent } from '@/lib/analytics';
 
 function getPasswordStrength(pw: string): { label: string; pct: number; color: string } {
   let score = 0;
@@ -103,6 +104,13 @@ export default function RegisterPage() {
         navigate('/onboarding');
         return;
       }
+
+      // Track that a real checkout session was created before redirecting.
+      trackEvent('Subscription Checkout Started', {
+        plan: 'aurora_449',
+        billing_interval: 'monthly',
+        source: 'register',
+      });
 
       // 6. Redirect to Stripe Checkout
       window.location.href = checkoutData.url;

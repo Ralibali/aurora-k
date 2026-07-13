@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AlertCircle, CreditCard, ExternalLink, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
+import { trackEventOnce } from '@/lib/analytics';
 
 const STATUS_MAP: Record<string, { label: string; variant: 'default' | 'destructive' | 'outline' | 'secondary' }> = {
   active: { label: 'Aktiv', variant: 'default' },
@@ -48,6 +49,17 @@ export default function SubscriptionTab() {
       }
 
       setStatus(data?.subscription_status || 'pending');
+
+      // Fire Subscription Purchased exactly once per company when the Stripe
+      // webhook has flipped status to active. Deduped in localStorage.
+      if (data?.subscription_status === 'active' && companyId) {
+        trackEventOnce(
+          companyId,
+          'Subscription Purchased',
+          { plan: 'aurora_449', billing_interval: 'monthly' },
+          { allowInternal: true },
+        );
+      }
     } catch {
       setError('Kunde inte hämta prenumerationsstatus just nu. Försök igen.');
     } finally {

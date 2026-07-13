@@ -128,7 +128,10 @@ export function LeadForm({ onSuccess, compact = false }: LeadFormProps) {
     }).catch((err) => console.warn('Failed to send lead notification:', err));
 
     setSubmitted(true);
-    try { (await import('@/lib/track')).track('lead_submit_success', { fleet_size: form.fleet_size || 'unspecified', has_phone: Boolean(form.phone), lead_score: leadScore }); } catch { /* noop */ }
+    try {
+      const { trackEvent } = await import('@/lib/analytics');
+      trackEvent('Demo Requested', { source: 'lead_form' });
+    } catch { /* noop */ }
     toast.success('Tack! Vi hör av oss inom kort.');
     onSuccess?.();
   };

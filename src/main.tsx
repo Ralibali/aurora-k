@@ -6,6 +6,7 @@ import App from "./App.tsx";
 import { FormAnalyticsObserver } from "./components/FormAnalyticsObserver";
 import { LandingMobileNavigation } from "./components/LandingMobileNavigation";
 import { MobileConversionShell, StandaloneDemoPage } from "./components/MobileConversionShell";
+import { installPlausibleRouteGuard } from "./lib/analytics";
 import "./index.css";
 import "@fontsource/space-grotesk/400.css";
 import "@fontsource/space-grotesk/500.css";
@@ -15,6 +16,10 @@ import "@fontsource/dm-sans/400.css";
 import "@fontsource/dm-sans/500.css";
 import "@fontsource/dm-sans/600.css";
 import "@fontsource/dm-sans/700.css";
+
+// Ensure Plausible does not track internal work views (admin / driver / platform / portal / onboarding / track).
+// Must run before any route renders so the guard wraps the queued `window.plausible` from index.html.
+installPlausibleRouteGuard();
 
 Sentry.init({
   dsn: "https://d838e2cf945e668ad9d1f63d7586ba00@o4511191910383616.ingest.de.sentry.io/4511191916675152",
