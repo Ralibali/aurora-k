@@ -53,10 +53,12 @@ export default function SubscriptionTab() {
       // Fire Subscription Purchased exactly once per company when the Stripe
       // webhook has flipped status to active. Deduped in localStorage.
       if (data?.subscription_status === 'active' && companyId) {
-        trackEventOnce(companyId, 'Subscription Purchased', {
-          plan: 'aurora_449',
-          billing_interval: 'monthly',
-        });
+        trackEventOnce(
+          companyId,
+          'Subscription Purchased',
+          { plan: 'aurora_449', billing_interval: 'monthly' },
+          { allowInternal: true },
+        );
       }
     } catch {
       setError('Kunde inte hämta prenumerationsstatus just nu. Försök igen.');

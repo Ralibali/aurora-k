@@ -37,12 +37,14 @@ export type PropMap = {
 
 export type EventName = keyof PropMap;
 
+// Operational work views — do NOT track pageviews or generic events on these.
+// `/onboarding` is intentionally NOT here: it is a conversion surface that
+// fires Signup Completed / Trial Started after a successful checkout return.
 const INTERNAL_PREFIXES = [
   '/admin',
   '/driver',
   '/platform',
   '/portal',
-  '/onboarding',
   '/track/',
 ];
 
@@ -76,9 +78,22 @@ function sanitizeProps(input: Record<string, unknown>): Record<string, PropValue
   return out;
 }
 
-export function trackEvent<E extends EventName>(name: E, props: PropMap[E] = {} as PropMap[E]): void {
+export interface TrackOptions {
+  /**
+   * Bypass the internal-route guard. Reserved for conversion events that
+   * legitimately fire from inside an authenticated area (e.g. Subscription
+   * Purchased confirmed via subscription status inside /admin/settings).
+   */
+  allowInternal?: boolean;
+}
+
+export function trackEvent<E extends EventName>(
+  name: E,
+  props: PropMap[E] = {} as PropMap[E],
+  options: TrackOptions = {},
+): void {
   if (typeof window === 'undefined') return;
-  if (isInternalPath()) return;
+  if (!options.allowInternal && isInternalPath()) return;
   const fn = window.plausible;
   if (typeof fn !== 'function') return;
   try {
@@ -100,6 +115,7 @@ export function trackEventOnce<E extends EventName>(
   dedupeKey: string,
   name: E,
   props: PropMap[E] = {} as PropMap[E],
+  options: TrackOptions = {},
 ): void {
   const storeKey = `at_analytics_v1:${name}:${dedupeKey}`;
   try {
@@ -108,7 +124,7 @@ export function trackEventOnce<E extends EventName>(
   } catch {
     // storage disabled — fall through and fire anyway
   }
-  trackEvent(name, props);
+  trackEvent(name, props, options);
 }
 
 /**
