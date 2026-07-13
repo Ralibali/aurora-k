@@ -141,7 +141,11 @@ export function installPlausibleRouteGuard(): void {
 
   const wrap = (raw: PlausibleFn | undefined): PlausibleFn => {
     const wrapped = function (this: unknown, ...args: Parameters<PlausibleFn>) {
-      if (isInternalPath()) return;
+      // Only suppress automatic pageviews on internal work views. Custom
+      // business events are gated inside `trackEvent` (which respects the
+      // `allowInternal` option), so we let them through here.
+      const eventName = args[0];
+      if (eventName === 'pageview' && isInternalPath()) return;
       if (typeof raw === 'function') return raw.apply(this, args);
     } as PlausibleFn;
     // Preserve queue / options set by the snippet
