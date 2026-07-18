@@ -76,6 +76,24 @@ export interface LandingCopy {
     cta: string;
     ctaRegister: string;
   };
+  roi: {
+    eyebrow: string;
+    h2: string;
+    sub: string;
+    driversLabel: string;
+    assignmentsLabel: string;
+    rateLabel: string;
+    driversUnit: string;
+    assignmentsUnit: string;
+    rateUnit: string;
+    assumption: string;
+    hoursSavedLabel: string;
+    moneySavedLabel: string;
+    paybackLabel: string;
+    paybackSuffix: string;
+    perMonth: string;
+    cta: string;
+  };
   faq: {
     eyebrow: string;
     h2: string;
@@ -232,6 +250,24 @@ const SV: LandingCopy = {
     monthlyBenefits: ['Ingen bindningstid', 'Support på svenska', 'Obegränsat antal förare', 'Fakturaunderlag ingår'],
     cta: 'Boka demo',
     ctaRegister: 'Kom igång – skapa konto',
+  },
+  roi: {
+    eyebrow: 'Räkna på det',
+    h2: 'Vad är din administration värd?',
+    sub: 'Dra i reglagen och se hur mycket tid och pengar ett transportledningssystem kan frigöra varje månad.',
+    driversLabel: 'Antal förare',
+    assignmentsLabel: 'Uppdrag per förare och vecka',
+    rateLabel: 'Timkostnad för administration',
+    driversUnit: 'st',
+    assignmentsUnit: 'st',
+    rateUnit: 'kr/h',
+    assumption: 'Räkneexempel: 15 minuter sparad administration per uppdrag – planering, förarkontakt, tidrapporter och fakturaunderlag som annars hamnar i Excel, SMS och telefonsamtal.',
+    hoursSavedLabel: 'Sparad tid',
+    moneySavedLabel: 'Sparat värde',
+    paybackLabel: 'Aurora betalar sig självt',
+    paybackSuffix: 'gånger om',
+    perMonth: 'per månad',
+    cta: 'Boka demo och se hur',
   },
   faq: {
     eyebrow: 'FAQ',
@@ -396,6 +432,24 @@ const EN: LandingCopy = {
     monthlyBenefits: ['No lock-in', 'Human support', 'Unlimited drivers', 'Invoice drafts included'],
     cta: 'Book a demo',
     ctaRegister: 'Get started',
+  },
+  roi: {
+    eyebrow: 'Do the math',
+    h2: 'What is your admin time worth?',
+    sub: 'Move the sliders and see how much time and money a transport management system can free up every month.',
+    driversLabel: 'Number of drivers',
+    assignmentsLabel: 'Jobs per driver and week',
+    rateLabel: 'Hourly cost of admin work',
+    driversUnit: '',
+    assignmentsUnit: '',
+    rateUnit: 'SEK/h',
+    assumption: 'Example: 15 minutes of admin saved per job – planning, driver calls, time reports and invoice drafts that otherwise end up in Excel, texts and phone calls.',
+    hoursSavedLabel: 'Time saved',
+    moneySavedLabel: 'Value saved',
+    paybackLabel: 'Aurora pays for itself',
+    paybackSuffix: 'times over',
+    perMonth: 'per month',
+    cta: 'Book a demo and see how',
   },
   faq: {
     eyebrow: 'FAQ',
