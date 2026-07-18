@@ -49,7 +49,7 @@ export async function requireAdminForRecipientCompany(
 
   if (roleError) return { ok: false, error: roleError.message };
 
-  const adminCompanyIds = new Set((adminRoleRows ?? []).map((row: any) => row.company_id).filter(Boolean));
+  const adminCompanyIds = new Set((adminRoleRows ?? []).map((row: { company_id: string | null }) => row.company_id).filter(Boolean));
 
   if (adminCompanyIds.size === 0) {
     const { data: profile, error: profileError } = await callerClient
@@ -72,7 +72,7 @@ export async function requireAdminForRecipientCompany(
   if (recipientsError) return { ok: false, error: recipientsError.message };
   if ((recipientProfiles ?? []).length !== userIds.length) return { ok: false, error: "Recipient not found" };
 
-  const allSameCompany = (recipientProfiles ?? []).every((profile: any) => adminCompanyIds.has(profile.company_id));
+  const allSameCompany = (recipientProfiles ?? []).every((profile: { company_id: string | null }) => adminCompanyIds.has(profile.company_id));
   if (!allSameCompany) return { ok: false, error: "Recipients must belong to your company" };
 
   return { ok: true };

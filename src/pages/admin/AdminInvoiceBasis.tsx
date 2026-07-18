@@ -22,7 +22,17 @@ type StatusFilter = 'ready' | 'invoiced' | 'all';
 const fmtSek = (v: number) =>
   new Intl.NumberFormat('sv-SE', { style: 'currency', currency: 'SEK', maximumFractionDigits: 0 }).format(v || 0);
 
-function calcAmount(a: any) {
+type InvoiceBasisAssignment = {
+  actual_start: string | null;
+  actual_stop: string | null;
+  customer: {
+    pricing_type: string | null;
+    price_per_delivery: number | null;
+    price_per_hour: number | null;
+  } | null;
+};
+
+function calcAmount(a: InvoiceBasisAssignment) {
   const c = a.customer;
   if (!c) return { hours: 0, amount: 0 };
   const hours = a.actual_start && a.actual_stop ? calculateDecimalHours(a.actual_start, a.actual_stop) : 0;
@@ -40,11 +50,11 @@ export default function AdminInvoiceBasis() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
   const completedAssignments = useMemo(() => {
-    return (assignments ?? []).filter((a: any) => a.status === 'completed');
+    return (assignments ?? []).filter((a) => a.status === 'completed');
   }, [assignments]);
 
   const filtered = useMemo(() => {
-    return completedAssignments.filter((a: any) => {
+    return completedAssignments.filter((a) => {
       if (status === 'ready' && a.invoiced) return false;
       if (status === 'invoiced' && !a.invoiced) return false;
       if (customerId !== 'all' && a.customer_id !== customerId) return false;
@@ -59,8 +69,8 @@ export default function AdminInvoiceBasis() {
 
   // Group by customer for the "skapa underlag" workflow
   const groupedByCustomer = useMemo(() => {
-    const map = new Map<string, { customer: any; assignments: any[]; total: number; hours: number }>();
-    filtered.forEach((a: any) => {
+    const map = new Map<string, { customer: (typeof filtered)[number]['customer']; assignments: (typeof filtered)[number][]; total: number; hours: number }>();
+    filtered.forEach((a) => {
       if (!a.customer_id) return;
       const { hours, amount } = calcAmount(a);
       const entry = map.get(a.customer_id) ?? { customer: a.customer, assignments: [], total: 0, hours: 0 };
@@ -73,20 +83,20 @@ export default function AdminInvoiceBasis() {
   }, [filtered]);
 
   const stats = useMemo(() => {
-    const ready = completedAssignments.filter((a: any) => !a.invoiced);
-    const invoiced = completedAssignments.filter((a: any) => a.invoiced);
+    const ready = completedAssignments.filter((a) => !a.invoiced);
+    const invoiced = completedAssignments.filter((a) => a.invoiced);
     const readyAmount = ready.reduce((sum, a) => sum + calcAmount(a).amount, 0);
     return {
       readyCount: ready.length,
       readyAmount,
       invoicedCount: invoiced.length,
-      customerCount: new Set(ready.map((a: any) => a.customer_id)).size,
+      customerCount: new Set(ready.map((a) => a.customer_id)).size,
     };
   }, [completedAssignments]);
 
   const toggleAll = () => {
     if (selected.size === filtered.length) setSelected(new Set());
-    else setSelected(new Set(filtered.map((a: any) => a.id)));
+    else setSelected(new Set(filtered.map((a) => a.id)));
   };
 
   const toggleOne = (id: string) => {
@@ -97,7 +107,7 @@ export default function AdminInvoiceBasis() {
   };
 
   const exportCsv = () => {
-    const rows = filtered.map((a: any) => {
+    const rows = filtered.map((a) => {
       const { hours, amount } = calcAmount(a);
       return {
         Datum: a.actual_start ? format(new Date(a.actual_start), 'yyyy-MM-dd', { locale: sv }) : '',
@@ -117,7 +127,7 @@ export default function AdminInvoiceBasis() {
     const headers = Object.keys(rows[0]);
     const csv = [
       headers.join(';'),
-      ...rows.map((r) => headers.map((h) => `"${String((r as any)[h]).replace(/"/g, '""')}"`).join(';')),
+      ...rows.map((r) => headers.map((h) => `"${String(r[h as keyof typeof r]).replace(/"/g, '""')}"`).join(';')),
     ].join('\n');
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -216,7 +226,7 @@ export default function AdminInvoiceBasis() {
                     <Badge variant="secondary">{fmtSek(group.total)}</Badge>
                   </div>
                   <Button asChild size="sm" className="w-full mt-2">
-                    <Link to={createInvoiceUrl(group.customer?.id, group.assignments.map((a: any) => a.id))}>
+                    <Link to={createInvoiceUrl(group.customer?.id, group.assignments.map((a) => a.id))}>
                       <FilePlus2 className="h-4 w-4 mr-2" /> Skapa faktura
                     </Link>
                   </Button>
@@ -252,7 +262,7 @@ export default function AdminInvoiceBasis() {
               <SelectTrigger className="w-full md:w-56"><SelectValue placeholder="Alla kunder" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Alla kunder</SelectItem>
-                {(customers ?? []).map((c: any) => (
+                {(customers ?? []).map((c) => (
                   <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                 ))}
               </SelectContent>
@@ -261,13 +271,13 @@ export default function AdminInvoiceBasis() {
               <FileSpreadsheet className="h-4 w-4 mr-2" /> Exportera CSV
             </Button>
             {selected.size > 0 && (() => {
-              const selArr = filtered.filter((a: any) => selected.has(a.id));
-              const custIds = new Set(selArr.map((a: any) => a.customer_id));
+              const selArr = filtered.filter((a) => selected.has(a.id));
+              const custIds = new Set(selArr.map((a) => a.customer_id));
               if (custIds.size === 1) {
                 const cid = [...custIds][0];
                 return (
                   <Button asChild>
-                    <Link to={createInvoiceUrl(cid, selArr.map((a: any) => a.id))}>
+                    <Link to={createInvoiceUrl(cid, selArr.map((a) => a.id))}>
                       <FilePlus2 className="h-4 w-4 mr-2" /> Skapa faktura ({selected.size})
                     </Link>
                   </Button>
@@ -308,7 +318,7 @@ export default function AdminInvoiceBasis() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filtered.map((a: any) => {
+                  {filtered.map((a) => {
                     const { hours, amount } = calcAmount(a);
                     return (
                       <TableRow key={a.id}>

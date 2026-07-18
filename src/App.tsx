@@ -87,6 +87,8 @@ const BudtjanstAppPage = lazy(() => import("./pages/BudtjanstAppPage"));
 const AkeriSystemPage = lazy(() => import("./pages/AkeriSystemPage"));
 const TransportplaneringPage = lazy(() => import("./pages/TransportplaneringPage"));
 const DigitalFoljesedelPage = lazy(() => import("./pages/DigitalFoljesedelPage"));
+const KororderAppPage = lazy(() => import("./pages/KororderAppPage"));
+const TransportbemanningPage = lazy(() => import("./pages/TransportbemanningPage"));
 const DispatchSystemPage = lazy(() => import("./pages/DispatchSystemPage"));
 const AdsBudtjanstPage = lazy(() => import("./pages/AdsBudtjanstPage"));
 const AdsAkeriPage = lazy(() => import("./pages/AdsAkeriPage"));
@@ -175,6 +177,8 @@ const App = () => (
                   <Route path="/akeri-system" element={<AkeriSystemPage />} />
                   <Route path="/transportplanering" element={<TransportplaneringPage />} />
                   <Route path="/digital-foljesedel" element={<DigitalFoljesedelPage />} />
+                  <Route path="/kororder-app" element={<KororderAppPage />} />
+                  <Route path="/transportbemanning" element={<TransportbemanningPage />} />
                   <Route path="/dispatch-system" element={<DispatchSystemPage />} />
                   <Route path="/ads/budtjanst" element={<AdsBudtjanstPage />} />
                   <Route path="/ads/akeri" element={<AdsAkeriPage />} />

@@ -107,8 +107,8 @@ export default function JoinPage() {
 
       toast.success('Välkommen! Ditt konto är skapat.');
       navigate('/driver', { replace: true });
-    } catch (err: any) {
-      toast.error(err.message || 'Något gick fel');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Något gick fel');
     } finally {
       setSubmitting(false);
     }

@@ -4,10 +4,27 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { InvoiceDocumentLine } from '@/features/invoicing/invoice-document';
 
+type PreviewInvoice = {
+  invoice_number?: string | number;
+  invoice_date?: string;
+  due_date?: string;
+  total_ex_vat?: number | string;
+  vat_amount?: number | string;
+  total_inc_vat?: number | string;
+  message?: string;
+  customer?: { name?: string; invoice_address?: string } | null;
+};
+
+type PreviewSettings = {
+  company_name?: string;
+  address?: string;
+  zip_city?: string;
+};
+
 type Props = {
-  invoice: Record<string, any> | null;
+  invoice: PreviewInvoice | null;
   lines: InvoiceDocumentLine[];
-  settings: Record<string, any> | null | undefined;
+  settings: PreviewSettings | null | undefined;
   onClose: () => void;
   onDownload: () => void;
 };

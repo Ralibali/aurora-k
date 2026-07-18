@@ -8,9 +8,11 @@ import { StatusBadge } from '@/components/StatusBadge';
 import { AttentionQueue } from '@/features/dashboard/AttentionQueue';
 import { buildAttentionItems } from '@/features/dashboard/attention-items';
 import { useAssignments, useDrivers, useInvoices } from '@/hooks/useData';
+
+type AssignmentRow = NonNullable<ReturnType<typeof useAssignments>['data']>[number];
 import { useAuth } from '@/hooks/useAuth';
 import { useDemoMode } from '@/hooks/useDemoMode';
-import { demoAssignments, demoActivity, demoKpis } from '@/lib/demo-data';
+import { demoAssignments, demoActivity, demoKpis, type DemoAssignment } from '@/lib/demo-data';
 import { calculateDecimalHours, formatSwedishTime } from '@/lib/format';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
@@ -90,7 +92,10 @@ export default function AdminDashboardPage() {
     return () => { void supabase.removeChannel(channel); };
   }, [queryClient]);
 
-  const assignments: any[] = demoOn ? demoAssignments : (realAssignments ?? []);
+  const assignments = useMemo<(DemoAssignment | AssignmentRow)[]>(
+    () => (demoOn ? demoAssignments : (realAssignments ?? [])),
+    [demoOn, realAssignments]
+  );
   const today = new Date().toISOString().slice(0, 10);
   const weekStart = new Date();
   weekStart.setDate(weekStart.getDate() - 6);

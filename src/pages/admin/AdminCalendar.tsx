@@ -40,20 +40,20 @@ export default function AdminCalendar() {
 
   const effectiveAssignments = useMemo(() => {
     const real = assignments ?? [];
-    if (demoEnabled && real.length === 0) return demoCalendarAssignments as any[];
+    if (demoEnabled && real.length === 0) return demoCalendarAssignments as unknown as typeof real;
     return real;
   }, [assignments, demoEnabled]);
 
   const effectiveDrivers = useMemo(() => {
     const real = drivers ?? [];
-    if (demoEnabled && real.length === 0) return demoDrivers as any[];
+    if (demoEnabled && real.length === 0) return demoDrivers as unknown as typeof real;
     return real;
   }, [drivers, demoEnabled]);
 
   const filteredAssignments = useMemo(() => {
     if (!effectiveAssignments.length) return [];
     if (driverFilter === 'all') return effectiveAssignments;
-    return effectiveAssignments.filter((a: any) => a.assigned_driver_id === driverFilter);
+    return effectiveAssignments.filter((a) => a.assigned_driver_id === driverFilter);
   }, [effectiveAssignments, driverFilter]);
 
   const days = useMemo(() => {
@@ -146,7 +146,7 @@ export default function AdminCalendar() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Alla chaufförer</SelectItem>
-                {effectiveDrivers.map((d: any) => (
+                {effectiveDrivers.map((d) => (
                   <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>
                 ))}
               </SelectContent>

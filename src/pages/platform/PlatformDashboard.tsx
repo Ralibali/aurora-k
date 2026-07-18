@@ -4,7 +4,7 @@ import { PlatformLayout } from '@/components/PlatformAdminLayout';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Building2, Users, HeadphonesIcon, TrendingUp, AlertCircle, CheckCircle, ExternalLink, Clock } from 'lucide-react';
+import { Building2, Users, HeadphonesIcon, TrendingUp, AlertCircle, CheckCircle, ExternalLink, Clock , type LucideIcon } from 'lucide-react';
 
 const statusBadge = (status: string | null) => {
   switch (status) {
@@ -39,21 +39,21 @@ export default function PlatformDashboard() {
     queryKey: ['platform-tickets-count'],
     queryFn: async () => {
       const { data } = await (supabase
-        .from('support_tickets' as any)
-        .select('id, status') as any);
+        .from('support_tickets')
+        .select('id, status'));
       return (data || []) as { id: string; status: string }[];
     },
   });
 
   const totalCompanies = companies?.length || 0;
-  const activeCompanies = companies?.filter((c: any) => c.subscription_status === 'active').length || 0;
+  const activeCompanies = companies?.filter((c) => c.subscription_status === 'active').length || 0;
   const totalUsers = profiles?.length || 0;
   const openTickets = tickets?.filter((t) => t.status === 'open').length || 0;
   const mrr = activeCompanies * 449;
 
-  const pending = companies?.filter((c: any) => c.subscription_status === 'pending') || [];
-  const pastDue = companies?.filter((c: any) => c.subscription_status === 'past_due') || [];
-  const cancelled = companies?.filter((c: any) => c.subscription_status === 'cancelled') || [];
+  const pending = companies?.filter((c) => c.subscription_status === 'pending') || [];
+  const pastDue = companies?.filter((c) => c.subscription_status === 'past_due') || [];
+  const cancelled = companies?.filter((c) => c.subscription_status === 'cancelled') || [];
 
   const stats = [
     { label: 'Totalt företag', value: totalCompanies, icon: Building2, color: 'text-blue-600 bg-blue-50' },
@@ -89,7 +89,7 @@ export default function PlatformDashboard() {
       <Card className="p-5">
         <h2 className="font-semibold text-foreground mb-4">Senaste aktivitet</h2>
         <div className="space-y-3">
-          {companies?.slice(0, 15).map((c: any) => (
+          {companies?.slice(0, 15).map((c) => (
             <div key={c.id} className="flex items-center justify-between py-2 border-b border-border last:border-0">
               <div>
                 <p className="text-sm font-medium text-foreground">{c.name}</p>
@@ -107,7 +107,8 @@ export default function PlatformDashboard() {
   );
 }
 
-function StatusColumn({ title, items, icon: Icon, showStripe }: { title: string; items: any[]; icon: any; showStripe?: boolean }) {
+type StatusItem = { id: string; name: string; created_at: string; stripe_customer_id?: string | null };
+function StatusColumn({ title, items, icon: Icon, showStripe }: { title: string; items: StatusItem[]; icon: LucideIcon; showStripe?: boolean }) {
   return (
     <Card className="p-4">
       <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
@@ -121,7 +122,7 @@ function StatusColumn({ title, items, icon: Icon, showStripe }: { title: string;
         </div>
       ) : (
         <div className="space-y-2">
-          {items.map((c: any) => (
+          {items.map((c) => (
             <div key={c.id} className="flex items-center justify-between text-sm">
               <div>
                 <p className="font-medium text-foreground">{c.name}</p>

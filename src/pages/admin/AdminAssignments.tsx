@@ -21,7 +21,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { StaggeredTableBody, StaggeredTableRow, StaggeredList, StaggeredItem } from '@/components/StaggeredList';
 import { useDemoMode } from '@/hooks/useDemoMode';
-import { demoAssignments } from '@/lib/demo-data';
+import { demoAssignments, type DemoAssignment } from '@/lib/demo-data';
 import { EmptyState } from '@/components/EmptyState';
 import { Inbox as InboxIcon } from 'lucide-react';
 import { DemoModeBanner } from '@/components/DemoModeBanner';
@@ -35,14 +35,17 @@ const filterTabs = [
   { key: 'completed', label: 'Slutförda', dotClass: 'bg-slate-400' },
 ] as const;
 
-function getRouteSummary(a: any) {
+type AssignmentRow = NonNullable<ReturnType<typeof useAssignments>['data']>[number];
+type AssignmentItem = AssignmentRow | DemoAssignment;
+
+function getRouteSummary(a: AssignmentItem) {
   const pickup = a.pickup_address;
   const delivery = a.delivery_address;
   if (pickup && delivery) return `${pickup} → ${delivery}`;
   return pickup || delivery || a.address;
 }
 
-function matchesTab(a: any, tab: string) {
+function matchesTab(a: AssignmentItem, tab: string) {
   if (tab === 'all') return true;
   if (tab === 'unassigned') return !a.assigned_driver_id;
   if (tab === 'urgent') return a.priority === 'urgent' || a.priority === 'high';
@@ -66,11 +69,14 @@ export default function AdminAssignments() {
   const effectiveAssignments = useMemo(() => {
     const real = assignments ?? [];
     if (demo.enabled && real.length === 0) {
-      return demoAssignments.map((a: any) => ({
+      return demoAssignments.map((a) => ({
         ...a,
-        assigned_driver_id: a.assigned_driver_id ?? a.driver?.full_name ?? null,
+        assigned_driver_id: a.assigned_driver_id ?? null,
         scheduled_end: a.scheduled_end ?? null,
         instructions: a.instructions ?? null,
+        pickup_address: a.pickup_address ?? null,
+        delivery_address: a.delivery_address ?? null,
+        service_type: a.service_type ?? null,
       }));
     }
     return real;
@@ -79,7 +85,7 @@ export default function AdminAssignments() {
   const today = format(new Date(), 'EEEE d MMMM yyyy', { locale: sv });
 
   const filtered = useMemo(() =>
-    effectiveAssignments.filter((a: any) => {
+    effectiveAssignments.filter((a) => {
       if (!matchesTab(a, statusFilter)) return false;
       if (driverFilter !== 'all' && a.assigned_driver_id !== driverFilter) return false;
       if (search) {
@@ -88,13 +94,13 @@ export default function AdminAssignments() {
         if (!haystack.includes(q)) return false;
       }
       return true;
-    }).sort((a: any, b: any) => b.scheduled_start.localeCompare(a.scheduled_start)),
+    }).sort((a, b) => b.scheduled_start.localeCompare(a.scheduled_start)),
     [effectiveAssignments, statusFilter, driverFilter, search]
   );
 
   const counts = useMemo(() => {
     const base: Record<string, number> = { all: 0, unassigned: 0, urgent: 0, pending: 0, active: 0, completed: 0 };
-    for (const a of effectiveAssignments as any[]) {
+    for (const a of effectiveAssignments) {
       base.all += 1;
       if (!a.assigned_driver_id) base.unassigned += 1;
       if (a.priority === 'urgent' || a.priority === 'high') base.urgent += 1;
@@ -105,11 +111,11 @@ export default function AdminAssignments() {
 
   const todayCount = useMemo(() => {
     const todayPrefix = format(new Date(), 'yyyy-MM-dd');
-    return (effectiveAssignments as any[]).filter(a => a.scheduled_start?.startsWith(todayPrefix)).length;
+    return effectiveAssignments.filter(a => a.scheduled_start?.startsWith(todayPrefix)).length;
   }, [effectiveAssignments]);
 
   const toggleSelect = (id: string) => setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
-  const toggleAll = () => { if (selected.length === filtered.length) setSelected([]); else setSelected(filtered.map((a: any) => a.id)); };
+  const toggleAll = () => { if (selected.length === filtered.length) setSelected([]); else setSelected(filtered.map((a) => a.id)); };
 
   return (
     <AdminLayout title="Uppdrag" description="Transportledning, rutter och förare">
@@ -182,7 +188,7 @@ export default function AdminAssignments() {
               <Table>
                 <TableHeader><TableRow><TableHead className="w-10"><Checkbox checked={selected.length === filtered.length && filtered.length > 0} onCheckedChange={toggleAll} /></TableHead><TableHead>ID</TableHead><TableHead>Uppdrag</TableHead><TableHead>Rutt</TableHead><TableHead>Tid</TableHead><TableHead>Chaufför</TableHead><TableHead>Status</TableHead><TableHead className="w-10" /></TableRow></TableHeader>
                 <StaggeredTableBody>
-                  {filtered.map((a: any) => (
+                  {filtered.map((a) => (
                     <StaggeredTableRow key={a.id} className="cursor-pointer hover:bg-secondary/50" onClick={() => navigate(`/admin/assignments/${a.id}`)}>
                       <TableCell onClick={(e) => e.stopPropagation()}><Checkbox checked={selected.includes(a.id)} onCheckedChange={() => toggleSelect(a.id)} /></TableCell>
                       <TableCell className="font-mono text-xs text-muted-foreground">{a.id.slice(0, 6).toUpperCase()}</TableCell>
@@ -193,7 +199,7 @@ export default function AdminAssignments() {
                       <TableCell className="font-mono text-sm">{formatSwedishDateTime(a.scheduled_start)}</TableCell>
                       <TableCell>{a.driver ? <div className="flex items-center gap-2"><div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center shrink-0"><span className="text-[9px] font-bold text-blue-700">{a.driver.full_name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}</span></div><span className="text-sm">{a.driver.full_name}</span></div> : <span className="inline-flex items-center gap-1 text-sm text-amber-700"><UserX className="h-3.5 w-3.5" /> Saknar förare</span>}</TableCell>
                       <TableCell><StatusBadge status={a.status} /></TableCell>
-                      <TableCell onClick={(e) => e.stopPropagation()}><DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem onClick={() => navigate(`/admin/assignments/${a.id}`)}>Redigera</DropdownMenuItem><DropdownMenuItem onClick={() => navigate('/admin/assignments/new', { state: { copy: a } })}>Kopiera</DropdownMenuItem><DropdownMenuItem className="text-destructive" onClick={() => { updateAssignment.mutate({ id: a.id, status: 'cancelled' } as any); toast.success('Uppdraget avbokat'); }}>Avboka</DropdownMenuItem></DropdownMenuContent></DropdownMenu></TableCell>
+                      <TableCell onClick={(e) => e.stopPropagation()}><DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem onClick={() => navigate(`/admin/assignments/${a.id}`)}>Redigera</DropdownMenuItem><DropdownMenuItem onClick={() => navigate('/admin/assignments/new', { state: { copy: a } })}>Kopiera</DropdownMenuItem><DropdownMenuItem className="text-destructive" onClick={() => { updateAssignment.mutate({ id: a.id, status: 'cancelled' }); toast.success('Uppdraget avbokat'); }}>Avboka</DropdownMenuItem></DropdownMenuContent></DropdownMenu></TableCell>
                     </StaggeredTableRow>
                   ))}
                 </StaggeredTableBody>
@@ -201,7 +207,7 @@ export default function AdminAssignments() {
             </div>
 
             <StaggeredList className="md:hidden space-y-3">
-              {filtered.map((a: any) => (
+              {filtered.map((a) => (
                 <StaggeredItem key={a.id}>
                   <Link to={`/admin/assignments/${a.id}`} className="block bg-card rounded-lg border border-border p-4 shadow-card active:bg-secondary transition-colors">
                     <div className="flex items-start justify-between gap-2"><div className="min-w-0 flex-1"><div className="flex items-center gap-2"><p className="font-semibold text-sm text-foreground truncate">{a.title}</p>{a.service_type && <span className="text-[10px] rounded bg-muted px-1.5 py-0.5 text-muted-foreground">{a.service_type}</span>}</div><p className="text-sm text-muted-foreground mt-0.5">{a.customer?.name}</p></div><StatusBadge status={a.status} /></div>

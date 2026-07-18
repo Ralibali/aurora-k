@@ -1,6 +1,7 @@
 import { useLayoutEffect } from 'react';
 
 export function useJsonLd(id: string, data: unknown) {
+  const dataJson = JSON.stringify(data);
   useLayoutEffect(() => {
     let script = document.head.querySelector<HTMLScriptElement>(
       `script[type="application/ld+json"][data-jsonld-id="${id}"]`
@@ -13,10 +14,10 @@ export function useJsonLd(id: string, data: unknown) {
       document.head.appendChild(script);
     }
 
-    script.textContent = JSON.stringify(data);
+    script.textContent = dataJson;
 
     return () => {
       script?.remove();
     };
-  }, [id, JSON.stringify(data)]);
+  }, [id, dataJson]);
 }

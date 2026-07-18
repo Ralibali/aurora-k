@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useSettings, useUpdateSettings, useCreateSettings } from '@/hooks/useData';
+import type { TablesUpdate } from '@/integrations/supabase/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useFeatureSettings, useToggleFeature, useResetAllFeatures } from '@/hooks/useFeatureSettings';
 import { Save, Upload, ToggleLeft, RotateCcw, Sun, Moon, Monitor, Building, Palette, CreditCard, ChevronRight, ArrowLeft } from 'lucide-react';
@@ -62,7 +63,7 @@ export default function AdminSettings() {
   const { data: settings, isLoading } = useSettings();
   const updateSettings = useUpdateSettings();
   const createSettings = useCreateSettings();
-  const [form, setForm] = useState<Record<string, any> | null>(null);
+  const [form, setForm] = useState<TablesUpdate<'settings'> | null>(null);
   const [uploading, setUploading] = useState(false);
   const isMobile = useIsMobile();
   const [mobileSection, setMobileSection] = useState<SettingsSection>(null);
@@ -93,7 +94,7 @@ export default function AdminSettings() {
   }
 
   const f = form || settings || {};
-  const setField = (key: string, value: any) => setForm(prev => ({ ...(prev || settings || {}), [key]: value }));
+  const setField = <K extends keyof TablesUpdate<'settings'>>(key: K, value: TablesUpdate<'settings'>[K]) => setForm(prev => ({ ...(prev || settings || {}), [key]: value }));
   const settingsPayload = {
     company_name: f.company_name || 'Aurora Medias Transport AB',
     org_number: f.org_number || null,

@@ -16,7 +16,16 @@ import { InvoicePreviewDialog } from '@/features/invoicing/InvoicePreviewDialog'
 import { useDemoMode } from '@/hooks/useDemoMode';
 import { demoInvoices } from '@/lib/demo-data';
 
-type InvoiceRecord = Record<string, any>;
+type InvoiceRecord = Record<string, unknown> & {
+  id: string;
+  status: string;
+  due_date?: string;
+  customer_id?: string;
+  invoice_number?: string | number;
+  invoice_date?: string;
+  total_inc_vat?: number | string;
+  customer?: { name?: string } | null;
+};
 
 export default function InvoicesPage() {
   const [statusFilter, setStatusFilter] = useState('all');
@@ -30,7 +39,10 @@ export default function InvoicesPage() {
   const updateStatus = useUpdateInvoiceStatus();
   const { enabled: demoEnabled } = useDemoMode();
   const showingDemo = demoEnabled && (invoices?.length ?? 0) === 0;
-  const source = showingDemo ? demoInvoices as InvoiceRecord[] : (invoices ?? []) as InvoiceRecord[];
+  const source = useMemo<InvoiceRecord[]>(
+    () => (showingDemo ? demoInvoices : (invoices ?? [])) as InvoiceRecord[],
+    [showingDemo, invoices]
+  );
   const today = new Date().toISOString().slice(0, 10);
 
   const filtered: InvoiceRecord[] = useMemo(() => source

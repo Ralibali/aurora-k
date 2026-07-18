@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { TablesUpdate } from '@/integrations/supabase/types';
 import { PlatformLayout } from '@/components/PlatformAdminLayout';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -53,19 +54,19 @@ export default function PlatformCompanies() {
   });
 
   const getCompanyProfiles = (companyId: string) =>
-    profiles?.filter((p: any) => p.company_id === companyId) || [];
+    profiles?.filter((p) => p.company_id === companyId) || [];
 
   const getUserCount = (companyId: string) => getCompanyProfiles(companyId).length;
   const getAdminCount = (companyId: string) =>
-    getCompanyProfiles(companyId).filter((p: any) => p.role === 'admin').length;
+    getCompanyProfiles(companyId).filter((p) => p.role === 'admin').length;
 
-  const trialDaysLeft = (c: any) => {
+  const trialDaysLeft = (c) => {
     if (!c.trial_ends_at) return null;
     const diff = Math.ceil((new Date(c.trial_ends_at).getTime() - Date.now()) / 86400000);
     return diff > 0 ? diff : null;
   };
 
-  const statusLabel = (c: any) => {
+  const statusLabel = (c) => {
     const trial = trialDaysLeft(c);
     if (trial !== null) return { label: `Trial — ${trial} dagar kvar`, variant: 'outline' as const, className: 'text-blue-600 border-blue-200' };
     switch (c.subscription_status) {
@@ -76,7 +77,7 @@ export default function PlatformCompanies() {
     }
   };
 
-  const filtered = (companies || []).filter((c: any) => {
+  const filtered = (companies || []).filter((c) => {
     const matchSearch = c.name.toLowerCase().includes(search.toLowerCase()) || (c.org_nr || '').includes(search);
     if (!matchSearch) return false;
     if (filter === 'all') return true;
@@ -86,7 +87,7 @@ export default function PlatformCompanies() {
   // Mutations
   const updateStatus = useMutation({
     mutationFn: async ({ id, status, trialDays }: { id: string; status: string; trialDays?: number }) => {
-      const update: any = { subscription_status: status };
+      const update: TablesUpdate<'companies'> = { subscription_status: status };
       if (trialDays) {
         update.trial_ends_at = new Date(Date.now() + trialDays * 86400000).toISOString();
       }
@@ -113,15 +114,15 @@ export default function PlatformCompanies() {
       setNewPassword('');
       toast.success('Lösenord återställt');
     },
-    onError: (e: any) => toast.error(e.message || 'Kunde inte återställa lösenord'),
+    onError: (e) => toast.error(e.message || 'Kunde inte återställa lösenord'),
   });
 
   const sendWelcome = useMutation({
     mutationFn: async ({ companyId }: { companyId: string }) => {
-      const admins = getCompanyProfiles(companyId).filter((p: any) => p.role === 'admin');
+      const admins = getCompanyProfiles(companyId).filter((p) => p.role === 'admin');
       const admin = admins[0];
       if (!admin) throw new Error('Ingen admin hittad');
-      const company = companies?.find((c: any) => c.id === companyId);
+      const company = companies?.find((c) => c.id === companyId);
       const { error } = await supabase.functions.invoke('send-email', {
         body: {
           to: admin.email,
@@ -152,8 +153,8 @@ export default function PlatformCompanies() {
       queryClient.invalidateQueries({ queryKey: ['platform-companies-detail'] });
       queryClient.invalidateQueries({ queryKey: ['platform-profiles-all'] });
       toast.success(`${companyName} skapades!`);
-    } catch (err: any) {
-      toast.error('Kunde inte skapa: ' + err.message);
+    } catch (err) {
+      toast.error('Kunde inte skapa: ' + (err instanceof Error ? err.message : 'Okänt fel'));
     } finally {
       setCreatingCompany(false);
     }
@@ -208,7 +209,7 @@ export default function PlatformCompanies() {
       )}
 
       <div className="space-y-3">
-        {filtered.map((c: any) => {
+        {filtered.map((c) => {
           const status = statusLabel(c);
           const isExpanded = expanded === c.id;
           const companyProfiles = getCompanyProfiles(c.id);
@@ -290,7 +291,7 @@ export default function PlatformCompanies() {
                             </tr>
                           </thead>
                           <tbody>
-                            {companyProfiles.map((p: any) => (
+                            {companyProfiles.map((p) => (
                               <tr key={p.id} className="border-b border-border last:border-0">
                                 <td className="py-1.5 text-foreground">{p.full_name}</td>
                                 <td className="py-1.5">

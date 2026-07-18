@@ -5,7 +5,7 @@ import { assignmentConfirmationEmail, driverWelcomeEmail, driverInviteEmail, new
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
 const ADMIN_EMAIL = "info@auroramedia.se";
 
-const TEMPLATE_MAP: Record<string, (data: any) => { subject: string; html: string }> = {
+const TEMPLATE_MAP: Record<string, (data: Record<string, string>) => { subject: string; html: string }> = {
   'assignment-confirmation': assignmentConfirmationEmail,
   'driver-welcome': driverWelcomeEmail,
   'driver-invite': driverInviteEmail,

@@ -22,6 +22,8 @@ export const SEO_ROUTES: SeoRoute[] = [
   { path: "/budtjanst-app", priority: "0.8", changefreq: "monthly" },
   { path: "/akeri-system", priority: "0.8", changefreq: "monthly" },
   { path: "/dispatch-system", priority: "0.8", changefreq: "monthly" },
+  { path: "/kororder-app", priority: "0.8", changefreq: "monthly", lastmod: "2026-07-18" },
+  { path: "/transportbemanning", priority: "0.8", changefreq: "monthly", lastmod: "2026-07-18" },
 
   { path: "/om-oss", priority: "0.7", changefreq: "monthly" },
   { path: "/kontakt", priority: "0.7", changefreq: "monthly" },

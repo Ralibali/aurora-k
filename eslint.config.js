@@ -24,4 +24,17 @@ export default tseslint.config(
       "@typescript-eslint/no-explicit-any": "warn",
     },
   },
+  {
+    // shadcn/ui-komponenter exporterar medvetet cva-varianter bredvid komponenter,
+    // och auth/demo-providerna exporterar sin hook tillsammans med providern.
+    // Det är etablerade mönster i dessa filer, så regeln är avstängd här.
+    files: [
+      "src/components/ui/**",
+      "src/hooks/useAuth.tsx",
+      "src/hooks/useDemoMode.tsx",
+    ],
+    rules: {
+      "react-refresh/only-export-components": "off",
+    },
+  },
 );

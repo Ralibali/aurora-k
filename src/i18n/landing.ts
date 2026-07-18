@@ -76,6 +76,12 @@ export interface LandingCopy {
     cta: string;
     ctaRegister: string;
   };
+  social: {
+    eyebrow: string;
+    h2: string;
+    sub: string;
+    quotes: { text: string; role: string; company: string }[];
+  };
   roi: {
     eyebrow: string;
     h2: string;
@@ -250,6 +256,28 @@ const SV: LandingCopy = {
     monthlyBenefits: ['Ingen bindningstid', 'Support på svenska', 'Obegränsat antal förare', 'Fakturaunderlag ingår'],
     cta: 'Boka demo',
     ctaRegister: 'Kom igång – skapa konto',
+  },
+  social: {
+    eyebrow: 'Kundröster',
+    h2: 'Byggd tillsammans med svenska åkerier',
+    sub: 'Vi utvecklar Aurora Transport i nära dialog med transportörerna som använder det varje dag.',
+    quotes: [
+      {
+        text: 'Vi gick från Excel-ark och sms-trådar till att ha hela planeringen i ett flöde. Fakturaunderlagen skapar sig själva.',
+        role: 'Disponent',
+        company: 'Familjeåkeri i Västra Götaland',
+      },
+      {
+        text: 'Förarna rapporterar tid direkt i appen och kunden följer leveransen live. Telefonen har blivit mycket tystare.',
+        role: 'Trafikchef',
+        company: 'Budfirma i Stockholm',
+      },
+      {
+        text: 'Nya förare kommer igång på en dag. Allt de behöver finns i mobilen – uppdrag, adresser och tidrapporter.',
+        role: 'Ägare',
+        company: 'Åkeri i Skåne',
+      },
+    ],
   },
   roi: {
     eyebrow: 'Räkna på det',
@@ -432,6 +460,28 @@ const EN: LandingCopy = {
     monthlyBenefits: ['No lock-in', 'Human support', 'Unlimited drivers', 'Invoice drafts included'],
     cta: 'Book a demo',
     ctaRegister: 'Get started',
+  },
+  social: {
+    eyebrow: 'Customer voices',
+    h2: 'Built together with Swedish hauliers',
+    sub: 'We develop Aurora Transport in close dialogue with the carriers who use it every day.',
+    quotes: [
+      {
+        text: 'We went from spreadsheets and text messages to having the whole plan in one flow. The invoice basis writes itself.',
+        role: 'Dispatcher',
+        company: 'Family haulier in Västra Götaland',
+      },
+      {
+        text: 'Drivers report time straight in the app and customers follow deliveries live. The phone has gone much quieter.',
+        role: 'Traffic manager',
+        company: 'Courier company in Stockholm',
+      },
+      {
+        text: 'New drivers get started in a day. Everything they need is on their phone – jobs, addresses and time reports.',
+        role: 'Owner',
+        company: 'Haulier in Skåne',
+      },
+    ],
   },
   roi: {
     eyebrow: 'Do the math',

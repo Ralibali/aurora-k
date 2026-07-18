@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { useCustomers, useDrivers, useCreateAssignment } from '@/hooks/useData';
+import type { Tables, TablesInsert } from '@/integrations/supabase/types';
 import { useVehicles, useOrders } from '@/hooks/useNewFeatures';
 import { useUpdateBookingRequest } from '@/hooks/useAllFeatures';
 import { priorityLabels } from '@/lib/types';
@@ -129,7 +130,8 @@ function parseSmartAssignment(text: string) {
 export default function AdminNewAssignment() {
   const navigate = useNavigate();
   const location = useLocation();
-  const state = (location.state as any) || {};
+  type AssignmentRow = Tables<'assignments'>;
+  const state = (location.state as { copy?: AssignmentRow; bookingRequestId?: string; source?: string; importedScheduledStart?: string } | null) || {};
   const copyFrom = state.copy;
   const bookingRequestId = state.bookingRequestId as string | undefined;
   const importedOrder = state.source === 'smart-order-import';
@@ -181,7 +183,7 @@ export default function AdminNewAssignment() {
       : 'Texten tolkades. Datum och tid lämnades oförändrade eftersom inget säkert datum hittades.');
   };
 
-  const notifyDriver = (assignment: any, scheduledStartIso: string) => {
+  const notifyDriver = (assignment: { id: string }, scheduledStartIso: string) => {
     const driver = (drivers ?? []).find(d => d.id === driverId);
     const customer = (customers ?? []).find(c => c.id === customerId);
     if (!driver) return;
@@ -255,7 +257,7 @@ export default function AdminNewAssignment() {
 
     try {
       for (const d of dates) {
-        const payload: any = {
+        const payload: TablesInsert<'assignments'> = {
           title,
           customer_id: customerId,
           address: buildAddress(pickupAddress, deliveryAddress),
@@ -276,7 +278,7 @@ export default function AdminNewAssignment() {
           vehicle_id: vehicleId || null,
           order_id: orderId || null,
         };
-        const createdAssignment = await new Promise<any>((resolve, reject) => {
+        const createdAssignment = await new Promise<{ id: string }>((resolve, reject) => {
           createAssignment.mutate(payload, { onSuccess: data => resolve(data), onError: err => reject(err) });
         });
         notifyDriver(createdAssignment, d.start.toISOString());

@@ -256,6 +256,28 @@ const STATIC_PAGES = [
     ],
   },
   {
+    route: "/kororder-app",
+    title: "Digital körorder app — uppdrag, signatur & GPS i mobilen | Aurora Transport",
+    description:
+      "Digital körorder app för förare: uppdrag, adresser, kundsignatur, foto och tidrapportering i mobilen. Sluta ringa — allt synkas automatiskt.",
+    h1: "Digital körorder app — körordern försvinner aldrig",
+    body: [
+      "Med Aurora Transport får föraren hela körordern i mobilen: uppdrag, adresser, kontaktpersoner och instruktioner. Mottagaren signerar på skärmen, föraren fotar godset och tiden rapporteras automatiskt.",
+      "GPS och geofence visar var bilen är utan att du ringer. Allt fungerar offline och blir färdiga tidrapporter och fakturaunderlag. 449 kr per månad, ingen bindningstid.",
+    ],
+  },
+  {
+    route: "/transportbemanning",
+    title: "System för transportbemanning — förare, uppdrag & tidrapporter | Aurora Transport",
+    description:
+      "Bemanningsbolag inom transport: tilldela förare på sekunder, få färdiga tidrapporter med OB och traktamente och ge kunderna egen portal. 449 kr/mån.",
+    h1: "Systemet för transportbemanning — förare, uppdrag och tid i ett flöde",
+    body: [
+      "Aurora Transport är byggt för bemanningsbolag: se vilka förare som är tillgängliga, tilldela uppdrag på sekunder och låt förarna rapportera tid direkt i appen.",
+      "OB-tillägg och traktamenten räknas automatiskt till färdigt löneunderlag, och era uppdragsgivare bokar och följer uppdrag i egen portal. 449 kr per månad utan bindningstid.",
+    ],
+  },
+  {
     route: "/om-oss",
     title: "Om Aurora Transport — Svenskt transportledningssystem",
     description:

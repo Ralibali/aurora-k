@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
+import type { Json, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 
 // ─── ARTICLES ────────────────────────────────────────────
 export function useArticles() {
@@ -36,7 +37,7 @@ export function useCreateArticle() {
 export function useUpdateArticle() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...updates }: { id: string; [key: string]: any }) => {
+    mutationFn: async ({ id, ...updates }: { id: string } & TablesUpdate<'articles'>) => {
       const { error } = await supabase.from('articles').update(updates).eq('id', id);
       if (error) throw error;
     },
@@ -90,7 +91,7 @@ export function useCreateVehicle() {
 export function useUpdateVehicle() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...updates }: { id: string; [key: string]: any }) => {
+    mutationFn: async ({ id, ...updates }: { id: string } & TablesUpdate<'vehicles'>) => {
       const { error } = await supabase.from('vehicles').update(updates).eq('id', id);
       if (error) throw error;
     },
@@ -144,7 +145,7 @@ export function useCreateOrder() {
 export function useUpdateOrder() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...updates }: { id: string; [key: string]: any }) => {
+    mutationFn: async ({ id, ...updates }: { id: string } & TablesUpdate<'orders'>) => {
       const { error } = await supabase.from('orders').update(updates).eq('id', id);
       if (error) throw error;
     },
@@ -210,7 +211,7 @@ export function useCreateOrderTemplate() {
   const qc = useQueryClient();
   const { companyId } = useAuth();
   return useMutation({
-    mutationFn: async (template: { name: string; description?: string | null; template_data?: any }) => {
+    mutationFn: async (template: { name: string; description?: string | null; template_data?: Json }) => {
       const { data, error } = await supabase.from('order_templates').insert({ ...template, company_id: companyId }).select().single();
       if (error) throw error;
       return data;
@@ -287,7 +288,7 @@ export function useObRates() {
   return useQuery({
     queryKey: ['ob_rates', companyId],
     queryFn: async () => {
-      const q = supabase.from('ob_rates' as any).select('*').order('name');
+      const q = supabase.from('ob_rates').select('*').order('name');
       if (companyId) q.eq('company_id', companyId);
       const { data, error } = await q;
       if (error) throw error;
@@ -301,8 +302,8 @@ export function useCreateObRate() {
   const qc = useQueryClient();
   const { companyId } = useAuth();
   return useMutation({
-    mutationFn: async (rate: Partial<ObRate>) => {
-      const { data, error } = await supabase.from('ob_rates' as any).insert({ ...rate, company_id: companyId } as any).select().single();
+    mutationFn: async (rate: Omit<TablesInsert<'ob_rates'>, 'company_id'>) => {
+      const { data, error } = await supabase.from('ob_rates').insert({ ...rate, company_id: companyId ?? '' }).select().single();
       if (error) throw error;
       return data;
     },
@@ -314,8 +315,8 @@ export function useCreateObRate() {
 export function useUpdateObRate() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...updates }: { id: string; [key: string]: any }) => {
-      const { error } = await supabase.from('ob_rates' as any).update({ ...updates, updated_at: new Date().toISOString() } as any).eq('id', id);
+    mutationFn: async ({ id, ...updates }: { id: string } & TablesUpdate<'ob_rates'>) => {
+      const { error } = await supabase.from('ob_rates').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['ob_rates'] }); toast.success('OB-tillägg uppdaterat!'); },
@@ -327,7 +328,7 @@ export function useDeleteObRate() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('ob_rates' as any).delete().eq('id', id);
+      const { error } = await supabase.from('ob_rates').delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['ob_rates'] }); toast.success('OB-tillägg borttaget!'); },
@@ -350,7 +351,7 @@ export function usePerDiemRates() {
   return useQuery({
     queryKey: ['per_diem_rates', companyId],
     queryFn: async () => {
-      const q = supabase.from('per_diem_rates' as any).select('*').order('name');
+      const q = supabase.from('per_diem_rates').select('*').order('name');
       if (companyId) q.eq('company_id', companyId);
       const { data, error } = await q;
       if (error) throw error;
@@ -364,8 +365,8 @@ export function useCreatePerDiemRate() {
   const qc = useQueryClient();
   const { companyId } = useAuth();
   return useMutation({
-    mutationFn: async (rate: Partial<PerDiemRate>) => {
-      const { data, error } = await supabase.from('per_diem_rates' as any).insert({ ...rate, company_id: companyId } as any).select().single();
+    mutationFn: async (rate: Omit<TablesInsert<'per_diem_rates'>, 'company_id'>) => {
+      const { data, error } = await supabase.from('per_diem_rates').insert({ ...rate, company_id: companyId ?? '' }).select().single();
       if (error) throw error;
       return data;
     },
@@ -377,8 +378,8 @@ export function useCreatePerDiemRate() {
 export function useUpdatePerDiemRate() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...updates }: { id: string; [key: string]: any }) => {
-      const { error } = await supabase.from('per_diem_rates' as any).update({ ...updates, updated_at: new Date().toISOString() } as any).eq('id', id);
+    mutationFn: async ({ id, ...updates }: { id: string } & TablesUpdate<'per_diem_rates'>) => {
+      const { error } = await supabase.from('per_diem_rates').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['per_diem_rates'] }); toast.success('Traktamente uppdaterat!'); },
@@ -390,7 +391,7 @@ export function useDeletePerDiemRate() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('per_diem_rates' as any).delete().eq('id', id);
+      const { error } = await supabase.from('per_diem_rates').delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['per_diem_rates'] }); toast.success('Traktamente borttaget!'); },

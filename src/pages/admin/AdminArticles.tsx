@@ -38,14 +38,14 @@ export default function AdminArticles() {
 
   const unitOptions = useMemo(() => {
     const set = new Set<string>();
-    (articles ?? []).forEach((a: any) => { if (a.unit) set.add(a.unit); });
+    (articles ?? []).forEach((a) => { if (a.unit) set.add(a.unit); });
     return Array.from(set).sort();
   }, [articles]);
 
   const filtered = useMemo(() => {
     const list = articles ?? [];
     const q = search.trim().toLowerCase();
-    const matched = list.filter((a: any) => {
+    const matched = list.filter((a) => {
       if (unitFilter !== 'all' && a.unit !== unitFilter) return false;
       if (!q) return true;
       return (
@@ -55,7 +55,7 @@ export default function AdminArticles() {
       );
     });
     const dir = sortDir === 'asc' ? 1 : -1;
-    matched.sort((a: any, b: any) => {
+    matched.sort((a, b) => {
       const av = a[sortKey];
       const bv = b[sortKey];
       if (av == null && bv == null) return 0;
@@ -85,7 +85,7 @@ export default function AdminArticles() {
     setEditId(null); setName(''); setDescription(''); setUnit('st'); setPrice(''); setArticleNumber(''); setVatRate('0');
   };
 
-  const openEdit = (a: any) => {
+  const openEdit = (a) => {
     setEditId(a.id); setName(a.name); setDescription(a.description || ''); setUnit(a.unit); setPrice(String(a.default_price)); setArticleNumber(a.article_number || ''); setVatRate(String(a.vat_rate)); setDialogOpen(true);
   };
 
@@ -224,7 +224,7 @@ export default function AdminArticles() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filtered.map((a: any) => (
+                  {filtered.map((a) => (
                     <TableRow key={a.id}>
                       <TableCell className="font-mono text-xs">{a.article_number || '—'}</TableCell>
                       <TableCell>

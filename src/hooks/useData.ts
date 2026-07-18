@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
 import { useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
@@ -71,7 +72,7 @@ export function useCreateCustomer() {
 export function useUpdateCustomer() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...updates }: { id: string; [key: string]: any }) => {
+    mutationFn: async ({ id, ...updates }: { id: string } & TablesUpdate<'customers'>) => {
       const { data, error } = await supabase.from('customers').update(updates).eq('id', id).select().single();
       if (error) throw error;
       return data;
@@ -249,7 +250,7 @@ export function useCreateAssignment() {
 export function useUpdateAssignment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...updates }: { id: string; [key: string]: any }) => {
+    mutationFn: async ({ id, ...updates }: { id: string } & TablesUpdate<'assignments'>) => {
       const { data, error } = await supabase.from('assignments').update(updates).eq('id', id).select().single();
       if (error) throw error;
       return data;
@@ -462,11 +463,11 @@ export function useSettings() {
 export function useUpdateSettings() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (updates: { id: string; [key: string]: any }) => {
+    mutationFn: async (updates: { id: string } & TablesUpdate<'settings'>) => {
       const { id, ...rest } = updates;
       const payload = Object.fromEntries(
         Object.entries(rest).filter(([, value]) => value !== undefined)
-      );
+      ) as TablesUpdate<'settings'>;
 
       if (Object.keys(payload).length === 0) {
         const { data, error } = await supabase.from('settings').select('*').eq('id', id).maybeSingle();
@@ -498,10 +499,10 @@ export function useCreateSettings() {
   const qc = useQueryClient();
   const { companyId } = useAuth();
   return useMutation({
-    mutationFn: async (settings: { company_name: string; [key: string]: any }) => {
+    mutationFn: async (settings: { company_name: string } & Omit<TablesInsert<'settings'>, 'company_id'>) => {
       const payload = Object.fromEntries(
         Object.entries({ ...settings, company_id: companyId }).filter(([, value]) => value !== undefined)
-      );
+      ) as TablesInsert<'settings'>;
       const { data, error } = await supabase.from('settings').insert(payload).select().maybeSingle();
       if (error) throw error;
       if (!data) throw new Error('Inställningarna kunde inte skapas');

@@ -42,8 +42,8 @@ export default function AdminVehicles() {
   const vehicleAssignmentCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     (assignments ?? []).forEach(a => {
-      if ((a as any).vehicle_id) {
-        counts[(a as any).vehicle_id] = (counts[(a as any).vehicle_id] || 0) + 1;
+      if (a.vehicle_id) {
+        counts[a.vehicle_id] = (counts[a.vehicle_id] || 0) + 1;
       }
     });
     return counts;
@@ -53,7 +53,7 @@ export default function AdminVehicles() {
     setEditId(null); setName(''); setRegNr(''); setType('vehicle'); setMake(''); setModel(''); setYear(''); setNotes('');
   };
 
-  const openEdit = (v: any) => {
+  const openEdit = (v) => {
     setEditId(v.id); setName(v.name); setRegNr(v.registration_number || ''); setType(v.type); setMake(v.make || ''); setModel(v.model || ''); setYear(v.year ? String(v.year) : ''); setNotes(v.notes || ''); setDialogOpen(true);
   };
 

@@ -114,8 +114,8 @@ export default function RegisterPage() {
 
       // 6. Redirect to Stripe Checkout
       window.location.href = checkoutData.url;
-    } catch (err: any) {
-      toast.error(err.message || 'Något gick fel');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Något gick fel');
     } finally {
       setSubmitting(false);
     }

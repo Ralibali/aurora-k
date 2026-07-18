@@ -15,10 +15,10 @@ export default function AdminEnvironment() {
 
   const stats = useMemo(() => {
     const all = assignments ?? [];
-    const totalKm = all.reduce((s, a) => s + ((a as any).distance_km || 0), 0);
-    const totalCo2 = all.reduce((s, a) => s + ((a as any).co2_kg || 0), 0);
-    const totalFuel = all.reduce((s, a) => s + ((a as any).fuel_liters || 0), 0);
-    const count = all.filter(a => (a as any).distance_km).length;
+    const totalKm = all.reduce((s, a) => s + (a.distance_km || 0), 0);
+    const totalCo2 = all.reduce((s, a) => s + (a.co2_kg || 0), 0);
+    const totalFuel = all.reduce((s, a) => s + (a.fuel_liters || 0), 0);
+    const count = all.filter(a => a.distance_km).length;
     return { totalKm, totalCo2, totalFuel, count };
   }, [assignments]);
 

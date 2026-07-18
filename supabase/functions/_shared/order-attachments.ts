@@ -1,15 +1,32 @@
 import { extractPdfText } from './pdf-text.ts';
+import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.100.1';
 
 function safeName(value: string) {
   return value.normalize('NFKD').replace(/[^a-zA-Z0-9._-]+/g, '-').slice(0, 160) || 'attachment';
 }
 
-export async function processOrderAttachments(supabase: any, companyId: string, emailRowId: string, attachments: any[]) {
-  const rows: any[] = [];
+export type OrderAttachment = {
+  id?: string;
+  filename: string;
+  content_type: string;
+  size: number;
+  download_url: string;
+};
+
+type AttachmentRow = {
+  provider_attachment_id?: string;
+  filename: string;
+  content_type: string;
+  size: number;
+  text_content?: string;
+};
+
+export async function processOrderAttachments(supabase: SupabaseClient, companyId: string, emailRowId: string, attachments: OrderAttachment[]) {
+  const rows: AttachmentRow[] = [];
   const texts: string[] = [];
 
   for (const attachment of attachments) {
-    const row: any = {
+    const row: AttachmentRow = {
       provider_attachment_id: attachment.id,
       filename: attachment.filename,
       content_type: attachment.content_type,

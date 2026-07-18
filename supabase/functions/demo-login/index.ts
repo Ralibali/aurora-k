@@ -95,7 +95,7 @@ Deno.serve(async (req) => {
     // Helper: ensure user exists
     async function ensureUser(u: { email: string; password: string; fullName: string }, role: "admin" | "driver") {
       const { data: existingUsers } = await admin.auth.admin.listUsers();
-      const existing = existingUsers?.users?.find((x: any) => x.email === u.email);
+      const existing = existingUsers?.users?.find((x: { email?: string }) => x.email === u.email);
 
       let userId: string;
       if (existing) {
@@ -166,7 +166,7 @@ Deno.serve(async (req) => {
         .select("id")
         .eq("company_id", companyId)
         .limit(3);
-      customerIds.push(...(existingCusts || []).map((c: any) => c.id));
+      customerIds.push(...(existingCusts || []).map((c: { id: string }) => c.id));
     }
 
     // Seed assignments if none exist
@@ -198,9 +198,9 @@ Deno.serve(async (req) => {
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (err: any) {
+  } catch (err) {
     return new Response(
-      JSON.stringify({ error: err.message || "Internal server error" }),
+      JSON.stringify({ error: err instanceof Error ? err.message : "Internal server error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

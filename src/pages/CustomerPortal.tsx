@@ -28,7 +28,7 @@ interface PortalInvoice {
   total_inc_vat?: number; status: string; lines?: unknown; assignment_ids?: string[];
   total_ex_vat?: number; vat_amount?: number; reference?: string | null; message?: string | null;
 }
-interface PortalBooking { id: string; [key: string]: unknown; }
+interface PortalBooking { id: string; title?: string; preferred_date?: string | null; status?: string; [key: string]: unknown; }
 interface PortalSettings {
   company_name: string; org_number: string | null; address: string | null; zip_city: string | null;
   email: string | null; phone: string | null; bankgiro: string | null; plusgiro: string | null; vat_number: string | null;
@@ -143,10 +143,10 @@ export default function CustomerPortal() {
     fetchData();
   }, [token]);
 
-  const assignments: PortalAssignment[] = data?.assignments ?? [];
-  const invoices: PortalInvoice[] = data?.invoices ?? [];
-  const orders: PortalOrder[] = data?.orders ?? [];
-  const bookings: PortalBooking[] = data?.bookings ?? [];
+  const assignments: PortalAssignment[] = useMemo(() => data?.assignments ?? [], [data]);
+  const invoices: PortalInvoice[] = useMemo(() => data?.invoices ?? [], [data]);
+  const orders: PortalOrder[] = useMemo(() => data?.orders ?? [], [data]);
+  const bookings: PortalBooking[] = useMemo(() => data?.bookings ?? [], [data]);
   const customer: PortalCustomer | undefined = data?.customer;
   const settings = data?.settings;
 
@@ -247,7 +247,7 @@ export default function CustomerPortal() {
           </TabsContent>
 
           <TabsContent value="invoices">
-            <Card><CardContent className="p-0"><Table><TableHeader><TableRow><TableHead>Fakturanr</TableHead><TableHead>Datum</TableHead><TableHead>Förfallodatum</TableHead><TableHead className="text-right">Belopp</TableHead><TableHead>Status</TableHead><TableHead /></TableRow></TableHeader><TableBody>{invoices.length === 0 && <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Inga fakturor</TableCell></TableRow>}{invoices.map((inv) => <TableRow key={inv.id}><TableCell className="font-medium">#{inv.invoice_number}</TableCell><TableCell>{inv.invoice_date}</TableCell><TableCell>{inv.due_date}</TableCell><TableCell className="text-right font-mono">{inv.total_inc_vat?.toFixed(0)} kr</TableCell><TableCell><Badge variant={statusVariant(inv.status)}>{statusLabels[inv.status] || inv.status}</Badge></TableCell><TableCell className="text-right"><PortalInvoiceDownloadButton invoice={{ ...inv, customer }} assignments={assignments as Record<string, any>[]} settings={settings as Record<string, any> | null | undefined} /></TableCell></TableRow>)}</TableBody></Table></CardContent></Card>
+            <Card><CardContent className="p-0"><Table><TableHeader><TableRow><TableHead>Fakturanr</TableHead><TableHead>Datum</TableHead><TableHead>Förfallodatum</TableHead><TableHead className="text-right">Belopp</TableHead><TableHead>Status</TableHead><TableHead /></TableRow></TableHeader><TableBody>{invoices.length === 0 && <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Inga fakturor</TableCell></TableRow>}{invoices.map((inv) => <TableRow key={inv.id}><TableCell className="font-medium">#{inv.invoice_number}</TableCell><TableCell>{inv.invoice_date}</TableCell><TableCell>{inv.due_date}</TableCell><TableCell className="text-right font-mono">{inv.total_inc_vat?.toFixed(0)} kr</TableCell><TableCell><Badge variant={statusVariant(inv.status)}>{statusLabels[inv.status] || inv.status}</Badge></TableCell><TableCell className="text-right"><PortalInvoiceDownloadButton invoice={{ ...inv, customer }} assignments={assignments} settings={settings} /></TableCell></TableRow>)}</TableBody></Table></CardContent></Card>
           </TabsContent>
 
           <TabsContent value="booking"><BookingRequestForm token={token!} bookings={bookings} onCreated={handleBookingCreated} /></TabsContent>

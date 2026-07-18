@@ -9,13 +9,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useNotifications, useCreateNotification } from '@/hooks/useAllFeatures';
 import { useAuth } from '@/hooks/useAuth';
-import { Plus, Bell, BellRing, Info, AlertTriangle, Megaphone } from 'lucide-react';
+import { Plus, Bell, BellRing, Info, AlertTriangle, Megaphone, type LucideIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useDemoMode } from '@/hooks/useDemoMode';
 import { demoNotifications } from '@/lib/demo-data';
 
-const typeIcons: Record<string, any> = { info: Info, warning: AlertTriangle, alert: BellRing };
+const typeIcons: Record<string, LucideIcon> = { info: Info, warning: AlertTriangle, alert: BellRing };
 const typeLabels: Record<string, string> = { info: 'Info', warning: 'Varning', alert: 'Brådskande' };
 
 export default function AdminNotifications() {

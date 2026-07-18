@@ -47,8 +47,8 @@ export function useUnreadPortalMessages() {
     const lastSeen = getLastSeen();
 
     const fetchCount = async () => {
-      const { count, error } = await (supabase
-        .from('portal_messages' as any) as any)
+      const { count, error } = await supabase
+        .from('portal_messages')
         .select('*', { count: 'exact', head: true })
         .eq('company_id', companyId)
         .eq('sender_type', 'customer')
@@ -76,7 +76,7 @@ export function useUnreadPortalMessages() {
           filter: `company_id=eq.${companyId}`,
         },
         (payload) => {
-          const msg = payload.new as any;
+          const msg = payload.new as { sender_type?: string };
           if (msg.sender_type === 'customer') {
             setUnreadCount((c) => c + 1);
             playNotificationSound();

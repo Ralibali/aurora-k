@@ -3,15 +3,15 @@ import { normalizeInvoiceLines, toInvoicePdfLines, type PersistedInvoiceLine } f
 
 export type InvoiceDocumentLine = PersistedInvoiceLine;
 
-type Assignment = {
+export type InvoiceAssignment = {
   id: string;
   title: string;
-  actual_start: string | null;
-  actual_stop: string | null;
+  actual_start?: string | null;
+  actual_stop?: string | null;
   driver?: { full_name?: string | null } | null;
 };
 
-type CompanySettings = {
+export type InvoiceCompanySettings = {
   company_name: string;
   org_number: string | null;
   address: string | null;
@@ -25,7 +25,7 @@ type CompanySettings = {
 
 export function getInvoiceDocumentLines(
   invoice: Record<string, unknown>,
-  assignments: Assignment[],
+  assignments: InvoiceAssignment[],
 ): InvoiceDocumentLine[] {
   const stored = normalizeInvoiceLines(invoice.lines);
   if (stored.length) return stored;
@@ -63,8 +63,8 @@ export function getInvoiceDocumentLines(
 
 export function buildInvoicePdfData(
   invoice: Record<string, unknown>,
-  assignments: Assignment[],
-  settings: CompanySettings,
+  assignments: InvoiceAssignment[],
+  settings: InvoiceCompanySettings,
 ) {
   const customer = (invoice.customer ?? {}) as Record<string, unknown>;
   const totalExVat = Number(invoice.total_ex_vat ?? 0);

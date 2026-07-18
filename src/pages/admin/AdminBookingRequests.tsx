@@ -35,7 +35,7 @@ export default function AdminBookingRequests() {
   const [statusFilter, setStatusFilter] = useState('all');
 
   const filtered = useMemo(() => {
-    return (requests ?? []).filter((r: any) => {
+    return (requests ?? []).filter((r) => {
       const haystack = `${r.customer_name} ${r.title} ${r.customer_email} ${r.customer_phone} ${r.description}`.toLowerCase();
       const matchesSearch = haystack.includes(search.toLowerCase());
       const matchesStatus = statusFilter === 'all' || r.status === statusFilter;
@@ -43,11 +43,11 @@ export default function AdminBookingRequests() {
     });
   }, [requests, search, statusFilter]);
 
-  const pending = (requests ?? []).filter((r: any) => r.status === 'pending').length;
-  const urgent = (requests ?? []).filter((r: any) => isUrgent(r.description)).length;
-  const accepted = (requests ?? []).filter((r: any) => r.status === 'accepted').length;
+  const pending = (requests ?? []).filter((r) => r.status === 'pending').length;
+  const urgent = (requests ?? []).filter((r) => isUrgent(r.description)).length;
+  const accepted = (requests ?? []).filter((r) => r.status === 'accepted').length;
 
-  const createAssignmentFromRequest = (r: any) => {
+  const createAssignmentFromRequest = (r) => {
     navigate('/admin/assignments/new', {
       state: {
         copy: {
@@ -134,7 +134,7 @@ export default function AdminBookingRequests() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filtered.map((r: any) => {
+                  {filtered.map((r) => {
                     const urgentRequest = isUrgent(r.description);
                     return (
                       <TableRow key={r.id} className={r.status === 'pending' ? 'bg-blue-50/40' : undefined}>

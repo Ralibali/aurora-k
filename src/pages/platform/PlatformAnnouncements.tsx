@@ -37,9 +37,9 @@ export default function PlatformAnnouncements() {
     queryKey: ['platform-announcements'],
     queryFn: async () => {
       const { data } = await (supabase
-        .from('platform_announcements' as any)
+        .from('platform_announcements')
         .select('*')
-        .order('created_at', { ascending: false }) as any);
+        .order('created_at', { ascending: false }));
       return (data || []) as Announcement[];
     },
   });
@@ -56,7 +56,7 @@ export default function PlatformAnnouncements() {
     mutationFn: async () => {
       const finalTarget = target === 'company' ? targetCompany : target;
       const { error } = await supabase
-        .from('platform_announcements' as any)
+        .from('platform_announcements')
         .insert({ title, message, type, created_by: user?.id, target: finalTarget });
       if (error) throw error;
     },
@@ -76,7 +76,7 @@ export default function PlatformAnnouncements() {
   const toggleMutation = useMutation({
     mutationFn: async ({ id, active }: { id: string; active: boolean }) => {
       const { error } = await supabase
-        .from('platform_announcements' as any)
+        .from('platform_announcements')
         .update({ active })
         .eq('id', id);
       if (error) throw error;
@@ -98,7 +98,7 @@ export default function PlatformAnnouncements() {
   const getTargetLabel = (t: string | undefined) => {
     if (!t || t === 'all') return 'Alla';
     if (t === 'active') return 'Aktiva';
-    const company = companies?.find((c: any) => c.id === t);
+    const company = companies?.find((c) => c.id === t);
     return company?.name || t;
   };
 
@@ -143,7 +143,7 @@ export default function PlatformAnnouncements() {
                     <SelectValue placeholder="Välj företag..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {companies?.map((c: any) => (
+                    {companies?.map((c) => (
                       <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                     ))}
                   </SelectContent>

@@ -74,7 +74,7 @@ export default function AdminAbsences() {
           <Table><TableHeader><TableRow><TableHead>Chaufför</TableHead><TableHead>Typ</TableHead><TableHead>Period</TableHead><TableHead>Status</TableHead><TableHead className="w-[120px]" /></TableRow></TableHeader>
             <TableBody>{absences.map(a => (
               <TableRow key={a.id}>
-                <TableCell className="font-medium">{(a as any).driver?.full_name}</TableCell>
+                <TableCell className="font-medium">{a.driver?.full_name}</TableCell>
                 <TableCell><Badge variant="outline">{typeLabels[a.type] || a.type}</Badge></TableCell>
                 <TableCell className="text-sm">{a.start_date} → {a.end_date}</TableCell>
                 <TableCell>{a.approved ? <Badge variant="secondary">Godkänd</Badge> : <Badge variant="outline">Väntande</Badge>}</TableCell>

@@ -169,7 +169,7 @@ export function generateInvoicePdf(data: InvoicePdfData): jsPDF {
   });
 
   // ─── Totals section ──────────────────────────────────
-  const finalY = (doc as any).lastAutoTable.finalY + 6;
+  const finalY = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 6;
   const totalsWidth = 75;
   const totalsX = rightCol - totalsWidth;
 

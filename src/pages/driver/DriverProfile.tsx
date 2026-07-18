@@ -24,7 +24,7 @@ export default function DriverProfile() {
   const { data: driverSettings } = useEffectiveDriverSettings(user?.id);
   const showAvailability = driverSettings?.show_availability_toggle ?? true;
 
-  const isAvailable = (profile as any)?.is_available ?? true;
+  const isAvailable = profile?.is_available ?? true;
 
   const handleLogout = async () => {
     await signOut();

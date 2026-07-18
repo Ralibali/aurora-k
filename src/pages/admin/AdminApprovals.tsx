@@ -25,9 +25,9 @@ export default function AdminApprovals() {
           <Table><TableHeader><TableRow><TableHead>Uppdrag</TableHead><TableHead>Kund</TableHead><TableHead>Chaufför</TableHead><TableHead>Status</TableHead><TableHead className="w-[120px]" /></TableRow></TableHeader>
             <TableBody>{approvals.map(a => (
               <TableRow key={a.id}>
-                <TableCell className="font-medium">{(a as any).assignment?.title}</TableCell>
-                <TableCell>{(a as any).assignment?.customer?.name}</TableCell>
-                <TableCell>{(a as any).assignment?.driver?.full_name}</TableCell>
+                <TableCell className="font-medium">{a.assignment?.title}</TableCell>
+                <TableCell>{a.assignment?.customer?.name}</TableCell>
+                <TableCell>{a.assignment?.driver?.full_name}</TableCell>
                 <TableCell><Badge variant={a.status === 'approved' ? 'secondary' : a.status === 'rejected' ? 'destructive' : 'outline'}>{statusLabels[a.status] || a.status}</Badge></TableCell>
                 <TableCell>{a.status === 'pending' && <div className="flex gap-1 justify-end">
                   <Button variant="ghost" size="icon" onClick={() => updateApproval.mutate({ id: a.id, status: 'approved', approved_by: user?.id })}><Check className="h-3.5 w-3.5 text-green-600" /></Button>

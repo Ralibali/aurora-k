@@ -3,7 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 const cors = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type' };
 const reply = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...cors, 'Content-Type': 'application/json' } });
 
-async function signedUpload(admin: any, userId: string, assignmentId: string, operationId: string, file: File, suffix: string) {
+async function signedUpload(admin: SupabaseClient, userId: string, assignmentId: string, operationId: string, file: File, suffix: string) {
   const path = `${userId}/${assignmentId}/${operationId}-${suffix}`;
   const bytes = new Uint8Array(await file.arrayBuffer());
   const { error } = await admin.storage.from('consignment-notes').upload(path, bytes, {

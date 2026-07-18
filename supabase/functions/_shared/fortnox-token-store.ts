@@ -1,6 +1,7 @@
 import { refreshFortnoxToken } from './fortnox-oauth.ts';
+import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.100.1';
 
-export async function getValidFortnoxToken(admin: any, companyId: string, userId: string) {
+export async function getValidFortnoxToken(admin: SupabaseClient, companyId: string, userId: string) {
   const { data, error } = await admin.rpc('read_fortnox_tokens', { p_company_id: companyId });
   if (error) throw error;
   const row = Array.isArray(data) ? data[0] : data;

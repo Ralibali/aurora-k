@@ -101,7 +101,7 @@ export default function AdminStatistics() {
     });
 
     // Customer table
-    const afterFirst = (doc as any).lastAutoTable?.finalY ?? 80;
+    const afterFirst = (doc as unknown as { lastAutoTable?: { finalY?: number } }).lastAutoTable?.finalY ?? 80;
     doc.setFontSize(13);
     doc.text('Per kund', 14, afterFirst + 10);
     autoTable(doc, {
@@ -111,7 +111,7 @@ export default function AdminStatistics() {
     });
 
     // Footer
-    const afterSecond = (doc as any).lastAutoTable?.finalY ?? 140;
+    const afterSecond = (doc as unknown as { lastAutoTable?: { finalY?: number } }).lastAutoTable?.finalY ?? 140;
     doc.setFontSize(12);
     doc.text(`Totalt fakturerat: ${invoicedAmount.toFixed(0)} kr`, 14, afterSecond + 14);
 

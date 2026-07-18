@@ -89,8 +89,8 @@ export default function SubscriptionTab() {
       const { data, error } = await supabase.functions.invoke('stripe-portal');
       if (error || !data?.url) throw new Error('Kunde inte öppna portalen');
       window.location.href = data.url;
-    } catch (err: any) {
-      toast.error(err.message || 'Något gick fel');
+    } catch (err) {
+      toast.error((err instanceof Error ? err.message : 'Okänt fel') || 'Något gick fel');
       setPortalLoading(false);
     }
   };

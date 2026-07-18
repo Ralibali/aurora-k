@@ -25,11 +25,11 @@ export default function AdminCustomers() {
 
   // Overlay demo customers when demo mode is on and the account has no real ones
   const effectiveCustomers = (demoEnabled && (customers?.length ?? 0) === 0)
-    ? (demoCustomersFull as any)
+    ? demoCustomersFull
     : (customers ?? []);
   const showingDemo = demoEnabled && (customers?.length ?? 0) === 0;
 
-  const filtered = effectiveCustomers.filter((c: any) => {
+  const filtered = effectiveCustomers.filter((c) => {
     if (pricingFilter !== 'all' && c.pricing_type !== pricingFilter) return false;
     if (search) {
       const q = search.toLowerCase();
@@ -99,7 +99,7 @@ export default function AdminCustomers() {
                 ))}
                 {!isLoading && filtered.length > 0 && (
                   <StaggeredTableBody>
-                    {filtered.map((c: any) => (
+                    {filtered.map((c) => (
                       <StaggeredTableRow
                         key={c.id}
                         className="cursor-pointer hover:bg-muted/50"

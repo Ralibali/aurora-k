@@ -35,7 +35,28 @@ function dayOffsetAt(dayOffset: number, hours: number, minutes = 0): string {
   return d.toISOString();
 }
 
-export const demoAssignments = [
+export type DemoAssignment = {
+  id: string;
+  title: string;
+  address: string | null;
+  status: string;
+  priority: string;
+  scheduled_start: string;
+  scheduled_end?: string | null;
+  actual_start: string | null;
+  actual_stop: string | null;
+  assigned_driver_id?: string | null;
+  instructions?: string | null;
+  pickup_address?: string | null;
+  delivery_address?: string | null;
+  service_type?: string | null;
+  invoiced?: boolean | null;
+  cost?: number | null;
+  customer: { name: string; pricing_type?: string | null; price_per_hour?: number | null; price_per_delivery?: number | null } | null;
+  driver: { full_name: string } | null;
+};
+
+export const demoAssignments: DemoAssignment[] = [
   {
     id: 'demo-a-1042',
     title: 'Pall #4502 — Möbeltransport',

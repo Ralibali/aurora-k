@@ -7,7 +7,7 @@ let registrationErrorListener: PluginListenerHandle | null = null;
 let registeredUserId: string | null = null;
 let registeredToken: string | null = null;
 
-const pushTokenTable = () => (supabase as any).from('driver_push_tokens');
+const pushTokenTable = () => supabase.from('driver_push_tokens');
 
 export function isNativePushAvailable() {
   return Capacitor.isNativePlatform();

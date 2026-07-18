@@ -9,10 +9,17 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Send, Loader2, CheckCircle2, Inbox } from 'lucide-react';
 import { toast } from 'sonner';
 
+export type PortalBookingItem = {
+  id: string;
+  title?: string;
+  preferred_date?: string | null;
+  status?: string;
+};
+
 interface BookingRequestFormProps {
   token: string;
-  bookings: any[];
-  onCreated: (booking: any) => void;
+  bookings: PortalBookingItem[];
+  onCreated: (booking: PortalBookingItem) => void;
 }
 
 const statusLabels: Record<string, string> = {
@@ -61,8 +68,8 @@ export function BookingRequestForm({ token, bookings, onCreated }: BookingReques
       setSubmitted(true);
       toast.success('Förfrågan skickad!');
       setTimeout(() => setSubmitted(false), 3000);
-    } catch (err: any) {
-      toast.error(err.message || 'Något gick fel');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Något gick fel');
     } finally {
       setSubmitting(false);
     }
@@ -143,7 +150,7 @@ export function BookingRequestForm({ token, bookings, onCreated }: BookingReques
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {bookings.map((b: any) => (
+                {bookings.map((b) => (
                   <TableRow key={b.id}>
                     <TableCell className="font-medium">{b.title}</TableCell>
                     <TableCell>{b.preferred_date || '—'}</TableCell>

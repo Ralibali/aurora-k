@@ -29,6 +29,7 @@ import {
   Send,
   Truck,
   User,
+  type LucideIcon,
 } from 'lucide-react';
 
 function openMaps(address: string) {
@@ -62,7 +63,14 @@ function appendEvent(existing: string | null | undefined, label: string, details
   return [existing, row].filter(Boolean).join('\n');
 }
 
-function shouldNotifyCustomer(a: any) {
+type AssignmentWithRelations = NonNullable<ReturnType<typeof useAssignment>['data']>;
+
+function orderNumberOf(a: AssignmentWithRelations) {
+  const value = (a as Record<string, unknown>).order_number;
+  return typeof value === 'string' ? value : undefined;
+}
+
+function shouldNotifyCustomer(a: AssignmentWithRelations) {
   return (
     a?.tracking_enabled !== false &&
     !!a?.tracking_token &&
@@ -70,19 +78,19 @@ function shouldNotifyCustomer(a: any) {
   );
 }
 
-function sendCustomerTrackingEmail(kind: 'tracking-started' | 'delivery-completed', a: any) {
+function sendCustomerTrackingEmail(kind: 'tracking-started' | 'delivery-completed', a: AssignmentWithRelations) {
   if (!shouldNotifyCustomer(a)) return;
   const trackingUrl = `${PUBLIC_SITE_URL}/track/${a.tracking_token}`;
   const templateData =
     kind === 'tracking-started'
       ? {
-          orderNumber: a.order_number ?? a.id?.slice(0, 8)?.toUpperCase(),
+          orderNumber: orderNumberOf(a) ?? a.id?.slice(0, 8)?.toUpperCase(),
           driverName: a.driver?.full_name ?? null,
           assignmentTitle: a.title,
           trackingUrl,
         }
       : {
-          orderNumber: a.order_number ?? a.id?.slice(0, 8)?.toUpperCase(),
+          orderNumber: orderNumberOf(a) ?? a.id?.slice(0, 8)?.toUpperCase(),
           assignmentTitle: a.title,
           completedAt: new Date().toLocaleString('sv-SE', { dateStyle: 'short', timeStyle: 'short' }),
           recipientName: a.customer?.name ?? null,
@@ -95,7 +103,7 @@ function sendCustomerTrackingEmail(kind: 'tracking-started' | 'delivery-complete
     .catch((err) => console.warn(`[${kind}] send-email failed`, err));
 }
 
-function InfoRow({ icon: Icon, label, children }: { icon: any; label: string; children: React.ReactNode }) {
+function InfoRow({ icon: Icon, label, children }: { icon: LucideIcon; label: string; children: React.ReactNode }) {
   return (
     <div className="flex gap-3 border-b py-3 last:border-0">
       <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-muted">
@@ -150,7 +158,7 @@ function SignaturePad({ value, onChange }: { value: string | null; onChange: (va
     resize();
     window.addEventListener('resize', resize);
     return () => window.removeEventListener('resize', resize);
-  }, []);
+  }, [value]);
 
   const point = (event: React.PointerEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current!;
@@ -249,7 +257,7 @@ export default function DriverAssignmentDetail() {
 
   if (!assignment) return <div className="p-8 text-center text-muted-foreground">Uppdraget hittades inte</div>;
 
-  const a = assignment as any;
+  const a = assignment;
   const pickupAddress = a.pickup_address || assignment.address;
   const deliveryAddress = a.delivery_address || '';
   const isPending = assignment.status === 'pending';

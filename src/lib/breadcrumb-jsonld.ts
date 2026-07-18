@@ -6,11 +6,13 @@ interface BreadcrumbItem {
 }
 
 export function useBreadcrumbJsonLd(items: BreadcrumbItem[]) {
+  const itemsKey = JSON.stringify(items);
   useLayoutEffect(() => {
+    const stableItems = JSON.parse(itemsKey) as BreadcrumbItem[];
     const jsonLd = {
       '@context': 'https://schema.org',
       '@type': 'BreadcrumbList',
-      itemListElement: items.map((item, i) => ({
+      itemListElement: stableItems.map((item, i) => ({
         '@type': 'ListItem',
         position: i + 1,
         name: item.name,
@@ -34,5 +36,5 @@ export function useBreadcrumbJsonLd(items: BreadcrumbItem[]) {
     return () => {
       script?.remove();
     };
-  }, [JSON.stringify(items)]);
+  }, [itemsKey]);
 }

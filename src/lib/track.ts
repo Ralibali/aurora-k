@@ -22,7 +22,6 @@ export function track(event: string, params: TrackParams = {}): void {
       window.dataLayer.push({ event, ...params });
     }
     if (import.meta.env.DEV) {
-      // eslint-disable-next-line no-console
       console.debug('[track]', event, params);
     }
   } catch {

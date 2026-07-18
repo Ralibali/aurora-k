@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { PlatformLayout } from '@/components/PlatformAdminLayout';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { Tables } from '@/integrations/supabase/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -32,7 +33,7 @@ export default function PlatformLeads() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [selectedLead, setSelectedLead] = useState<any | null>(null);
+  const [selectedLead, setSelectedLead] = useState<Tables<'leads'> | null>(null);
   const [convertOpen, setConvertOpen] = useState(false);
   const [convertCompanyName, setConvertCompanyName] = useState('');
   const [convertOrgNr, setConvertOrgNr] = useState('');
@@ -40,7 +41,7 @@ export default function PlatformLeads() {
   const { data: leads = [], isLoading } = useQuery({
     queryKey: ['platform-leads'],
     queryFn: async () => {
-      const { data, error } = await (supabase.from('leads') as any)
+      const { data, error } = await supabase.from('leads')
         .select('*')
         .order('created_at', { ascending: false });
       if (error) throw error;
@@ -50,7 +51,7 @@ export default function PlatformLeads() {
 
   const updateLead = useMutation({
     mutationFn: async ({ id, ...updates }: { id: string; status?: string; admin_notes?: string }) => {
-      const { error } = await (supabase.from('leads') as any).update(updates).eq('id', id);
+      const { error } = await supabase.from('leads').update(updates).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -90,7 +91,7 @@ export default function PlatformLeads() {
     });
 
     // Mark lead as converted
-    await (supabase.from('leads') as any)
+    await supabase.from('leads')
       .update({ status: 'converted', admin_notes: (selectedLead.admin_notes || '') + `\nKonverterad till företag ${company.id}` })
       .eq('id', selectedLead.id);
 
@@ -101,7 +102,7 @@ export default function PlatformLeads() {
     toast.success(`Företag "${convertCompanyName}" skapat! Du kan nu bjuda in ägaren under Företag-fliken.`);
   };
 
-  const filtered = leads.filter((lead: any) => {
+  const filtered = leads.filter((lead) => {
     const matchSearch = !search || [lead.company_name, lead.contact_person, lead.email, lead.phone]
       .filter(Boolean).join(' ').toLowerCase().includes(search.toLowerCase());
     const matchStatus = statusFilter === 'all' || lead.status === statusFilter;
@@ -110,9 +111,9 @@ export default function PlatformLeads() {
 
   const counts = {
     total: leads.length,
-    new: leads.filter((l: any) => l.status === 'new').length,
-    contacted: leads.filter((l: any) => l.status === 'contacted').length,
-    converted: leads.filter((l: any) => l.status === 'converted').length,
+    new: leads.filter((l) => l.status === 'new').length,
+    contacted: leads.filter((l) => l.status === 'contacted').length,
+    converted: leads.filter((l) => l.status === 'converted').length,
   };
 
   const exportCsv = () => {
@@ -124,11 +125,11 @@ export default function PlatformLeads() {
       'Datum', 'Företag', 'Kontaktperson', 'E-post', 'Telefon', 'Org.nr',
       'Flottstorlek', 'Poäng', 'Status', 'UTM Källa', 'UTM Medium', 'UTM Kampanj', 'Meddelande', 'Anteckningar'
     ];
-    const escape = (v: any) => {
+    const escape = (v) => {
       const s = v == null ? '' : String(v);
       return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     };
-    const rows = filtered.map((l: any) => [
+    const rows = filtered.map((l) => [
       format(new Date(l.created_at), 'yyyy-MM-dd HH:mm'),
       l.company_name, l.contact_person, l.email, l.phone || '', l.org_number || '',
       l.fleet_size || '', l.lead_score ?? 0,
@@ -217,7 +218,7 @@ export default function PlatformLeads() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map((lead: any) => {
+              {filtered.map((lead) => {
                 const s = statusMap[lead.status] || fallbackStatus;
                 return (
                   <TableRow key={lead.id} className="cursor-pointer hover:bg-muted/50" onClick={() => setSelectedLead(lead)}>

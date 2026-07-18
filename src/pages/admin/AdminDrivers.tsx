@@ -23,6 +23,7 @@ import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { useDemoMode } from '@/hooks/useDemoMode';
 import { demoDriversFull } from '@/lib/demo-data';
+import type { Database } from '@/integrations/supabase/types';
 
 const COMP_LABELS: Record<string, string> = {
   hourly: 'Timbaserad',
@@ -45,10 +46,18 @@ function getInitials(name: string) {
   return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 }
 
+type DriverRow = NonNullable<ReturnType<typeof useDrivers>['data']>[number];
+type AssignmentRow = NonNullable<ReturnType<typeof useAssignments>['data']>[number];
+type CompRow = NonNullable<ReturnType<typeof useDriverCompensations>['data']>[number];
+type CompType = Database['public']['Enums']['compensation_type'];
+function toCompType(value: string | null | undefined): CompType {
+  return value === 'per_assignment' || value === 'monthly' ? value : 'hourly';
+}
+
 /* ── Compensation Dialog ── */
-function CompensationDialog({ driverId, driverName, existing }: { driverId: string; driverName: string; existing?: any }) {
+function CompensationDialog({ driverId, driverName, existing }: { driverId: string; driverName: string; existing?: CompRow }) {
   const [open, setOpen] = useState(false);
-  const [compType, setCompType] = useState<'hourly' | 'per_assignment' | 'monthly'>(existing?.compensation_type ?? 'hourly');
+  const [compType, setCompType] = useState<CompType>(existing?.compensation_type ?? 'hourly');
   const [hourlyRate, setHourlyRate] = useState(String(existing?.hourly_rate ?? '0'));
   const [perAssignmentRate, setPerAssignmentRate] = useState(String(existing?.per_assignment_rate ?? '0'));
   const [monthlySalary, setMonthlySalary] = useState(String(existing?.monthly_salary ?? '0'));
@@ -88,7 +97,7 @@ function CompensationDialog({ driverId, driverName, existing }: { driverId: stri
         <div className="space-y-4">
           <div className="space-y-2">
             <Label>Ersättningstyp</Label>
-            <Select value={compType} onValueChange={(v) => setCompType(v as any)}>
+            <Select value={compType} onValueChange={(v) => setCompType(toCompType(v))}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="hourly">Timbaserad (kr/timme)</SelectItem>
@@ -150,8 +159,8 @@ function CreateDriverModal({ companyId }: { companyId: string }) {
       setName('');
       setEmail('');
       setPassword('');
-    } catch (err: any) {
-      toast.error('Kunde inte skapa förare: ' + err.message);
+    } catch (err) {
+      toast.error('Kunde inte skapa förare: ' + (err instanceof Error ? err.message : 'Okänt fel'));
     } finally {
       setSubmitting(false);
     }
@@ -241,8 +250,8 @@ function InviteDriverModal({ companyId }: { companyId: string }) {
       setOpen(false);
       setName('');
       setEmail('');
-    } catch (err: any) {
-      toast.error('Kunde inte skicka inbjudan: ' + (err?.message || 'Okänt fel'));
+    } catch (err) {
+      toast.error('Kunde inte skicka inbjudan: ' + (err instanceof Error ? err.message : 'Okänt fel'));
     } finally {
       setSubmitting(false);
     }
@@ -278,8 +287,8 @@ function InviteDriverModal({ companyId }: { companyId: string }) {
 function DriverDetailSheet({
   driver, assignments: allAssignments, onClose
 }: {
-  driver: any;
-  assignments: any[];
+  driver: DriverRow | (typeof demoDriversFull)[number];
+  assignments: AssignmentRow[];
   onClose: () => void;
 }) {
   const today = new Date().toISOString().split('T')[0];
@@ -397,7 +406,7 @@ const filters = [
 
 /* ── Invitations List ── */
 function InvitationsList({ companyId }: { companyId: string }) {
-  const [invitations, setInvitations] = useState<any[]>([]);
+  const [invitations, setInvitations] = useState<Database['public']['Tables']['invitations']['Row'][]>([]);
   const [loading, setLoading] = useState(true);
   const [resending, setResending] = useState<string | null>(null);
   const { user } = useAuth();
@@ -415,7 +424,7 @@ function InvitationsList({ companyId }: { companyId: string }) {
 
   useEffect(() => { void fetchInvitations(); }, [fetchInvitations]);
 
-  const handleResend = async (inv: any) => {
+  const handleResend = async (inv) => {
     setResending(inv.id);
     try {
       const joinUrl = `${PUBLIC_SITE_URL}/join?token=${inv.token}`;
@@ -533,7 +542,7 @@ function InvitationsList({ companyId }: { companyId: string }) {
 export default function AdminDrivers() {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
-  const [selectedDriver, setSelectedDriver] = useState<any>(null);
+  const [selectedDriver, setSelectedDriver] = useState<DriverRow | (typeof demoDriversFull)[number] | null>(null);
   const [activeTab, setActiveTab] = useState('drivers');
 
   const { companyId } = useAuth();
@@ -543,9 +552,10 @@ export default function AdminDrivers() {
   const qc = useQueryClient();
   const { enabled: demoEnabled } = useDemoMode();
 
-  const effectiveDrivers = (demoEnabled && (drivers?.length ?? 0) === 0)
-    ? (demoDriversFull as any)
-    : (drivers ?? []);
+  const effectiveDrivers = useMemo(
+    () => (demoEnabled && (drivers?.length ?? 0) === 0 ? demoDriversFull : (drivers ?? [])),
+    [demoEnabled, drivers]
+  );
   const showingDemo = demoEnabled && (drivers?.length ?? 0) === 0;
 
   const today = new Date().toISOString().split('T')[0];
@@ -570,11 +580,11 @@ export default function AdminDrivers() {
     let list = effectiveDrivers;
     if (search) {
       const q = search.toLowerCase();
-      list = list.filter((d: any) => d.full_name.toLowerCase().includes(q) || d.email.toLowerCase().includes(q));
+      list = list.filter((d) => d.full_name.toLowerCase().includes(q) || d.email.toLowerCase().includes(q));
     }
-    if (filter === 'available') list = list.filter((d: any) => d.is_available);
-    else if (filter === 'active') list = list.filter((d: any) => driverStats.get(d.id)?.activeToday);
-    else if (filter === 'inactive') list = list.filter((d: any) => !driverStats.get(d.id)?.todayCount);
+    if (filter === 'available') list = list.filter((d) => d.is_available);
+    else if (filter === 'active') list = list.filter((d) => driverStats.get(d.id)?.activeToday);
+    else if (filter === 'inactive') list = list.filter((d) => !driverStats.get(d.id)?.todayCount);
     return list;
   }, [effectiveDrivers, search, filter, driverStats]);
 

@@ -80,7 +80,7 @@ export default function AdminDriverSettings() {
   const handleResetToGlobal = (key: SettingKey) => {
     if (!selectedDriverId || !selectedOverride) return;
     // Set to null = use global
-    upsertOverride.mutate({ driver_id: selectedDriverId, [key]: null as any });
+    upsertOverride.mutate({ driver_id: selectedDriverId, [key]: null });
   };
 
   const handleResetAllToGlobal = () => {

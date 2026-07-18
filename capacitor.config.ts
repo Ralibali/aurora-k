@@ -1,4 +1,5 @@
 import type { CapacitorConfig } from '@capacitor/cli';
+import { Style } from '@capacitor/status-bar';
 
 const config: CapacitorConfig = {
   appId: 'se.auroramedia.auroratransport',
@@ -9,7 +10,7 @@ const config: CapacitorConfig = {
       launchShowDuration: 2000,
     },
     StatusBar: {
-      style: 'DARK' as any,
+      style: Style.Dark,
     },
     PushNotifications: {
       presentationOptions: ['badge', 'sound', 'alert'],

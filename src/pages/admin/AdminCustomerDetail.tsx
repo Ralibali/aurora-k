@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { StatusBadge } from '@/components/StatusBadge';
 import { InvoiceStatusBadge } from '@/components/InvoiceStatusBadge';
 import { useCustomer, useUpdateCustomer, useAssignments, useInvoices } from '@/hooks/useData';
+import type { Tables, TablesUpdate } from '@/integrations/supabase/types';
 import { useCustomerPriceList, useUpsertCustomerPrice, useDeleteCustomerPrice, useArticles } from '@/hooks/useNewFeatures';
 import { pricingTypeLabels } from '@/lib/types';
 import { formatSwedishDate, calculateDecimalHours } from '@/lib/format';
@@ -34,7 +35,7 @@ export default function AdminCustomerDetail() {
   const upsertPrice = useUpsertCustomerPrice();
   const deletePrice = useDeleteCustomerPrice();
 
-  const [form, setForm] = useState<Record<string, any> | null>(null);
+  const [form, setForm] = useState<TablesUpdate<'customers'> | null>(null);
   const [newPriceArticle, setNewPriceArticle] = useState('');
   const [newPriceValue, setNewPriceValue] = useState('');
 
@@ -47,7 +48,7 @@ export default function AdminCustomerDetail() {
   }
 
   const f = form || customer;
-  const setField = (key: string, value: any) => setForm(prev => ({ ...(prev || customer), [key]: value }));
+  const setField = <K extends keyof TablesUpdate<'customers'>>(key: K, value: TablesUpdate<'customers'>[K]) => setForm(prev => ({ ...(prev || customer), [key]: value }));
 
   const customerAssignments = (allAssignments ?? []).filter(a => a.customer_id === id && a.status === 'completed');
   const customerInvoices = (allInvoices ?? []).filter(i => i.customer_id === id);
@@ -188,7 +189,7 @@ export default function AdminCustomerDetail() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {priceList.map((p: any) => (
+                      {priceList.map((p) => (
                         <TableRow key={p.id}>
                           <TableCell className="font-medium">{p.article?.name}</TableCell>
                           <TableCell className="text-right text-muted-foreground font-mono">{p.article?.default_price} kr</TableCell>
@@ -284,7 +285,7 @@ export default function AdminCustomerDetail() {
 }
 
 function CustomerPortalSection({ customerId }: { customerId: string }) {
-  const [tokens, setTokens] = useState<any[]>([]);
+  const [tokens, setTokens] = useState<Tables<'customer_access_tokens'>[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [generating, setGenerating] = useState(false);
 

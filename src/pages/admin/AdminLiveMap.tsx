@@ -60,7 +60,7 @@ export default function AdminLiveMap() {
   const { enabled: demoEnabled } = useDemoMode();
 
   const effectiveLocations: DriverLocation[] = (demoEnabled && locations.length === 0)
-    ? (demoDriverLocations as any[])
+    ? (demoDriverLocations as unknown as DriverLocation[])
     : locations;
 
   const fetchLocations = async () => {

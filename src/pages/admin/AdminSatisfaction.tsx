@@ -44,7 +44,7 @@ export default function AdminSatisfaction() {
           <Table><TableHeader><TableRow><TableHead>Kund</TableHead><TableHead>Betyg</TableHead><TableHead>Kommentar</TableHead><TableHead>Datum</TableHead></TableRow></TableHeader>
             <TableBody>{ratings.map(r => (
               <TableRow key={r.id}>
-                <TableCell className="font-medium">{(r as any).customer?.name || '—'}</TableCell>
+                <TableCell className="font-medium">{r.customer?.name || '—'}</TableCell>
                 <TableCell><Stars rating={r.rating} /></TableCell>
                 <TableCell className="text-sm text-muted-foreground">{r.comment || '—'}</TableCell>
                 <TableCell className="text-sm">{new Date(r.created_at).toLocaleDateString('sv-SE')}</TableCell>

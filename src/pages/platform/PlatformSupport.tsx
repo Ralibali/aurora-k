@@ -36,9 +36,9 @@ export default function PlatformSupport() {
     queryKey: ['platform-support-tickets'],
     queryFn: async () => {
       const { data } = await (supabase
-        .from('support_tickets' as any)
+        .from('support_tickets')
         .select('*')
-        .order('created_at', { ascending: false }) as any);
+        .order('created_at', { ascending: false }));
       return (data || []) as Ticket[];
     },
   });
@@ -63,7 +63,7 @@ export default function PlatformSupport() {
     mutationFn: async ({ ticketId, reply }: { ticketId: string; reply: string }) => {
       const ticket = tickets?.find((t) => t.id === ticketId);
       const { error } = await supabase
-        .from('support_tickets' as any)
+        .from('support_tickets')
         .update({
           admin_reply: reply,
           replied_at: new Date().toISOString(),
@@ -75,7 +75,7 @@ export default function PlatformSupport() {
 
       // Send email notification to ticket creator
       if (ticket) {
-        const creatorProfile = profiles?.find((p: any) => p.id === ticket.created_by);
+        const creatorProfile = profiles?.find((p) => p.id === ticket.created_by);
         if (creatorProfile?.email) {
           try {
             await supabase.functions.invoke('send-email', {
@@ -103,7 +103,7 @@ export default function PlatformSupport() {
   const closeMutation = useMutation({
     mutationFn: async (ticketId: string) => {
       const { error } = await supabase
-        .from('support_tickets' as any)
+        .from('support_tickets')
         .update({ status: 'closed' })
         .eq('id', ticketId);
       if (error) throw error;
@@ -115,7 +115,7 @@ export default function PlatformSupport() {
   });
 
   const getCompanyName = (companyId: string) =>
-    companies?.find((c: any) => c.id === companyId)?.name || 'Okänt företag';
+    companies?.find((c) => c.id === companyId)?.name || 'Okänt företag';
 
   const statusIcon = (status: string) => {
     switch (status) {

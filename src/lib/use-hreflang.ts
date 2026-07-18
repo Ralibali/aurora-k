@@ -5,14 +5,16 @@ import { useLayoutEffect } from 'react';
  * Pass a record of language code -> absolute URL. Swedish is preferred as x-default.
  */
 export function useHreflang(alternates: Record<string, string>, htmlLang: string) {
+  const alternatesKey = JSON.stringify(alternates);
   useLayoutEffect(() => {
+    const stableAlternates = JSON.parse(alternatesKey) as Record<string, string>;
     document.documentElement.lang = htmlLang;
 
     document.head
       .querySelectorAll('link[rel="alternate"][data-hreflang-managed="1"]')
       .forEach((el) => el.remove());
 
-    const entries = Object.entries(alternates);
+    const entries = Object.entries(stableAlternates);
     entries.forEach(([lang, href]) => {
       const link = document.createElement('link');
       link.rel = 'alternate';
@@ -26,7 +28,7 @@ export function useHreflang(alternates: Record<string, string>, htmlLang: string
       const xDefault = document.createElement('link');
       xDefault.rel = 'alternate';
       xDefault.hreflang = 'x-default';
-      xDefault.href = alternates.sv ?? entries[0][1];
+      xDefault.href = stableAlternates.sv ?? entries[0][1];
       xDefault.setAttribute('data-hreflang-managed', '1');
       document.head.appendChild(xDefault);
     }
@@ -36,5 +38,5 @@ export function useHreflang(alternates: Record<string, string>, htmlLang: string
         .querySelectorAll('link[rel="alternate"][data-hreflang-managed="1"]')
         .forEach((el) => el.remove());
     };
-  }, [JSON.stringify(alternates), htmlLang]);
+  }, [alternatesKey, htmlLang]);
 }

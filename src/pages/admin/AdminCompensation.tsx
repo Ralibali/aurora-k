@@ -37,6 +37,14 @@ function avatarColor(name: string) {
   for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
   return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
 }
+function orderNumberOf(assignment: Record<string, unknown>) {
+  const value = assignment.order_number;
+  return typeof value === 'string' && value ? `${value} ` : '';
+}
+type CompType = 'hourly' | 'per_assignment' | 'monthly';
+function toCompType(value: string | null | undefined): CompType {
+  return value === 'per_assignment' || value === 'monthly' ? value : 'hourly';
+}
 function getInitials(name: string) {
   return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 }
@@ -179,44 +187,44 @@ function SalaryExportTab() {
   const periodEnd = endOfMonth(periodStart);
 
   const periodAssignments = useMemo(() => (assignments ?? [])
-    .filter((item: any) => {
+    .filter((item) => {
       if (item.status !== 'completed' || !item.actual_start || !item.actual_stop) return false;
       const start = new Date(item.actual_start);
       if (start < periodStart || start > periodEnd) return false;
       if (driverFilter !== 'all' && item.assigned_driver_id !== driverFilter) return false;
       return true;
     })
-    .sort((a: any, b: any) => String(a.actual_start).localeCompare(String(b.actual_start))),
+    .sort((a, b) => String(a.actual_start).localeCompare(String(b.actual_start))),
   [assignments, driverFilter, periodEnd, periodStart]);
 
-  const visibleDrivers = driverFilter === 'all' ? (drivers ?? []) : (drivers ?? []).filter((driver: any) => driver.id === driverFilter);
-  const visibleCompensations = driverFilter === 'all' ? (compensations ?? []) : (compensations ?? []).filter((item: any) => item.driver_id === driverFilter);
-  const salary = computeSalary(periodAssignments as any, visibleDrivers as any, visibleCompensations as any, obRates ?? [], perDiemRates ?? [], 'month');
+  const visibleDrivers = driverFilter === 'all' ? (drivers ?? []) : (drivers ?? []).filter((driver) => driver.id === driverFilter);
+  const visibleCompensations = driverFilter === 'all' ? (compensations ?? []) : (compensations ?? []).filter((item) => item.driver_id === driverFilter);
+  const salary = computeSalary(periodAssignments, visibleDrivers, visibleCompensations, obRates ?? [], perDiemRates ?? [], 'month');
   const hasRows = periodAssignments.length > 0;
 
   const exportCsv = () => {
-    const driverById = new Map((drivers ?? []).map((driver: any) => [driver.id, driver]));
+    const driverById = new Map((drivers ?? []).map((driver) => [driver.id, driver]));
     const salaryByDriver = new Map(salary.rows.map(row => [row.driverId, row]));
-    const includePersonalNumber = visibleDrivers.some((driver: any) => getPersonalNumber(driver));
+    const includePersonalNumber = visibleDrivers.some((driver) => getPersonalNumber(driver));
     const headers = ['Förare', ...(includePersonalNumber ? ['Personnummer'] : []), 'Datum', 'Uppdrag', 'Timmar', 'OB-timmar', 'OB-belopp', 'Traktamente', 'Grundlön', 'Totalt'];
     const csvRows: (string | number)[][] = [headers];
-    const assignmentsByDriver = new Map<string, any[]>();
+    const assignmentsByDriver = new Map<string, (typeof periodAssignments)[number][]>();
 
-    periodAssignments.forEach((assignment: any) => {
+    periodAssignments.forEach((assignment) => {
       const driverId = assignment.assigned_driver_id || 'unknown';
       assignmentsByDriver.set(driverId, [...(assignmentsByDriver.get(driverId) ?? []), assignment]);
     });
 
     assignmentsByDriver.forEach((driverAssignments, driverId) => {
-      const driver: any = driverById.get(driverId);
-      driverAssignments.forEach((assignment: any) => {
-        const ob = calculateObBreakdown([assignment] as any, obRates ?? []);
+      const driver = driverById.get(driverId);
+      driverAssignments.forEach((assignment) => {
+        const ob = calculateObBreakdown([assignment], obRates ?? []);
         const row: (string | number)[] = [
           driver?.full_name ?? assignment.driver?.full_name ?? 'Okänd',
           ...(includePersonalNumber ? [getPersonalNumber(driver)] : []),
           formatSwedishDate(assignment.actual_start),
-          `${assignment.order_number ? `${assignment.order_number} ` : ''}${assignment.title ?? ''}`.trim(),
-          round2(workedHours([assignment] as any)),
+          `${orderNumberOf(assignment)}${assignment.title ?? ''}`.trim(),
+          round2(workedHours([assignment])),
           round2(ob.hours),
           round2(ob.amount),
           '',
@@ -228,7 +236,7 @@ function SalaryExportTab() {
 
       const sum = salaryByDriver.get(driverId);
       if (sum) {
-        const driverOb = calculateObBreakdown(driverAssignments as any, obRates ?? []);
+        const driverOb = calculateObBreakdown(driverAssignments, obRates ?? []);
         csvRows.push([
           `${sum.name} – SUMMA`,
           ...(includePersonalNumber ? [getPersonalNumber(driver)] : []),
@@ -261,9 +269,9 @@ function SalaryExportTab() {
     const validation = validatePaxml({
       periodStart,
       periodEnd,
-      assignments: periodAssignments as any,
-      drivers: visibleDrivers as any,
-      compensations: visibleCompensations as any,
+      assignments: periodAssignments,
+      drivers: visibleDrivers,
+      compensations: visibleCompensations,
       obRates: obRates ?? [],
       perDiemRates: perDiemRates ?? [],
     });
@@ -275,9 +283,9 @@ function SalaryExportTab() {
     const xml = buildPaxml({
       periodStart,
       periodEnd,
-      assignments: periodAssignments as any,
-      drivers: visibleDrivers as any,
-      compensations: visibleCompensations as any,
+      assignments: periodAssignments,
+      drivers: visibleDrivers,
+      compensations: visibleCompensations,
       obRates: obRates ?? [],
       perDiemRates: perDiemRates ?? [],
     });
@@ -302,7 +310,7 @@ function SalaryExportTab() {
         <p className="text-sm text-muted-foreground">Välj månad och chaufför. Exporten använder samma löne-, OB- och traktamentelogik som ersättningsvyn. CSV = manuell hantering, PAXml 2.2 = direktimport i lönesystem (Fortnox Lön, Visma, Kontek m.fl.).</p>
         <div className="grid gap-4 sm:grid-cols-[180px_1fr_auto_auto] sm:items-end">
           <div className="space-y-2"><Label>Månad</Label><Input type="month" value={month} onChange={e => setMonth(e.target.value)} /></div>
-          <div className="space-y-2"><Label>Chaufför</Label><Select value={driverFilter} onValueChange={setDriverFilter}><SelectTrigger><SelectValue placeholder="Välj chaufför" /></SelectTrigger><SelectContent><SelectItem value="all">Alla chaufförer</SelectItem>{(drivers ?? []).map((driver: any) => <SelectItem key={driver.id} value={driver.id}>{driver.full_name}</SelectItem>)}</SelectContent></Select></div>
+          <div className="space-y-2"><Label>Chaufför</Label><Select value={driverFilter} onValueChange={setDriverFilter}><SelectTrigger><SelectValue placeholder="Välj chaufför" /></SelectTrigger><SelectContent><SelectItem value="all">Alla chaufförer</SelectItem>{(drivers ?? []).map((driver) => <SelectItem key={driver.id} value={driver.id}>{driver.full_name}</SelectItem>)}</SelectContent></Select></div>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -337,7 +345,10 @@ function csvCell(value: string | number) {
   return /[";\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 }
 function round2(value: number) { return Number(value.toFixed(2)); }
-function getPersonalNumber(driver: any) { return driver?.personnummer || driver?.personal_number || driver?.personalNumber || ''; }
+function getPersonalNumber(driver: Record<string, unknown> | undefined) {
+  const value = driver?.personnummer ?? driver?.personal_number ?? driver?.personalNumber;
+  return typeof value === 'string' ? value : '';
+}
 
 /* ── Base Pay Tab ── */
 function BasePayTab() {
@@ -356,7 +367,8 @@ function BasePayTab() {
   );
 }
 
-function formatCompAmount(comp: any): string {
+type CompRow = { compensation_type: string; hourly_rate: number | null; per_assignment_rate: number | null; monthly_salary: number | null };
+function formatCompAmount(comp: CompRow): string {
   switch (comp.compensation_type) {
     case 'hourly': return `${Number(comp.hourly_rate).toFixed(0)} kr/h`;
     case 'per_assignment': return `${Number(comp.per_assignment_rate).toFixed(0)} kr/uppdrag`;
@@ -365,8 +377,8 @@ function formatCompAmount(comp: any): string {
   }
 }
 
-function CompensationEditRow({ driver, existing, onClose }: { driver: any; existing?: any; onClose: () => void }) {
-  const [compType, setCompType] = useState<'hourly' | 'per_assignment' | 'monthly'>(existing?.compensation_type ?? 'hourly');
+function CompensationEditRow({ driver, existing, onClose }: { driver: { id: string; full_name: string }; existing?: (CompRow & { tax_table?: string | null }); onClose: () => void }) {
+  const [compType, setCompType] = useState<CompType>(toCompType(existing?.compensation_type));
   const [hourlyRate, setHourlyRate] = useState(String(existing?.hourly_rate ?? ''));
   const [perAssignmentRate, setPerAssignmentRate] = useState(String(existing?.per_assignment_rate ?? ''));
   const [monthlySalary, setMonthlySalary] = useState(String(existing?.monthly_salary ?? ''));
@@ -375,7 +387,7 @@ function CompensationEditRow({ driver, existing, onClose }: { driver: any; exist
 
   useEffect(() => {
     if (existing) {
-      setCompType(existing.compensation_type ?? 'hourly');
+      setCompType(toCompType(existing.compensation_type));
       setHourlyRate(String(existing.hourly_rate ?? ''));
       setPerAssignmentRate(String(existing.per_assignment_rate ?? ''));
       setMonthlySalary(String(existing.monthly_salary ?? ''));
@@ -400,7 +412,7 @@ function CompensationEditRow({ driver, existing, onClose }: { driver: any; exist
   return (
     <TableRow className="bg-muted/50">
       <TableCell><div className="flex items-center gap-3"><div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold ${avatarColor(driver.full_name)}`}>{getInitials(driver.full_name)}</div><p className="font-medium text-sm">{driver.full_name}</p></div></TableCell>
-      <TableCell><Select value={compType} onValueChange={(v) => setCompType(v as any)}><SelectTrigger className="h-8 w-[150px] text-xs"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="hourly">Timlön (kr/h)</SelectItem><SelectItem value="per_assignment">Per uppdrag</SelectItem><SelectItem value="monthly">Månadslön</SelectItem></SelectContent></Select></TableCell>
+      <TableCell><Select value={compType} onValueChange={(v) => setCompType(toCompType(v))}><SelectTrigger className="h-8 w-[150px] text-xs"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="hourly">Timlön (kr/h)</SelectItem><SelectItem value="per_assignment">Per uppdrag</SelectItem><SelectItem value="monthly">Månadslön</SelectItem></SelectContent></Select></TableCell>
       <TableCell>{compType === 'hourly' && <Input type="number" min="0" step="1" value={hourlyRate} onChange={e => setHourlyRate(e.target.value)} className="h-8 w-[120px] text-right text-sm" placeholder="0" />}{compType === 'per_assignment' && <Input type="number" min="0" step="1" value={perAssignmentRate} onChange={e => setPerAssignmentRate(e.target.value)} className="h-8 w-[120px] text-right text-sm" placeholder="0" />}{compType === 'monthly' && <Input type="number" min="0" step="100" value={monthlySalary} onChange={e => setMonthlySalary(e.target.value)} className="h-8 w-[120px] text-right text-sm" placeholder="0" />}</TableCell>
       <TableCell><Input value={taxTable} onChange={e => setTaxTable(e.target.value)} className="h-8 w-[120px] text-sm" placeholder="T.ex. Tabell 30" /></TableCell>
       <TableCell><div className="flex gap-1"><Button size="sm" className="h-7 text-xs" onClick={handleSave} disabled={upsert.isPending}><Save className="h-3 w-3 mr-1" /> Spara</Button><Button size="sm" variant="ghost" className="h-7 text-xs" onClick={onClose}>Avbryt</Button></div></TableCell>

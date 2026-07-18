@@ -279,12 +279,14 @@ export type Database = {
           address: string
           admin_comment: string | null
           assigned_driver_id: string
+          booking_request_id: string | null
           co2_kg: number | null
           company_id: string | null
           consignment_photo_url: string | null
           cost: number | null
           created_at: string
           customer_id: string
+          delivery_address: string | null
           distance_km: number | null
           driver_comment: string | null
           fuel_liters: number | null
@@ -295,6 +297,7 @@ export type Database = {
           instructions: string | null
           invoiced: boolean
           order_id: string | null
+          pickup_address: string | null
           priority: string
           require_photo: boolean
           require_signature: boolean
@@ -303,6 +306,7 @@ export type Database = {
           scheduled_start: string
           series_date: string | null
           series_id: string | null
+          service_type: string | null
           signature_url: string | null
           status: string
           title: string
@@ -316,12 +320,14 @@ export type Database = {
           address: string
           admin_comment?: string | null
           assigned_driver_id: string
+          booking_request_id?: string | null
           co2_kg?: number | null
           company_id?: string | null
           consignment_photo_url?: string | null
           cost?: number | null
           created_at?: string
           customer_id: string
+          delivery_address?: string | null
           distance_km?: number | null
           driver_comment?: string | null
           fuel_liters?: number | null
@@ -332,6 +338,7 @@ export type Database = {
           instructions?: string | null
           invoiced?: boolean
           order_id?: string | null
+          pickup_address?: string | null
           priority?: string
           require_photo?: boolean
           require_signature?: boolean
@@ -340,6 +347,7 @@ export type Database = {
           scheduled_start: string
           series_date?: string | null
           series_id?: string | null
+          service_type?: string | null
           signature_url?: string | null
           status?: string
           title: string
@@ -353,12 +361,14 @@ export type Database = {
           address?: string
           admin_comment?: string | null
           assigned_driver_id?: string
+          booking_request_id?: string | null
           co2_kg?: number | null
           company_id?: string | null
           consignment_photo_url?: string | null
           cost?: number | null
           created_at?: string
           customer_id?: string
+          delivery_address?: string | null
           distance_km?: number | null
           driver_comment?: string | null
           fuel_liters?: number | null
@@ -369,6 +379,7 @@ export type Database = {
           instructions?: string | null
           invoiced?: boolean
           order_id?: string | null
+          pickup_address?: string | null
           priority?: string
           require_photo?: boolean
           require_signature?: boolean
@@ -377,6 +388,7 @@ export type Database = {
           scheduled_start?: string
           series_date?: string | null
           series_id?: string | null
+          service_type?: string | null
           signature_url?: string | null
           status?: string
           title?: string

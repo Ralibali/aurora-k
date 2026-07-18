@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { TablesUpdate } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -36,7 +37,7 @@ export function useCreateAbsence() {
 export function useUpdateAbsence() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...u }: { id: string; [k: string]: any }) => {
+    mutationFn: async ({ id, ...u }: { id: string } & TablesUpdate<'driver_absences'>) => {
       const { error } = await supabase.from('driver_absences').update(u).eq('id', id);
       if (error) throw error;
     },
@@ -161,7 +162,7 @@ export function useCreateInvoiceTemplate() {
 export function useUpdateInvoiceTemplate() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...u }: { id: string; [k: string]: any }) => {
+    mutationFn: async ({ id, ...u }: { id: string } & TablesUpdate<'invoice_templates'>) => {
       const { error } = await supabase.from('invoice_templates').update(u).eq('id', id);
       if (error) throw error;
     },
@@ -238,7 +239,7 @@ export function useCreateExternalResource() {
 export function useUpdateExternalResource() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...u }: { id: string; [k: string]: any }) => {
+    mutationFn: async ({ id, ...u }: { id: string } & TablesUpdate<'external_resources'>) => {
       const { error } = await supabase.from('external_resources').update(u).eq('id', id);
       if (error) throw error;
     },

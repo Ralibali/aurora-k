@@ -182,7 +182,7 @@ export function buildPaxml(input: PaxmlBuildInput): string {
       }
 
       // OB
-      const ob = calculateObBreakdown([a] as any, input.obRates || []);
+      const ob = calculateObBreakdown([a], input.obRates || []);
       if (ob.hours > 0 && ob.amount > 0) {
         lines.push('      <salarytrans>');
         lines.push(`        <empid>${empid}</empid>`);

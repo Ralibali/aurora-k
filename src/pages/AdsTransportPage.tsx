@@ -61,8 +61,8 @@ export default function AdsTransportPage() {
       if (signInError) throw signInError;
       toast.success(`Inloggad som ${data.companyName}`);
       setTimeout(() => navigate('/admin'), 500);
-    } catch (err: any) {
-      toast.error(err.message || 'Demo-inloggning misslyckades');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Demo-inloggning misslyckades');
       setDemoLoading(false);
     }
   };

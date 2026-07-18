@@ -98,8 +98,8 @@ export function useUpdateDriverSettings() {
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<DriverSettings> & { id: string }) => {
       const { data, error } = await supabase
-        .from('driver_settings' as any)
-        .update({ ...updates, updated_at: new Date().toISOString() } as any)
+        .from('driver_settings')
+        .update({ ...updates, updated_at: new Date().toISOString() })
         .eq('id', id)
         .select()
         .single();

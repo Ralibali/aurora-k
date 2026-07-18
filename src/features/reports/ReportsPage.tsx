@@ -17,7 +17,7 @@ import { useObRates, usePerDiemRates } from '@/hooks/useNewFeatures';
 import { computeSalary, workedHours, type SalaryPeriodMode } from '@/lib/salary-calculation';
 import { formatSwedishDate, formatSwedishTime } from '@/lib/format';
 
-type AssignmentRecord = Record<string, any>;
+type AssignmentRecord = NonNullable<ReturnType<typeof useAssignments>['data']>[number];
 
 export default function ReportsPage() {
   const [viewMode, setViewMode] = useState<SalaryPeriodMode>('week');
@@ -55,14 +55,14 @@ export default function ReportsPage() {
   const visibleDrivers = driverFilter === 'all' ? (drivers ?? []) : (drivers ?? []).filter(driver => driver.id === driverFilter);
   const visibleCompensations = driverFilter === 'all' ? (compensations ?? []) : (compensations ?? []).filter(item => item.driver_id === driverFilter);
   const salary = computeSalary(
-    periodAssignments as any,
+    periodAssignments,
     visibleDrivers,
     visibleCompensations,
     obRates ?? [],
     perDiemRates ?? [],
     viewMode,
   );
-  const totalHours = workedHours(periodAssignments as any);
+  const totalHours = workedHours(periodAssignments);
   const periodLabel = viewMode === 'week'
     ? `Vecka ${getISOWeek(weekStart)}, ${format(weekStart, 'd MMM', { locale: sv })}–${format(weekEnd, 'd MMM yyyy', { locale: sv })}`
     : format(monthDate, 'MMMM yyyy', { locale: sv });
@@ -76,7 +76,7 @@ export default function ReportsPage() {
       Uppdrag: item.title,
       Start: formatSwedishTime(item.actual_start),
       Stopp: formatSwedishTime(item.actual_stop),
-      Timmar: workedHours([item] as any),
+      Timmar: workedHours([item]),
     }));
     const salaryRows = salary.rows.map(row => ({
       Chaufför: row.name,
@@ -110,11 +110,11 @@ export default function ReportsPage() {
         item.title,
         formatSwedishTime(item.actual_start),
         formatSwedishTime(item.actual_stop),
-        workedHours([item] as any).toFixed(2),
+        workedHours([item]).toFixed(2),
       ]),
       styles: { fontSize: 8 },
     });
-    const y = (document as any).lastAutoTable?.finalY + 10 || 90;
+    const y = ((document as unknown as { lastAutoTable?: { finalY?: number } }).lastAutoTable?.finalY ?? 80) + 10;
     document.setFontSize(13);
     document.text('Löneunderlag', 20, y);
     autoTable(document, {
@@ -148,7 +148,7 @@ export default function ReportsPage() {
 
         <Card><CardHeader><CardTitle className="text-base">Löneunderlag per chaufför</CardTitle></CardHeader><CardContent className="p-0"><Table><TableHeader><TableRow><TableHead>Chaufför</TableHead><TableHead>Ersättning</TableHead><TableHead className="text-right">Timmar</TableHead><TableHead className="text-right">Grundlön</TableHead><TableHead className="text-right">OB</TableHead><TableHead className="text-right">Traktamente</TableHead><TableHead className="text-right">Totalt</TableHead></TableRow></TableHeader><TableBody>{salary.rows.length === 0 && <TableRow><TableCell colSpan={7} className="py-8 text-center text-muted-foreground">Ingen lönedata för perioden</TableCell></TableRow>}{salary.rows.map(row => <TableRow key={row.driverId}><TableCell className="font-medium">{row.name}</TableCell><TableCell>{row.payType}</TableCell><TableCell className="text-right">{row.hours.toFixed(2)}</TableCell><TableCell className="text-right">{Math.round(row.grossPay).toLocaleString('sv-SE')} kr</TableCell><TableCell className="text-right">{Math.round(row.obTotal).toLocaleString('sv-SE')} kr</TableCell><TableCell className="text-right">{Math.round(row.perDiemTot).toLocaleString('sv-SE')} kr</TableCell><TableCell className="text-right font-bold">{Math.round(row.total).toLocaleString('sv-SE')} kr</TableCell></TableRow>)}</TableBody></Table></CardContent></Card>
 
-        <Card><CardHeader><CardTitle className="text-base">Rapporterade uppdrag</CardTitle></CardHeader><CardContent className="p-0"><Table><TableHeader><TableRow><TableHead>Datum</TableHead><TableHead>Chaufför</TableHead><TableHead>Kund</TableHead><TableHead>Uppdrag</TableHead><TableHead>Start–stopp</TableHead><TableHead className="text-right">Timmar</TableHead></TableRow></TableHeader><TableBody>{periodAssignments.length === 0 && <TableRow><TableCell colSpan={6} className="py-8 text-center text-muted-foreground">Inga slutförda uppdrag</TableCell></TableRow>}{periodAssignments.map(item => <TableRow key={item.id}><TableCell>{formatSwedishDate(item.actual_start)}</TableCell><TableCell>{item.driver?.full_name}</TableCell><TableCell>{item.customer?.name}</TableCell><TableCell>{item.title}</TableCell><TableCell>{formatSwedishTime(item.actual_start)}–{formatSwedishTime(item.actual_stop)}</TableCell><TableCell className="text-right">{workedHours([item] as any).toFixed(2)}</TableCell></TableRow>)}</TableBody></Table></CardContent></Card>
+        <Card><CardHeader><CardTitle className="text-base">Rapporterade uppdrag</CardTitle></CardHeader><CardContent className="p-0"><Table><TableHeader><TableRow><TableHead>Datum</TableHead><TableHead>Chaufför</TableHead><TableHead>Kund</TableHead><TableHead>Uppdrag</TableHead><TableHead>Start–stopp</TableHead><TableHead className="text-right">Timmar</TableHead></TableRow></TableHeader><TableBody>{periodAssignments.length === 0 && <TableRow><TableCell colSpan={6} className="py-8 text-center text-muted-foreground">Inga slutförda uppdrag</TableCell></TableRow>}{periodAssignments.map(item => <TableRow key={item.id}><TableCell>{formatSwedishDate(item.actual_start)}</TableCell><TableCell>{item.driver?.full_name}</TableCell><TableCell>{item.customer?.name}</TableCell><TableCell>{item.title}</TableCell><TableCell>{formatSwedishTime(item.actual_start)}–{formatSwedishTime(item.actual_stop)}</TableCell><TableCell className="text-right">{workedHours([item]).toFixed(2)}</TableCell></TableRow>)}</TableBody></Table></CardContent></Card>
       </div>
     </AdminLayout>
   );

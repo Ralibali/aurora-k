@@ -30,7 +30,7 @@ export default function AdminInvoiceTemplates() {
   const [showBank, setShowBank] = useState(true);
 
   const reset = () => { setEditId(null); setName(''); setHeaderHtml(''); setFooterHtml(''); setColor('#1a1a2e'); setShowLogo(true); setShowBank(true); };
-  const openEdit = (t: any) => { setEditId(t.id); setName(t.name); setHeaderHtml(t.header_html || ''); setFooterHtml(t.footer_html || ''); setColor(t.primary_color); setShowLogo(t.show_logo); setShowBank(t.show_bank_details); setOpen(true); };
+  const openEdit = (t) => { setEditId(t.id); setName(t.name); setHeaderHtml(t.header_html || ''); setFooterHtml(t.footer_html || ''); setColor(t.primary_color); setShowLogo(t.show_logo); setShowBank(t.show_bank_details); setOpen(true); };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

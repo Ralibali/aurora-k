@@ -29,7 +29,7 @@ function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: responseHeaders });
 }
 
-async function validateToken(supabase: any, token: string) {
+async function validateToken(supabase: SupabaseClient, token: string) {
   const { data, error } = await supabase
     .from('customer_access_tokens')
     .select('customer_id, company_id, expires_at, customer:customers(id, name, contact_person, email, phone, org_number, company_id)')
@@ -89,7 +89,7 @@ Deno.serve(async (req) => {
       return json({ booking }, 201);
     }
 
-    const companyFilter = (query: any) => query.eq('customer_id', customerId).eq('company_id', companyId);
+    const companyFilter = <T extends { eq: (column: string, value: string) => T }>(query: T) => query.eq('customer_id', customerId).eq('company_id', companyId);
     const [assignmentsRes, ordersRes, invoicesRes, bookingsRes, settingsRes] = await Promise.all([
       companyFilter(supabase
         .from('assignments')

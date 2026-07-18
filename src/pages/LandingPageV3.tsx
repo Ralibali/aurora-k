@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, ChartBar as BarChart3, Check, CircleCheck as CheckCircle2, Clock, FileText, Globe, Loader as Loader2, Mail, Menu, PackageCheck, Route, ShieldCheck, Sparkles, TimerReset, Truck, Users, Wallet, Zap } from 'lucide-react';
+import { ArrowRight, ChartBar as BarChart3, Check, CircleCheck as CheckCircle2, Clock, FileText, Globe, Loader as Loader2, Mail, Menu, PackageCheck, Route, ShieldCheck, Sparkles, TimerReset, Truck, Users, Wallet, Zap , type LucideIcon } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { LeadFormModal } from '@/components/LeadFormModal';
 import { DemoBookingModal } from '@/components/DemoBookingModal';
 import { RoiCalculator } from '@/components/RoiCalculator';
+import { SocialProof } from '@/components/SocialProof';
 import { useAuth } from '@/hooks/useAuth';
 import { useBreadcrumbJsonLd } from '@/lib/breadcrumb-jsonld';
 import { useJsonLd } from '@/lib/use-json-ld';
@@ -95,8 +96,8 @@ export default function LandingPageV3() {
 
       toast.success(t.toasts.demoSuccess(data.companyName));
       setTimeout(() => navigate('/admin'), 500);
-    } catch (err: any) {
-      toast.error(err.message || t.toasts.demoError);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t.toasts.demoError);
     } finally {
       setDemoLoading(false);
     }
@@ -252,6 +253,10 @@ export default function LandingPageV3() {
               })}
             </div>
           </div>
+        </section>
+
+        <section className="bg-[#0a0a1a] py-20 sm:py-24">
+          <SocialProof t={t.social} />
         </section>
 
         <IncludedSection lang={lang} onDemo={() => setDemoModalOpen(true)} />
@@ -560,7 +565,7 @@ function HeroProductMockup() {
   );
 }
 
-function Metric({ icon: Icon, value, label, tone }: { icon: any; value: string; label: string; tone: 'blue' | 'green' | 'amber' }) {
+function Metric({ icon: Icon, value, label, tone }: { icon: LucideIcon; value: string; label: string; tone: 'blue' | 'green' | 'amber' }) {
   const tones = {
     blue: 'bg-[#4f46e5]/15 text-[#a5b4fc]',
     green: 'bg-emerald-500/15 text-emerald-300',

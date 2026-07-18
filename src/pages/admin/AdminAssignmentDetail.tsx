@@ -107,9 +107,8 @@ export default function AdminAssignmentDetail() {
     return <AdminLayout title="Uppdrag"><div className="text-center py-12 text-muted-foreground">Uppdraget hittades inte</div></AdminLayout>;
   }
 
-  const a = assignment as any;
   const currentComment = comment !== null ? comment : (assignment.admin_comment || '');
-  const flags = getDriverEventFlags(a.driver_comment);
+  const flags = getDriverEventFlags(assignment.driver_comment);
   const canInvoice = assignment.status === 'completed' && !assignment.invoiced && assignment.customer_id;
 
   const handleDriverChange = (driverId: string) => {
@@ -256,8 +255,8 @@ export default function AdminAssignmentDetail() {
           <div>
             <Label htmlFor="cost" className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Kostnad / fakturabelopp (kr)</Label>
             <div className="flex gap-2 mt-1">
-              <Input id="cost" type="number" step="0.01" min="0" className="max-w-[200px]" value={costInput !== null ? costInput : (a.cost != null ? String(a.cost) : '')} onChange={e => setCostInput(e.target.value)} placeholder="Valfritt" />
-              <Button size="sm" variant="outline" onClick={() => { const val = costInput !== null ? costInput : ''; updateAssignment.mutate({ id: assignment.id, cost: val ? parseFloat(val) : null } as any); setCostInput(null); }}>Spara</Button>
+              <Input id="cost" type="number" step="0.01" min="0" className="max-w-[200px]" value={costInput !== null ? costInput : (assignment.cost != null ? String(assignment.cost) : '')} onChange={e => setCostInput(e.target.value)} placeholder="Valfritt" />
+              <Button size="sm" variant="outline" onClick={() => { const val = costInput !== null ? costInput : ''; updateAssignment.mutate({ id: assignment.id, cost: val ? parseFloat(val) : null }); setCostInput(null); }}>Spara</Button>
             </div>
           </div>
 
@@ -270,7 +269,7 @@ export default function AdminAssignmentDetail() {
           {assignment.signature_url && <div><p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Mottagarens signatur</p><img src={assignment.signature_url} alt="Signatur" className="w-full max-w-xs rounded-lg border bg-white p-2" /></div>}
           {assignment.consignment_photo_url && <div><p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Fraktsedel</p><img src={assignment.consignment_photo_url} alt="Fraktsedel" className="w-full max-w-xs rounded-lg border" /></div>}
 
-          {a.driver_comment && <div className="bg-secondary rounded-lg p-3"><p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-1"><MessageSquare className="h-3 w-3" /> Förarkommentar / statuslogg</p><p className="text-sm whitespace-pre-wrap">{a.driver_comment}</p></div>}
+          {assignment.driver_comment && <div className="bg-secondary rounded-lg p-3"><p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-1"><MessageSquare className="h-3 w-3" /> Förarkommentar / statuslogg</p><p className="text-sm whitespace-pre-wrap">{assignment.driver_comment}</p></div>}
 
           <div className="space-y-2">
             <Label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Meddelande till chaufför</Label>

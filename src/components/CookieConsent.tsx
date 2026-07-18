@@ -16,7 +16,7 @@ function getConsent(): ConsentStatus {
 
 function updateGoogleAnalyticsConsent(status: Exclude<ConsentStatus, null>) {
   try {
-    const gtag = (window as any).gtag;
+    const gtag = (window as Window & { gtag?: (...args: unknown[]) => void }).gtag;
     if (typeof gtag === 'function') {
       gtag('consent', 'update', {
         analytics_storage: status === 'accepted' ? 'granted' : 'denied',
