@@ -125,7 +125,9 @@ const SV: LandingCopy = {
   },
   hero: {
     badge: 'Svenskt transportledningssystem för åkerier, bud och bemanning',
-    h1: 'Transportledningssystemet som ersätter Excel, WhatsApp och manuell planering',
+    // Mjuka bindestreck (\u00AD) styr var de långa sammansatta orden får brytas
+    // så att rubriken inte kapas mitt i en stavelse på smala skärmar.
+    h1: 'Transport\u00ADlednings\u00ADsystemet som ersätter Excel, WhatsApp och manuell planering',
     sub: 'Aurora Transport samlar uppdrag, förare, digital tidrapportering och fakturaunderlag i ett enkelt flöde för svenska transportföretag.',
     ctaPrimary: 'Boka demo',
     ctaSecondaryIdle: 'Se demo med exempeldata',

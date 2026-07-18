@@ -13,9 +13,12 @@ tidrapportering, GPS-spårning och fakturaunderlag i ett enkelt SaaS-verktyg.
 ## Utveckling
 
 Projektet använder npm och den committade `package-lock.json` som källa för
-reproducerbara installationer.
+reproducerbara installationer. **Node 22 eller senare krävs** (se `.nvmrc`) –
+Capacitor 8:s CLI, som används för iOS- och Android-byggena, stödjer inte
+äldre Node-versioner.
 
 ```bash
+nvm use   # valfritt, läser .nvmrc (Node 22)
 npm ci
 npm run dev
 ```

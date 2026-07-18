@@ -6,7 +6,7 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: se.auroramedia.auroratransport
-      node: 20
+      node: 22
       vars:
         XCODE_WORKSPACE: ios/App/App.xcworkspace
         XCODE_SCHEME: App
@@ -39,7 +39,7 @@ workflows:
     environment:
       android_signing:
         - aurora_keystore
-      node: 20
+      node: 22
       java: 17
       groups:
         - google_play
