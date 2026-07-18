@@ -132,6 +132,7 @@ export interface LandingCopy {
 const SV: LandingCopy = {
   htmlLang: 'sv',
   meta: {
+    // OBS: inga mjuka bindestreck här – de hamnar i sökresultatens titlar.
     title: 'Transportledningssystem för åkerier | Aurora Transport',
     description:
       'Svenskt transportledningssystem för åkerier, budfirmor och bemanning. Uppdrag, förare, tidrapportering och fakturaunderlag – 449 kr/mån.',
@@ -148,7 +149,7 @@ const SV: LandingCopy = {
     breadcrumbHome: 'Hem',
   },
   hero: {
-    badge: 'Svenskt transportledningssystem för åkerier, bud och bemanning',
+    badge: 'Svenskt transport­lednings­system för åkerier, bud och bemanning',
     // Mjuka bindestreck (\u00AD) styr var de långa sammansatta orden får brytas
     // så att rubriken inte kapas mitt i en stavelse på smala skärmar.
     h1: 'Transport\u00ADlednings\u00ADsystemet som ersätter Excel, WhatsApp och manuell planering',
@@ -167,7 +168,7 @@ const SV: LandingCopy = {
   values: [
     {
       title: 'Mindre administration',
-      text: 'Skapa uppdrag, tilldela förare och samla tidrapporter i ett transportledningssystem i stället för att hoppa mellan Excel, telefon och chattar.',
+      text: 'Skapa uppdrag, tilldela förare och samla tidrapporter i ett transport­lednings­system i stället för att hoppa mellan Excel, telefon och chattar.',
     },
     {
       title: 'Färre missar',
@@ -180,8 +181,8 @@ const SV: LandingCopy = {
   ],
   seoIntro: {
     eyebrow: 'Vad är Aurora Transport?',
-    h2: 'Ett enkelt transportledningssystem för svenska transportföretag',
-    text: 'Aurora Transport är ett transportledningssystem för åkerier, budfirmor och transportbemanning. Systemet hjälper dig att planera uppdrag, tilldela förare, samla tidrapporter och ta fram fakturaunderlag utan Excel, WhatsApp eller manuell administration.',
+    h2: 'Ett enkelt transport­lednings­system för svenska transportföretag',
+    text: 'Aurora Transport är ett transport­lednings­system för åkerier, budfirmor och transportbemanning. Systemet hjälper dig att planera uppdrag, tilldela förare, samla tidrapporter och ta fram fakturaunderlag utan Excel, WhatsApp eller manuell administration.',
     bullets: [
       'Transportplanering och dispatch i samma flöde',
       'Digital tidrapportering för förare',
@@ -202,7 +203,7 @@ const SV: LandingCopy = {
   },
   features: {
     eyebrow: 'Funktioner',
-    h2: 'Allt du behöver i ett modernt transportledningssystem',
+    h2: 'Allt du behöver i ett modernt transport­lednings­system',
     sub: 'Ett fokuserat åkerisystem och dispatchsystem för transportföretag som vill samla uppdrag, förare, tidrapportering och fakturaunderlag på ett ställe.',
     groups: [
       {
@@ -234,7 +235,7 @@ const SV: LandingCopy = {
   },
   audiences: {
     eyebrow: 'För vem?',
-    h2: 'Transportledningssystem för åkerier, budfirmor och transportbemanning',
+    h2: 'Transport­lednings­system för åkerier, budfirmor och transportbemanning',
     sub: 'Aurora Transport är byggt för transportbolag som behöver ordning, fart och enkelhet — inte fler komplicerade system.',
     items: [
       { title: 'Åkerier', text: 'För mindre och växande åkerier som vill få bättre kontroll över uppdrag, förare och fakturaunderlag.' },
@@ -244,7 +245,7 @@ const SV: LandingCopy = {
   },
   pricing: {
     eyebrow: 'Pris',
-    h2: 'Ett prisvärt transportledningssystem utan krångel',
+    h2: 'Ett prisvärt transport­lednings­system utan krångel',
     sub: 'För transportföretag som vill komma igång snabbt utan bindningstid, dolda avgifter eller dyra licenser per användare.',
     setupLabel: 'Setup',
     setupPrice: '3 500 kr',
@@ -282,7 +283,7 @@ const SV: LandingCopy = {
   roi: {
     eyebrow: 'Räkna på det',
     h2: 'Vad är din administration värd?',
-    sub: 'Dra i reglagen och se hur mycket tid och pengar ett transportledningssystem kan frigöra varje månad.',
+    sub: 'Dra i reglagen och se hur mycket tid och pengar ett transport­lednings­system kan frigöra varje månad.',
     driversLabel: 'Antal förare',
     assignmentsLabel: 'Uppdrag per förare och vecka',
     rateLabel: 'Timkostnad för administration',
@@ -299,10 +300,10 @@ const SV: LandingCopy = {
   },
   faq: {
     eyebrow: 'FAQ',
-    h2: 'Vanliga frågor om transportledningssystem',
+    h2: 'Vanliga frågor om transport­lednings­system',
     sub: 'Kort, rakt och utan krångel. Precis som systemet.',
     items: [
-      { q: 'Vad är ett transportledningssystem?', a: 'Ett transportledningssystem hjälper transportföretag att planera uppdrag, tilldela förare, följa status, samla tidrapporter och skapa fakturaunderlag i ett gemensamt system.' },
+      { q: 'Vad är ett transport­lednings­system?', a: 'Ett transport­lednings­system hjälper transportföretag att planera uppdrag, tilldela förare, följa status, samla tidrapporter och skapa fakturaunderlag i ett gemensamt system.' },
       { q: 'Vad kostar Aurora Transport?', a: 'Aurora Transport kostar 449 kr per månad. Setup och onboarding kostar 3 500 kr som engångskostnad.' },
       { q: 'Kan Aurora Transport användas som dispatchsystem?', a: 'Ja. Aurora Transport fungerar som ett enkelt dispatchsystem där du kan skapa uppdrag, tilldela förare och följa status i realtid.' },
       { q: 'Finns det bindningstid?', a: 'Nej. Du kan säga upp när du vill. Målet är att systemet ska vara enkelt att börja med och enkelt att stanna kvar i.' },
@@ -313,7 +314,7 @@ const SV: LandingCopy = {
     ],
   },
   finalCta: {
-    h2: 'Redo för ett enklare transportledningssystem?',
+    h2: 'Redo för ett enklare transport­lednings­system?',
     sub: 'Boka en kort demo så visar vi hur Aurora Transport kan ersätta Excel, WhatsApp och manuell planering i ditt transportföretag.',
     primary: 'Boka demo',
     secondaryIdle: 'Se demo med exempeldata',
