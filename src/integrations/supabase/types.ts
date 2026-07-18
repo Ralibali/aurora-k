@@ -894,6 +894,57 @@ export type Database = {
           },
         ]
       }
+      driver_documents: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          doc_type: string
+          driver_id: string
+          expires_at: string | null
+          id: string
+          label: string | null
+          notes: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          doc_type: string
+          driver_id: string
+          expires_at?: string | null
+          id?: string
+          label?: string | null
+          notes?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          doc_type?: string
+          driver_id?: string
+          expires_at?: string | null
+          id?: string
+          label?: string | null
+          notes?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_documents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_documents_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       driver_locations: {
         Row: {
           assignment_id: string | null
@@ -2506,6 +2557,60 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vehicle_maintenance: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          done_at: string | null
+          due_date: string | null
+          due_odometer_km: number | null
+          id: string
+          notes: string | null
+          type: string
+          updated_at: string | null
+          vehicle_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          done_at?: string | null
+          due_date?: string | null
+          due_odometer_km?: number | null
+          id?: string
+          notes?: string | null
+          type: string
+          updated_at?: string | null
+          vehicle_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          done_at?: string | null
+          due_date?: string | null
+          due_odometer_km?: number | null
+          id?: string
+          notes?: string | null
+          type?: string
+          updated_at?: string | null
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_maintenance_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_maintenance_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
             referencedColumns: ["id"]
           },
         ]

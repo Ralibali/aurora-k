@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   LayoutDashboard, Briefcase, Calendar, Map, Navigation,
-  Users, UserX, CheckSquare, Building, ShoppingCart, Inbox,
+  Users, UserX, CheckSquare, Building, ShoppingCart, Inbox, ShieldCheck,
   Star, FileText, Package, Leaf, BarChart, TrendingUp,
   Bell, Globe, Code, Settings, LogOut, Truck, Car,
   ClipboardList, FileImage, Smartphone, Shield, ChevronDown, Repeat,
@@ -72,6 +72,7 @@ const secondarySections = [
     label: 'Personal',
     items: [
       { title: 'Frånvaro', url: '/admin/absences', icon: UserX },
+      { title: 'Efterlevnad', url: '/admin/compliance', icon: ShieldCheck },
       { title: 'Godkännanden', url: '/admin/approvals', icon: CheckSquare },
     ],
   },

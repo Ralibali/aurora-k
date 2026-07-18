@@ -57,6 +57,7 @@ const AdminVehicles = lazy(() => import("./pages/admin/AdminVehicles"));
 const AdminOrders = lazy(() => import("./pages/admin/AdminOrders"));
 const AdminOrderTemplates = lazy(() => import("./pages/admin/AdminOrderTemplates"));
 const AdminAbsences = lazy(() => import("./pages/admin/AdminAbsences"));
+const AdminCompliance = lazy(() => import("./pages/admin/AdminCompliance"));
 const AdminApprovals = lazy(() => import("./pages/admin/AdminApprovals"));
 const AdminInvoiceTemplates = lazy(() => import("./pages/admin/AdminInvoiceTemplates"));
 const AdminNotifications = lazy(() => import("./pages/admin/AdminNotifications"));
@@ -221,6 +222,7 @@ const App = () => (
                     <Route path="orders" element={<AdminOrders />} />
                     <Route path="order-templates" element={<AdminOrderTemplates />} />
                     <Route path="absences" element={<AdminAbsences />} />
+                    <Route path="compliance" element={<AdminCompliance />} />
                     <Route path="approvals" element={<AdminApprovals />} />
                     <Route path="invoice-templates" element={<AdminInvoiceTemplates />} />
                     <Route path="notifications" element={<AdminNotifications />} />
