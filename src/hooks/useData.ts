@@ -156,7 +156,7 @@ export function useAssignment(id: string | undefined) {
   useEffect(() => {
     if (!id) return;
     const channel = supabase
-      .channel(`assignment-${id}`)
+      .channel(`assignment-${id}-${crypto.randomUUID()}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'assignments', filter: `id=eq.${id}` }, () => {
         qc.invalidateQueries({ queryKey: ['assignments', id] });
       })
@@ -171,7 +171,7 @@ export function useAssignment(id: string | undefined) {
       if (!id) throw new Error('No ID');
       const { data, error } = await supabase
         .from('assignments')
-        .select('*, customer:customers(*), driver:profiles!assignments_assigned_driver_id_fkey(*)')
+        .select('*, customer:customers(*), driver:profiles!assignments_assigned_driver_id_fkey(*), vehicle:vehicles(name, registration_number)')
         .eq('id', id)
         .single();
       if (error) throw error;
@@ -187,7 +187,7 @@ export function useDriverAssignments(driverId: string | undefined) {
   useEffect(() => {
     if (!driverId) return;
     const channel = supabase
-      .channel(`driver-assignments-${driverId}`)
+      .channel(`driver-assignments-${driverId}-${crypto.randomUUID()}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'assignments', filter: `assigned_driver_id=eq.${driverId}` }, () => {
         qc.invalidateQueries({ queryKey: ['assignments', 'driver', driverId] });
       })

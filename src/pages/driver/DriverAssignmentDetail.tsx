@@ -395,7 +395,7 @@ export default function DriverAssignmentDetail() {
               </Button>
             </div>
             {assignment.instructions && <InfoRow icon={FileText} label="Instruktioner">{assignment.instructions}</InfoRow>}
-            {a.vehicle_id && <InfoRow icon={Package} label="Fordon">{a.vehicle_id}</InfoRow>}
+            {(a.vehicle || a.vehicle_id) && <InfoRow icon={Package} label="Fordon">{[a.vehicle?.name, a.vehicle?.registration_number].filter(Boolean).join(' · ') || a.vehicle_id}</InfoRow>}
             {assignment.actual_start && <InfoRow icon={Clock} label="Startad">{formatSwedishDateTime(assignment.actual_start)}</InfoRow>}
             {assignment.actual_start && assignment.actual_stop && <InfoRow icon={CheckCircle2} label="Varaktighet">{calculateDuration(assignment.actual_start, assignment.actual_stop)}</InfoRow>}
           </CardContent>
