@@ -285,6 +285,36 @@ export function newLeadNotificationEmail(data: {
   };
 }
 
+export function newTrialSignupEmail(data: {
+  companyName: string;
+  contactPerson: string;
+  email: string;
+  phone?: string | null;
+  orgNr?: string | null;
+  trialEndsAt: string;
+}) {
+  const trialEnd = new Date(data.trialEndsAt).toLocaleDateString('sv-SE');
+  const html = `
+    ${heading('Nytt testkonto skapat')}
+    ${subheading('Ett nytt företag har startat en gratis provperiod — dags att boka uppföljning.')}
+    ${infoBox(`
+      ${detailRow('Företag', data.companyName)}
+      ${data.orgNr ? detailRow('Org.nr', data.orgNr) : ''}
+      ${detailRow('Kontaktperson', data.contactPerson)}
+      ${detailRow('E-post', data.email)}
+      ${data.phone ? detailRow('Telefon', data.phone) : ''}
+      ${detailRow('Provperioden slutar', trialEnd)}
+    `)}
+    ${button('Se företaget i plattformsadmin', 'https://auroratransport.se/platform/companies')}
+    ${divider()}
+    ${smallText('Detta mail skickades automatiskt när någon registrerade ett testkonto på auroratransport.se.')}
+  `;
+  return {
+    subject: `Nytt testkonto: ${data.companyName}`,
+    html: layout(html),
+  };
+}
+
 export function newCustomerMessageEmail(data: {
   customerName: string;
   message: string;

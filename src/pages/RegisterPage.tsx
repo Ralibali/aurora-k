@@ -4,10 +4,10 @@ import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Truck, Building2, User, Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { Truck, Building2, User, Mail, Lock, Eye, EyeOff, AlertCircle, Phone, BadgeCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { trackEvent } from '@/lib/analytics';
+import { trackEventOnce } from '@/lib/analytics';
 
 function getPasswordStrength(pw: string): { label: string; pct: number; color: string } {
   let score = 0;
@@ -29,8 +29,8 @@ export default function RegisterPage() {
   const cancelled = searchParams.get('cancelled');
 
   usePageMeta({
-    title: 'Registrera företag – Kom igång gratis | Aurora Transport',
-    description: 'Skapa konto och kom igång med Aurora Transport på under 5 minuter. 449 kr/mån, ingen bindningstid.',
+    title: 'Starta gratis provperiod – 14 dagar utan kostnad | Aurora Transport',
+    description: 'Skapa konto och testa Aurora Transport gratis i 14 dagar. Inget betalkort krävs. 449 kr/mån efteråt, ingen bindningstid.',
     canonical: 'https://auroratransport.se/register',
     noindex: true,
   });
@@ -38,6 +38,7 @@ export default function RegisterPage() {
   const [companyName, setCompanyName] = useState('');
   const [orgNumber, setOrgNumber] = useState('');
   const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -48,7 +49,10 @@ export default function RegisterPage() {
   const validate = () => {
     const e: Record<string, string> = {};
     if (!companyName.trim()) e.companyName = 'Företagsnamn krävs';
+    if (!orgNumber.trim()) e.orgNumber = 'Organisationsnummer krävs';
+    else if (!/^\d{6}-?\d{4}$/.test(orgNumber.trim())) e.orgNumber = 'Format: XXXXXX-XXXX';
     if (!fullName.trim()) e.fullName = 'Ditt namn krävs';
+    if (!phone.trim()) e.phone = 'Telefonnummer krävs';
     if (!email.trim()) e.email = 'E-postadress krävs';
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) e.email = 'Ogiltig e-postadress';
     if (!password) e.password = 'Lösenord krävs';
@@ -78,9 +82,11 @@ export default function RegisterPage() {
 
       const userId = authData.user.id;
 
-      // 2. Create company via edge function (bypasses RLS since no session yet)
+      // 2. Create company via edge function (bypasses RLS since no session yet).
+      //    Funktionen startar automatiskt en 14-dagars gratis provperiod —
+      //    ingen betalning krävs vid registrering.
       const { data: companyResult, error: companyError } = await supabase.functions.invoke('register-company', {
-        body: { userId, companyName, orgNr: orgNumber || null, fullName },
+        body: { userId, companyName, orgNr: orgNumber || null, fullName, phone: phone || null },
       });
       if (companyError) throw companyError;
       if (!companyResult?.companyId) throw new Error('Kunde inte skapa företag');
@@ -92,28 +98,10 @@ export default function RegisterPage() {
       localStorage.setItem('onboarding_company_name', companyName);
       localStorage.setItem('onboarding_org_nr', orgNumber);
 
-      // 3. Create Stripe Checkout session
-      const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke('create-checkout', {
-        body: { companyId, companyName },
-      });
+      trackEventOnce(companyId, 'Trial Started', { plan: 'aurora_449', billing_interval: 'monthly' });
 
-      if (checkoutError || !checkoutData?.url) {
-        // If Stripe fails, still allow onboarding (manual activation later)
-        console.error('Stripe checkout error:', checkoutError);
-        toast.success('Konto skapat! Betalning kan slutföras senare.');
-        navigate('/onboarding');
-        return;
-      }
-
-      // Track that a real checkout session was created before redirecting.
-      trackEvent('Subscription Checkout Started', {
-        plan: 'aurora_449',
-        billing_interval: 'monthly',
-        source: 'register',
-      });
-
-      // 6. Redirect to Stripe Checkout
-      window.location.href = checkoutData.url;
+      toast.success('Konto skapat — provperioden på 14 dagar är igång!');
+      navigate('/onboarding');
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Något gick fel');
     } finally {
@@ -147,8 +135,8 @@ export default function RegisterPage() {
         )}
 
         <div className="rounded-[2rem] border border-[#1e1e5a] bg-[#141432]/90 p-8 shadow-[0_30px_100px_rgba(0,0,0,0.35)] backdrop-blur">
-          <h2 className="mb-1 text-lg font-bold text-white">Skapa konto</h2>
-          <p className="mb-6 text-sm text-slate-400">Kom igång med ditt transportföretag</p>
+          <h2 className="mb-1 text-lg font-bold text-white">Starta din gratis provperiod</h2>
+          <p className="mb-6 text-sm text-slate-400">14 dagar gratis — inget betalkort krävs. Kontot pausas automatiskt efter provperioden om du väljer att inte fortsätta.</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Company Name */}
@@ -163,8 +151,9 @@ export default function RegisterPage() {
 
             {/* Org Number */}
             <div className="space-y-1.5">
-              <Label htmlFor="orgNumber" className="text-sm font-bold text-slate-200">Organisationsnummer</Label>
-              <Input id="orgNumber" placeholder="556xxx-xxxx" value={orgNumber} onChange={e => setOrgNumber(e.target.value)} className={inputCls} />
+              <Label htmlFor="orgNumber" className="text-sm font-bold text-slate-200">Organisationsnummer *</Label>
+              <Input id="orgNumber" placeholder="556XXX-XXXX" value={orgNumber} onChange={e => setOrgNumber(e.target.value)} className={inputCls} />
+              {errors.orgNumber && <p className="text-xs text-red-400">{errors.orgNumber}</p>}
             </div>
 
             {/* Name */}
@@ -175,6 +164,16 @@ export default function RegisterPage() {
                 <Input id="fullName" placeholder="Anna Andersson" value={fullName} onChange={e => setFullName(e.target.value)} className={`pl-10 ${inputCls}`} />
               </div>
               {errors.fullName && <p className="text-xs text-red-400">{errors.fullName}</p>}
+            </div>
+
+            {/* Phone */}
+            <div className="space-y-1.5">
+              <Label htmlFor="phone" className="text-sm font-bold text-slate-200">Telefonnummer *</Label>
+              <div className="relative">
+                <Phone className={iconCls} />
+                <Input id="phone" type="tel" placeholder="070-123 45 67" value={phone} onChange={e => setPhone(e.target.value)} className={`pl-10 ${inputCls}`} />
+              </div>
+              {errors.phone && <p className="text-xs text-red-400">{errors.phone}</p>}
             </div>
 
             {/* Email */}
@@ -219,8 +218,13 @@ export default function RegisterPage() {
             </div>
 
             <Button type="submit" className="mt-2 h-12 w-full rounded-2xl bg-[#4f46e5] text-sm font-black text-white shadow-lg shadow-[#4f46e5]/25 hover:bg-[#4338ca]" disabled={submitting}>
-              {submitting ? 'Skapar konto...' : 'Skapa konto'}
+              {submitting ? 'Skapar konto...' : 'Starta gratis provperiod'}
             </Button>
+
+            <div className="flex items-start gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-xs text-emerald-200">
+              <BadgeCheck className="mt-0.5 h-4 w-4 shrink-0" />
+              <p>Full tillgång till allt i 14 dagar. Inget kort, ingen bindningstid — du betalar först om du väljer att fortsätta efteråt (449 kr/mån).</p>
+            </div>
           </form>
         </div>
 

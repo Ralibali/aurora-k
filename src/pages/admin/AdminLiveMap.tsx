@@ -4,6 +4,7 @@ import { AdminLayout } from '@/components/AdminLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Clock, Navigation, AlertTriangle, Plus, Truck } from 'lucide-react';
+import { hasGoogleMapsKey } from '@/lib/google-maps';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useDemoMode } from '@/hooks/useDemoMode';
@@ -52,6 +53,7 @@ class MapErrorBoundary extends Component<{ children: ReactNode }, { hasError: bo
 
 // Lazy load the map component to isolate potential issues
 const LeafletMap = lazy(() => import('./AdminLiveMapLeaflet'));
+const GoogleMap = lazy(() => import('./AdminLiveMapGoogle'));
 
 export default function AdminLiveMap() {
   const navigate = useNavigate();
@@ -151,7 +153,11 @@ export default function AdminLiveMap() {
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
                       </div>
                     }>
-                      <LeafletMap locations={effectiveLocations} navigate={navigate} />
+                      {hasGoogleMapsKey ? (
+                        <GoogleMap locations={effectiveLocations} navigate={navigate} />
+                      ) : (
+                        <LeafletMap locations={effectiveLocations} navigate={navigate} />
+                      )}
                     </Suspense>
                   </MapErrorBoundary>
                 )}

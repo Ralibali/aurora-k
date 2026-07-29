@@ -254,9 +254,9 @@ const SV: LandingCopy = {
     monthlyPrice: '449 kr',
     monthlyUnit: 'per månad',
     monthlyText: 'Obegränsat antal förare, admins och uppdrag. Support på svenska ingår.',
-    monthlyBenefits: ['Ingen bindningstid', 'Support på svenska', 'Obegränsat antal förare', 'Fakturaunderlag ingår'],
+    monthlyBenefits: ['14 dagars gratis provperiod', 'Ingen bindningstid', 'Support på svenska', 'Obegränsat antal förare', 'Fakturaunderlag ingår'],
     cta: 'Boka demo',
-    ctaRegister: 'Kom igång – skapa konto',
+    ctaRegister: 'Testa gratis i 14 dagar',
   },
   social: {
     eyebrow: 'Kundröster',
@@ -304,6 +304,7 @@ const SV: LandingCopy = {
     sub: 'Kort, rakt och utan krångel. Precis som systemet.',
     items: [
       { q: 'Vad är ett transport­lednings­system?', a: 'Ett transport­lednings­system hjälper transportföretag att planera uppdrag, tilldela förare, följa status, samla tidrapporter och skapa fakturaunderlag i ett gemensamt system.' },
+      { q: 'Kan jag testa innan jag betalar?', a: 'Ja. Du får 14 dagars gratis provperiod med full tillgång – inget betalkort krävs. Först när provperioden tar slut väljer du om du vill fortsätta.' },
       { q: 'Vad kostar Aurora Transport?', a: 'Aurora Transport kostar 449 kr per månad. Setup och onboarding kostar 3 500 kr som engångskostnad.' },
       { q: 'Kan Aurora Transport användas som dispatchsystem?', a: 'Ja. Aurora Transport fungerar som ett enkelt dispatchsystem där du kan skapa uppdrag, tilldela förare och följa status i realtid.' },
       { q: 'Finns det bindningstid?', a: 'Nej. Du kan säga upp när du vill. Målet är att systemet ska vara enkelt att börja med och enkelt att stanna kvar i.' },
@@ -458,9 +459,9 @@ const EN: LandingCopy = {
     monthlyPrice: '449 SEK',
     monthlyUnit: 'per month',
     monthlyText: 'Unlimited drivers, admins and jobs. Human support included.',
-    monthlyBenefits: ['No lock-in', 'Human support', 'Unlimited drivers', 'Invoice drafts included'],
+    monthlyBenefits: ['14-day free trial', 'No lock-in', 'Human support', 'Unlimited drivers', 'Invoice drafts included'],
     cta: 'Book a demo',
-    ctaRegister: 'Get started',
+    ctaRegister: 'Start free 14-day trial',
   },
   social: {
     eyebrow: 'Customer voices',
@@ -508,6 +509,7 @@ const EN: LandingCopy = {
     sub: 'Short, straight and to the point — just like the system.',
     items: [
       { q: 'What is a transport management system?', a: 'A transport management system helps transport companies plan jobs, assign drivers, follow status, collect time reports and create invoice drafts in one shared system.' },
+      { q: 'Can I try before I pay?', a: 'Yes. You get a 14-day free trial with full access – no credit card required. You only decide whether to continue when the trial ends.' },
       { q: 'What does Aurora Transport cost?', a: 'Aurora Transport is 449 SEK per month. Setup and onboarding is a one-time fee of 3,500 SEK.' },
       { q: 'Can Aurora Transport be used as a dispatch system?', a: 'Yes. Aurora Transport works as a simple dispatch system where you can create jobs, assign drivers and follow status in real time.' },
       { q: 'Is there a lock-in period?', a: 'No. You can cancel whenever you want. We want the system to be easy to start with and easy to stay with.' },

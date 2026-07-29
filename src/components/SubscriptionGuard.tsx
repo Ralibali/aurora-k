@@ -10,6 +10,7 @@ import {
   type RawSubscriptionStatus,
   type SubscriptionViewStatus,
 } from '@/lib/subscription-status';
+import { trialDaysLeft } from '@/lib/trial';
 
 function AccountCard({ icon, title, text, action, actionLabel, busy }: {
   icon: React.ReactNode;
@@ -34,6 +35,8 @@ function AccountCard({ icon, title, text, action, actionLabel, busy }: {
 export function SubscriptionGuard({ children }: { children: React.ReactNode }) {
   const { companyId, loading: authLoading } = useAuth();
   const [status, setStatus] = useState<SubscriptionViewStatus>(null);
+  const [rawStatus, setRawStatus] = useState<RawSubscriptionStatus>(null);
+  const [trialEndsAt, setTrialEndsAt] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
@@ -44,9 +47,12 @@ export function SubscriptionGuard({ children }: { children: React.ReactNode }) {
     setLoadError(false);
     setLoading(true);
     try {
-      const { data, error } = await supabase.from('companies').select('subscription_status').eq('id', companyId).single();
+      const { data, error } = await supabase.from('companies').select('subscription_status, trial_ends_at').eq('id', companyId).single();
       if (error) throw error;
-      setStatus(normalizeSubscriptionStatus((data?.subscription_status ?? null) as RawSubscriptionStatus));
+      const raw = (data?.subscription_status ?? null) as RawSubscriptionStatus;
+      setRawStatus(raw);
+      setTrialEndsAt(data?.trial_ends_at ?? null);
+      setStatus(normalizeSubscriptionStatus(raw));
     } catch (error) {
       console.error('[SubscriptionGuard] Failed to load status', error);
       setLoadError(true);
@@ -71,6 +77,24 @@ export function SubscriptionGuard({ children }: { children: React.ReactNode }) {
   if (loading || authLoading) return <div className="flex min-h-screen items-center justify-center bg-background"><div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" /></div>;
   if (!companyId) return <Navigate to="/onboarding" replace />;
   if (loadError || status === null) return <AccountCard icon={<AlertTriangle className="h-7 w-7 text-destructive" />} title="Kunde inte verifiera kontot" text="Kontostatusen kunde inte hämtas. Försök igen innan du fortsätter." action={() => void loadStatus()} actionLabel="Försök igen" busy={loading} />;
+
+  // Provperiod: full tillgång medan den pågår, automatiskt låst när den tar slut.
+  if (rawStatus === 'trialing') {
+    const daysLeft = trialDaysLeft(trialEndsAt);
+    if (daysLeft <= 0) {
+      return <AccountCard icon={<Lock className="h-7 w-7" />} title="Provperioden har löpt ut" text="Dina 14 gratisdagar är slut. Uppgradera för att fortsätta använda Aurora Transport — all din data finns kvar." action={() => void redirect('create-checkout')} actionLabel="Uppgradera – 449 kr/mån" busy={redirecting} />;
+    }
+    return (
+      <>
+        <div className="flex items-center justify-between gap-3 border-b border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+          <span className="flex items-center gap-2"><AlertTriangle className="h-4 w-4" />Provperiod: {daysLeft} {daysLeft === 1 ? 'dag' : 'dagar'} kvar</span>
+          <Button variant="outline" size="sm" disabled={redirecting} onClick={() => void redirect('create-checkout')}>Uppgradera nu</Button>
+        </div>
+        {children}
+      </>
+    );
+  }
+
   if (status === 'active') return <>{children}</>;
   if (status === 'past_due') return <><div className="flex items-center justify-between gap-3 border-b border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"><span className="flex items-center gap-2"><AlertTriangle className="h-4 w-4" />Betalningen misslyckades. Uppdatera betalningsmetoden.</span><Button variant="outline" size="sm" disabled={redirecting} onClick={() => void redirect('stripe-portal')}>Hantera betalning</Button></div>{children}</>;
   if (status === 'paused') return <AccountCard icon={<Lock className="h-7 w-7" />} title="Prenumerationen är pausad" text="Öppna betalningsportalen för att återuppta tjänsten." action={() => void redirect('stripe-portal')} actionLabel="Hantera prenumeration" busy={redirecting} />;
