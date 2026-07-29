@@ -168,7 +168,7 @@ function FeaturesGrid() {
     { icon: Users, title: 'Obegränsat antal förare', desc: 'Lägg till hela teamet. Ingen extra kostnad oavsett storlek.' },
     { icon: MapPin, title: 'GPS-spårning', desc: 'Se var dina förare befinner sig och vilka uppdrag som pågår just nu.' },
     { icon: Smartphone, title: 'Mobilapp utan installation', desc: 'PWA — fungerar direkt i webbläsaren. Inga app-installationer.' },
-    { icon: FileText, title: 'Fortnox-export', desc: 'Exportera tidrapporter och faktureringsunderlag med ett klick.' },
+    { icon: FileText, title: 'CSV-export', desc: 'Exportera tidrapporter och faktureringsunderlag med ett klick.' },
   ];
   return (
     <section className="py-20 bg-muted">

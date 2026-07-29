@@ -307,7 +307,7 @@ function SalaryExportTab() {
         <CardTitle className="text-base">Exportera löneunderlag</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-sm text-muted-foreground">Välj månad och chaufför. Exporten använder samma löne-, OB- och traktamentelogik som ersättningsvyn. CSV = manuell hantering, PAXml 2.2 = direktimport i lönesystem (Fortnox Lön, Visma, Kontek m.fl.).</p>
+        <p className="text-sm text-muted-foreground">Välj månad och chaufför. Exporten använder samma löne-, OB- och traktamentelogik som ersättningsvyn. CSV = manuell hantering, PAXml 2.2 = direktimport i lönesystem (Visma, Kontek m.fl.).</p>
         <div className="grid gap-4 sm:grid-cols-[180px_1fr_auto_auto] sm:items-end">
           <div className="space-y-2"><Label>Månad</Label><Input type="month" value={month} onChange={e => setMonth(e.target.value)} /></div>
           <div className="space-y-2"><Label>Chaufför</Label><Select value={driverFilter} onValueChange={setDriverFilter}><SelectTrigger><SelectValue placeholder="Välj chaufför" /></SelectTrigger><SelectContent><SelectItem value="all">Alla chaufförer</SelectItem>{(drivers ?? []).map((driver) => <SelectItem key={driver.id} value={driver.id}>{driver.full_name}</SelectItem>)}</SelectContent></Select></div>

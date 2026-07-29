@@ -7,7 +7,6 @@ const DIST = resolve(process.cwd(), 'dist');
 const replacements = [
   [/ingen setup-avgift/gi, 'en setup- och onboardingkostnad på 3 500 kr'],
   [/ingen setupavgift/gi, 'en setup- och onboardingkostnad på 3 500 kr'],
-  [/Fortnox eller Visma/g, 'Fortnox'],
 ];
 
 function htmlFiles(directory) {

@@ -91,7 +91,7 @@ function Hero() {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="flex justify-center flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground mt-8">
           <span>✓ OB-tillägg automatiskt</span>
           <span>✓ Traktamente inbyggt</span>
-          <span>✓ Fortnox-export</span>
+          <span>✓ CSV-export av fakturaunderlag</span>
         </motion.div>
       </div>
     </section>
@@ -176,7 +176,7 @@ function PricingInfo() {
 const faqs = [
   { q: 'Passar det för ett litet åkeri?', a: 'Absolut. Aurora Transport är byggt specifikt för små och medelstora åkerier. Fast pris oavsett om du har 2 eller 20 förare.' },
   { q: 'Hanterar ni OB-tillägg?', a: 'Ja. Du konfigurerar OB-scheman (kväll, natt, helg) och systemet beräknar tilläggen automatiskt baserat på arbetade timmar.' },
-  { q: 'Kan jag exportera till Fortnox?', a: 'Ja. Exportera tidrapporter och faktureringsunderlag med ett klick.' },
+  { q: 'Kan jag exportera faktureringsunderlag?', a: 'Ja. Exportera tidrapporter och faktureringsunderlag som CSV med ett klick.' },
   { q: 'Behöver mina förare ladda ner en app?', a: 'Nej. Det är en PWA — öppna länken i mobilen, lägg till på hemskärmen. Klart.' },
   { q: 'Finns det bindningstid?', a: 'Nej. Du betalar per månad och kan avsluta när du vill.' },
 ];
@@ -210,7 +210,7 @@ function FinalCta() {
           Redo att digitalisera ditt åkeri?
         </motion.h2>
         <motion.p initial="hidden" whileInView="visible" viewport={{ once: true }} custom={1} variants={fadeUp} className="text-slate-400 mb-8">
-          449 kr/mån. OB-tillägg, traktamente och Fortnox-export — allt ingår.
+          449 kr/mån. OB-tillägg, traktamente och CSV-export — allt ingår.
         </motion.p>
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} custom={2} variants={fadeUp}>
           <Button size="lg" asChild className="rounded-xl px-10 py-6 text-base font-semibold bg-white text-[hsl(222,47%,11%)] hover:bg-white/90">

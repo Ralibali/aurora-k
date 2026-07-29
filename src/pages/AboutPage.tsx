@@ -204,7 +204,7 @@ export default function AboutPage() {
             <h2 className="text-2xl font-bold mb-6">Varför välja Aurora Transport?</h2>
             <div className="prose prose-lg max-w-none text-muted-foreground space-y-4">
               <p>
-                Aurora Transport är ett <strong>svenskt transportledningssystem</strong> byggt för åkerier, budföretag, leveransföretag och logistikbolag. Till skillnad från generella verktyg som Coredination och andra plattformar är Aurora Transport specialbyggt för den svenska transportbranschen med stöd för <strong>Fortnox-export, svenska faktureringsregler och momshantering</strong>.
+                Aurora Transport är ett <strong>svenskt transportledningssystem</strong> byggt för åkerier, budföretag, leveransföretag och logistikbolag. Till skillnad från generella verktyg som Coredination och andra plattformar är Aurora Transport specialbyggt för den svenska transportbranschen med stöd för <strong>svenska faktureringsregler, momshantering och fakturaunderlag redo för bokföringen</strong>.
               </p>
               <p>
                 Systemet inkluderar <strong>körorder och uppdragshantering</strong>, <strong>digital tidrapportering</strong> med automatisk löneberäkning, <strong>GPS-spårning i realtid</strong> via livekarta, <strong>kundportal</strong> med bokningsförfrågningar, samt <strong>komplett fakturering</strong> med artikelregister och kundspecifika prislistor. Allt är tillgängligt direkt i webbläsaren – ingen installation krävs.

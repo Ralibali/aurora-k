@@ -3,9 +3,6 @@ project_id = "dqjwtnziasqtveuwnalx"
 [functions.resend-inbound-order]
 verify_jwt = false
 
-[functions.fortnox-oauth-callback]
-verify_jwt = false
-
 [functions.stripe-webhook]
 verify_jwt = false
 

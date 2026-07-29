@@ -141,7 +141,6 @@ function ComparisonTable() {
     { feature: 'Jobbdispatch', aurora: true, core: true },
     { feature: 'Mobilapp', aurora: true, core: true },
     { feature: 'Tidrapportering', aurora: true, core: true },
-    { feature: 'Fortnox', aurora: true, core: true },
     { feature: 'Fast pris oavsett antal användare', aurora: true, core: 'Paket och användarantal' },
     { feature: 'Obegränsat antal användare ingår', aurora: true, core: 'Skalas med paket/användare' },
     { feature: 'Renodlat för transport och bemanning', aurora: true, core: 'Transport, maskinuthyrning och service' },

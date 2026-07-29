@@ -625,11 +625,11 @@ const includedCopy = {
       {
         title: 'Fakturering & ekonomi',
         items: [
-          '4-stegs fakturaguide (full eller underlags-läge för Fortnox)',
+          '4-stegs fakturaguide (full- eller underlagsläge)',
           'PDF-fakturor med din logga och dina avtalsuppgifter',
           'Fakturaunderlag direkt från utförda uppdrag',
           'Momsstöd: 0%, 6%, 12%, 25%',
-          'Bokföringsexport: SIE (CP437), Fortnox CSV, Visma CSV, Excel',
+          'CSV-export av fakturaunderlag för bokföring',
           'Automatisk konto­mappning för intäkter och moms',
         ],
       },
@@ -734,11 +734,11 @@ const includedCopy = {
       {
         title: 'Invoicing & finance',
         items: [
-          '4-step invoice wizard (full or basis mode for Fortnox)',
+          '4-step invoice wizard (full or basis mode)',
           'PDF invoices with your logo and details',
           'Invoice basis generated directly from completed jobs',
           'VAT support: 0%, 6%, 12%, 25%',
-          'Accounting export: SIE (CP437), Fortnox CSV, Visma CSV, Excel',
+          'CSV export of invoice basis for bookkeeping',
           'Automatic account mapping for revenue and VAT',
         ],
       },

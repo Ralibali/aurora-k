@@ -107,7 +107,7 @@ const STATIC_PAGES = [
     h1: "Transportledningssystem för åkerier och transportföretag",
     body: [
       "Ett transportledningssystem (TMS) hjälper dig att planera uppdrag, fördela förare, följa leveranser och ta fram fakturaunderlag utan dubbeljobb. Aurora Transport är byggt för svenska åkerier och transportföretag som vill lämna Excel och WhatsApp bakom sig.",
-      "Tilldela uppdrag, följ status i realtid, samla tidrapporter direkt från förarna och exportera fakturaunderlag till Fortnox eller Visma – från 449 kr per månad.",
+      "Tilldela uppdrag, följ status i realtid, samla tidrapporter direkt från förarna och exportera fakturaunderlag som CSV – från 449 kr per månad.",
     ],
   },
   {

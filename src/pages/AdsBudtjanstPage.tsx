@@ -384,7 +384,7 @@ function Features() {
     { icon: Camera, title: 'Foto vid leverans', desc: 'Budet tar foto som bevis. Dokumentationen sparas automatiskt.', color: 'from-violet-500/20 to-violet-600/5 border-violet-500/10' },
     { icon: PenTool, title: 'Digital signatur', desc: 'Mottagaren signerar direkt på skärmen. Kvittens i realtid.', color: 'from-amber-500/20 to-amber-600/5 border-amber-500/10' },
     { icon: Clock, title: 'Automatisk tidrapport', desc: 'In/ut-stämpling per leverans. OB-tillägg beräknas automatiskt.', color: 'from-green-500/20 to-green-600/5 border-green-500/10' },
-    { icon: FileText, title: 'Faktureringsunderlag', desc: 'Generera underlag med ett klick. Exportera till Fortnox.', color: 'from-rose-500/20 to-rose-600/5 border-rose-500/10' },
+    { icon: FileText, title: 'Faktureringsunderlag', desc: 'Generera underlag med ett klick. Exportera som CSV.', color: 'from-rose-500/20 to-rose-600/5 border-rose-500/10' },
   ];
 
   return (
@@ -557,7 +557,7 @@ function Pricing({ onDemo, demoLoading }: { onDemo: () => void; demoLoading: boo
                 'Foto & signatur vid leverans',
                 'Automatisk tidrapportering',
                 'OB-tillägg & traktamente',
-                'Fortnox-export',
+                'CSV-export för bokföring',
                 'Mobilapp (PWA) — ingen nedladdning',
                 'Support på svenska',
               ].map(item => (
