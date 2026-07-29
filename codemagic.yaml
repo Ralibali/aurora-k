@@ -8,21 +8,33 @@ workflows:
         bundle_identifier: se.auroramedia.auroratransport
       node: 22
       vars:
-        XCODE_WORKSPACE: ios/App/App.xcworkspace
+        XCODE_PROJECT: ios/App/App.xcodeproj
         XCODE_SCHEME: App
     scripts:
       - name: Install deps
         script: npm ci
       - name: Build web
         script: npm run build
+      - name: Add iOS platform if missing
+        script: |
+          if [ ! -d "ios" ]; then
+            npx cap add ios
+          fi
+      - name: Patch iOS project (Info.plist-behörigheter)
+        script: node scripts/ios-post-add.mjs
+      - name: Generate app icons & splash
+        script: npx --yes @capacitor/assets generate --ios
+      - name: Bump build number
+        script: |
+          cd ios/App
+          agvtool next-version -all
+          cd ../..
       - name: Capacitor sync
         script: npx cap sync ios
-      - name: CocoaPods
-        script: cd ios/App && pod install
       - name: Build IPA
         script: |
           xcode-project build-ipa \
-            --workspace "$XCODE_WORKSPACE" \
+            --project "$XCODE_PROJECT" \
             --scheme "$XCODE_SCHEME"
     artifacts:
       - build/ios/ipa/*.ipa
@@ -57,6 +69,8 @@ workflows:
           if [ ! -d "android" ]; then
             npx cap add android
           fi
+      - name: Generate app icons & splash
+        script: npx --yes @capacitor/assets generate --android
       - name: Patch AndroidManifest (permissions, FCM)
         script: node scripts/android-post-add.mjs
       - name: Capacitor sync

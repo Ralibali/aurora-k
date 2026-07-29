@@ -42,3 +42,40 @@ if (added > 0) {
 } else {
   console.log('[android-post-add] AndroidManifest.xml already up to date.');
 }
+
+// ─── FCM: google-services.json + plugin (bara om nyckeln finns som env) ───
+// Lägg hela google-services.json som base64 i Codemagic-variabeln
+// GOOGLE_SERVICES_JSON (grupp "google_play"). Utan den hoppas push-stödet
+// över och appen byggs ändå.
+const gservicesB64 = process.env.GOOGLE_SERVICES_JSON;
+if (!gservicesB64) {
+  console.warn('[android-post-add] GOOGLE_SERVICES_JSON saknas — push-notiser på Android hoppas över.');
+} else {
+  const appJsonPath = resolve('android/app/google-services.json');
+  const decoded = Buffer.from(gservicesB64, 'base64').toString('utf8');
+  if (!existsSync(appJsonPath) || readFileSync(appJsonPath, 'utf8') !== decoded) {
+    writeFileSync(appJsonPath, decoded);
+    console.log('[android-post-add] google-services.json skriven från env.');
+  }
+
+  // Klassväg i projekt-nivåns build.gradle
+  const projectGradlePath = resolve('android/build.gradle');
+  let projectGradle = readFileSync(projectGradlePath, 'utf8');
+  if (!projectGradle.includes('com.google.gms:google-services')) {
+    projectGradle = projectGradle.replace(
+      /(classpath ['"]com\.android\.tools\.build:gradle[^'"]*['"])/,
+      `$1\n        classpath 'com.google.gms:google-services:4.4.4'`
+    );
+    writeFileSync(projectGradlePath, projectGradle);
+    console.log('[android-post-add] google-services classpath tillagd i android/build.gradle.');
+  }
+
+  // Plugin-apply i app-modulens build.gradle
+  const appGradlePath = resolve('android/app/build.gradle');
+  let appGradle = readFileSync(appGradlePath, 'utf8');
+  if (!appGradle.includes('com.google.gms.google-services')) {
+    appGradle += `\napply plugin: 'com.google.gms.google-services'\n`;
+    writeFileSync(appGradlePath, appGradle);
+    console.log('[android-post-add] google-services plugin tillagd i android/app/build.gradle.');
+  }
+}
