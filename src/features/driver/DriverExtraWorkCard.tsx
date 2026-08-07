@@ -172,7 +172,7 @@ export default function DriverExtraWorkCard({ assignmentId, companyId, customerI
 
         {!readOnly && !open && (
           <Button type="button" variant="outline" className="h-12 w-full" onClick={() => setOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> Lägg till extra arbete
+            <Plus className="mr-2 h-4 w-4" /> Lägg till tillval
           </Button>
         )}
 
