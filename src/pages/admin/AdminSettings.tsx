@@ -9,7 +9,8 @@ import { useSettings, useUpdateSettings, useCreateSettings } from '@/hooks/useDa
 import type { TablesUpdate } from '@/integrations/supabase/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useFeatureSettings, useToggleFeature, useResetAllFeatures } from '@/hooks/useFeatureSettings';
-import { Save, Upload, ToggleLeft, RotateCcw, Sun, Moon, Monitor, Building, Palette, CreditCard, ChevronRight, ArrowLeft } from 'lucide-react';
+import { Save, Upload, ToggleLeft, RotateCcw, Sun, Moon, Monitor, Building, Palette, CreditCard, ChevronRight, ArrowLeft, Sparkles } from 'lucide-react';
+import { DemoDataTab } from '@/components/admin/DemoDataTab';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -55,6 +56,7 @@ const settingsMenu = [
   { key: 'company' as const, label: 'Företag', description: 'Namn, adress och betaluppgifter', icon: Building },
   { key: 'features' as const, label: 'Funktioner', description: 'Aktivera eller dölja moduler', icon: ToggleLeft },
   { key: 'appearance' as const, label: 'Utseende', description: 'Ljust, mörkt eller systemläge', icon: Palette },
+  { key: 'demo' as const, label: 'Exempeldata', description: 'Visa eller ta bort exempeldata', icon: Sparkles },
   { key: 'subscription' as const, label: 'Prenumeration', description: 'Hantera ditt abonnemang', icon: CreditCard },
 ];
 
@@ -264,6 +266,7 @@ export default function AdminSettings() {
     company: companyContent,
     features: featuresContent,
     appearance: <AppearanceTab />,
+    demo: <DemoDataTab />,
     subscription: (
       <Suspense fallback={<div className="space-y-4 py-12"><Skeleton className="h-32 w-full" /><Skeleton className="h-32 w-full" /></div>}>
         <SubscriptionTab />
@@ -340,11 +343,13 @@ export default function AdminSettings() {
               <ToggleLeft className="h-3.5 w-3.5" /> Funktioner
             </TabsTrigger>
             <TabsTrigger value="appearance">Utseende</TabsTrigger>
+            <TabsTrigger value="demo" className="gap-1.5"><Sparkles className="h-3.5 w-3.5" /> Exempeldata</TabsTrigger>
             <TabsTrigger value="subscription">Prenumeration</TabsTrigger>
           </TabsList>
           <TabsContent value="company">{companyContent}</TabsContent>
           <TabsContent value="features">{featuresContent}</TabsContent>
           <TabsContent value="appearance"><AppearanceTab /></TabsContent>
+          <TabsContent value="demo"><DemoDataTab /></TabsContent>
           <TabsContent value="subscription">
             <Suspense fallback={<div className="space-y-4 py-12"><Skeleton className="h-32 w-full" /><Skeleton className="h-32 w-full" /></div>}>
               <SubscriptionTab />
