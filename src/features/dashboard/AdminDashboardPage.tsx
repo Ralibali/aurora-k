@@ -183,10 +183,10 @@ export default function AdminDashboardPage() {
               <h3 className="font-semibold">Aktivitetsflöde</h3>
               <p className="text-xs text-muted-foreground">Senaste händelserna idag.</p>
             </div>
-            <div className="nordic-card divide-y overflow-hidden">
-              {activity.length === 0 ? <p className="p-8 text-center text-sm text-muted-foreground">Ingen aktivitet idag.</p> : activity.map(item => <div key={item.key} className="flex items-start justify-between gap-3 p-4 text-sm"><p>{item.text}</p><span className="shrink-0 font-mono-ui text-xs text-muted-foreground">{item.time}</span></div>)}
+            <div className="nordic-card divide-y overflow-hidden rounded-xl">
+              {activity.length === 0 ? <p className="p-6 text-center text-sm text-muted-foreground">Ingen aktivitet idag.</p> : activity.map(item => <div key={item.key} className="flex items-start justify-between gap-3 p-3 text-sm"><p>{item.text}</p><span className="shrink-0 font-mono-ui text-xs text-muted-foreground">{item.time}</span></div>)}
             </div>
-            <div className="grid grid-cols-2 gap-2"><Button variant="outline" size="sm" asChild className="rounded-full bg-white/60 dark:bg-white/5"><Link to="/admin/live-map"><MapPin className="mr-1 h-4 w-4" /> Live-karta</Link></Button><Button variant="outline" size="sm" asChild className="rounded-full bg-white/60 dark:bg-white/5"><Link to="/admin/reports"><Clock className="mr-1 h-4 w-4" /> Tidrapporter</Link></Button></div>
+            <div className="grid grid-cols-2 gap-2"><Button variant="outline" size="sm" asChild className="rounded-md"><Link to="/admin/live-map"><MapPin className="mr-1 h-4 w-4" /> Live-karta</Link></Button><Button variant="outline" size="sm" asChild className="rounded-md"><Link to="/admin/reports"><Clock className="mr-1 h-4 w-4" /> Tidrapporter</Link></Button></div>
           </section>
         </div>
       </div>
