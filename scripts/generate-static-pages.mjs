@@ -19,36 +19,13 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { loadBlogPosts } from "./lib/blog-posts.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 const DIST = resolve(ROOT, "dist");
 const TEMPLATE_PATH = resolve(DIST, "index.html");
 const BASE_URL = "https://auroratransport.se";
-
-// ---------- Bloggdata laddas direkt från TS-källan ---------------------------
-// blog-data.ts är ren data – vi parser:ar manuellt för att slippa TS-loader.
-function loadBlogPosts() {
-  const src = readFileSync(resolve(ROOT, "src/lib/blog-data.ts"), "utf8");
-  const posts = [];
-  const blockRegex = /\{\s*slug:\s*'([^']+)',\s*title:\s*'([^']+)',\s*seoTitle:\s*'([^']+)',\s*metaDescription:\s*'([^']+)',\s*publishDate:\s*'([^']+)',\s*readTime:\s*'([^']+)',\s*excerpt:\s*'([^']+)',/g;
-  let m;
-  while ((m = blockRegex.exec(src)) !== null) {
-    posts.push({
-      slug: m[1],
-      title: m[2],
-      seoTitle: m[3],
-      metaDescription: m[4],
-      publishDate: m[5],
-      readTime: m[6],
-      excerpt: m[7],
-    });
-  }
-  if (posts.length === 0) {
-    throw new Error("Kunde inte parsa några blogginlägg ur src/lib/blog-data.ts");
-  }
-  return posts;
-}
 
 // ---------- Statiska publika sidor ------------------------------------------
 // Title/description speglar respektive sidas usePageMeta exakt (annars uppstår
