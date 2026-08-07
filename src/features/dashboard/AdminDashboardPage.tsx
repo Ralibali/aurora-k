@@ -10,7 +10,6 @@ import { buildAttentionItems } from '@/features/dashboard/attention-items';
 import { useAssignments, useDrivers, useInvoices } from '@/hooks/useData';
 
 type AssignmentRow = NonNullable<ReturnType<typeof useAssignments>['data']>[number];
-import { useAuth } from '@/hooks/useAuth';
 import { useDemoMode } from '@/hooks/useDemoMode';
 import { demoAssignments, demoActivity, demoKpis, demoAttentionItems, type DemoAssignment } from '@/lib/demo-data';
 import { calculateDecimalHours, formatSwedishTime } from '@/lib/format';
@@ -47,7 +46,6 @@ const todayLabel = (date = new Date()) => date.toLocaleDateString('sv-SE', { wee
 
 export default function AdminDashboardPage() {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
   const { enabled: demoOn } = useDemoMode();
   const { data: realAssignments, isLoading } = useAssignments();
   const { data: drivers } = useDrivers();
