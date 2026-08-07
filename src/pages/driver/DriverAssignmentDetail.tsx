@@ -12,6 +12,7 @@ import { formatSwedishDateTime, calculateDuration } from '@/lib/format';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { PUBLIC_SITE_URL } from '@/lib/constants';
+import DriverExtraWorkCard from '@/features/driver/DriverExtraWorkCard';
 import {
   AlertTriangle,
   ArrowLeft,
