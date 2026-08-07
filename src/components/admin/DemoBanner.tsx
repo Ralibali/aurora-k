@@ -13,14 +13,14 @@ export function DemoBanner() {
           Exempeldata visas
         </span>
         <span className="hidden sm:inline text-amber-800/80 dark:text-amber-200/70">
-          Ingen riktig data sparas. Stäng av för att se ditt riktiga konto.
+          Visas bara i tomma vyer. Din egen data påverkas inte.
         </span>
         <button
           onClick={disable}
           className="ml-auto inline-flex items-center gap-1 hover:text-amber-950 dark:hover:text-amber-100 transition-colors"
         >
           <X className="h-3.5 w-3.5" />
-          Stäng av
+          Ta bort exempeldata
         </button>
       </div>
     </div>
