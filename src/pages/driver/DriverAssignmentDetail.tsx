@@ -434,6 +434,13 @@ export default function DriverAssignmentDetail() {
           <CardContent className="space-y-3"><Textarea rows={6} value={driverComment} onChange={e => setDriverComment(e.target.value)} placeholder="Skriv anteckning, status eller information till admin..." /><Button variant="outline" onClick={handleSaveComment} disabled={updateAssignment.isPending} className="w-full"><Send className="mr-2 h-4 w-4" /> Spara kommentar</Button></CardContent>
         </Card>
 
+        <DriverExtraWorkCard assignmentId={assignment.id} companyId={companyId} readOnly={isCompleted} />
+
+        <Card className="hidden">
+          <CardHeader><CardTitle className="text-base">placeholder</CardTitle></CardHeader>
+          <CardContent className="space-y-3"><Textarea rows={6} value={driverComment} onChange={e => setDriverComment(e.target.value)} placeholder="Skriv anteckning, status eller information till admin..." /><Button variant="outline" onClick={handleSaveComment} disabled={updateAssignment.isPending} className="w-full"><Send className="mr-2 h-4 w-4" /> Spara kommentar</Button></CardContent>
+        </Card>
+
         {isCompleted && (
           <Card className="border-green-200 bg-green-50"><CardContent className="space-y-3 p-5 text-center"><CheckCircle2 className="mx-auto h-12 w-12 text-green-600" /><p className="text-lg font-bold text-green-900">Uppdraget är slutfört</p>{assignment.actual_start && assignment.actual_stop && <p className="text-sm text-green-800">Tid: {calculateDuration(assignment.actual_start, assignment.actual_stop)}</p>}{a.consignment_photo_url && <img src={a.consignment_photo_url} alt="Fraktsedel" className="mx-auto mt-3 max-w-xs rounded-xl border bg-white" />}{a.signature_url && <img src={a.signature_url} alt="Mottagarsignatur" className="mx-auto mt-3 max-w-xs rounded-xl border bg-white p-3" />}</CardContent></Card>
         )}
