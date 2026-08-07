@@ -13,7 +13,7 @@ export function AttentionQueue({ items }: { items: AttentionItem[] }) {
   return (
     <section className="space-y-3">
       <div className="flex items-center justify-between gap-3">
-        <div><h3 className="font-semibold">Kräver din uppmärksamhet</h3><p className="text-xs text-muted-foreground">Aurora prioriterar avvikelser och nästa bästa åtgärd.</p></div>
+        <div><h3 className="font-semibold">Kräver din uppmärksamhet</h3><p className="text-xs text-muted-foreground">Avvikelser och åtgärder som väntar.</p></div>
         <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-semibold">{items.reduce((sum, item) => sum + item.count, 0)} åtgärder</span>
       </div>
 
