@@ -29,24 +29,15 @@ function startOfDayIso(date = new Date()) {
   return copy.toISOString();
 }
 
-function greeting() {
-  const hour = new Date().getHours();
-  if (hour < 10) return 'God morgon';
-  if (hour < 17) return 'Hej';
-  if (hour < 22) return 'God kväll';
-  return 'God natt';
-}
-
-function Kpi({ icon: Icon, value, label, loading, helper }: { icon: typeof Briefcase; value: string | number; label: string; loading: boolean; helper?: string }) {
+function Kpi({ icon: Icon, value, label, loading }: { icon: typeof Briefcase; value: string | number; label: string; loading: boolean }) {
   return (
-    <div className="stat-card group">
-      <div className="flex items-start justify-between gap-3">
+    <div className="nordic-card rounded-xl p-3">
+      <div className="flex items-center justify-between gap-3">
         <div>
-          {loading ? <Skeleton className="h-8 w-20 rounded-lg" /> : <p className="stat-card-value">{value}</p>}
-          <p className="stat-card-label mt-1">{label}</p>
-          {helper && <p className="mt-2 text-xs text-muted-foreground">{helper}</p>}
+          {loading ? <Skeleton className="h-7 w-20 rounded-lg" /> : <p className="text-2xl font-semibold tracking-tight">{value}</p>}
+          <p className="mt-0.5 text-xs text-muted-foreground">{label}</p>
         </div>
-        <div className="stat-card-icon bg-primary/10 text-primary"><Icon className="h-5 w-5" /></div>
+        <Icon className="h-4 w-4 text-muted-foreground" />
       </div>
     </div>
   );
