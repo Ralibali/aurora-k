@@ -279,6 +279,7 @@ export type Database = {
           address: string
           admin_comment: string | null
           assigned_driver_id: string
+          booking_request_id: string | null
           co2_kg: number | null
           company_id: string | null
           consignment_photo_url: string | null
@@ -319,6 +320,7 @@ export type Database = {
           address: string
           admin_comment?: string | null
           assigned_driver_id: string
+          booking_request_id?: string | null
           co2_kg?: number | null
           company_id?: string | null
           consignment_photo_url?: string | null
@@ -359,6 +361,7 @@ export type Database = {
           address?: string
           admin_comment?: string | null
           assigned_driver_id?: string
+          booking_request_id?: string | null
           co2_kg?: number | null
           company_id?: string | null
           consignment_photo_url?: string | null
@@ -399,6 +402,13 @@ export type Database = {
             columns: ["assigned_driver_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignments_booking_request_id_fkey"
+            columns: ["booking_request_id"]
+            isOneToOne: false
+            referencedRelation: "booking_requests"
             referencedColumns: ["id"]
           },
           {
@@ -934,6 +944,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_documents_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
