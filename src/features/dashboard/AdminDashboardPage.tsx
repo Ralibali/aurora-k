@@ -123,7 +123,7 @@ export default function AdminDashboardPage() {
   const firstName = user?.user_metadata?.full_name?.split(' ')[0] ?? 'där';
 
   return (
-    <AdminLayout title="Dashboard" description="Nordisk kontrollpanel för dagens transportflöde">
+    <AdminLayout title="Dashboard" description="Dagens läge">
       <div className="space-y-5">
         <section className="nordic-card flex flex-wrap items-center justify-between gap-3 rounded-xl p-4">
           <div className="min-w-0">
