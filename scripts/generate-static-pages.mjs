@@ -521,7 +521,7 @@ function main() {
   }
 
   // 2) Bloggposter
-  const posts = loadBlogPosts();
+  const posts = loadBlogPosts(resolve(ROOT, "src/lib/blog-data.ts"));
   for (const post of posts) {
     const route = `/blogg/${post.slug}`;
     const canonical = `${BASE_URL}${route}`;
