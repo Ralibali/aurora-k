@@ -50,7 +50,7 @@ function AppearanceTab() {
   );
 }
 
-type SettingsSection = 'company' | 'features' | 'appearance' | 'subscription' | null;
+type SettingsSection = 'company' | 'features' | 'appearance' | 'demo' | 'subscription' | null;
 
 const settingsMenu = [
   { key: 'company' as const, label: 'Företag', description: 'Namn, adress och betaluppgifter', icon: Building },
