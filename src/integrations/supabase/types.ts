@@ -279,14 +279,12 @@ export type Database = {
           address: string
           admin_comment: string | null
           assigned_driver_id: string
-          booking_request_id: string | null
           co2_kg: number | null
           company_id: string | null
           consignment_photo_url: string | null
           cost: number | null
           created_at: string
           customer_id: string
-          delivery_address: string | null
           distance_km: number | null
           driver_comment: string | null
           fuel_liters: number | null
@@ -297,7 +295,6 @@ export type Database = {
           instructions: string | null
           invoiced: boolean
           order_id: string | null
-          pickup_address: string | null
           priority: string
           require_photo: boolean
           require_signature: boolean
@@ -306,7 +303,6 @@ export type Database = {
           scheduled_start: string
           series_date: string | null
           series_id: string | null
-          service_type: string | null
           signature_url: string | null
           status: string
           title: string
@@ -320,14 +316,12 @@ export type Database = {
           address: string
           admin_comment?: string | null
           assigned_driver_id: string
-          booking_request_id?: string | null
           co2_kg?: number | null
           company_id?: string | null
           consignment_photo_url?: string | null
           cost?: number | null
           created_at?: string
           customer_id: string
-          delivery_address?: string | null
           distance_km?: number | null
           driver_comment?: string | null
           fuel_liters?: number | null
@@ -338,7 +332,6 @@ export type Database = {
           instructions?: string | null
           invoiced?: boolean
           order_id?: string | null
-          pickup_address?: string | null
           priority?: string
           require_photo?: boolean
           require_signature?: boolean
@@ -347,7 +340,6 @@ export type Database = {
           scheduled_start: string
           series_date?: string | null
           series_id?: string | null
-          service_type?: string | null
           signature_url?: string | null
           status?: string
           title: string
@@ -361,14 +353,12 @@ export type Database = {
           address?: string
           admin_comment?: string | null
           assigned_driver_id?: string
-          booking_request_id?: string | null
           co2_kg?: number | null
           company_id?: string | null
           consignment_photo_url?: string | null
           cost?: number | null
           created_at?: string
           customer_id?: string
-          delivery_address?: string | null
           distance_km?: number | null
           driver_comment?: string | null
           fuel_liters?: number | null
@@ -379,7 +369,6 @@ export type Database = {
           instructions?: string | null
           invoiced?: boolean
           order_id?: string | null
-          pickup_address?: string | null
           priority?: string
           require_photo?: boolean
           require_signature?: boolean
@@ -388,7 +377,6 @@ export type Database = {
           scheduled_start?: string
           series_date?: string | null
           series_id?: string | null
-          service_type?: string | null
           signature_url?: string | null
           status?: string
           title?: string
@@ -890,57 +878,6 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      driver_documents: {
-        Row: {
-          company_id: string
-          created_at: string | null
-          doc_type: string
-          driver_id: string
-          expires_at: string | null
-          id: string
-          label: string | null
-          notes: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          company_id: string
-          created_at?: string | null
-          doc_type: string
-          driver_id: string
-          expires_at?: string | null
-          id?: string
-          label?: string | null
-          notes?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          company_id?: string
-          created_at?: string | null
-          doc_type?: string
-          driver_id?: string
-          expires_at?: string | null
-          id?: string
-          label?: string | null
-          notes?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "driver_documents_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "driver_documents_driver_id_fkey"
-            columns: ["driver_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -2557,60 +2494,6 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      vehicle_maintenance: {
-        Row: {
-          company_id: string
-          created_at: string | null
-          done_at: string | null
-          due_date: string | null
-          due_odometer_km: number | null
-          id: string
-          notes: string | null
-          type: string
-          updated_at: string | null
-          vehicle_id: string
-        }
-        Insert: {
-          company_id: string
-          created_at?: string | null
-          done_at?: string | null
-          due_date?: string | null
-          due_odometer_km?: number | null
-          id?: string
-          notes?: string | null
-          type: string
-          updated_at?: string | null
-          vehicle_id: string
-        }
-        Update: {
-          company_id?: string
-          created_at?: string | null
-          done_at?: string | null
-          due_date?: string | null
-          due_odometer_km?: number | null
-          id?: string
-          notes?: string | null
-          type?: string
-          updated_at?: string | null
-          vehicle_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "vehicle_maintenance_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "vehicle_maintenance_vehicle_id_fkey"
-            columns: ["vehicle_id"]
-            isOneToOne: false
-            referencedRelation: "vehicles"
             referencedColumns: ["id"]
           },
         ]
