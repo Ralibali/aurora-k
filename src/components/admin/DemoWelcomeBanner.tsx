@@ -51,9 +51,11 @@ export function DemoWelcomeBanner({ isEmpty }: { isEmpty: boolean }) {
             fakturor, statistik och miljödata hänger ihop — eller hoppa direkt in och börja skapa själv.
           </p>
           <div className="flex flex-wrap items-center gap-2 mt-4">
-            <Button size="sm" onClick={enable} className="gap-1.5">
-              <Sparkles className="h-3.5 w-3.5" />
-              Visa exempeldata
+            <Button size="sm" asChild className="gap-1.5">
+              <Link to="/admin/settings">
+                <Sparkles className="h-3.5 w-3.5" />
+                Visa exempeldata via inställningar
+              </Link>
             </Button>
             <Button size="sm" variant="outline" asChild className="gap-1.5">
               <Link to="/admin/customers/new">
