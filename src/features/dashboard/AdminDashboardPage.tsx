@@ -111,71 +111,58 @@ export default function AdminDashboardPage() {
       .slice(-10)
       .reverse();
 
-  const firstName = user?.user_metadata?.full_name?.split(' ')[0] ?? 'där';
-
   return (
-    <AdminLayout title="Dashboard" description="Dagens läge">
-      <div className="space-y-5">
-        <section className="nordic-card flex flex-wrap items-center justify-between gap-3 rounded-xl p-4">
-          <div className="min-w-0">
-            <p className="text-lg font-semibold tracking-tight text-foreground">{greeting()}, {firstName}</p>
-            <p className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
-              <span className="capitalize">{todayLabel()}</span>
-              {isLive && <span className="inline-flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-success" /> Realtid</span>}
-            </p>
-          </div>
+    <AdminLayout title="Översikt" description={todayLabel()}>
+      <div className="space-y-4">
+        <section className="flex flex-wrap items-center justify-between gap-3">
+          <p className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span className="capitalize">{todayLabel()}</span>
+            {isLive && <span className="inline-flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-success" /> Realtid</span>}
+          </p>
           <div className="flex flex-wrap items-center gap-2">
-            <Button asChild className="rounded-md"><Link to="/admin/assignments/new"><Plus className="mr-2 h-4 w-4" /> Skapa uppdrag</Link></Button>
-            <Button variant="outline" asChild className="rounded-md"><Link to="/admin/booking-requests">Bokningsförfrågningar <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
+            <Button size="sm" asChild className="rounded-md"><Link to="/admin/assignments/new"><Plus className="mr-2 h-4 w-4" /> Nytt uppdrag</Link></Button>
+            <Button size="sm" variant="outline" asChild className="rounded-md"><Link to="/admin/booking-requests">Bokningsförfrågningar</Link></Button>
           </div>
         </section>
 
         <AttentionQueue items={attentionItems} />
 
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <Kpi icon={Briefcase} value={activeCount} label="Aktiva uppdrag idag" loading={isLoading} helper="Dagens körningar" />
-          <Kpi icon={Users} value={availableDrivers} label="Lediga förare" loading={isLoading} helper="Redo att tilldelas" />
-          <Kpi icon={Clock} value={`${displayedHours.toFixed(1)} h`} label="Rapporterade timmar" loading={isLoading} helper="Senaste 7 dagarna" />
-          <Kpi icon={Wallet} value={`${Math.round(displayedInvoiceable).toLocaleString('sv-SE')} kr`} label="Ofakturerat värde" loading={isLoading} helper="Kan bli intäkt" />
+          <Kpi icon={Briefcase} value={activeCount} label="Aktiva uppdrag idag" loading={isLoading} />
+          <Kpi icon={Users} value={availableDrivers} label="Lediga förare" loading={isLoading} />
+          <Kpi icon={Clock} value={`${displayedHours.toFixed(1)} h`} label="Timmar 7 dagar" loading={isLoading} />
+          <Kpi icon={Wallet} value={`${Math.round(displayedInvoiceable).toLocaleString('sv-SE')} kr`} label="Ofakturerat" loading={isLoading} />
         </div>
 
-        <div className="grid gap-5 lg:grid-cols-5">
-          <section className="space-y-3 lg:col-span-3">
+        <div className="grid gap-4 lg:grid-cols-5">
+          <section className="space-y-2 lg:col-span-3">
             <div className="flex items-center justify-between gap-3">
-              <div>
-                <h3 className="font-semibold">Dagens uppdrag</h3>
-                <p className="text-xs text-muted-foreground">Klicka in där du behöver agera.</p>
-              </div>
-              <Button size="sm" asChild className="rounded-md"><Link to="/admin/assignments/new"><Plus className="mr-1 h-4 w-4" /> Nytt uppdrag</Link></Button>
+              <h3 className="text-sm font-semibold">Dagens uppdrag</h3>
+              <Button variant="ghost" size="sm" asChild className="rounded-md"><Link to="/admin/assignments">Visa alla <ArrowRight className="ml-1 h-4 w-4" /></Link></Button>
             </div>
             {liveJobs.length === 0 ? (
-              <div className="nordic-card rounded-xl border-dashed p-6 text-center">
-                <Inbox className="mx-auto mb-3 h-9 w-9 text-muted-foreground" />
-                <p className="font-semibold">Inga uppdrag idag</p>
-                <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">Lägg upp dagens första uppdrag så syns det här, eller öppna kalendern för att planera veckan.</p>
-                <div className="mt-4 flex flex-col justify-center gap-2 sm:flex-row">
-                  <Button asChild className="rounded-md"><Link to="/admin/assignments/new"><Plus className="mr-1 h-4 w-4" /> Skapa uppdrag</Link></Button>
-                  <Button variant="outline" asChild className="rounded-md"><Link to="/admin/calendar"><CalendarDays className="mr-1 h-4 w-4" /> Öppna kalender</Link></Button>
-                </div>
+              <div className="nordic-card flex items-center gap-2 rounded-xl border-dashed p-4 text-sm text-muted-foreground">
+                <Inbox className="h-4 w-4" /> Inga uppdrag idag
+                <Button variant="ghost" size="sm" asChild className="ml-auto rounded-md"><Link to="/admin/calendar"><CalendarDays className="mr-1 h-4 w-4" /> Kalender</Link></Button>
               </div>
-            ) : liveJobs.map(item => (
-              <Link key={item.id} to={demoOn ? '#' : `/admin/assignments/${item.id}`} className="nordic-card flex items-center gap-3 rounded-xl p-3 text-sm transition-colors hover:border-primary/40">
+            ) : (
+              <div className="nordic-card divide-y overflow-hidden rounded-xl">
+                {liveJobs.map(item => (
+              <Link key={item.id} to={demoOn ? '#' : `/admin/assignments/${item.id}`} className="flex items-center gap-3 px-3 py-2 text-sm transition-colors hover:bg-muted/50">
                 <span className="min-w-0 flex-1 truncate font-medium">{item.customer?.name ?? item.title}</span>
                 <span className="shrink-0 font-mono-ui text-xs text-muted-foreground">{formatSwedishTime(item.scheduled_start)}</span>
                 <span className="hidden min-w-0 max-w-[9rem] flex-1 truncate text-xs text-muted-foreground sm:block">{item.driver?.full_name ?? 'Ej tilldelad'}</span>
                 <StatusBadge status={item.status} />
               </Link>
-            ))}
-            <Button variant="ghost" size="sm" asChild className="rounded-md"><Link to="/admin/assignments">Visa alla <ArrowRight className="ml-1 h-4 w-4" /></Link></Button>
+                ))}
+              </div>
+            )}
           </section>
 
-          <section className="space-y-3 lg:col-span-2">
-            <div>
-              <h3 className="font-semibold">Aktivitetsflöde</h3>
-              <p className="text-xs text-muted-foreground">Senaste händelserna idag.</p>
-            </div>
+          <section className="space-y-2 lg:col-span-2">
+            <h3 className="text-sm font-semibold">Aktivitet idag</h3>
             <div className="nordic-card divide-y overflow-hidden rounded-xl">
-              {activity.length === 0 ? <p className="p-6 text-center text-sm text-muted-foreground">Ingen aktivitet idag.</p> : activity.map(item => <div key={item.key} className="flex items-start justify-between gap-3 p-3 text-sm"><p>{item.text}</p><span className="shrink-0 font-mono-ui text-xs text-muted-foreground">{item.time}</span></div>)}
+              {activity.length === 0 ? <p className="p-4 text-sm text-muted-foreground">Ingen aktivitet idag.</p> : activity.map(item => <div key={item.key} className="flex items-start justify-between gap-3 px-3 py-2 text-sm"><p>{item.text}</p><span className="shrink-0 font-mono-ui text-xs text-muted-foreground">{item.time}</span></div>)}
             </div>
             <div className="grid grid-cols-2 gap-2"><Button variant="outline" size="sm" asChild className="rounded-md"><Link to="/admin/live-map"><MapPin className="mr-1 h-4 w-4" /> Live-karta</Link></Button><Button variant="outline" size="sm" asChild className="rounded-md"><Link to="/admin/reports"><Clock className="mr-1 h-4 w-4" /> Tidrapporter</Link></Button></div>
           </section>
