@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Briefcase, CalendarDays, CheckCircle2, Clock, Inbox, MapPin, Plus, Route, ShieldCheck, Sparkles, TrendingUp, Users, Wallet } from 'lucide-react';
+import { ArrowRight, Briefcase, CalendarDays, Clock, Inbox, MapPin, Plus, Users, Wallet } from 'lucide-react';
 import { AdminLayout } from '@/components/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -12,7 +12,7 @@ import { useAssignments, useDrivers, useInvoices } from '@/hooks/useData';
 type AssignmentRow = NonNullable<ReturnType<typeof useAssignments>['data']>[number];
 import { useAuth } from '@/hooks/useAuth';
 import { useDemoMode } from '@/hooks/useDemoMode';
-import { demoAssignments, demoActivity, demoKpis, type DemoAssignment } from '@/lib/demo-data';
+import { demoAssignments, demoActivity, demoKpis, demoAttentionItems, type DemoAssignment } from '@/lib/demo-data';
 import { calculateDecimalHours, formatSwedishTime } from '@/lib/format';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
@@ -40,40 +40,19 @@ function greeting() {
 function Kpi({ icon: Icon, value, label, loading, helper }: { icon: typeof Briefcase; value: string | number; label: string; loading: boolean; helper?: string }) {
   return (
     <div className="stat-card group">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
       <div className="flex items-start justify-between gap-3">
         <div>
           {loading ? <Skeleton className="h-8 w-20 rounded-lg" /> : <p className="stat-card-value">{value}</p>}
           <p className="stat-card-label mt-1">{label}</p>
           {helper && <p className="mt-2 text-xs text-muted-foreground">{helper}</p>}
         </div>
-        <div className="stat-card-icon bg-primary/10 text-primary transition-transform group-hover:scale-105"><Icon className="h-5 w-5" /></div>
+        <div className="stat-card-icon bg-primary/10 text-primary"><Icon className="h-5 w-5" /></div>
       </div>
     </div>
   );
 }
 
-function TrustStrip() {
-  const items = [
-    { icon: ShieldCheck, title: 'Svenskt arbetsflöde', text: 'Planering, förare och fakturering i samma vy.' },
-    { icon: CheckCircle2, title: 'Tydliga beslut', text: 'Fokus på avvikelser, ofakturerat och dagens uppdrag.' },
-    { icon: Route, title: 'Mindre friktion', text: 'Snabbvägar till det som faktiskt driver intäkter.' },
-  ];
-
-  return (
-    <div className="grid gap-3 md:grid-cols-3">
-      {items.map(({ icon: Icon, title, text }) => (
-        <div key={title} className="nordic-card flex items-start gap-3 p-4">
-          <div className="rounded-2xl bg-success/10 p-2 text-success"><Icon className="h-4 w-4" /></div>
-          <div>
-            <p className="text-sm font-semibold text-foreground">{title}</p>
-            <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{text}</p>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
+const todayLabel = (date = new Date()) => date.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'long' });
 
 export default function AdminDashboardPage() {
   const queryClient = useQueryClient();
