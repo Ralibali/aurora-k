@@ -405,6 +405,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "assignments_booking_request_id_fkey"
+            columns: ["booking_request_id"]
+            isOneToOne: false
+            referencedRelation: "booking_requests"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "assignments_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
@@ -897,36 +904,39 @@ export type Database = {
       driver_documents: {
         Row: {
           company_id: string
-          created_at: string | null
+          created_at: string
           doc_type: string
           driver_id: string
           expires_at: string | null
+          file_url: string | null
           id: string
           label: string | null
           notes: string | null
-          updated_at: string | null
+          updated_at: string
         }
         Insert: {
           company_id: string
-          created_at?: string | null
+          created_at?: string
           doc_type: string
           driver_id: string
           expires_at?: string | null
+          file_url?: string | null
           id?: string
           label?: string | null
           notes?: string | null
-          updated_at?: string | null
+          updated_at?: string
         }
         Update: {
           company_id?: string
-          created_at?: string | null
+          created_at?: string
           doc_type?: string
           driver_id?: string
           expires_at?: string | null
+          file_url?: string | null
           id?: string
           label?: string | null
           notes?: string | null
-          updated_at?: string | null
+          updated_at?: string
         }
         Relationships: [
           {
@@ -2564,38 +2574,41 @@ export type Database = {
       vehicle_maintenance: {
         Row: {
           company_id: string
-          created_at: string | null
-          done_at: string | null
+          completed_at: string | null
+          cost: number | null
+          created_at: string
           due_date: string | null
           due_odometer_km: number | null
           id: string
           notes: string | null
           type: string
-          updated_at: string | null
+          updated_at: string
           vehicle_id: string
         }
         Insert: {
           company_id: string
-          created_at?: string | null
-          done_at?: string | null
+          completed_at?: string | null
+          cost?: number | null
+          created_at?: string
           due_date?: string | null
           due_odometer_km?: number | null
           id?: string
           notes?: string | null
           type: string
-          updated_at?: string | null
+          updated_at?: string
           vehicle_id: string
         }
         Update: {
           company_id?: string
-          created_at?: string | null
-          done_at?: string | null
+          completed_at?: string | null
+          cost?: number | null
+          created_at?: string
           due_date?: string | null
           due_odometer_km?: number | null
           id?: string
           notes?: string | null
           type?: string
-          updated_at?: string | null
+          updated_at?: string
           vehicle_id?: string
         }
         Relationships: [

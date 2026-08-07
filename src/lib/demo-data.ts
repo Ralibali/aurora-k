@@ -132,6 +132,12 @@ export const demoEnvironment = {
   fuelLiters: 4_960,
 };
 
+export const demoAttentionItems = [
+  { id: 'demo-delayed', tone: 'red' as const, title: 'Försenade transporter', description: 'Kundkontakt eller omplanering kan behövas.', count: 2, href: '/admin/assignments', action: 'Hantera' },
+  { id: 'demo-unassigned', tone: 'amber' as const, title: 'Saknar chaufför', description: 'Planerade uppdrag behöver tilldelas.', count: 3, href: '/admin/assignments', action: 'Tilldela' },
+  { id: 'demo-invoice-ready', tone: 'green' as const, title: 'Redo att fakturera', description: 'Slutförda uppdrag har komplett underlag.', count: 5, href: '/admin/invoices/new', action: 'Fakturera' },
+];
+
 export const demoActivity = [
   { key: 'd-act-1', driver: 'Johan Svensson', action: 'startade', title: 'Nilsson Åkeri AB — Möbeltransport', time: '08:32', isComplete: false },
   { key: 'd-act-2', driver: 'Maria Karlsson', action: 'slutförde', title: 'AB Transport — Kontorsflytt', time: '11:14', isComplete: true },
