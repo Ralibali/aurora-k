@@ -9,23 +9,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Trash2, Wrench } from 'lucide-react';
 import { toast } from 'sonner';
 
-const CUSTOM = 'custom';
-
 type Props = {
   assignmentId: string;
   companyId: string | null | undefined;
+  customerId?: string | null;
   readOnly?: boolean;
 };
 
-export default function DriverExtraWorkCard({ assignmentId, companyId, readOnly }: Props) {
+export default function DriverExtraWorkCard({ assignmentId, companyId, customerId, readOnly }: Props) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [articleId, setArticleId] = useState<string>(CUSTOM);
-  const [name, setName] = useState('');
-  const [unit, setUnit] = useState('st');
+  const [articleId, setArticleId] = useState<string>('');
   const [quantity, setQuantity] = useState('1');
-  const [unitPrice, setUnitPrice] = useState('0');
-  const [vatRate, setVatRate] = useState('25');
 
   const { data: articles } = useQuery({
     queryKey: ['driver-articles', companyId],
@@ -40,6 +35,28 @@ export default function DriverExtraWorkCard({ assignmentId, companyId, readOnly 
       return data ?? [];
     },
   });
+
+  const { data: customerPrices } = useQuery({
+    queryKey: ['driver-customer-prices', customerId],
+    enabled: !!customerId && !readOnly,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('customer_price_lists')
+        .select('article_id, price')
+        .eq('customer_id', customerId as string);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const priceFor = (id: string) => {
+    const custom = (customerPrices ?? []).find(p => p.article_id === id);
+    if (custom) return Number(custom.price);
+    const article = (articles ?? []).find(a => a.id === id);
+    return Number(article?.default_price ?? 0);
+  };
+
+  const selectedArticle = (articles ?? []).find(a => a.id === articleId) ?? null;
 
   const { data: lines, isLoading } = useQuery({
     queryKey: ['assignment-articles', assignmentId],
@@ -60,32 +77,26 @@ export default function DriverExtraWorkCard({ assignmentId, companyId, readOnly 
   );
 
   const reset = () => {
-    setArticleId(CUSTOM);
-    setName('');
-    setUnit('st');
+    setArticleId('');
     setQuantity('1');
-    setUnitPrice('0');
-    setVatRate('25');
   };
 
   const addLine = useMutation({
     mutationFn: async () => {
       if (!companyId) throw new Error('Saknar företagskoppling');
-      const label = name.trim();
-      if (!label) throw new Error('Beskriv vad du gjort extra');
+      const article = (articles ?? []).find(a => a.id === articleId);
+      if (!article) throw new Error('Välj ett tillval');
       const qty = Number(quantity.replace(',', '.'));
-      const price = Number(unitPrice.replace(',', '.'));
       if (!Number.isFinite(qty) || qty <= 0) throw new Error('Ange ett antal större än 0');
-      if (!Number.isFinite(price) || price < 0) throw new Error('Ange ett giltigt á-pris');
       const { error } = await supabase.from('assignment_articles').insert({
         assignment_id: assignmentId,
         company_id: companyId,
-        article_id: articleId === CUSTOM ? null : articleId,
-        name: label,
-        unit: unit.trim() || 'st',
+        article_id: article.id,
+        name: article.name,
+        unit: article.unit || 'st',
         quantity: qty,
-        unit_price: price,
-        vat_rate: Number(vatRate) || 25,
+        unit_price: priceFor(article.id),
+        vat_rate: Number(article.vat_rate ?? 25),
       });
       if (error) throw error;
     },
@@ -110,28 +121,17 @@ export default function DriverExtraWorkCard({ assignmentId, companyId, readOnly 
     onError: () => toast.error('Kunde inte ta bort tillägget'),
   });
 
-  const pickArticle = (value: string) => {
-    setArticleId(value);
-    if (value === CUSTOM) return;
-    const article = (articles ?? []).find(item => item.id === value);
-    if (!article) return;
-    setName(article.name);
-    setUnit(article.unit);
-    setUnitPrice(String(article.default_price ?? 0));
-    setVatRate(String(article.vat_rate ?? 25));
-  };
-
   if (readOnly && !isLoading && !(lines ?? []).length) return null;
 
   return (
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
-          <Wrench className="h-4 w-4" /> Extra arbete och tillägg
+          <Wrench className="h-4 w-4" /> Tillval
         </CardTitle>
         {!readOnly && (
           <p className="text-sm text-muted-foreground">
-            Behövde du t.ex. en annan kran, extra timmar eller material? Lägg till det här så kommer det med på fakturan.
+            Välj tillval från företagets prislista, t.ex. annan kran eller extra timmar. Priset är satt av administratören.
           </p>
         )}
       </CardHeader>
