@@ -66,40 +66,55 @@ export default function PlatformLeads() {
       toast.error('Företagsnamn krävs');
       return;
     }
-
-    // Create company
-    const { data: company, error: companyError } = await supabase
-      .from('companies')
-      .insert({
-        name: convertCompanyName.trim(),
-        org_nr: convertOrgNr.trim() || null,
-        subscription_status: 'trial',
-        trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-      })
-      .select('id')
-      .single();
-
-    if (companyError) {
-      toast.error('Kunde inte skapa företag: ' + companyError.message);
+    if (!selectedLead.email) {
+      toast.error('Leaden saknar e-postadress — kan inte skapa adminkonto');
       return;
     }
 
-    // Create settings for the company
+    // Skapa företag OCH adminkonto (annars finns ingen mottagare för välkomstmail)
+    const { data, error: fnError } = await supabase.functions.invoke('create-onboarding-link', {
+      body: {
+        company_name: convertCompanyName.trim(),
+        org_nr: convertOrgNr.trim() || null,
+        admin_name: selectedLead.contact_person || convertCompanyName.trim(),
+        admin_email: selectedLead.email,
+      },
+    });
+
+    if (fnError || data?.error) {
+      toast.error('Kunde inte skapa företag: ' + (data?.error || fnError?.message));
+      return;
+    }
+
+    const companyId = data.company_id as string;
+
+    // Provperiod 14 dagar + grundinställningar
+    await supabase.from('companies').update({
+      subscription_status: 'trialing',
+      trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+    }).eq('id', companyId);
+
     await supabase.from('settings').insert({
-      company_id: company.id,
+      company_id: companyId,
       company_name: convertCompanyName.trim(),
     });
 
     // Mark lead as converted
     await supabase.from('leads')
-      .update({ status: 'converted', admin_notes: (selectedLead.admin_notes || '') + `\nKonverterad till företag ${company.id}` })
+      .update({ status: 'converted', admin_notes: (selectedLead.admin_notes || '') + `\nKonverterad till företag ${companyId}` })
       .eq('id', selectedLead.id);
 
     queryClient.invalidateQueries({ queryKey: ['platform-leads'] });
     queryClient.invalidateQueries({ queryKey: ['platform-companies'] });
+    queryClient.invalidateQueries({ queryKey: ['platform-companies-detail'] });
+    queryClient.invalidateQueries({ queryKey: ['platform-profiles-all'] });
     setConvertOpen(false);
     setSelectedLead(null);
-    toast.success(`Företag "${convertCompanyName}" skapat! Du kan nu bjuda in ägaren under Företag-fliken.`);
+    toast.success(
+      data.temp_password
+        ? `Företag "${convertCompanyName}" skapat. Tillfälligt lösenord: ${data.temp_password}`
+        : `Företag "${convertCompanyName}" skapat!`,
+    );
   };
 
   const filtered = leads.filter((lead) => {

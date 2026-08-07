@@ -121,7 +121,7 @@ export default function PlatformCompanies() {
     mutationFn: async ({ companyId }: { companyId: string }) => {
       const admins = getCompanyProfiles(companyId).filter((p) => p.role === 'admin');
       const admin = admins[0];
-      if (!admin) throw new Error('Ingen admin hittad');
+      if (!admin) throw new Error('Företaget har inget adminkonto ännu — skapa/bjud in ägaren först');
       const company = companies?.find((c) => c.id === companyId);
       const { error } = await supabase.functions.invoke('send-email', {
         body: {
@@ -133,7 +133,7 @@ export default function PlatformCompanies() {
       if (error) throw error;
     },
     onSuccess: () => toast.success('Välkomstmail skickat'),
-    onError: () => toast.error('Kunde inte skicka mail'),
+    onError: (e) => toast.error(e instanceof Error ? e.message : 'Kunde inte skicka mail'),
   });
 
   const handleCreateCompany = async () => {
