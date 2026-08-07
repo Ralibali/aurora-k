@@ -178,50 +178,42 @@ export default function DriverExtraWorkCard({ assignmentId, companyId, customerI
 
         {!readOnly && open && (
           <div className="space-y-3 rounded-xl border bg-muted/30 p-3">
-            {(articles ?? []).length > 0 && (
-              <div className="space-y-1.5">
-                <Label>Välj tjänst</Label>
-                <Select value={articleId} onValueChange={pickArticle}>
-                  <SelectTrigger className="h-12"><SelectValue placeholder="Välj" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={CUSTOM}>Egen rad (skriv själv)</SelectItem>
-                    {(articles ?? []).map(article => (
-                      <SelectItem key={article.id} value={article.id}>{article.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            {(articles ?? []).length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Inga tillval är upplagda ännu. Kontakta din administratör.
+              </p>
+            ) : (
+              <>
+                <div className="space-y-1.5">
+                  <Label>Välj tillval</Label>
+                  <Select value={articleId} onValueChange={setArticleId}>
+                    <SelectTrigger className="h-12"><SelectValue placeholder="Välj tillval" /></SelectTrigger>
+                    <SelectContent>
+                      {(articles ?? []).map(article => (
+                        <SelectItem key={article.id} value={article.id}>
+                          {article.name} — {priceFor(article.id).toLocaleString('sv-SE')} kr/{article.unit}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="extra-qty">Antal {selectedArticle ? `(${selectedArticle.unit})` : ''}</Label>
+                  <Input id="extra-qty" className="h-12" inputMode="decimal" value={quantity} onChange={e => setQuantity(e.target.value)} />
+                </div>
+                {selectedArticle && (
+                  <p className="text-sm text-muted-foreground">
+                    Pris enligt prislista: {priceFor(selectedArticle.id).toLocaleString('sv-SE')} kr/{selectedArticle.unit}
+                  </p>
+                )}
+              </>
             )}
-            <div className="space-y-1.5">
-              <Label htmlFor="extra-name">Vad gjordes?</Label>
-              <Input
-                id="extra-name"
-                className="h-12"
-                value={name}
-                onChange={e => setName(e.target.value)}
-                placeholder="T.ex. Extra kran 30 ton"
-              />
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              <div className="space-y-1.5">
-                <Label htmlFor="extra-qty">Antal</Label>
-                <Input id="extra-qty" className="h-12" inputMode="decimal" value={quantity} onChange={e => setQuantity(e.target.value)} />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="extra-unit">Enhet</Label>
-                <Input id="extra-unit" className="h-12" value={unit} onChange={e => setUnit(e.target.value)} placeholder="st / tim" />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="extra-price">Á-pris</Label>
-                <Input id="extra-price" className="h-12" inputMode="decimal" value={unitPrice} onChange={e => setUnitPrice(e.target.value)} />
-              </div>
-            </div>
             <div className="grid grid-cols-2 gap-2">
               <Button type="button" variant="ghost" className="h-12" onClick={() => { reset(); setOpen(false); }}>
                 Avbryt
               </Button>
-              <Button type="button" className="h-12" onClick={() => addLine.mutate()} disabled={addLine.isPending}>
-                Spara tillägg
+              <Button type="button" className="h-12" onClick={() => addLine.mutate()} disabled={addLine.isPending || !articleId}>
+                Lägg till
               </Button>
             </div>
           </div>
