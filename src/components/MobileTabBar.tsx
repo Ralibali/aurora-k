@@ -28,7 +28,7 @@ export function MobileTabBar() {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const { signOut } = useAuth();
-  const { enabled: demoEnabled, toggle: toggleDemo } = useDemoMode();
+  const { enabled: demoEnabled, disable: disableDemo } = useDemoMode();
 
   const isTabActive = (tab: typeof tabs[number]) => {
     if (tab.exact) return location.pathname === tab.to;
@@ -129,25 +129,22 @@ export function MobileTabBar() {
                 ))}
               </div>
               <div className="border-t border-border px-5 py-3">
-                <button
-                  onClick={() => {
-                    toggleDemo();
-                    setMenuOpen(false);
-                    toast(demoEnabled ? 'Exempeldata avstängt' : 'Exempeldata påslaget', {
-                      description: demoEnabled ? 'Du ser nu din riktiga data.' : 'Du ser nu exempeldata — inget sparas.',
-                      duration: 3000,
-                    });
-                  }}
-                  className="flex items-center justify-between w-full py-3 px-2 text-sm text-foreground active:bg-muted rounded-lg transition-colors"
-                >
-                  <span className="flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-primary" />
-                    {demoEnabled ? 'Stäng av exempeldata' : 'Visa exempeldata'}
-                  </span>
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${demoEnabled ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
-                    {demoEnabled ? 'PÅ' : 'AV'}
-                  </span>
-                </button>
+                {demoEnabled && (
+                  <button
+                    onClick={() => {
+                      disableDemo();
+                      setMenuOpen(false);
+                      toast('Exempeldata borttagen', { description: 'Du ser nu din riktiga data.', duration: 3000 });
+                    }}
+                    className="flex items-center justify-between w-full py-3 px-2 text-sm text-foreground active:bg-muted rounded-lg transition-colors"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-primary" />
+                      Ta bort exempeldata
+                    </span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-primary/10 text-primary">PÅ</span>
+                  </button>
+                )}
                 <button
                   onClick={handleLogout}
                   className="flex items-center gap-3 w-full py-3 text-sm text-destructive active:bg-muted rounded-lg transition-colors"

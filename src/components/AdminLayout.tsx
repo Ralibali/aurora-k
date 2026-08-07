@@ -38,24 +38,21 @@ interface AdminLayoutProps {
 }
 
 function DemoToggle() {
-  const { enabled, toggle } = useDemoMode();
-  const handleToggle = () => {
-    toggle();
-    toast(enabled ? 'Exempeldata avstängt' : 'Exempeldata påslaget', {
-      description: enabled ? 'Du ser nu din riktiga data.' : 'Du ser nu exempeldata — inget sparas.',
-      duration: 3000,
-    });
-  };
+  const { enabled, disable } = useDemoMode();
+  if (!enabled) return null;
   return (
     <Button
-      variant={enabled ? 'default' : 'outline'}
+      variant="outline"
       size="sm"
-      onClick={handleToggle}
-      className={`hidden md:inline-flex h-9 gap-1.5 rounded-full ${enabled ? 'shadow-sm' : 'border-amber-300/60 bg-white/60 text-amber-700 hover:bg-amber-50 hover:text-amber-800 dark:border-amber-900/60 dark:bg-white/5 dark:text-amber-400 dark:hover:bg-amber-950/30'}`}
-      title="Visa eller dölj exempeldata"
+      onClick={() => {
+        disable();
+        toast('Exempeldata borttagen', { description: 'Du ser nu din riktiga data.', duration: 3000 });
+      }}
+      className="hidden md:inline-flex h-9 gap-1.5 rounded-full border-amber-300/60 bg-white/60 text-amber-700 hover:bg-amber-50 hover:text-amber-800 dark:border-amber-900/60 dark:bg-white/5 dark:text-amber-400 dark:hover:bg-amber-950/30"
+      title="Ta bort exempeldata"
     >
       <Sparkles className="h-3.5 w-3.5" />
-      {enabled ? 'Exempeldata på' : 'Visa exempeldata'}
+      Ta bort exempeldata
     </Button>
   );
 }

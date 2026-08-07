@@ -48,7 +48,7 @@ const navigationItems = [
 export function CommandPalette() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-  const { enabled: demoOn, toggle: toggleDemo } = useDemoMode();
+  const { enabled: demoOn, disable: disableDemo } = useDemoMode();
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -79,10 +79,12 @@ export function CommandPalette() {
               <span>{a.label}</span>
             </CommandItem>
           ))}
-          <CommandItem onSelect={() => { toggleDemo(); setOpen(false); }} className="gap-2">
-            <Sparkles className="h-4 w-4 text-amber-500" />
-            <span>{demoOn ? 'Stäng av exempeldata' : 'Visa exempeldata'}</span>
-          </CommandItem>
+          {demoOn && (
+            <CommandItem onSelect={() => { disableDemo(); setOpen(false); }} className="gap-2">
+              <Sparkles className="h-4 w-4 text-amber-500" />
+              <span>Ta bort exempeldata</span>
+            </CommandItem>
+          )}
         </CommandGroup>
 
         <CommandSeparator />

@@ -12,7 +12,7 @@ const DISMISS_KEY = 'aurora-demo-welcome-dismissed';
  * data or starting from scratch.
  */
 export function DemoWelcomeBanner({ isEmpty }: { isEmpty: boolean }) {
-  const { enabled, enable } = useDemoMode();
+  const { enabled } = useDemoMode();
   const [dismissed, setDismissed] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
     return window.localStorage.getItem(DISMISS_KEY) === 'true';
@@ -47,13 +47,15 @@ export function DemoWelcomeBanner({ isEmpty }: { isEmpty: boolean }) {
             Det här är ditt demo-konto
           </h3>
           <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">
-            Du kan testa Aurora Transport med exempeldata för att se hur uppdrag, förare,
-            fakturor, statistik och miljödata hänger ihop — eller hoppa direkt in och börja skapa själv.
+            Du kan slå på exempeldata under Inställningar för att se hur uppdrag, förare, fakturor,
+            statistik och miljödata hänger ihop — din egen data påverkas inte — eller börja skapa själv direkt.
           </p>
           <div className="flex flex-wrap items-center gap-2 mt-4">
-            <Button size="sm" onClick={enable} className="gap-1.5">
-              <Sparkles className="h-3.5 w-3.5" />
-              Visa exempeldata
+            <Button size="sm" asChild className="gap-1.5">
+              <Link to="/admin/settings">
+                <Sparkles className="h-3.5 w-3.5" />
+                Visa exempeldata via inställningar
+              </Link>
             </Button>
             <Button size="sm" variant="outline" asChild className="gap-1.5">
               <Link to="/admin/customers/new">
