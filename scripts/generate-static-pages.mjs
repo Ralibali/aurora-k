@@ -41,6 +41,9 @@ const STATIC_PAGES = [
       "Aurora Transport är ett svenskt transportledningssystem som ersätter Excel, WhatsApp och whiteboard. Hantera uppdrag, förare, tidrapporter och fakturaunderlag i ett enda system – byggt för åkerier, budfirmor och transportbemanning.",
       "Fast pris från 449 kr/månad. Obegränsat antal förare. Ingen bindningstid. Boka en kostnadsfri 15-minuters demo så visar vi hur du kan starta i dag.",
     ],
+    // First-byte CTA: /boka is customer transport booking (a different job).
+    // The product next step is the existing demo page.
+    cta: { href: "/boka-demo", label: "Boka 15 minuters demo" },
   },
   {
     route: "/en",
@@ -368,7 +371,7 @@ function injectJsonLd(html, jsonLd) {
 }
 
 // ---------- Sidrendering -----------------------------------------------------
-function renderStaticBody({ h1, paragraphs, breadcrumbs }) {
+function renderStaticBody({ h1, paragraphs, breadcrumbs, cta }) {
   const crumbs = breadcrumbs
     ? `<nav aria-label="Brödsmulor"><ol>${breadcrumbs
         .map(
@@ -378,8 +381,11 @@ function renderStaticBody({ h1, paragraphs, breadcrumbs }) {
         .join("")}</ol></nav>`
     : "";
   const body = paragraphs.map((p) => `<p>${escapeHtml(p)}</p>`).join("");
+  const ctaHtml = cta
+    ? `<p><a href="${escapeAttr(cta.href)}">${escapeHtml(cta.label)}</a></p>`
+    : "";
   // Sätt aria-hidden för att inte dubbeluppläsas av skärmläsare efter hydration.
-  return `<div data-prerendered="true" aria-hidden="true" style="position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden;">${crumbs}<h1>${escapeHtml(h1)}</h1>${body}</div>`;
+  return `<div data-prerendered="true" aria-hidden="true" style="position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden;">${crumbs}<h1>${escapeHtml(h1)}</h1>${body}${ctaHtml}</div>`;
 }
 
 function buildBreadcrumbJsonLd(items) {
@@ -506,6 +512,7 @@ function main() {
       h1: page.h1,
       paragraphs: page.body,
       breadcrumbs,
+      cta: page.cta,
     });
     const out = renderPage(template, {
       route: page.route,
