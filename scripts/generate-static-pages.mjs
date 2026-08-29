@@ -55,13 +55,13 @@ const STATIC_PAGES = [
   },
   {
     route: "/boka",
-    title: "Boka transport | Aurora Transport",
+    title: "Boka 15 min demo | Aurora Transport",
     description:
-      "Boka en transport hos våra åkerier direkt online. Fyll i uppdrag, adresser och önskad tid – vi återkommer med bekräftelse och pris.",
-    h1: "Boka transport",
+      "Boka en kostnadsfri 15-minuters demo av Aurora Transport – svenskt transportledningssystem för uppdrag, förare och tidrapporter. 449 kr/mån. Ingen bindningstid.",
+    h1: "Boka 15 minuters demo",
     body: [
-      "Behöver du boka en transport? Fyll i formuläret så matchar vi ditt uppdrag med rätt åkeri och återkommer med bekräftelse och pris.",
-      "Ange upphämtnings- och leveransadress, gods och önskad tid – det tar mindre än en minut.",
+      "Aurora Transport är ett transportledningssystem för åkerier och budfirmor, inte en fraktmarknadsplats. Boka en kostnadsfri 15-minuters demo så visar vi uppdrag, förare, tidrapporter och fakturaunderlag i systemet.",
+      "449 kr per månad är månadspriset för programvaran – inte ett fraktpris. Obegränsat antal förare. Ingen bindningstid.",
     ],
   },
   {
@@ -367,6 +367,40 @@ function injectJsonLd(html, jsonLd) {
   return html.replace("</head>", `  ${script}\n</head>`);
 }
 
+// /boka inherits SoftwareApplication Offer 449 from index.html. Rewrite the
+// description on that route so 449 cannot be read as a freight-booking price.
+function clarifyBokaSoftwareOffer(html) {
+  const next = html.replace(
+    '"description": "Fast pris per månad för Aurora Transport."',
+    '"description": "Månadspris för transportledningssystemet Aurora Transport. Inte ett fraktpris."'
+  );
+  if (next === html) {
+    throw new Error(
+      "[generate-static-pages] /boka Offer 449 description was not rewritten to TMS."
+    );
+  }
+  return next;
+}
+
+function assertBokaFirstByteHonesty(page) {
+  const text = [page.title, page.description, page.h1, ...(page.body ?? [])].join(
+    "\n"
+  );
+  const forbidden = [
+    /hos våra åkerier/i,
+    /matchar vi ditt uppdrag/i,
+    /boka en transport/i,
+    /boka transport \|/i,
+  ];
+  for (const re of forbidden) {
+    if (re.test(text)) {
+      throw new Error(
+        `[generate-static-pages] /boka first-byte still contains marketplace copy: ${re}`
+      );
+    }
+  }
+}
+
 // ---------- Sidrendering -----------------------------------------------------
 function renderStaticBody({ h1, paragraphs, breadcrumbs }) {
   const crumbs = breadcrumbs
@@ -497,6 +531,9 @@ function main() {
 
   // 1) Statiska publika sidor
   for (const page of STATIC_PAGES) {
+    if (page.route === "/boka") {
+      assertBokaFirstByteHonesty(page);
+    }
     const canonical = `${BASE_URL}${page.route === "/" ? "/" : page.route}`;
     const breadcrumbs = [{ name: "Hem", url: `${BASE_URL}/` }];
     if (page.route !== "/") {
@@ -507,7 +544,9 @@ function main() {
       paragraphs: page.body,
       breadcrumbs,
     });
-    const out = renderPage(template, {
+    const pageTemplate =
+      page.route === "/boka" ? clarifyBokaSoftwareOffer(template) : template;
+    const out = renderPage(pageTemplate, {
       route: page.route,
       title: page.title,
       description: page.description,
