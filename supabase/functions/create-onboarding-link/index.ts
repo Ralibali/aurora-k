@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.100.1";
 import Stripe from "https://esm.sh/stripe@18.5.0";
+import { safeOrigin } from "../_shared/site-url.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -146,7 +147,7 @@ Deno.serve(async (req) => {
       if (monthlyPriceId) lineItems.push({ price: monthlyPriceId, quantity: 1 });
 
       if (lineItems.length > 0) {
-        const origin = req.headers.get("origin") || "https://aurora-k.lovable.app";
+        const origin = safeOrigin(req);
         const session = await stripe.checkout.sessions.create({
           customer: customer.id,
           line_items: lineItems,

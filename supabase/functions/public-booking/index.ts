@@ -1,6 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { z } from 'https://esm.sh/zod@3';
 import { bookingRequestCreatedEmail, bookingRequestConfirmationEmail } from '../_shared/email-templates.ts';
+import { sitePath } from '../_shared/site-url.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -206,7 +207,7 @@ Deno.serve(async (req) => {
       title: parsed.data.title,
       description: parsed.data.description ?? null,
       attachmentCount: parsed.data.attachment_paths.length,
-      adminUrl: 'https://auroratransport.se/admin/booking-requests',
+      adminUrl: sitePath('/admin/booking-requests'),
     });
     const customerTpl = bookingRequestConfirmationEmail({
       contactName: parsed.data.customer_name,

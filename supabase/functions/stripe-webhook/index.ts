@@ -2,12 +2,13 @@ import { serve } from 'https://deno.land/std@0.190.0/http/server.ts';
 import Stripe from 'https://esm.sh/stripe@18.5.0';
 import { createClient } from 'npm:@supabase/supabase-js@2.57.2';
 import { handleStripeEvent } from './handler.ts';
+import { getSiteUrl } from '../_shared/site-url.ts';
 
 const stripeSecret = Deno.env.get('STRIPE_SECRET_KEY');
 const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
 const supabaseUrl = Deno.env.get('SUPABASE_URL');
 const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-const siteUrl = (Deno.env.get('SITE_URL') || 'https://auroratransport.se').replace(/\/$/, '');
+const siteUrl = getSiteUrl();
 
 if (!stripeSecret || !webhookSecret || !supabaseUrl || !serviceRoleKey) {
   throw new Error('Stripe-webhook saknar obligatoriska miljövariabler');

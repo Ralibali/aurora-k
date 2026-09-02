@@ -1,4 +1,5 @@
 // Aurora Transport – Branded email templates
+import { getSiteUrl, sitePath } from './site-url.ts';
 
 const BRAND = {
   primary: '#1e3a5f',
@@ -14,7 +15,10 @@ const BRAND = {
   danger: '#dc2626',
 };
 
-const layout = (content: string) => `
+const layout = (content: string) => {
+  const siteUrl = getSiteUrl();
+  const siteHost = siteUrl.replace(/^https?:\/\//, '');
+  return `
 <!DOCTYPE html>
 <html lang="sv">
 <head>
@@ -42,7 +46,7 @@ const layout = (content: string) => `
         <!-- Footer -->
         <tr><td style="padding:28px 36px 0;text-align:center">
           <p style="margin:0;font-size:12px;color:${BRAND.muted};line-height:1.6">
-            Aurora Transport · <a href="https://auroratransport.se" style="color:${BRAND.muted};text-decoration:underline">auroratransport.se</a>
+            Aurora Transport · <a href="${siteUrl}" style="color:${BRAND.muted};text-decoration:underline">${siteHost}</a>
           </p>
           <p style="margin:6px 0 0;font-size:12px;color:${BRAND.muted}">
             Frågor? <a href="mailto:info@auroratransport.se" style="color:${BRAND.primaryLight}">info@auroratransport.se</a>
@@ -53,6 +57,7 @@ const layout = (content: string) => `
   </table>
 </body>
 </html>`;
+};
 
 const heading = (text: string) =>
   `<h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:${BRAND.text};line-height:1.3">${text}</h1>`;
@@ -275,7 +280,7 @@ export function newLeadNotificationEmail(data: {
       ${data.fleetSize ? detailRow('Fordon/förare', data.fleetSize) : ''}
     `)}
     ${data.message ? alertBox(`<strong>Meddelande:</strong> ${data.message}`, BRAND.primary) : ''}
-    ${button('Se alla leads', 'https://auroratransport.se/platform/leads')}
+    ${button('Se alla leads', sitePath('/platform/leads'))}
     ${divider()}
     ${smallText('Detta mail skickades automatiskt från Aurora Transport.')}
   `;
@@ -305,9 +310,9 @@ export function newTrialSignupEmail(data: {
       ${data.phone ? detailRow('Telefon', data.phone) : ''}
       ${detailRow('Provperioden slutar', trialEnd)}
     `)}
-    ${button('Se företaget i plattformsadmin', 'https://auroratransport.se/platform/companies')}
+    ${button('Se företaget i plattformsadmin', sitePath('/platform/companies'))}
     ${divider()}
-    ${smallText('Detta mail skickades automatiskt när någon registrerade ett testkonto på auroratransport.se.')}
+    ${smallText(`Detta mail skickades automatiskt när någon registrerade ett testkonto på ${getSiteUrl().replace(/^https?:\/\//, '')}.`)}
   `;
   return {
     subject: `Nytt testkonto: ${data.companyName}`,

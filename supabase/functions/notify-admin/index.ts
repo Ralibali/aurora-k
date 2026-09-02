@@ -2,6 +2,7 @@ import { corsHeaders } from "npm:@supabase/supabase-js@2.100.1/cors";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.100.1";
 import { z } from "https://esm.sh/zod@3";
 import { newCustomerMessageEmail } from "../_shared/email-templates.ts";
+import { sitePath } from "../_shared/site-url.ts";
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
 const FALLBACK_ADMIN_EMAIL = "info@auroramedia.se";
@@ -82,7 +83,7 @@ Deno.serve(async (req) => {
     const template = newCustomerMessageEmail({
       customerName: escapeHtml(customer.name),
       message: escapeHtml(parsed.data.data.message).replace(/\n/g, "<br>"),
-      customerUrl: `https://auroratransport.se/admin/customers/${customer.id}`,
+      customerUrl: sitePath(`/admin/customers/${customer.id}`),
     });
 
     const res = await fetch(`${GATEWAY_URL}/emails`, {
