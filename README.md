@@ -54,3 +54,10 @@ statiska SEO-genereringen.
 `SUPABASE_ACCESS_TOKEN` och `SUPABASE_DB_PASSWORD` finns konfigurerade. Om de
 saknas hoppar deployjobbet över distributionen och ändringen måste distribueras
 från Lovable Cloud/Supabase innan funktionen kan användas i produktion.
+
+Klientlänkar (inbjudan, spårning, portal) läser `VITE_PUBLIC_SITE_URL`.
+Edge-funktioner (Stripe-returer, e-postknappar) läser `SITE_URL` (eller
+`PUBLIC_SITE_URL`). Båda faller tillbaka till `https://auroratransport.se`.
+Sätt dem till samma kanoniska origin utan avslutande slash om produktvärden
+ändras. Supabase Auth redirect-allowlist konfigureras i dashboarden och finns
+inte i git.

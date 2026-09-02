@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.100.1";
 import { z } from "https://esm.sh/zod@3.23.8";
+import { sitePath } from "../_shared/site-url.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -106,7 +107,7 @@ Deno.serve(async (req) => {
           templateData: {
             driverName: name,
             companyName: company?.name || "ditt företag",
-            appUrl: `${req.headers.get("origin") || "https://aurora-k.lovable.app"}/driver/assignments`,
+            appUrl: sitePath("/driver/assignments"),
           },
         },
       });

@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { safeOrigin } from "../_shared/site-url.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,16 +14,6 @@ function json(body: unknown, status = 200) {
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
-}
-
-function safeOrigin(req: Request) {
-  const fallback = (Deno.env.get("SITE_URL") || "https://auroratransport.se").replace(/\/$/, "");
-  const origin = req.headers.get("origin")?.replace(/\/$/, "");
-  const allowed = new Set([fallback, "https://auroratransport.se", "https://aurora-k.lovable.app"]);
-  if (origin && (allowed.has(origin) || origin.startsWith("http://localhost:") || origin.startsWith("http://127.0.0.1:"))) {
-    return origin;
-  }
-  return fallback;
 }
 
 serve(async (req) => {
