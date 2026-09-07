@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AdminLayout } from '@/components/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,7 +10,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAssignments, useCustomers } from '@/hooks/useData';
-import { calculateDecimalHours } from '@/lib/format';
+import { csvCell, invoiceReadiness } from '@/lib/invoice-readiness';
+import { useAssignmentDeviations } from '@/lib/assignment-deviations';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { FileSpreadsheet, FilePlus2, Search, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
@@ -22,25 +23,6 @@ type StatusFilter = 'ready' | 'invoiced' | 'all';
 const fmtSek = (v: number) =>
   new Intl.NumberFormat('sv-SE', { style: 'currency', currency: 'SEK', maximumFractionDigits: 0 }).format(v || 0);
 
-type InvoiceBasisAssignment = {
-  actual_start: string | null;
-  actual_stop: string | null;
-  customer: {
-    pricing_type: string | null;
-    price_per_delivery: number | null;
-    price_per_hour: number | null;
-  } | null;
-};
-
-function calcAmount(a: InvoiceBasisAssignment) {
-  const c = a.customer;
-  if (!c) return { hours: 0, amount: 0 };
-  const hours = a.actual_start && a.actual_stop ? calculateDecimalHours(a.actual_start, a.actual_stop) : 0;
-  if (c.pricing_type === 'per_delivery') return { hours, amount: c.price_per_delivery || 0 };
-  if (c.pricing_type === 'per_hour') return { hours, amount: hours * (c.price_per_hour || 0) };
-  return { hours, amount: 0 };
-}
-
 export default function AdminInvoiceBasis() {
   const { data: assignments, isLoading } = useAssignments();
   const { data: customers } = useCustomers();
@@ -48,6 +30,10 @@ export default function AdminInvoiceBasis() {
   const [status, setStatus] = useState<StatusFilter>('ready');
   const [customerId, setCustomerId] = useState<string>('all');
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const deviations=useAssignmentDeviations();
+  const openCounts=useMemo(()=>{const counts=new Map<string,number>();for(const d of deviations.data??[])counts.set(d.assignment_id,(counts.get(d.assignment_id)??0)+1);return counts;},[deviations.data]);
+  const readiness=useCallback((a:NonNullable<typeof assignments>[number])=>invoiceReadiness(a,openCounts.get(a.id)??0,!deviations.isPending&&!deviations.isError),[openCounts,deviations.isPending,deviations.isError]);
+
 
   const completedAssignments = useMemo(() => {
     return (assignments ?? []).filter((a) => a.status === 'completed');
@@ -71,33 +57,36 @@ export default function AdminInvoiceBasis() {
   const groupedByCustomer = useMemo(() => {
     const map = new Map<string, { customer: (typeof filtered)[number]['customer']; assignments: (typeof filtered)[number][]; total: number; hours: number }>();
     filtered.forEach((a) => {
-      if (!a.customer_id) return;
-      const { hours, amount } = calcAmount(a);
+      if (!a.customer_id || !readiness(a).ready) return;
+      const { hours, amount } = readiness(a);
       const entry = map.get(a.customer_id) ?? { customer: a.customer, assignments: [], total: 0, hours: 0 };
       entry.assignments.push(a);
-      entry.total += amount;
-      entry.hours += hours;
+      entry.total += amount ?? 0;
+      entry.hours += hours ?? 0;
       map.set(a.customer_id, entry);
     });
     return Array.from(map.values()).sort((a, b) => b.total - a.total);
-  }, [filtered]);
+  }, [filtered, readiness]);
 
   const stats = useMemo(() => {
-    const ready = completedAssignments.filter((a) => !a.invoiced);
+    const ready = completedAssignments.filter((a) => readiness(a).ready);
     const invoiced = completedAssignments.filter((a) => a.invoiced);
-    const readyAmount = ready.reduce((sum, a) => sum + calcAmount(a).amount, 0);
+    const readyAmount = ready.reduce((sum, a) => sum + (readiness(a).amount ?? 0), 0);
     return {
       readyCount: ready.length,
       readyAmount,
       invoicedCount: invoiced.length,
       customerCount: new Set(ready.map((a) => a.customer_id)).size,
     };
-  }, [completedAssignments]);
+  }, [completedAssignments, readiness]);
 
-  const toggleAll = () => {
-    if (selected.size === filtered.length) setSelected(new Set());
-    else setSelected(new Set(filtered.map((a) => a.id)));
-  };
+  const eligible=filtered.filter(a=>readiness(a).ready);
+  const selectedVisible=filtered.filter(a=>selected.has(a.id));
+  const selectedForInvoice=selectedVisible.filter(a=>readiness(a).ready);
+  const toggleAll=()=>setSelected(previous=>{
+    const result=new Set(previous);const all=eligible.length>0&&eligible.every(a=>previous.has(a.id));
+    for(const a of eligible){if(all)result.delete(a.id);else result.add(a.id);}return result;
+  });
 
   const toggleOne = (id: string) => {
     const next = new Set(selected);
@@ -107,16 +96,17 @@ export default function AdminInvoiceBasis() {
   };
 
   const exportCsv = () => {
-    const rows = filtered.map((a) => {
-      const { hours, amount } = calcAmount(a);
+    const rows = (selectedVisible.length ? selectedVisible : filtered).map((a) => {
+      const { hours, amount } = readiness(a);
       return {
         Datum: a.actual_start ? format(new Date(a.actual_start), 'yyyy-MM-dd', { locale: sv }) : '',
         Uppdrag: a.title,
         Kund: a.customer?.name ?? '',
         Förare: a.driver?.full_name ?? '',
         Adress: a.address,
-        Timmar: hours.toFixed(2),
-        Belopp: amount.toFixed(2),
+        Timmar: hours?.toFixed(2) ?? '',
+        Belopp: amount?.toFixed(2) ?? '',
+        Kontroll: readiness(a).issues.join('; '),
         Status: a.invoiced ? 'Fakturerat' : 'Ej fakturerat',
       };
     });
@@ -127,7 +117,7 @@ export default function AdminInvoiceBasis() {
     const headers = Object.keys(rows[0]);
     const csv = [
       headers.join(';'),
-      ...rows.map((r) => headers.map((h) => `"${String(r[h as keyof typeof r]).replace(/"/g, '""')}"`).join(';')),
+      ...rows.map((r) => headers.map((h) => csvCell(r[h as keyof typeof r])).join(';')),
     ].join('\n');
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -157,7 +147,8 @@ export default function AdminInvoiceBasis() {
   }
 
   return (
-    <AdminLayout title="Fakturaunderlag" description="Översikt över slutförda uppdrag som kan faktureras">
+    <AdminLayout title="Fakturaunderlag" description="Granska slutförda uppdrag, leveransbevis och avvikelser före fakturering">
+      {(deviations.isPending||deviations.isError)&&<div role="status" className="rounded-lg border border-amber-200 bg-amber-50 p-4 mb-5 text-sm text-amber-900">{deviations.isError?'Avvikelserna kunde inte kontrolleras. Fakturering från denna lista väntar tills kontrollen fungerar.':'Kontrollerar öppna avvikelser…'}{deviations.isError&&<Button variant="outline" size="sm" className="ml-3" onClick={()=>void deviations.refetch()}>Försök igen</Button>}</div>}
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <Card>
@@ -165,7 +156,7 @@ export default function AdminInvoiceBasis() {
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-amber-500/10"><Clock className="h-5 w-5 text-amber-500" /></div>
               <div>
-                <p className="text-xs text-muted-foreground">Att fakturera</p>
+                <p className="text-xs text-muted-foreground">Färdiga att fakturera</p>
                 <p className="text-2xl font-bold">{stats.readyCount}</p>
               </div>
             </div>
@@ -268,17 +259,17 @@ export default function AdminInvoiceBasis() {
               </SelectContent>
             </Select>
             <Button variant="outline" onClick={exportCsv}>
-              <FileSpreadsheet className="h-4 w-4 mr-2" /> Exportera CSV
+              <FileSpreadsheet className="h-4 w-4 mr-2" /> {selectedVisible.length ? `Exportera markerade (${selectedVisible.length})` : 'Exportera CSV'}
             </Button>
-            {selected.size > 0 && (() => {
-              const selArr = filtered.filter((a) => selected.has(a.id));
+            {selectedForInvoice.length > 0 && (() => {
+              const selArr = selectedForInvoice;
               const custIds = new Set(selArr.map((a) => a.customer_id));
               if (custIds.size === 1) {
                 const cid = [...custIds][0];
                 return (
                   <Button asChild>
                     <Link to={createInvoiceUrl(cid, selArr.map((a) => a.id))}>
-                      <FilePlus2 className="h-4 w-4 mr-2" /> Skapa faktura ({selected.size})
+                      <FilePlus2 className="h-4 w-4 mr-2" /> Skapa faktura ({selectedForInvoice.length})
                     </Link>
                   </Button>
                 );
@@ -304,7 +295,9 @@ export default function AdminInvoiceBasis() {
                   <TableRow>
                     <TableHead className="w-10">
                       <Checkbox
-                        checked={selected.size === filtered.length && filtered.length > 0}
+                        checked={eligible.length > 0 && eligible.every(a=>selected.has(a.id))}
+                        disabled={eligible.length===0}
+                        aria-label="Markera alla färdiga uppdrag"
                         onCheckedChange={toggleAll}
                       />
                     </TableHead>
@@ -319,11 +312,11 @@ export default function AdminInvoiceBasis() {
                 </TableHeader>
                 <TableBody>
                   {filtered.map((a) => {
-                    const { hours, amount } = calcAmount(a);
+                    const { hours, amount } = readiness(a);
                     return (
                       <TableRow key={a.id}>
                         <TableCell>
-                          <Checkbox checked={selected.has(a.id)} onCheckedChange={() => toggleOne(a.id)} />
+                          <Checkbox aria-label={`Markera ${a.title}`} disabled={!readiness(a).ready} checked={selected.has(a.id)} onCheckedChange={() => toggleOne(a.id)} />
                         </TableCell>
                         <TableCell className="text-sm">
                           {a.actual_start ? format(new Date(a.actual_start), 'd MMM yyyy', { locale: sv }) : '—'}
@@ -335,8 +328,8 @@ export default function AdminInvoiceBasis() {
                         </TableCell>
                         <TableCell>{a.customer?.name ?? '—'}</TableCell>
                         <TableCell className="text-sm text-muted-foreground">{a.driver?.full_name ?? '—'}</TableCell>
-                        <TableCell className="text-right tabular-nums">{hours.toFixed(2)}</TableCell>
-                        <TableCell className="text-right tabular-nums font-medium">{fmtSek(amount)}</TableCell>
+                        <TableCell className="text-right tabular-nums">{hours?.toFixed(2) ?? '—'}</TableCell>
+                        <TableCell className="text-right tabular-nums font-medium">{amount===null?'Saknas':fmtSek(amount)}</TableCell>
                         <TableCell>
                           {a.invoiced ? (
                             <Badge variant="secondary" className="bg-green-500/10 text-green-700 dark:text-green-400">
@@ -344,9 +337,10 @@ export default function AdminInvoiceBasis() {
                             </Badge>
                           ) : (
                             <Badge variant="secondary" className="bg-amber-500/10 text-amber-700 dark:text-amber-400">
-                              Att fakturera
+                              {readiness(a).ready ? 'Att fakturera' : 'Behöver granskas'}
                             </Badge>
                           )}
+                          {!a.invoiced&&readiness(a).issues.length>0&&<ul className="mt-2 text-xs text-amber-800 space-y-1">{readiness(a).issues.map(issue=><li key={issue}>{issue}</li>)}</ul>}
                         </TableCell>
                       </TableRow>
                     );

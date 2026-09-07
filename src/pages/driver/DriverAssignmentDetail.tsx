@@ -1,3 +1,4 @@
+import AssignmentDeviations from '@/components/AssignmentDeviations';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -235,8 +236,6 @@ export default function DriverAssignmentDetail() {
   const { data: assignment, isLoading } = useAssignment(id);
   const updateAssignment = useDriverUpdateAssignment();
   const [driverComment, setDriverComment] = useState('');
-  const [deviationText, setDeviationText] = useState('');
-  const [showDeviation, setShowDeviation] = useState(false);
   const [signatureDataUrl, setSignatureDataUrl] = useState<string | null>(null);
 
   const activeAssignmentId = assignment?.status === 'active' ? assignment.id : undefined;
@@ -282,18 +281,6 @@ export default function DriverAssignmentDetail() {
     const next = appendEvent(assignment.driver_comment as string | null, label);
     setDriverComment(next);
     saveDriverComment(next, label);
-  };
-
-  const handleDeviation = () => {
-    if (!deviationText.trim()) {
-      toast.error('Skriv vad som avviker först');
-      return;
-    }
-    const next = appendEvent(assignment.driver_comment as string | null, 'AVVIKELSE', deviationText.trim());
-    setDriverComment(next);
-    setDeviationText('');
-    setShowDeviation(false);
-    saveDriverComment(next, 'Avvikelse rapporterad till admin');
   };
 
   const handleSaveComment = () => saveDriverComment(driverComment, 'Kommentar sparad');
@@ -413,14 +400,11 @@ export default function DriverAssignmentDetail() {
               <Button variant="outline" onClick={() => handleQuickEvent('På väg till uppdraget')} disabled={updateAssignment.isPending}>Jag är på väg</Button>
               <Button variant="outline" onClick={() => handleQuickEvent('Framme på plats')} disabled={updateAssignment.isPending}>Jag är framme</Button>
               <Button variant="outline" onClick={() => handleQuickEvent('Lastning/lossning pågår')} disabled={updateAssignment.isPending}>Påbörjat arbete</Button>
-              <Button variant="outline" onClick={() => setShowDeviation(v => !v)} className="border-amber-300 text-amber-700"><AlertTriangle className="mr-2 h-4 w-4" /> Rapportera avvikelse</Button>
             </CardContent>
           </Card>
         )}
 
-        {showDeviation && (
-          <Card className="border-amber-200 bg-amber-50"><CardContent className="space-y-3 p-4"><p className="font-semibold text-amber-800">Vad har hänt?</p><Textarea value={deviationText} onChange={e => setDeviationText(e.target.value)} placeholder="T.ex. kund ej på plats, fel adress, gods saknas, skada upptäckt..." /><Button onClick={handleDeviation} disabled={updateAssignment.isPending} className="w-full">Skicka avvikelse</Button></CardContent></Card>
-        )}
+        <AssignmentDeviations assignmentId={assignment.id} legacyComment={assignment.driver_comment} />
 
         {isActive && isSignatureRequired && (
           <Card className="border-blue-200 bg-blue-50/50">

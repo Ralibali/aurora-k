@@ -1,3 +1,4 @@
+import AssignmentDeviations from '@/components/AssignmentDeviations';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AdminLayout } from '@/components/AdminLayout';
@@ -24,6 +25,8 @@ const ACTION_LABELS: Record<string, string> = {
   status_changed: 'Status ändrad',
   comment_updated: 'Kommentar uppdaterad',
   created: 'Uppdrag skapat',
+  deviation_reported: 'Avvikelse rapporterad',
+  deviation_resolved: 'Avvikelse åtgärdad',
 };
 
 function openMaps(address: string) {
@@ -168,6 +171,7 @@ export default function AdminAssignmentDetail() {
         </div>
 
         <div className="p-6 space-y-6">
+          <AssignmentDeviations assignmentId={assignment.id} canResolve legacyComment={assignment.driver_comment} />
           {flags.deviation && (
             <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-amber-900">
               <div className="flex items-start gap-3">
