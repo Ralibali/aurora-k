@@ -495,6 +495,7 @@ function main() {
   );
 
   const written = [];
+  const posts = loadBlogPosts(resolve(ROOT, "src/lib/blog-data.ts"));
 
   // 1) Statiska publika sidor
   for (const page of STATIC_PAGES) {
@@ -503,7 +504,7 @@ function main() {
     if (page.route !== "/") {
       breadcrumbs.push({ name: page.h1, url: canonical });
     }
-    const bodyHtml = renderStaticBody({
+    const bodyHtml = page.route === "/blogg" ? `<main style="max-width:70ch;margin:3rem auto;padding:1.5rem;font-family:system-ui;line-height:1.7"><a href="/">Hem</a><h1>${escapeHtml(page.h1)}</h1><p>${escapeHtml(page.description)}</p>${posts.map(post => `<article><h2><a href="/blogg/${escapeAttr(post.slug)}">${escapeHtml(post.title)}</a></h2><p>${escapeHtml(post.publishDate)} · ${escapeHtml(post.readTime)}</p><p>${escapeHtml(post.excerpt)}</p></article>`).join("")}</main>` : renderStaticBody({
       h1: page.h1,
       paragraphs: page.body,
       breadcrumbs,
@@ -522,7 +523,6 @@ function main() {
   }
 
   // 2) Bloggposter
-  const posts = loadBlogPosts(resolve(ROOT, "src/lib/blog-data.ts"));
   for (const post of posts) {
     const route = `/blogg/${post.slug}`;
     const canonical = `${BASE_URL}${route}`;
