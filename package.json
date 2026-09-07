@@ -13,7 +13,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "validate": "npm run typecheck && npm run lint && npm test && npm run build",
-    "build:ios": "npm run build && npx cap sync ios"
+    "build:ios": "npm run build && npx cap sync ios",
+    "editorial:check": "node scripts/editorial-check.mjs",
+    "prebuild": "npm run editorial:check"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.0",

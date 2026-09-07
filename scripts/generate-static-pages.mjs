@@ -19,6 +19,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { renderEditorialArticle } from './editorial-html.mjs';
 import { loadBlogPosts } from "./lib/blog-posts.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -530,7 +531,7 @@ function main() {
       { name: "Blogg", url: `${BASE_URL}/blogg` },
       { name: post.title, url: canonical },
     ];
-    const bodyHtml = renderStaticBody({
+    const bodyHtml = post.sections ? renderEditorialArticle(post) : renderStaticBody({
       h1: post.title,
       paragraphs: [
         `Publicerad ${post.publishDate} · ${post.readTime} läsning.`,

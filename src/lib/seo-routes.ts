@@ -1,3 +1,5 @@
+import editorialArticles from '../content/editorial/articles.json';
+
 export type SeoRoute = {
   path: string;
   priority: string;
@@ -6,6 +8,7 @@ export type SeoRoute = {
 };
 
 export const SEO_ROUTES: SeoRoute[] = [
+  ...editorialArticles.map(post => ({ path: `/blogg/${post.slug}`, priority: '0.8', changefreq: 'monthly' as const, lastmod: post.publishDate })),
   { path: "/", priority: "1.0", changefreq: "weekly" },
   { path: "/en", priority: "0.9", changefreq: "weekly" },
 
