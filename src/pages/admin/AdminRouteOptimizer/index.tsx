@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
-import { format } from 'date-fns';
+import { formatStockholmTime, getStockholmDateKey, isOpenAssignment } from '@/features/dispatch/dispatch-utils';
 import { ArrowDown, ArrowUp, CalendarDays, MapPin, Route, Save, Sparkles, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { hasGoogleMapsKey } from '@/lib/google-maps';
@@ -35,7 +35,7 @@ export default function AdminRouteOptimizerPage() {
   const { data: drivers } = useDrivers();
   const { enabled: demoEnabled } = useDemoMode();
   const [selectedDriver, setSelectedDriver] = useState('');
-  const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+  const [selectedDate, setSelectedDate] = useState(() => getStockholmDateKey());
   const [orderedIds, setOrderedIds] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
 
@@ -44,7 +44,7 @@ export default function AdminRouteOptimizerPage() {
   const availableAssignments = useMemo(() => {
     if (!selectedDriver) return [];
     return (assignments ?? [])
-      .filter(item => item.assigned_driver_id === selectedDriver && item.scheduled_start.startsWith(selectedDate) && item.status !== 'completed')
+      .filter(item => item.assigned_driver_id === selectedDriver && getStockholmDateKey(item.scheduled_start) === selectedDate && isOpenAssignment(item))
       .map(item => item as RouteAssignment)
       .sort((a, b) => (a.route_sequence ?? 9999) - (b.route_sequence ?? 9999) || a.scheduled_start.localeCompare(b.scheduled_start));
   }, [assignments, selectedDate, selectedDriver]);
@@ -101,7 +101,7 @@ export default function AdminRouteOptimizerPage() {
 
         {orderedAssignments.length > 0 && <div className="grid gap-5 lg:grid-cols-2">
           <Card className="overflow-hidden"><CardHeader><CardTitle className="text-sm">Ruttkarta</CardTitle></CardHeader><CardContent className="p-0"><div className="h-[420px]"><Suspense fallback={<div className="flex h-full items-center justify-center">Laddar karta…</div>}>{hasGoogleMapsKey ? <RouteMapGoogle assignments={orderedAssignments} /> : <RouteMapLeaflet assignments={orderedAssignments} />}</Suspense></div></CardContent></Card>
-          <Card><CardHeader><CardTitle className="text-sm">Körordning ({orderedAssignments.length} stopp)</CardTitle></CardHeader><CardContent className="space-y-2">{orderedAssignments.map((item, index) => <div key={item.id} className="flex items-center gap-3 rounded-lg border p-3"><div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground">{index + 1}</div><div className="min-w-0 flex-1"><p className="truncate font-medium">{item.title}</p><p className="flex items-center gap-1 truncate text-xs text-muted-foreground"><MapPin className="h-3 w-3" /> {item.address}</p><p className="text-xs text-muted-foreground">{format(new Date(item.scheduled_start), 'HH:mm')}{item.geofence_lat == null && <Badge variant="outline" className="ml-2 text-[10px]">saknar koordinat</Badge>}</p></div><div className="flex gap-1"><Button variant="ghost" size="icon" onClick={() => setOrderedIds(moveStop(orderedIds, index, -1))} disabled={index === 0}><ArrowUp className="h-4 w-4" /></Button><Button variant="ghost" size="icon" onClick={() => setOrderedIds(moveStop(orderedIds, index, 1))} disabled={index === orderedAssignments.length - 1}><ArrowDown className="h-4 w-4" /></Button></div></div>)}</CardContent></Card>
+          <Card><CardHeader><CardTitle className="text-sm">Körordning ({orderedAssignments.length} stopp)</CardTitle></CardHeader><CardContent className="space-y-2">{orderedAssignments.map((item, index) => <div key={item.id} className="flex items-center gap-3 rounded-lg border p-3"><div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground">{index + 1}</div><div className="min-w-0 flex-1"><p className="truncate font-medium">{item.title}</p><p className="flex items-center gap-1 truncate text-xs text-muted-foreground"><MapPin className="h-3 w-3" /> {item.address}</p><p className="text-xs text-muted-foreground">{formatStockholmTime(item.scheduled_start)}{item.geofence_lat == null && <Badge variant="outline" className="ml-2 text-[10px]">saknar koordinat</Badge>}</p></div><div className="flex gap-1"><Button variant="ghost" size="icon" onClick={() => setOrderedIds(moveStop(orderedIds, index, -1))} disabled={index === 0}><ArrowUp className="h-4 w-4" /></Button><Button variant="ghost" size="icon" onClick={() => setOrderedIds(moveStop(orderedIds, index, 1))} disabled={index === orderedAssignments.length - 1}><ArrowDown className="h-4 w-4" /></Button></div></div>)}</CardContent></Card>
         </div>}
       </div>
     </AdminLayout>
