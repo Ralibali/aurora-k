@@ -1,3 +1,5 @@
+import editorialArticles from '../content/editorial/articles.json';
+
 export interface BlogPost {
   slug: string;
   title: string;
@@ -10,6 +12,7 @@ export interface BlogPost {
 }
 
 export const blogPosts: BlogPost[] = [
+  ...editorialArticles,
   {
     slug: 'basta-transportledningssystemet-for-sma-akerier-2026',
     title: 'Bästa transportledningssystemet för små åkerier 2026',

@@ -11,7 +11,8 @@
  * i stället för att inlägget bara försvinner.
  */
 
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
+import { dirname, resolve } from "node:path";
 
 const REQUIRED_FIELDS = [
   "slug",
@@ -130,6 +131,8 @@ export function loadBlogPosts(blogDataPath) {
     throw new Error("Kunde inte parsa några blogginlägg ur blog-data.ts");
   }
 
+  const editorialPath = resolve(dirname(blogDataPath), '../content/editorial/articles.json');
+  if (existsSync(editorialPath)) posts.unshift(...JSON.parse(readFileSync(editorialPath, 'utf8')));
   const slugs = new Set();
   for (const post of posts) {
     if (slugs.has(post.slug)) {

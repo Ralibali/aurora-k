@@ -95,6 +95,7 @@ const AdsBudtjanstPage = lazy(() => import("./pages/AdsBudtjanstPage"));
 const AdsAkeriPage = lazy(() => import("./pages/AdsAkeriPage"));
 const AdsTransportPage = lazy(() => import("./pages/AdsTransportPage"));
 const AdsFlottaPage = lazy(() => import("./pages/AdsFlottaPage"));
+const EditorialBlogPost = lazy(() => import("./pages/blog/EditorialBlogPost"));
 const BlogIndex = lazy(() => import("./pages/BlogIndex"));
 const BlogBastaDispatch = lazy(() => import("./pages/blog/BlogBastaDispatch"));
 const BlogDigitaliseraBudtjanst = lazy(() => import("./pages/blog/BlogDigitaliseraBudtjanst"));
@@ -186,6 +187,7 @@ const App = () => (
                   <Route path="/ads/transport" element={<AdsTransportPage />} />
                   <Route path="/ads/flotta" element={<AdsFlottaPage />} />
                   <Route path="/blogg" element={<BlogIndex />} />
+                  <Route path="/blogg/:slug" element={<EditorialBlogPost />} />
                   <Route path="/blogg/basta-dispatchsystemet-for-akeri-2026" element={<BlogBastaDispatch />} />
                   <Route path="/blogg/hur-digitaliserar-man-sin-budtjanst" element={<BlogDigitaliseraBudtjanst />} />
                   <Route path="/blogg/vad-kostar-ett-transportledningssystem" element={<BlogVadKostarTms />} />
