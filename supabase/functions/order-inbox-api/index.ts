@@ -1,4 +1,4 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.100.1';
 
 const cors = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type' };
 const reply = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...cors, 'Content-Type': 'application/json' } });
@@ -21,10 +21,13 @@ Deno.serve(async request => {
   if (!role?.company_id) return reply({ error: 'Admin access required' }, 403);
 
   const body = await request.json().catch(() => ({})) as { action?: string; id?: string };
+  const receivingReady = Deno.env.get('ORDER_INBOX_ENABLED') === 'true';
+  const domain = Deno.env.get('ORDER_INBOX_DOMAIN') || 'auroratransport.se';
   if (body.action === 'activate') {
+    if (!receivingReady) return reply({ error: 'E-postmottagningen är inte färdigkopplad. Använd filuppladdning tills vidare.' }, 409);
     const { data, error } = await admin.from('order_inbox_channels').upsert({ company_id: role.company_id }, { onConflict: 'company_id' }).select('id,inbox_key,enabled').single();
     if (error) return reply({ error: error.message }, 400);
-    return reply({ channel: data });
+    return reply({ channel: data, domain, receivingReady });
   }
 
   if (body.action === 'mark' && body.id) {
@@ -38,5 +41,5 @@ Deno.serve(async request => {
     admin.from('inbound_order_emails').select('id,from_address,subject,status,parse_confidence,received_at,parsed_payload,attachments,error_message').eq('company_id', role.company_id).order('received_at', { ascending: false }).limit(30),
   ]);
   if (channelResult.error || queueResult.error) return reply({ error: channelResult.error?.message ?? queueResult.error?.message }, 400);
-  return reply({ channel: channelResult.data, queue: queueResult.data ?? [] });
+  return reply({ channel: channelResult.data, queue: queueResult.data ?? [], domain, receivingReady });
 });

@@ -6,7 +6,7 @@ import { useDriverLocationTracker } from '@/hooks/useDriverLocationTracker';
 export function DriverLocationRuntime() {
   const { user, companyId } = useAuth();
   const { data: assignments } = useDriverAssignments(user?.id);
-  const active = (assignments ?? []).find(item => item.status === 'active');
+  const active = (assignments ?? []).find(item => (item.status === 'active' || item.status === 'delayed') && Boolean(item.actual_start));
 
   const geofence = useMemo(() => {
     const record = active as typeof active & {

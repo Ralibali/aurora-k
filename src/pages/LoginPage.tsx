@@ -8,11 +8,12 @@ import { Truck, Mail, Lock, Play, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { getRegistrationDraft } from '@/features/onboarding/registration-service';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { session, role, isPlatformAdmin, loading } = useAuth();
+  const { session, role, companyId, isPlatformAdmin, loading, error: profileError, refreshProfile } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -41,12 +42,14 @@ export default function LoginPage() {
   });
 
   useEffect(() => {
-    if (!loading && session && role) {
+    if (!loading && session && !profileError) {
+      if (!companyId && getRegistrationDraft(session.user.user_metadata)) { navigate('/register', { replace: true }); return; }
+      if (!role) { navigate('/admin', { replace: true }); return; }
       if (isPlatformAdmin) navigate('/platform', { replace: true });
       else if (role === 'admin') navigate('/admin', { replace: true });
       else navigate('/driver', { replace: true });
     }
-  }, [loading, session, role, isPlatformAdmin, navigate]);
+  }, [loading, session, role, companyId, isPlatformAdmin, profileError, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,6 +80,7 @@ export default function LoginPage() {
           </div>
 
           <div className="rounded-[2rem] border border-[#1e1e5a] bg-[#141432]/90 p-6 shadow-[0_30px_100px_rgba(0,0,0,0.35)] backdrop-blur">
+            {profileError && <div role="alert" className="mb-4 text-sm text-amber-200">{profileError}<Button variant="ghost" size="sm" onClick={() => void refreshProfile().catch(() => {})}>Försök igen</Button></div>}
             <form onSubmit={handleLogin} className="space-y-5">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-bold text-slate-200">E-post</Label>

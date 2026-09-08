@@ -1,7 +1,12 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.100.1';
 import { z } from 'https://esm.sh/zod@3';
-import { bookingRequestCreatedEmail, bookingRequestConfirmationEmail } from '../_shared/email-templates.ts';
-import { sitePath } from '../_shared/site-url.ts';
+import { deliverOutbox } from '../_shared/notification-outbox.ts';
+declare const EdgeRuntime: { waitUntil(promise: Promise<unknown>): void };
+function notifyAfterBooking(admin: SupabaseClient, companyId: string) {
+  const task = deliverOutbox(admin, companyId).catch(error => console.error('[public-booking] Notification queued', error));
+  if (typeof EdgeRuntime !== 'undefined') EdgeRuntime.waitUntil(task);
+}
+
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -77,8 +82,7 @@ Deno.serve(async (req) => {
 
     const { data: existing, error: existingError } = await admin
       .from('booking_requests')
-      .select('id, public_order_number')
-      .eq('company_id', company.id)
+      .select('id, public_order_number, company_id')
       .eq('public_request_id', parsed.data.request_id)
       .maybeSingle();
 
@@ -86,6 +90,7 @@ Deno.serve(async (req) => {
       console.error('[public-booking] idempotency lookup failed', existingError);
       return json({ error: 'Kunde inte kontrollera förfrågan' }, 500);
     }
+    if (existing && existing.company_id !== company.id) return json({ error: 'Bokningsreferensen används redan. Ladda om formuläret.' }, 409);
     if (existing) {
       return json({ booking: existing, order_number: existing.public_order_number, duplicate: true }, 200);
     }
@@ -104,7 +109,7 @@ Deno.serve(async (req) => {
     if (!allowed) return json({ error: 'För många försök. Vänta tio minuter och försök igen.' }, 429);
 
     const attachmentPrefix = `public/${parsed.data.request_id}/`;
-    if (parsed.data.attachment_paths.some(path => !path.startsWith(attachmentPrefix))) {
+    if (parsed.data.attachment_paths.some(path => !path.startsWith(attachmentPrefix) || path.includes('..') || path.slice(attachmentPrefix.length).includes('/'))) {
       return json({ error: 'Ogiltig bilagereferens' }, 400);
     }
 
@@ -139,102 +144,16 @@ Deno.serve(async (req) => {
           .eq('company_id', company.id)
           .eq('public_request_id', parsed.data.request_id)
           .maybeSingle();
-        if (duplicate) return json({ booking: duplicate, order_number: duplicate.public_order_number, duplicate: true }, 200);
+        if (duplicate) {
+          notifyAfterBooking(admin, company.id);
+          return json({ booking: duplicate, order_number: duplicate.public_order_number, duplicate: true }, 200);
+        }
       }
       throw bookingError;
     }
 
-    const { data: outboxRows } = await admin.from('notification_outbox').insert([
-      {
-        channel: 'email',
-        type: 'booking_request_created',
-        subject: `Ny transportförfrågan ${orderNumber}`,
-        payload: {
-          companyId: company.id,
-          companyName: company.name,
-          orderNumber,
-          bookingId: booking.id,
-          attachmentPaths: parsed.data.attachment_paths,
-        },
-        status: 'pending',
-      },
-      {
-        channel: 'email',
-        type: 'booking_request_customer_confirmation',
-        recipient_email: parsed.data.customer_email,
-        subject: `Vi har tagit emot din transportförfrågan ${orderNumber}`,
-        payload: {
-          companyId: company.id,
-          companyName: company.name,
-          orderNumber,
-          bookingId: booking.id,
-        },
-        status: 'pending',
-      },
-    ]).select('id, type');
-
-    const [{ data: companySettings }, { data: adminProfile }] = await Promise.all([
-      admin.from('settings').select('email').eq('company_id', company.id).maybeSingle(),
-      admin.from('profiles').select('email').eq('company_id', company.id).eq('role', 'admin').not('email', 'is', null).limit(1).maybeSingle(),
-    ]);
-    const adminEmail = companySettings?.email || adminProfile?.email || 'info@auroramedia.se';
-
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const sendMail = async (to: string, tpl: { subject: string; html: string }) => {
-      const res = await fetch(`${supabaseUrl}/functions/v1/send-email`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${serviceRoleKey}`,
-        },
-        body: JSON.stringify({ to, subject: tpl.subject, html: tpl.html }),
-      });
-      if (!res.ok) {
-        console.error('[public-booking] send-email failed', await res.text());
-        return false;
-      }
-      return true;
-    };
-
-    const adminTpl = bookingRequestCreatedEmail({
-      companyName: company.name,
-      orderNumber,
-      customerName: parsed.data.customer_name,
-      customerEmail: parsed.data.customer_email,
-      customerPhone: parsed.data.customer_phone,
-      preferredDate: parsed.data.preferred_date,
-      title: parsed.data.title,
-      description: parsed.data.description ?? null,
-      attachmentCount: parsed.data.attachment_paths.length,
-      adminUrl: sitePath('/admin/booking-requests'),
-    });
-    const customerTpl = bookingRequestConfirmationEmail({
-      contactName: parsed.data.customer_name,
-      companyName: company.name,
-      orderNumber,
-      title: parsed.data.title,
-      preferredDate: parsed.data.preferred_date,
-    });
-
-    const [adminOk, customerOk] = await Promise.all([
-      sendMail(adminEmail, adminTpl),
-      sendMail(parsed.data.customer_email, customerTpl),
-    ]);
-
-    const updateStatus = async (type: string, ok: boolean) => {
-      const row = outboxRows?.find(r => r.type === type);
-      if (!row) return;
-      await admin.from('notification_outbox').update({
-        status: ok ? 'sent' : 'failed',
-        sent_at: ok ? new Date().toISOString() : null,
-      }).eq('id', row.id);
-    };
-
-    await Promise.all([
-      updateStatus('booking_request_created', adminOk),
-      updateStatus('booking_request_customer_confirmation', customerOk),
-    ]);
+    // Booking and notification events commit together through the database trigger.
+    notifyAfterBooking(admin, company.id);
 
     return json({ booking, order_number: orderNumber }, 201);
   } catch (error: unknown) {

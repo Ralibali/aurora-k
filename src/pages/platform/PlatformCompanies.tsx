@@ -127,7 +127,7 @@ export default function PlatformCompanies() {
         body: {
           to: admin.email,
           templateName: 'driver-welcome',
-          templateData: { firstName: admin.full_name, companyName: company?.name || '' },
+          templateData: { driverName: admin.full_name, companyName: company?.name || '' },
         },
       });
       if (error) throw error;

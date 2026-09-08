@@ -90,6 +90,7 @@ test('driver selection requires review and successful confirmation changes exact
   await expect(dialog.getByRole('button', { name: 'Tilldela 2 uppdrag', exact: true })).toBeDisabled();
   await chooseDriver(page, 'Maria Lind');
   expect(dispatchApi.writes).toHaveLength(0);
+  expect(dispatchApi.notificationRequests).toBe(0);
   await dialog.getByRole('button', { name: 'Tillbaka', exact: true }).click();
   expect(dispatchApi.writes).toHaveLength(0);
 
@@ -106,6 +107,7 @@ test('driver selection requires review and successful confirmation changes exact
   expect(dispatchApi.writes[0].query.get('company_id')).toBe(`eq.${dispatchApi.assignments[0].company_id}`);
   for (const title of [express, pallet]) await expect(page.getByRole('row').filter({ hasText: title })).toContainText('Maria Lind');
   expect(dispatchApi.assignments[2].assigned_driver_id).toBe(drivers[0].id);
+  await expect.poll(() => dispatchApi.notificationRequests).toBe(1);
 });
 
 test('a failed assignment keeps the dialog and selection available for a retry', async ({ page, dispatchApi }) => {
@@ -225,4 +227,18 @@ test('a job completed while cancellation is being reviewed cannot be overwritten
   // Playwright's visible check accepts opacity: 0. Verify the page transition
   // cannot hide the entire board for users who request reduced motion.
   await expect(page.locator('main > div > div')).toHaveCSS('opacity', '1');
+});
+
+
+test('a mail service failure preserves the saved driver assignment without duplicating the write', async ({ page, dispatchApi }) => {
+  dispatchApi.failNotifications = true;
+  await openDispatch(page);
+  await openBulkDialog(page);
+  await chooseDriver(page, 'Maria Lind');
+  await page.getByRole('dialog').getByRole('button', { name: 'Tilldela 2 uppdrag', exact: true }).click();
+  await expect(page.getByRole('dialog')).toBeHidden();
+  await expect(page.getByText('Uppdraget är sparat. Mejlaviseringen väntar på ett nytt försök.', { exact: true })).toBeVisible();
+  expect(dispatchApi.writes).toHaveLength(1);
+  expect(dispatchApi.notificationRequests).toBe(1);
+  expect(dispatchApi.assignments.slice(0, 2).every(item => item.assigned_driver_id === drivers[1].id)).toBe(true);
 });

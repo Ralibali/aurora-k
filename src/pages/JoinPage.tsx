@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { usePageMeta } from '@/lib/use-page-meta';
+import { useAuth } from '@/hooks/useAuth';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,6 +21,7 @@ export default function JoinPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
+  const { refreshProfile } = useAuth();
 
   const [invitation, setInvitation] = useState<Invitation | null>(null);
   const [loading, setLoading] = useState(true);
@@ -94,16 +96,24 @@ export default function JoinPage() {
         body: { token, name, password },
       });
 
-      if (fnError) throw new Error(fnError.message || 'Något gick fel');
+      if (fnError) {
+        const details = await fnError.context?.json?.().catch(() => null);
+        throw new Error(details?.error || 'Inbjudan kunde inte accepteras. Försök igen.');
+      }
       if (data?.error) throw new Error(data.error);
 
       // Set session from the response
       if (data?.session) {
-        await supabase.auth.setSession({
+        const { error: sessionError } = await supabase.auth.setSession({
           access_token: data.session.access_token,
           refresh_token: data.session.refresh_token,
         });
+        if (sessionError) throw sessionError;
+      } else {
+        throw new Error('Kontot är skapat. Logga in med din e-post och ditt lösenord.');
       }
+
+      await refreshProfile();
 
       toast.success('Välkommen! Ditt konto är skapat.');
       navigate('/driver', { replace: true });
@@ -150,6 +160,7 @@ export default function JoinPage() {
             <p className="text-sm text-muted-foreground mt-1">
               Gå med i <span className="font-medium text-foreground">{invitation?.company_name}</span> som förare
             </p>
+            <p className="mt-3 text-xs text-muted-foreground">Har du redan ett konto? Använd ditt befintliga lösenord. Du kan återställa det via inloggningssidan.</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">

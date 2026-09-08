@@ -6,8 +6,8 @@ export type RouteOrderedAssignment = {
 export function compareRouteOrder(first: RouteOrderedAssignment, second: RouteOrderedAssignment) {
   const firstSequence = Number(first.route_sequence);
   const secondSequence = Number(second.route_sequence);
-  const firstHasSequence = Number.isFinite(firstSequence);
-  const secondHasSequence = Number.isFinite(secondSequence);
+  const firstHasSequence = first.route_sequence != null && Number.isFinite(firstSequence);
+  const secondHasSequence = second.route_sequence != null && Number.isFinite(secondSequence);
 
   if (firstHasSequence && secondHasSequence && firstSequence !== secondSequence) {
     return firstSequence - secondSequence;

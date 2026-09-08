@@ -1,4 +1,4 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.100.1';
 import { htmlToText, parseInboundOrder } from '../_shared/order-parser.ts';
 import { processOrderAttachments } from '../_shared/order-attachments.ts';
 import { extractOrderInboxKey, getReceivedEmail, listReceivedAttachments, verifyResendWebhook } from '../_shared/resend-receiving.ts';
@@ -29,8 +29,9 @@ Deno.serve(async request => {
   if (!emailId) return reply({ error: 'Missing email id' }, 400);
   const supabase = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
 
-  const { data: duplicate } = await supabase.from('inbound_order_emails').select('id,status').eq('provider_email_id', emailId).maybeSingle();
-  if (duplicate) return reply({ accepted: true, duplicate: true, id: duplicate.id, status: duplicate.status });
+  const { data: duplicate } = await supabase.from('inbound_order_emails').select('id,status,updated_at').eq('provider_email_id', emailId).maybeSingle();
+  if (duplicate && !['failed', 'processing'].includes(duplicate.status)) return reply({ accepted: true, duplicate: true, id: duplicate.id, status: duplicate.status });
+  if (duplicate?.status === 'processing' && Date.parse(duplicate.updated_at) > Date.now() - 10 * 60_000) return reply({ error: 'Processing in progress, retry later' }, 503);
 
   try {
     const email = await getReceivedEmail(emailId, resendApiKey);
@@ -45,7 +46,7 @@ Deno.serve(async request => {
     if (channelError) throw channelError;
     if (!channel?.enabled) return reply({ accepted: true, ignored: true, reason: 'Inbox disabled or unknown' }, 202);
 
-    const { data: row, error: insertError } = await supabase.from('inbound_order_emails').insert({
+    const values = {
       company_id: channel.company_id,
       channel_id: channel.id,
       provider_email_id: emailId,
@@ -55,8 +56,12 @@ Deno.serve(async request => {
       subject: email.subject ?? '',
       text_body: email.text ?? null,
       html_body: email.html ?? null,
-      status: 'processing',
-    }).select('id').single();
+      status: 'processing', updated_at: new Date().toISOString(), error_message: null,
+    };
+    const write = duplicate
+      ? supabase.from('inbound_order_emails').update(values).eq('id', duplicate.id).eq('updated_at', duplicate.updated_at)
+      : supabase.from('inbound_order_emails').insert(values);
+    const { data: row, error: insertError } = await write.select('id').single();
     if (insertError) throw insertError;
 
     const attachmentList = await listReceivedAttachments(emailId, resendApiKey);

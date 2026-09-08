@@ -51,17 +51,8 @@ export default function PlatformSupport() {
     },
   });
 
-  const { data: profiles } = useQuery({
-    queryKey: ['platform-profiles-all'],
-    queryFn: async () => {
-      const { data } = await supabase.from('profiles').select('id, email, full_name');
-      return data || [];
-    },
-  });
-
   const replyMutation = useMutation({
     mutationFn: async ({ ticketId, reply }: { ticketId: string; reply: string }) => {
-      const ticket = tickets?.find((t) => t.id === ticketId);
       const { error } = await supabase
         .from('support_tickets')
         .update({
@@ -70,32 +61,23 @@ export default function PlatformSupport() {
           replied_by: user?.id,
           status: 'answered',
         })
-        .eq('id', ticketId);
+        .eq('id', ticketId).select('id').single();
       if (error) throw error;
 
-      // Send email notification to ticket creator
-      if (ticket) {
-        const creatorProfile = profiles?.find((p) => p.id === ticket.created_by);
-        if (creatorProfile?.email) {
-          try {
-            await supabase.functions.invoke('send-email', {
-              body: {
-                to: creatorProfile.email,
-                subject: `Svar på ditt supportärende: ${ticket.subject}`,
-                html: `<p>Hej,</p><p>Vi har svarat på ditt supportärende <strong>${ticket.subject}</strong>:</p><blockquote style="border-left:3px solid #1e3a5f;padding-left:12px;color:#555">${reply}</blockquote><p>Logga in på Aurora Transport för att se hela ärendet.</p>`,
-              },
-            });
-          } catch {
-            // Email notification is best-effort
-          }
-        }
-      }
+      // The server resolves the recipient and saved reply from this ticket.
+      try {
+        const { error: mailError } = await supabase.functions.invoke('send-email', {
+          body: { templateName: 'support-reply', templateData: { ticketId } },
+        });
+        return { mailSent: !mailError };
+      } catch { return { mailSent: false }; }
     },
-    onSuccess: () => {
+    onSuccess: ({ mailSent }) => {
       queryClient.invalidateQueries({ queryKey: ['platform-support-tickets'] });
       setReplyingTo(null);
       setReplyText('');
-      toast.success('Svar skickat');
+      if (mailSent) toast.success('Svar sparat och mejl skickat');
+      else toast.warning('Svaret är sparat, men mejlet kunde inte skickas.');
     },
     onError: () => toast.error('Kunde inte skicka svar'),
   });

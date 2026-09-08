@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { usePageMeta } from '@/lib/use-page-meta';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -6,12 +6,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Truck, Building2, User, Mail, Lock, Eye, EyeOff, AlertCircle, Phone, BadgeCheck } from 'lucide-react';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
+import { requestAuthEmail } from '@/lib/auth-email';
 import { trackEventOnce } from '@/lib/analytics';
+import { useAuth } from '@/hooks/useAuth';
+import { completeCompanyRegistration, getRegistrationDraft, type RegistrationDraft } from '@/features/onboarding/registration-service';
+import type { Session } from '@supabase/supabase-js';
 
 function getPasswordStrength(pw: string): { label: string; pct: number; color: string } {
   let score = 0;
-  if (pw.length >= 8) score++;
+  if (pw.length >= 10) score++;
   if (pw.length >= 12) score++;
   if (/[A-Z]/.test(pw)) score++;
   if (/[0-9]/.test(pw)) score++;
@@ -27,6 +30,7 @@ export default function RegisterPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const cancelled = searchParams.get('cancelled');
+  const { session, companyId, role, loading: authLoading, refreshProfile } = useAuth();
 
   usePageMeta({
     title: 'Starta gratis provperiod – 14 dagar utan kostnad | Aurora Transport',
@@ -45,6 +49,37 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [confirmationEmail, setConfirmationEmail] = useState('');
+  const [registrationError, setRegistrationError] = useState('');
+  const bootstrapBusy = useRef(false);
+  const attemptedUser = useRef('');
+
+  const finishRegistration = useCallback(async (current: Session, draft?: RegistrationDraft) => {
+    if (bootstrapBusy.current) return;
+    bootstrapBusy.current = true;
+    setSubmitting(true);
+    setRegistrationError('');
+    try {
+      const registeredCompanyId = await completeCompanyRegistration(current, draft);
+      const profile = await refreshProfile();
+      if (profile.companyId !== registeredCompanyId || profile.role !== 'admin') throw new Error('Företagskopplingen kunde inte bekräftas. Försök igen.');
+      trackEventOnce(registeredCompanyId, 'Trial Started', { plan: 'aurora_449', billing_interval: 'monthly' });
+      toast.success('Kontot är klart — din provperiod är igång.');
+      navigate('/onboarding', { replace: true });
+    } catch (cause) {
+      setRegistrationError(cause instanceof Error ? cause.message : 'Registreringen kunde inte slutföras. Försök igen.');
+    } finally { bootstrapBusy.current = false; setSubmitting(false); }
+  }, [navigate, refreshProfile]);
+
+  useEffect(() => {
+    if (!session || authLoading || bootstrapBusy.current) return;
+    if (companyId) { navigate(role === 'driver' ? '/driver' : '/admin', { replace: true }); return; }
+    const draft = getRegistrationDraft(session.user.user_metadata);
+    if (!draft || attemptedUser.current === session.user.id) return;
+    attemptedUser.current = session.user.id;
+    setCompanyName(draft.companyName); setOrgNumber(draft.orgNr); setFullName(draft.fullName); setPhone(draft.phone);
+    void finishRegistration(session, draft);
+  }, [session, authLoading, companyId, role, navigate, finishRegistration]);
 
   const validate = () => {
     const e: Record<string, string> = {};
@@ -53,11 +88,12 @@ export default function RegisterPage() {
     else if (!/^\d{6}-?\d{4}$/.test(orgNumber.trim())) e.orgNumber = 'Format: XXXXXX-XXXX';
     if (!fullName.trim()) e.fullName = 'Ditt namn krävs';
     if (!phone.trim()) e.phone = 'Telefonnummer krävs';
-    if (!email.trim()) e.email = 'E-postadress krävs';
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) e.email = 'Ogiltig e-postadress';
-    if (!password) e.password = 'Lösenord krävs';
-    else if (password.length < 8) e.password = 'Lösenordet måste vara minst 8 tecken';
-    if (password !== confirmPassword) e.confirmPassword = 'Lösenorden matchar inte';
+    if (!session && !email.trim()) e.email = 'E-postadress krävs';
+    else if (!session && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) e.email = 'Ogiltig e-postadress';
+    if (!session && !password) e.password = 'Lösenord krävs';
+    else if (!session && password.length < 10) e.password = 'Lösenordet måste vara minst 10 tecken';
+    if (!session && new TextEncoder().encode(password).length > 72) e.password = 'Lösenordet får innehålla högst 72 byte';
+    if (!session && password !== confirmPassword) e.confirmPassword = 'Lösenorden matchar inte';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -65,43 +101,15 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
+    const draft = { companyName: companyName.trim(), orgNr: orgNumber.trim(), fullName: fullName.trim(), phone: phone.trim() };
+    if (session) { await finishRegistration(session, draft); return; }
     setSubmitting(true);
 
     try {
-      // 1. Create auth user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { full_name: fullName, role: 'admin' },
-          emailRedirectTo: window.location.origin,
-        },
-      });
-      if (authError) throw authError;
-      if (!authData.user) throw new Error('Kunde inte skapa konto');
-
-      const userId = authData.user.id;
-
-      // 2. Create company via edge function (bypasses RLS since no session yet).
-      //    Funktionen startar automatiskt en 14-dagars gratis provperiod —
-      //    ingen betalning krävs vid registrering.
-      const { data: companyResult, error: companyError } = await supabase.functions.invoke('register-company', {
-        body: { userId, companyName, orgNr: orgNumber || null, fullName, phone: phone || null },
-      });
-      if (companyError) throw companyError;
-      if (!companyResult?.companyId) throw new Error('Kunde inte skapa företag');
-
-      const companyId = companyResult.companyId;
-
-      // Save onboarding state
-      localStorage.setItem('onboarding_company_id', companyId);
-      localStorage.setItem('onboarding_company_name', companyName);
-      localStorage.setItem('onboarding_org_nr', orgNumber);
-
-      trackEventOnce(companyId, 'Trial Started', { plan: 'aurora_449', billing_interval: 'monthly' });
-
-      toast.success('Konto skapat — provperioden på 14 dagar är igång!');
-      navigate('/onboarding');
+      await requestAuthEmail({ type: 'signup', email, password, registration: draft });
+      setConfirmationEmail(email.trim().toLowerCase());
+      setPassword('');
+      setConfirmPassword('');
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Något gick fel');
     } finally {
@@ -110,6 +118,18 @@ export default function RegisterPage() {
   };
 
   const strength = getPasswordStrength(password);
+
+  const resendConfirmation = async () => {
+    setSubmitting(true);
+    try {
+      await requestAuthEmail({ type: 'resend', email: confirmationEmail });
+      toast.success('Om registreringen väntar på bekräftelse skickas ett nytt mejl.');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Mejlet kunde inte begäras.');
+    } finally { setSubmitting(false); }
+  };
+
+  if (confirmationEmail && !session) return <div className="flex min-h-screen items-center justify-center bg-background p-6"><div className="w-full max-w-md space-y-5 rounded-2xl border bg-card p-8"><Mail className="h-9 w-9 text-primary" /><h1 className="text-xl font-semibold">Bekräfta din e-post</h1><p className="text-sm text-muted-foreground">Om adressen kan registreras skickas en bekräftelselänk till <strong>{confirmationEmail}</strong>. Öppna länken för att slutföra registreringen. Provperioden börjar när företaget har skapats.</p><p className="text-sm text-muted-foreground">Har du redan ett konto? Logga in eller återställ ditt lösenord.</p><Button className="w-full" disabled={submitting} onClick={() => void resendConfirmation()}>Skicka mejlet igen</Button><Button asChild variant="outline" className="w-full"><Link to="/login">Jag har bekräftat — logga in</Link></Button><Link className="block text-center text-sm text-primary underline" to="/forgot-password">Återställ lösenord</Link></div></div>;
 
   const inputCls = "h-11 border-[#1e1e5a] bg-[#0f0f2a] text-white placeholder:text-slate-600 focus-visible:ring-[#4f46e5]";
   const iconCls = "absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500";
@@ -138,6 +158,8 @@ export default function RegisterPage() {
           <h2 className="mb-1 text-lg font-bold text-white">Starta din gratis provperiod</h2>
           <p className="mb-6 text-sm text-slate-400">14 dagar gratis — inget betalkort krävs. Kontot pausas automatiskt efter provperioden om du väljer att inte fortsätta.</p>
 
+          {registrationError && <div role="alert" className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">{registrationError}</div>}
+          {session && <p className="mb-4 text-sm text-slate-300">Slutför företagsregistreringen för {session.user.email}.</p>}
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Company Name */}
             <div className="space-y-1.5">
@@ -176,6 +198,7 @@ export default function RegisterPage() {
               {errors.phone && <p className="text-xs text-red-400">{errors.phone}</p>}
             </div>
 
+            {!session && <>
             {/* Email */}
             <div className="space-y-1.5">
               <Label htmlFor="email" className="text-sm font-bold text-slate-200">E-postadress *</Label>
@@ -191,7 +214,7 @@ export default function RegisterPage() {
               <Label htmlFor="password" className="text-sm font-bold text-slate-200">Lösenord *</Label>
               <div className="relative">
                 <Lock className={iconCls} />
-                <Input id="password" type={showPassword ? 'text' : 'password'} placeholder="Minst 8 tecken" value={password} onChange={e => setPassword(e.target.value)} className={`pl-10 pr-10 ${inputCls}`} />
+                <Input id="password" type={showPassword ? 'text' : 'password'} placeholder="Minst 10 tecken" value={password} onChange={e => setPassword(e.target.value)} className={`pl-10 pr-10 ${inputCls}`} />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white">
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -216,6 +239,7 @@ export default function RegisterPage() {
               </div>
               {errors.confirmPassword && <p className="text-xs text-red-400">{errors.confirmPassword}</p>}
             </div>
+            </>}
 
             <Button type="submit" className="mt-2 h-12 w-full rounded-2xl bg-[#4f46e5] text-sm font-black text-white shadow-lg shadow-[#4f46e5]/25 hover:bg-[#4338ca]" disabled={submitting}>
               {submitting ? 'Skapar konto...' : 'Starta gratis provperiod'}

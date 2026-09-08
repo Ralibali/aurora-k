@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import L from 'leaflet';
+import { isValidMapCoordinate, mapPopup, mapTimeAgo } from '@/lib/map-content';
 import 'leaflet/dist/leaflet.css';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -83,7 +84,7 @@ export default function RouteMapLeaflet({ assignments }: RouteMapProps) {
     const positions: L.LatLngExpression[] = [];
 
     assignments.forEach((a, i) => {
-      if (!a.geofence_lat || !a.geofence_lng) return;
+      if (!isValidMapCoordinate(a.geofence_lat, a.geofence_lng)) return;
 
       const pos: L.LatLngExpression = [a.geofence_lat, a.geofence_lng];
       positions.push(pos);
@@ -91,13 +92,7 @@ export default function RouteMapLeaflet({ assignments }: RouteMapProps) {
       const marker = L.marker(pos, { icon: createNumberedIcon(i + 1) }).addTo(map);
 
       const time = new Date(a.scheduled_start).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
-      marker.bindPopup(`
-        <div style="min-width:160px">
-          <strong>${i + 1}. ${a.title}</strong>
-          <br/><span style="color:#666">📍 ${a.address}</span>
-          <br/><span style="color:#999;font-size:12px">🕐 ${time}</span>
-        </div>
-      `);
+      marker.bindPopup(mapPopup(`${i + 1}. ${a.title}`, [a.address, time]));
     });
 
     // Draw route line between stops

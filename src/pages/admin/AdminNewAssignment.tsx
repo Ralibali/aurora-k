@@ -14,7 +14,6 @@ import type { Tables, TablesInsert } from '@/integrations/supabase/types';
 import { useVehicles, useOrders } from '@/hooks/useNewFeatures';
 import { useUpdateBookingRequest } from '@/hooks/useAllFeatures';
 import { priorityLabels } from '@/lib/types';
-import { PUBLIC_SITE_URL } from '@/lib/constants';
 import { sendDriverAssignmentPush } from '@/lib/driver-notifications';
 import { ArrowLeft, MapPin, PackageCheck, Route, Sparkles, Truck } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -185,7 +184,6 @@ export default function AdminNewAssignment() {
 
   const notifyDriver = (assignment: { id: string }, scheduledStartIso: string) => {
     const driver = (drivers ?? []).find(d => d.id === driverId);
-    const customer = (customers ?? []).find(c => c.id === customerId);
     if (!driver) return;
 
     const formattedDate = new Date(scheduledStartIso).toLocaleString('sv-SE', {
@@ -196,28 +194,6 @@ export default function AdminNewAssignment() {
       hour: '2-digit',
       minute: '2-digit',
     });
-
-    if (driver.email && customer) {
-      supabase.functions.invoke('send-email', {
-        body: {
-          to: driver.email,
-          subject: `Nytt uppdrag: ${title}`,
-          templateName: 'assignment-confirmation',
-          templateData: {
-            driverName: driver.full_name,
-            title,
-            address: buildAddress(pickupAddress, deliveryAddress),
-            scheduledStart: formattedDate,
-            customerName: customer.name,
-            priority,
-            serviceType,
-            instructions: instructions || null,
-            adminComment: adminComment || null,
-            appUrl: `${PUBLIC_SITE_URL}/driver/assignments/${assignment.id}`,
-          },
-        },
-      }).catch(err => console.warn('[assignment-confirmation] send-email failed', err));
-    }
 
     sendDriverAssignmentPush(driver.id, 'Nytt uppdrag', `${title} · ${formattedDate}`, assignment.id);
   };

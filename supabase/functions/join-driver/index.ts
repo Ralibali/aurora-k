@@ -39,110 +39,57 @@ Deno.serve(async (req) => {
     // Look up invitation
     const { data: invitation, error: invError } = await adminClient
       .from("invitations")
-      .select("id, email, name, company_id")
+      .select("id, email, name, company_id, expires_at, created_at")
       .eq("token", token)
       .is("accepted_at", null)
       .maybeSingle();
 
-    if (invError || !invitation) {
+    const expiresAt = invitation?.expires_at ? Date.parse(invitation.expires_at) : Date.parse(invitation?.created_at ?? "") + 7 * 86400000;
+    if (invError || !invitation || !Number.isFinite(expiresAt) || expiresAt <= Date.now()) {
       return new Response(
-        JSON.stringify({ error: "Invitation not found or already used" }),
+        JSON.stringify({ error: "Inbjudan saknas, har gått ut eller är redan använd. Logga in om du redan har anslutit." }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Create auth user with email confirmed
-    const { data: userData, error: createError } =
-      await adminClient.auth.admin.createUser({
-        email: invitation.email,
-        password,
-        email_confirm: true,
-        user_metadata: { full_name: name, role: "driver" },
-      });
-
-    if (createError) {
-      return new Response(
-        JSON.stringify({ error: createError.message }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    const userId = userData.user.id;
-
-    // Update profile
-    await adminClient.from("profiles").upsert({
-      id: userId,
-      email: invitation.email,
-      full_name: name,
-      role: "driver",
-      company_id: invitation.company_id,
-    }, { onConflict: "id" });
-
-    // Set role
-    await adminClient.from("user_roles").upsert({
-      user_id: userId,
-      role: "driver",
-      company_id: invitation.company_id,
-    }, { onConflict: "user_id,role" });
-
-    // Mark invitation accepted
-    await adminClient
-      .from("invitations")
-      .update({ accepted_at: new Date().toISOString() })
-      .eq("id", invitation.id);
-
-    // Look up company name for welcome email
-    const { data: company } = await adminClient
-      .from("companies")
-      .select("name")
-      .eq("id", invitation.company_id)
-      .maybeSingle();
-
-    // Send welcome email (fire-and-forget)
-    try {
-      await adminClient.functions.invoke("send-email", {
-        body: {
-          to: "info@auroramedia.se",
-          templateName: "driver-welcome",
-          templateData: {
-            driverName: name,
-            companyName: company?.name || "ditt företag",
-            appUrl: sitePath("/driver/assignments"),
-          },
-        },
-      });
-    } catch (emailErr) {
-      console.error("[join-driver] Welcome email failed:", emailErr);
-    }
-
-    // Generate a session for the new user by signing in
+    // A new invitation may also belong to an existing account. In that case
+    // the supplied password must authenticate that account; never reset it.
+    const { data: created, error: createError } = await adminClient.auth.admin.createUser({
+      email: invitation.email, password, email_confirm: true,
+      user_metadata: { full_name: name },
+    });
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-    const anonClient = createClient(supabaseUrl, anonKey);
-    const { data: signInData, error: signInError } =
-      await anonClient.auth.signInWithPassword({
-        email: invitation.email,
-        password,
-      });
-
-    if (signInError) {
-      // User created but couldn't auto-sign in
-      return new Response(
-        JSON.stringify({ success: true, user_id: userId, session: null }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    const callerClient = createClient(supabaseUrl, anonKey);
+    const { data: signInData, error: signInError } = await callerClient.auth.signInWithPassword({ email: invitation.email, password });
+    if (signInError || !signInData.session || !signInData.user) {
+      return new Response(JSON.stringify({ error: createError
+        ? "Om du redan har ett konto: använd ditt befintliga lösenord eller återställ det via inloggningssidan."
+        : "Kontot är skapat men inloggningen misslyckades. Försök igen med samma lösenord." }),
+      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
-
-    return new Response(
-      JSON.stringify({
-        success: true,
-        user_id: userId,
-        session: signInData.session,
-      }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    // Accept atomically as the authenticated recipient. The database verifies
+    // the token, email and company membership before writing any profile/role.
+    const { error: acceptError } = await callerClient.rpc("accept_invitation", { p_token: token, p_user_id: signInData.user.id });
+    if (acceptError) {
+      console.error("[join-driver] Invitation acceptance failed", acceptError);
+      return new Response(JSON.stringify({ error: "Inbjudan kunde inte kopplas till kontot. Kontrollera att kontot inte tillhör ett annat företag och kontakta administratören." }),
+        { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    if (created?.user) {
+      try {
+        const { data: company } = await adminClient.from("companies").select("name").eq("id", invitation.company_id).single();
+        const { error: emailError } = await adminClient.functions.invoke("send-email", { body: {
+          to: invitation.email, templateName: "driver-welcome",
+          templateData: { driverName: name, companyName: company?.name || "ditt företag", appUrl: sitePath("/driver/assignments") },
+        } });
+        if (emailError) console.error("[join-driver] Welcome email failed", emailError);
+      } catch (emailError) { console.error("[join-driver] Welcome email failed", emailError); }
+    }
+    return new Response(JSON.stringify({ success: true, user_id: signInData.user.id, session: signInData.session }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (err) {
     return new Response(
-      JSON.stringify({ error: err.message }),
+      JSON.stringify({ error: err instanceof Error ? err.message : "Kunde inte ansluta föraren. Försök igen." }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

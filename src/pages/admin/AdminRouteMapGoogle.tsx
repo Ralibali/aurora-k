@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { loadGoogleMaps } from '@/lib/google-maps';
+import { isValidMapCoordinate, mapPopup, mapTimeAgo } from '@/lib/map-content';
 
 interface Assignment {
   id: string;
@@ -24,9 +25,11 @@ export default function RouteMapGoogle({ assignments }: RouteMapProps) {
   const overlaysRef = useRef<(google.maps.Marker | google.maps.Polyline)[]>([]);
   const infoRef = useRef<google.maps.InfoWindow | null>(null);
   const [loadError, setLoadError] = useState(false);
+  const [ready, setReady] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
+    const timeout = window.setTimeout(() => { if (!cancelled) { cancelled = true; setLoadError(true); } }, 15_000);
     loadGoogleMaps()
       .then(() => {
         if (cancelled || !containerRef.current || mapRef.current) return;
@@ -38,26 +41,38 @@ export default function RouteMapGoogle({ assignments }: RouteMapProps) {
           fullscreenControl: false,
         });
         infoRef.current = new google.maps.InfoWindow();
+        window.clearTimeout(timeout);
+        setReady(current => current + 1);
       })
       .catch((error) => {
         console.error('[RouteMapGoogle] Kunde inte ladda Google Maps:', error);
+        window.clearTimeout(timeout);
         if (!cancelled) setLoadError(true);
       });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeout);
+      overlaysRef.current.forEach(overlay => { google.maps.event.clearInstanceListeners(overlay); overlay.setMap(null); });
+      overlaysRef.current = [];
+      infoRef.current?.close();
+      infoRef.current = null;
+      if (mapRef.current) google.maps.event.clearInstanceListeners(mapRef.current);
+      mapRef.current = null;
+    };
   }, []);
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map) return;
+    if (!ready || !map) return;
 
-    overlaysRef.current.forEach((overlay) => overlay.setMap(null));
+    overlaysRef.current.forEach(overlay => { google.maps.event.clearInstanceListeners(overlay); overlay.setMap(null); });
     overlaysRef.current = [];
 
     const bounds = new google.maps.LatLngBounds();
     const path: google.maps.LatLngLiteral[] = [];
 
     assignments.forEach((a, i) => {
-      if (!a.geofence_lat || !a.geofence_lng) return;
+      if (!isValidMapCoordinate(a.geofence_lat, a.geofence_lng)) return;
 
       const position = { lat: a.geofence_lat, lng: a.geofence_lng };
       path.push(position);
@@ -80,13 +95,7 @@ export default function RouteMapGoogle({ assignments }: RouteMapProps) {
 
       const time = new Date(a.scheduled_start).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
       marker.addListener('click', () => {
-        infoRef.current?.setContent(`
-          <div style="min-width:160px;font-family:inherit">
-            <strong>${i + 1}. ${a.title}</strong>
-            <br/><span style="color:#666">📍 ${a.address}</span>
-            <br/><span style="color:#999;font-size:12px">🕐 ${time}</span>
-          </div>
-        `);
+        infoRef.current?.setContent(mapPopup(`${i + 1}. ${a.title}`, [a.address, time]));
         infoRef.current?.open({ map, anchor: marker });
       });
 
@@ -110,15 +119,20 @@ export default function RouteMapGoogle({ assignments }: RouteMapProps) {
     if (path.length > 0) {
       map.fitBounds(bounds, 50);
     }
-  }, [assignments]);
+    return () => {
+      infoRef.current?.close();
+      overlaysRef.current.forEach(overlay => { google.maps.event.clearInstanceListeners(overlay); overlay.setMap(null); });
+      overlaysRef.current = [];
+    };
+  }, [assignments, ready]);
 
   if (loadError) {
     return (
-      <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
-        Kunde inte ladda Google Maps — kontrollera API-nyckeln.
+      <div role="alert" className="flex h-full w-full items-center justify-center p-4 text-center text-sm text-muted-foreground">
+        Kartan kunde inte laddas. Kontrollera anslutningen och ladda om sidan.
       </div>
     );
   }
 
-  return <div ref={containerRef} className="h-full w-full" />;
+  return <div className="relative h-full w-full"><div ref={containerRef} className="h-full w-full" />{!ready && <div role="status" className="absolute inset-0 flex items-center justify-center bg-background/80 text-sm text-muted-foreground">Laddar karta…</div>}</div>;
 }

@@ -43,10 +43,6 @@ export async function saveDeliveryProof(input: {
     metadata: {
       recipientName: input.recipientName.trim(),
       note: input.note.trim(),
-      existingPhotoUrl: input.existingPhotoUrl ?? null,
-      existingSignatureUrl: input.existingSignatureUrl ?? null,
-      requirePhoto: Boolean(input.requirePhoto),
-      requireSignature: Boolean(input.requireSignature),
       completedAt,
       ...location,
     },

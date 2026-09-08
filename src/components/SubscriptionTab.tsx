@@ -8,10 +8,16 @@ import { toast } from 'sonner';
 import { trackEventOnce } from '@/lib/analytics';
 
 const STATUS_MAP: Record<string, { label: string; variant: 'default' | 'destructive' | 'outline' | 'secondary' }> = {
+  trialing: { label: 'Provperiod', variant: 'secondary' },
   active: { label: 'Aktiv', variant: 'default' },
   pending: { label: 'Väntar på betalning', variant: 'secondary' },
   past_due: { label: 'Förfallen', variant: 'destructive' },
   cancelled: { label: 'Avslutad', variant: 'destructive' },
+  canceled: { label: 'Avslutad', variant: 'destructive' },
+  incomplete_expired: { label: 'Avslutad', variant: 'destructive' },
+  incomplete: { label: 'Väntar på betalning', variant: 'secondary' },
+  unpaid: { label: 'Förfallen', variant: 'destructive' },
+  paused: { label: 'Pausad', variant: 'secondary' },
 };
 
 export default function SubscriptionTab() {
@@ -86,7 +92,8 @@ export default function SubscriptionTab() {
   const openPortal = async () => {
     setPortalLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('stripe-portal');
+      const startCheckout = ['trialing', 'pending', 'incomplete', 'cancelled', 'canceled', 'incomplete_expired'].includes(status);
+      const { data, error } = await supabase.functions.invoke(startCheckout ? 'create-checkout' : 'stripe-portal', startCheckout ? { body: { companyId } } : undefined);
       if (error || !data?.url) throw new Error('Kunde inte öppna portalen');
       window.location.href = data.url;
     } catch (err) {
@@ -133,7 +140,7 @@ export default function SubscriptionTab() {
               Aurora Transport
             </h3>
             <p className="text-2xl font-bold mt-2">449 kr<span className="text-sm font-normal text-muted-foreground">/mån</span></p>
-            <p className="text-xs text-muted-foreground mt-1">+ 3 500 kr startavgift (engångs)</p>
+            <p className="text-xs text-muted-foreground mt-1">Slutligt pris och eventuell startavgift visas innan du godkänner betalningen.</p>
           </div>
           <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
         </div>
@@ -147,7 +154,7 @@ export default function SubscriptionTab() {
         </p>
         <Button onClick={openPortal} disabled={portalLoading} className="gap-2">
           {portalLoading ? 'Öppnar...' : (
-            <>Hantera prenumeration <ExternalLink className="h-4 w-4" /></>
+            <>{status === 'trialing' ? 'Uppgradera' : 'Hantera prenumeration'} <ExternalLink className="h-4 w-4" /></>
           )}
         </Button>
       </div>

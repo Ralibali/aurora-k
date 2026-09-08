@@ -250,19 +250,8 @@ export default function AboutPage() {
               try {
                 const { error } = await supabase.functions.invoke('send-email', {
                   body: {
-                    to: 'info@auroramedia.se',
-                    subject: `Kontaktförfrågan från ${name}`,
-                    html: `
-                      <h2 style="margin:0 0 16px;font-size:18px;color:#1a1a1a">Nytt meddelande via kontaktformuläret</h2>
-                      <table style="width:100%;border-collapse:collapse;font-size:14px;color:#333">
-                        <tr><td style="padding:8px 0;font-weight:600;width:100px">Namn:</td><td style="padding:8px 0">${name}</td></tr>
-                        <tr><td style="padding:8px 0;font-weight:600">E-post:</td><td style="padding:8px 0"><a href="mailto:${email}" style="color:#2563eb">${email}</a></td></tr>
-                        ${phone ? `<tr><td style="padding:8px 0;font-weight:600">Telefon:</td><td style="padding:8px 0">${phone}</td></tr>` : ''}
-                      </table>
-                      <div style="margin-top:20px;padding:16px;background:#f8fafc;border-radius:8px;font-size:14px;line-height:1.6;color:#333">
-                        ${message.replace(/\n/g, '<br/>')}
-                      </div>
-                    `,
+                    templateName: 'contact-message',
+                    templateData: { name, email, phone, message },
                   },
                 });
                 if (error) throw error;

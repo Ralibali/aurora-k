@@ -197,7 +197,7 @@ function CreateDriverModal({ companyId }: { companyId: string }) {
 }
 
 /* ── Invite Driver Modal ── */
-function InviteDriverModal({ companyId }: { companyId: string }) {
+function InviteDriverModal({ companyId, onCreated }: { companyId: string; onCreated: () => void }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -211,6 +211,7 @@ function InviteDriverModal({ companyId }: { companyId: string }) {
     }
 
     setSubmitting(true);
+    let invitationSaved = false;
     try {
       const { data: inserted, error: insertErr } = await supabase
         .from('invitations')
@@ -223,6 +224,7 @@ function InviteDriverModal({ companyId }: { companyId: string }) {
         .single();
 
       if (insertErr || !inserted?.token) throw insertErr || new Error('Kunde inte skapa inbjudan');
+      invitationSaved = true;
 
       const joinUrl = `${PUBLIC_SITE_URL}/join?token=${inserted.token}`;
       const adminName = user?.user_metadata?.full_name || 'Admin';
@@ -234,7 +236,7 @@ function InviteDriverModal({ companyId }: { companyId: string }) {
         .eq('company_id', companyId)
         .maybeSingle();
 
-      await supabase.functions.invoke('send-email', {
+      const { error: mailError } = await supabase.functions.invoke('send-email', {
         body: {
           to: email.trim(),
           templateName: 'driver-invite',
@@ -246,13 +248,13 @@ function InviteDriverModal({ companyId }: { companyId: string }) {
         },
       });
 
+      if (mailError) throw new Error('Inbjudan är sparad, men mejlet kunde inte skickas. Försök skicka igen från inbjudningslistan.');
       toast.success(`Inbjudan skickad till ${email.trim()}`);
-      setOpen(false);
-      setName('');
-      setEmail('');
     } catch (err) {
-      toast.error('Kunde inte skicka inbjudan: ' + (err instanceof Error ? err.message : 'Okänt fel'));
+      if (invitationSaved) toast.warning('Inbjudan är sparad, men mejlet kunde inte skickas. Använd Skicka igen i inbjudningslistan.');
+      else toast.error('Kunde inte skapa inbjudan: ' + (err instanceof Error ? err.message : 'Okänt fel'));
     } finally {
+      if (invitationSaved) { setOpen(false); setName(''); setEmail(''); onCreated(); }
       setSubmitting(false);
     }
   };
@@ -435,7 +437,7 @@ function InvitationsList({ companyId }: { companyId: string }) {
         .eq('company_id', companyId)
         .maybeSingle();
 
-      await supabase.functions.invoke('send-email', {
+      const { error: mailError } = await supabase.functions.invoke('send-email', {
         body: {
           to: inv.email,
           templateName: 'driver-invite',
@@ -446,9 +448,10 @@ function InvitationsList({ companyId }: { companyId: string }) {
           },
         },
       });
+      if (mailError) throw new Error('Mejlet kunde inte skickas. Inbjudan finns kvar, försök igen.');
       toast.success(`Inbjudan skickad igen till ${inv.email}`);
     } catch {
-      toast.error('Kunde inte skicka om inbjudan');
+      toast.error('Mejlet kunde inte skickas. Inbjudan finns kvar, försök igen.');
     } finally {
       setResending(null);
     }
@@ -544,6 +547,7 @@ export default function AdminDrivers() {
   const [filter, setFilter] = useState('all');
   const [selectedDriver, setSelectedDriver] = useState<DriverRow | (typeof demoDriversFull)[number] | null>(null);
   const [activeTab, setActiveTab] = useState('drivers');
+  const [invitationRevision, setInvitationRevision] = useState(0);
 
   const { companyId } = useAuth();
   const { data: drivers, isLoading } = useDrivers();
@@ -609,7 +613,7 @@ export default function AdminDrivers() {
             </div>
             {companyId ? (
               <>
-                <InviteDriverModal companyId={companyId} />
+                <InviteDriverModal companyId={companyId} onCreated={() => { setInvitationRevision(current => current + 1); setActiveTab('invitations'); }} />
                 <CreateDriverModal companyId={companyId} />
               </>
             ) : (
@@ -721,7 +725,7 @@ export default function AdminDrivers() {
 
           <TabsContent value="invitations" className="mt-4">
             {companyId ? (
-              <InvitationsList companyId={companyId} />
+              <InvitationsList key={`${companyId}:${invitationRevision}`} companyId={companyId} />
             ) : (
               <p className="text-sm text-muted-foreground">Inget företag kopplat</p>
             )}

@@ -1,11 +1,10 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.100.1";
 import { corsHeaders } from "../_shared/cors.ts";
+import { sendResendMail, safeTemplateData } from "../_shared/resend.ts";
 import { newTrialSignupEmail } from "../_shared/email-templates.ts";
 
 // Automatisk provperiod — nya företag får 14 dagar gratis utan betaluppgifter.
-const TRIAL_DAYS = 14;
 const ADMIN_EMAIL = "info@auroramedia.se";
-const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
 
 async function notifyOwnerOfTrialSignup(payload: {
   companyName: string;
@@ -15,159 +14,55 @@ async function notifyOwnerOfTrialSignup(payload: {
   orgNr?: string | null;
   trialEndsAt: string;
 }) {
-  const lovableKey = Deno.env.get("LOVABLE_API_KEY");
-  const resendKey = Deno.env.get("RESEND_API_KEY");
-  if (!lovableKey || !resendKey) {
-    console.warn("[register-company] Mail-nycklar saknas — hoppar över ägar-notis");
-    return;
-  }
-  const { subject, html } = newTrialSignupEmail(payload);
-  const res = await fetch(`${GATEWAY_URL}/emails`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${lovableKey}`,
-      "X-Connection-Api-Key": resendKey,
-    },
-    body: JSON.stringify({
-      from: "Aurora Transport <noreply@auroratransport.se>",
-      to: [ADMIN_EMAIL],
-      subject,
-      html,
-    }),
-  });
-  if (!res.ok) {
-    console.error("[register-company] Ägar-notis misslyckades:", res.status, await res.text());
-  }
+  const { subject, html } = newTrialSignupEmail(safeTemplateData(payload));
+  const key = `trial/${payload.email.toLowerCase()}/${payload.trialEndsAt}`;
+  await sendResendMail({ to: ADMIN_EMAIL, subject, html }, key);
+
 }
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
-  }
-
+  const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-
-    // Authenticate the caller
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    if (!authHeader) return json({ error: "Logga in för att slutföra registreringen." }, 401);
+    const callerClient = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: authHeader } } });
+    const { data: { user: caller }, error: authError } = await callerClient.auth.getUser();
+    if (authError || !caller) return json({ error: "Logga in för att slutföra registreringen." }, 401);
+    const body = await req.json().catch(() => null);
+    if (!body || typeof body.companyName !== "string" || !body.companyName.trim() || body.companyName.length > 200
+      || typeof body.fullName !== "string" || !body.fullName.trim() || body.fullName.length > 200
+      || (body.orgNr != null && (typeof body.orgNr !== "string" || !/^\d{6}-?\d{4}$/.test(body.orgNr.trim())))
+      || (body.phone != null && (typeof body.phone !== "string" || body.phone.length > 50))) {
+      return json({ error: "Kontrollera företagsnamn, namn, organisationsnummer och telefonnummer." }, 400);
     }
-
-    const callerClient = createClient(supabaseUrl, anonKey, {
-      global: { headers: { Authorization: authHeader } },
+    const admin = createClient(supabaseUrl, serviceRoleKey, { auth: { persistSession: false } });
+    const { data: previous, error: previousError } = await admin.from("profiles").select("company_id").eq("id", caller.id).maybeSingle();
+    if (previousError) throw previousError;
+    // This transaction derives identity from auth.uid(), serializes concurrent
+    // retries, and atomically creates the company, profile and admin membership.
+    const { data: companyId, error: registrationError } = await callerClient.rpc("complete_company_registration", {
+      _name: body.companyName.trim(), _org_nr: body.orgNr?.trim() || null,
+      _user_full_name: body.fullName.trim(), _phone: body.phone?.trim() || null,
     });
-    const { data: { user: caller }, error: callerError } = await callerClient.auth.getUser();
-    if (callerError || !caller) {
-      return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    if (registrationError || !companyId) {
+      console.error("[register-company] Registration failed", registrationError);
+      return json({ error: "Företaget kunde inte registreras. Försök igen." }, 500);
     }
-
-    const { userId, companyName, orgNr, fullName, phone } = await req.json();
-
-    if (!userId || !companyName?.trim()) {
-      return new Response(
-        JSON.stringify({ error: "userId and companyName are required" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    if (!previous?.company_id) {
+      const { data: company, error: companyError } = await admin.from("companies").select("trial_ends_at").eq("id", companyId).single();
+      if (companyError) throw companyError;
+      try {
+        await notifyOwnerOfTrialSignup({ companyName: body.companyName.trim(), contactPerson: body.fullName.trim(), email: caller.email ?? "", phone: body.phone?.trim() || null, orgNr: body.orgNr?.trim() || null, trialEndsAt: company.trial_ends_at });
+      } catch (mailError) { console.error("[register-company] Owner notification failed", mailError); }
     }
-
-    // Ensure the caller can only register themselves
-    if (caller.id !== userId) {
-      return new Response(
-        JSON.stringify({ error: "Forbidden — you can only register your own account" }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    const adminClient = createClient(supabaseUrl, serviceRoleKey);
-
-    // Check user doesn't already belong to a company
-    const { data: existingProfile } = await adminClient
-      .from("profiles")
-      .select("company_id")
-      .eq("id", userId)
-      .maybeSingle();
-
-    if (existingProfile?.company_id) {
-      return new Response(
-        JSON.stringify({ error: "User already belongs to a company", companyId: existingProfile.company_id }),
-        { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // Create company — starta provperioden direkt, inget betalkort krävs
-    const trialEndsAt = new Date(Date.now() + TRIAL_DAYS * 86_400_000).toISOString();
-    const { data: company, error: companyError } = await adminClient
-      .from("companies")
-      .insert({
-        name: companyName.trim(),
-        org_nr: orgNr || null,
-        phone: phone || null,
-        subscription_status: "trialing",
-        trial_ends_at: trialEndsAt,
-      })
-      .select()
-      .single();
-
-    if (companyError) {
-      console.error("[register-company] Company create error:", companyError);
-      return new Response(
-        JSON.stringify({ error: "Failed to create company" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // Update profile
-    await adminClient.from("profiles").upsert({
-      id: userId,
-      email: caller.email,
-      full_name: fullName || caller.user_metadata?.full_name || "Admin",
-      role: "admin",
-      company_id: company.id,
-    }, { onConflict: "id" });
-
-    // Insert user_role
-    await adminClient.from("user_roles").upsert({
-      user_id: userId,
-      role: "admin",
-      company_id: company.id,
-    }, { onConflict: "user_id,role" });
-
-    console.log(`[register-company] Created company ${company.id} for user ${userId} (trial t.o.m. ${trialEndsAt})`);
-
-    // Maila ägaren så att uppföljning kan bokas — registreringen ska aldrig
-    // misslyckas om mailet gör det, därför körs det i try/catch.
-    try {
-      await notifyOwnerOfTrialSignup({
-        companyName: companyName.trim(),
-        contactPerson: fullName || "Okänd",
-        email: caller.email ?? "",
-        phone: phone || null,
-        orgNr: orgNr || null,
-        trialEndsAt,
-      });
-    } catch (mailError) {
-      console.error("[register-company] Kunde inte skicka ägar-notis:", mailError);
-    }
-
-    return new Response(
-      JSON.stringify({ success: true, companyId: company.id }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
-  } catch (err) {
-    console.error("[register-company] Error:", err);
-    return new Response(
-      JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return json({ success: true, companyId });
+  } catch (error) {
+    console.error("[register-company] Error", error);
+    return json({ error: "Registreringen kunde inte slutföras. Försök igen." }, 500);
   }
 });

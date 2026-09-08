@@ -172,7 +172,7 @@ export function paymentFailedEmail(data: {
     ${heading('Betalning misslyckades')}
     ${subheading(`Hej ${data.firstName}, vi kunde inte genomföra din betalning.`)}
     ${paragraph('Vi försökte debitera 449 kr för din Aurora Transport-prenumeration, men betalningen gick inte igenom.')}
-    ${alertBox('Ditt konto förblir aktivt i <strong>7 dagar</strong>. Uppdatera dina betalningsuppgifter innan dess för att undvika avbrott.', BRAND.warning)}
+    ${alertBox('Uppdatera dina betalningsuppgifter så snart som möjligt för att undvika avbrott.', BRAND.warning)}
     ${button('Uppdatera betalningsuppgifter', data.portalUrl)}
     ${divider()}
     ${smallText('Om du redan har uppdaterat dina uppgifter kan du ignorera detta meddelande.')}

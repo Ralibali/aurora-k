@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Truck, ArrowLeft, CheckCircle2, Mail } from 'lucide-react';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
+import { requestAuthEmail } from '@/lib/auth-email';
 export default function ForgotPasswordPage() {
   usePageMeta({ title: 'Glömt lösenord | Aurora Transport', description: '', canonical: 'https://auroratransport.se/forgot-password', noindex: true });
   const [email, setEmail] = useState('');
@@ -16,16 +16,12 @@ export default function ForgotPasswordPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
-    if (error) {
-      toast.error('Kunde inte skicka: ' + error.message);
-      setSubmitting(false);
-      return;
-    }
-    setSent(true);
-    setSubmitting(false);
+    try {
+      await requestAuthEmail({ type: 'recovery', email });
+      setSent(true);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Mejlet kunde inte begäras.');
+    } finally { setSubmitting(false); }
   };
 
   return (
@@ -53,9 +49,9 @@ export default function ForgotPasswordPage() {
             <div className="text-center space-y-4">
               <CheckCircle2 className="h-14 w-14 text-success mx-auto" />
               <p className="text-sm text-sidebar-foreground/70">
-                Om kontot finns har vi skickat ett e-postmeddelande till <strong className="text-sidebar-foreground">{email}</strong> med en länk för att återställa lösenordet.
+                Om kontot finns skickas ett e-postmeddelande till <strong className="text-sidebar-foreground">{email}</strong> med en länk för att återställa lösenordet.
               </p>
-              <Link to="/">
+              <Link to="/login">
                 <Button variant="outline" className="w-full touch-target border-sidebar-border text-sidebar-foreground hover:bg-sidebar-accent">
                   <ArrowLeft className="h-4 w-4 mr-1" /> Tillbaka till inloggning
                 </Button>
@@ -81,7 +77,7 @@ export default function ForgotPasswordPage() {
               <Button type="submit" className="w-full h-12 text-sm font-semibold rounded-xl shadow-lg shadow-primary/20" disabled={submitting}>
                 {submitting ? 'Skickar...' : 'Skicka återställningslänk'}
               </Button>
-              <Link to="/" className="block text-center text-sm text-sidebar-foreground/50 hover:text-sidebar-foreground transition-colors">
+              <Link to="/login" className="block text-center text-sm text-sidebar-foreground/50 hover:text-sidebar-foreground transition-colors">
                 <ArrowLeft className="inline h-3 w-3 mr-1" /> Tillbaka till inloggning
               </Link>
             </form>

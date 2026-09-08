@@ -13,6 +13,10 @@ export function SignaturePad({ onChange }: { onChange: (blob: Blob | null) => vo
       const ratio = window.devicePixelRatio || 1;
       const width = canvas.clientWidth;
       const height = canvas.clientHeight;
+      const previous = document.createElement('canvas');
+      previous.width = canvas.width;
+      previous.height = canvas.height;
+      if (hasInk.current) previous.getContext('2d')?.drawImage(canvas, 0, 0);
       canvas.width = width * ratio;
       canvas.height = height * ratio;
       const context = canvas.getContext('2d');
@@ -21,6 +25,7 @@ export function SignaturePad({ onChange }: { onChange: (blob: Blob | null) => vo
         context.lineWidth = 2.5;
         context.lineCap = 'round';
         context.strokeStyle = '#0f172a';
+        if (hasInk.current) context.drawImage(previous, 0, 0, width, height);
       }
     };
     resize();
@@ -67,7 +72,7 @@ export function SignaturePad({ onChange }: { onChange: (blob: Blob | null) => vo
 
   return (
     <div className="space-y-2">
-      <canvas ref={canvasRef} className="h-40 w-full touch-none rounded-xl border bg-white" onPointerDown={start} onPointerMove={move} onPointerUp={finish} onPointerCancel={finish} />
+      <canvas aria-label="Rita mottagarens signatur" ref={canvasRef} className="h-40 w-full touch-none rounded-xl border bg-white" onPointerDown={start} onPointerMove={move} onPointerUp={finish} onPointerCancel={finish} />
       <Button type="button" size="sm" variant="ghost" onClick={clear}>Rensa signatur</Button>
     </div>
   );

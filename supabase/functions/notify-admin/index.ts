@@ -1,11 +1,8 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2.100.1/cors";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.100.1";
 import { z } from "https://esm.sh/zod@3";
-import { newCustomerMessageEmail } from "../_shared/email-templates.ts";
-import { sitePath } from "../_shared/site-url.ts";
+import { deliverOutbox } from "../_shared/notification-outbox.ts";
 
-const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
-const FALLBACK_ADMIN_EMAIL = "info@auroramedia.se";
 const portalToken = z.string().trim().min(20).max(256).regex(/^[A-Za-z0-9._~-]+$/);
 
 const RequestSchema = z.object({
@@ -27,15 +24,6 @@ function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: jsonHeaders });
 }
 
-function escapeHtml(value: string) {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
@@ -44,13 +32,6 @@ Deno.serve(async (req) => {
     const parsed = RequestSchema.safeParse(await req.json().catch(() => ({})));
     if (!parsed.success) {
       return json({ error: "Invalid request", details: parsed.error.flatten().fieldErrors }, 400);
-    }
-
-    const lovableKey = Deno.env.get("LOVABLE_API_KEY");
-    const resendKey = Deno.env.get("RESEND_API_KEY");
-    if (!lovableKey || !resendKey) {
-      console.error("[notify-admin] email provider secrets are missing");
-      return json({ error: "Email service is not configured" }, 503);
     }
 
     const admin = createClient(
@@ -71,43 +52,13 @@ Deno.serve(async (req) => {
     }
 
     const customer = Array.isArray(tokenRow.customer) ? tokenRow.customer[0] : tokenRow.customer;
-    const companyId = tokenRow.company_id ?? customer?.company_id;
+    const companyId = tokenRow.company_id;
+    if (customer?.company_id !== companyId) return json({ error: "Unauthorized" }, 401);
     if (!companyId || !customer?.id || !customer?.name) return json({ error: "Unauthorized" }, 401);
 
-    const [{ data: companySettings }, { data: adminProfile }] = await Promise.all([
-      admin.from("settings").select("email").eq("company_id", companyId).maybeSingle(),
-      admin.from("profiles").select("email").eq("company_id", companyId).eq("role", "admin").not("email", "is", null).limit(1).maybeSingle(),
-    ]);
-
-    const recipient = companySettings?.email || adminProfile?.email || FALLBACK_ADMIN_EMAIL;
-    const template = newCustomerMessageEmail({
-      customerName: escapeHtml(customer.name),
-      message: escapeHtml(parsed.data.data.message).replace(/\n/g, "<br>"),
-      customerUrl: sitePath(`/admin/customers/${customer.id}`),
-    });
-
-    const res = await fetch(`${GATEWAY_URL}/emails`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${lovableKey}`,
-        "X-Connection-Api-Key": resendKey,
-      },
-      body: JSON.stringify({
-        from: "Aurora Transport <noreply@auroratransport.se>",
-        to: [recipient],
-        subject: template.subject,
-        html: template.html,
-      }),
-    });
-
-    const result = await res.json().catch(() => ({}));
-    if (!res.ok) {
-      console.error("[notify-admin] Resend error:", result);
-      return json({ error: "Email send failed" }, 502);
-    }
-
-    console.log(`[notify-admin] Sent ${parsed.data.type} notification for company ${companyId}`);
+    // Content and recipients come from the committed portal message trigger.
+    const result = await deliverOutbox(admin, companyId);
+    if (result.failed) return json({ error: 'Meddelandet är sparat. Mejlaviseringen väntar på ett nytt försök.' }, 502);
     return json({ success: true });
   } catch (err) {
     console.error("[notify-admin] Error:", err);

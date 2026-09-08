@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import L from 'leaflet';
+import { isValidMapCoordinate, mapPopup, mapTimeAgo } from '@/lib/map-content';
 import 'leaflet/dist/leaflet.css';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -11,14 +12,6 @@ L.Icon.Default.mergeOptions({
   iconUrl: markerIcon,
   shadowUrl: markerShadow,
 });
-
-function timeAgo(dateStr: string): string {
-  const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
-  if (seconds < 60) return `${seconds}s sedan`;
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m sedan`;
-  return `${Math.floor(minutes / 60)}h sedan`;
-}
 
 export type DriverLocation = {
   latitude: number;
@@ -68,24 +61,14 @@ export default function LeafletMap({ locations, navigate }: LeafletMapProps) {
     const positions: L.LatLngExpression[] = [];
 
     locations.forEach((loc) => {
+      if (!isValidMapCoordinate(loc.latitude, loc.longitude)) return;
       const pos: L.LatLngExpression = [loc.latitude, loc.longitude];
       positions.push(pos);
 
       const marker = L.marker(pos).addTo(map);
 
       const driverName = loc.driver?.full_name ?? 'Okänd förare';
-      let popupHtml = `<div style="min-width:180px"><strong>${driverName}</strong>`;
-      if (loc.assignment) {
-        popupHtml += `<br/><span style="color:#666">📍 ${loc.assignment.title}</span>`;
-        popupHtml += `<br/><span style="color:#666">${loc.assignment.address}</span>`;
-      }
-      popupHtml += `<br/><small style="color:#999">Uppdaterad ${timeAgo(loc.updated_at)}</small>`;
-      if (loc.assignment_id) {
-        popupHtml += `<br/><a href="/admin/assignments/${loc.assignment_id}" style="color:#3b82f6;font-size:12px">Visa uppdrag →</a>`;
-      }
-      popupHtml += '</div>';
-
-      marker.bindPopup(popupHtml);
+      marker.bindPopup(mapPopup(driverName, [loc.assignment?.title, loc.assignment?.address, `Uppdaterad ${mapTimeAgo(loc.updated_at)}`].filter((value): value is string => Boolean(value)), loc.assignment_id));
     });
 
     if (positions.length > 0) {

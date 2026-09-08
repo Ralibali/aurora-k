@@ -18,6 +18,7 @@ import { AdminShell } from "@/components/AdminLayout";
 import { DriverLayout } from "@/components/DriverLayout";
 import { PlatformAdminShell } from "@/components/PlatformAdminLayout";
 import { DriverPushNotifications } from "@/components/DriverPushNotifications";
+import AuthConfirmationPage from "@/pages/AuthConfirmationPage";
 
 const LandingPage = lazy(() => import("./pages/LandingPageV3"));
 const PublicBookingPage = lazy(() => import("./pages/PublicBookingPage"));
@@ -132,7 +133,7 @@ function ScrollToTop() {
 
 function PublicSiteEnhancements() {
   const location = useLocation();
-  const isAppRoute = location.pathname.startsWith('/admin') || location.pathname.startsWith('/driver') || location.pathname.startsWith('/platform') || location.pathname.startsWith('/portal') || location.pathname.startsWith('/onboarding') || location.pathname.startsWith('/track/');
+  const isAppRoute = location.pathname.startsWith('/admin') || location.pathname.startsWith('/driver') || location.pathname.startsWith('/platform') || location.pathname.startsWith('/portal') || location.pathname.startsWith('/onboarding') || location.pathname.startsWith('/track/') || location.pathname.startsWith('/auth/');
   if (isAppRoute) return null;
   return <><PwaInstallPrompt /><CookieConsent /><ExitIntentPopup /><QuickContactButton /></>;
 }
@@ -173,6 +174,7 @@ const App = () => (
                   <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                   <Route path="/portal" element={<CustomerPortal />} />
                   <Route path="/reset-password" element={<ResetPasswordPage />} />
+                  <Route path="/auth/confirm" element={<AuthConfirmationPage />} />
                   <Route path="/om-oss" element={<AboutPage />} />
                   <Route path="/privacy" element={<PrivacyPage />} />
                   <Route path="/budtjanst-app" element={<BudtjanstAppPage />} />

@@ -212,6 +212,12 @@ export function useDriverAssignments(driverId: string | undefined) {
   });
 }
 
+function deliverAssignmentNotifications() {
+  void supabase.functions.invoke('dispatch-notifications').then(({ data, error }) => {
+    if (error || data?.failed) toast.warning('Uppdraget är sparat. Mejlaviseringen väntar på ett nytt försök.');
+  }).catch(() => toast.warning('Uppdraget är sparat. Mejlaviseringen väntar på ett nytt försök.'));
+}
+
 export function useCreateAssignment() {
   const qc = useQueryClient();
   const { companyId } = useAuth();
@@ -242,6 +248,7 @@ export function useCreateAssignment() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['assignments'] });
       toast.success('Uppdrag skapat!');
+      deliverAssignmentNotifications();
     },
     onError: (e: Error) => toast.error('Kunde inte skapa uppdrag: ' + e.message),
   });
@@ -259,6 +266,7 @@ export function useUpdateAssignment() {
       qc.invalidateQueries({ queryKey: ['assignments'] });
       qc.invalidateQueries({ queryKey: ['assignments', data.id] });
       toast.success('Uppdrag uppdaterat');
+      deliverAssignmentNotifications();
     },
     onError: (e: Error) => toast.error('Kunde inte uppdatera: ' + e.message),
   });
@@ -267,24 +275,9 @@ export function useUpdateAssignment() {
 export function useDriverUpdateAssignment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (params: {
-      id: string;
-      status?: string;
-      actual_start?: string | null;
-      actual_stop?: string | null;
-      driver_comment?: string | null;
-      consignment_photo_url?: string | null;
-      signature_url?: string | null;
-    }) => {
-      const { id, ...fields } = params;
+    mutationFn: async (params: { id: string; driver_comment?: string | null }) => {
       const { error } = await supabase.rpc('driver_update_assignment', {
-        _id: id,
-        _status: fields.status ?? null,
-        _actual_start: fields.actual_start ?? null,
-        _actual_stop: fields.actual_stop ?? null,
-        _driver_comment: fields.driver_comment ?? null,
-        _consignment_photo_url: fields.consignment_photo_url ?? null,
-        _signature_url: fields.signature_url ?? null,
+        _id: params.id, _driver_comment: params.driver_comment ?? null,
       });
       if (error) throw error;
     },
@@ -348,6 +341,7 @@ export function useBulkAssignDriver() {
         .is('actual_start', null)
         .select('id');
       if (error) throw error;
+      if (data.length) deliverAssignmentNotifications();
       if (data.length !== ids.length) throw new Error('Några uppdrag har ändrats. Kontrollera tilldelningen innan du försöker igen.');
       return data;
     },

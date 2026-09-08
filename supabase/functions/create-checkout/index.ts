@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { prepareCompanyCheckout } from "./handler.ts";
 import { safeOrigin } from "../_shared/site-url.ts";
 
 const corsHeaders = {
@@ -49,7 +50,7 @@ serve(async (req) => {
 
     const { data: company, error: companyError } = await admin
       .from("companies")
-      .select("id, name, stripe_customer_id")
+      .select("id, name, stripe_customer_id, stripe_subscription_id")
       .eq("id", companyId)
       .single();
     if (companyError || !company) return json({ error: "Company not found" }, 404);
@@ -61,33 +62,19 @@ serve(async (req) => {
       apiVersion: "2025-08-27.basil",
     });
 
-    let customerId = company.stripe_customer_id as string | null;
-    if (!customerId) {
-      const customer = await stripe.customers.create({
-        email: user.email,
-        name: company.name || undefined,
-        metadata: { company_id: company.id, supabase_user_id: user.id },
-      });
-      customerId = customer.id;
-      await admin.from("companies").update({ stripe_customer_id: customerId }).eq("id", company.id);
-    }
-
-    const setupPriceId = Deno.env.get("STRIPE_SETUP_PRICE_ID");
-    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
-    if (setupPriceId) lineItems.push({ price: setupPriceId, quantity: 1 });
-    lineItems.push({ price: monthlyPriceId, quantity: 1 });
-
-    const origin = safeOrigin(req);
-    const session = await stripe.checkout.sessions.create({
-      customer: customerId,
-      line_items: lineItems,
-      mode: "subscription",
-      metadata: { company_id: company.id },
-      success_url: `${origin}/onboarding?checkout=success`,
-      cancel_url: `${origin}/register?cancelled=true`,
+    const result = await prepareCompanyCheckout({
+      stripe, company, email: user.email, userId: user.id, origin: safeOrigin(req),
+      monthlyPriceId, setupPriceId: Deno.env.get("STRIPE_SETUP_PRICE_ID"),
+      saveCustomer: async (customerId) => {
+        const { data, error } = await admin.from("companies").update({ stripe_customer_id: customerId }).eq("id", company.id).is("stripe_customer_id", null).select("stripe_customer_id").maybeSingle();
+        if (error) throw error;
+        if (!data) {
+          const { data: latest, error: latestError } = await admin.from("companies").select("stripe_customer_id").eq("id", company.id).single();
+          if (latestError || latest?.stripe_customer_id !== customerId) throw new Error("Företagets betalningsuppgifter ändrades. Försök igen.");
+        }
+      },
     });
-
-    return json({ url: session.url });
+    return json(result);
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
     return json({ error: msg }, 500);

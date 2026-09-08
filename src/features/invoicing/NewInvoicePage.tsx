@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { ArrowLeft, FileText, Zap } from 'lucide-react';
@@ -18,44 +18,62 @@ import { InvoiceLineEditor } from '@/features/invoicing/InvoiceLineEditor';
 import { invoiceLineTotals, type PersistedInvoiceLine } from '@/lib/invoice-lines';
 import { calculateDecimalHours, formatSwedishDate } from '@/lib/format';
 import { supabase } from '@/integrations/supabase/client';
-
-let sequence = 0;
-const nextLineId = () => `invoice-line-${Date.now()}-${++sequence}`;
-
-type NavigationState = {
-  customerId?: string;
-  assignmentIds?: string[];
-};
+import { assignmentInvoiceLines, invoiceLinesError, invoiceSelection, missingInvoiceSources, type InvoiceSelection } from './invoice-preparation';
+import { getStockholmDateKey } from '@/features/dispatch/dispatch-utils';
 
 export default function NewInvoicePage() {
-  const navigate = useNavigate();
   const location = useLocation();
-  const initial = (location.state as NavigationState | null) ?? {};
-  const initialAssignments = Array.isArray(initial.assignmentIds) ? initial.assignmentIds : [];
+  return <InvoiceForm key={location.key} initial={invoiceSelection(location.search, location.state)} />;
+}
 
+function InvoiceForm({ initial }: { initial: InvoiceSelection }) {
+  const navigate = useNavigate();
+  const initialAssignments = initial.assignmentIds;
   const [step, setStep] = useState(initial.customerId && initialAssignments.length ? 2 : 1);
-  const [customerId, setCustomerId] = useState(initial.customerId ?? '');
+  const [customerId, setCustomerId] = useState(initial.customerId);
   const [selectedAssignments, setSelectedAssignments] = useState<string[]>(initialAssignments);
   const [lines, setLines] = useState<PersistedInvoiceLine[]>([]);
+  const [sourceLines, setSourceLines] = useState<PersistedInvoiceLine[]>([]);
   const [reference, setReference] = useState('');
   const [message, setMessage] = useState(initialAssignments.length ? 'Faktura skapad från slutfört uppdrag.' : '');
-  const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().slice(0, 10));
+  const [invoiceDate, setInvoiceDate] = useState(getStockholmDateKey());
   const [dueDateOverride, setDueDateOverride] = useState('');
   const [invoiceNumberOverride, setInvoiceNumberOverride] = useState<number | null>(null);
-  const [didBuildInitialLines, setDidBuildInitialLines] = useState(false);
+  const [autoBuildPending, setAutoBuildPending] = useState(Boolean(initial.customerId && initialAssignments.length));
+  const [isBuilding, setIsBuilding] = useState(false);
+  const [buildError, setBuildError] = useState<string | null>(null);
+  const [preparedSelection, setPreparedSelection] = useState('');
+  const [zeroPricesApproved, setZeroPricesApproved] = useState(false);
+  const buildRequest = useRef(0);
+  useEffect(() => () => { buildRequest.current += 1; }, []);
 
-  const { data: customers } = useCustomers();
-  const { data: assignments } = useAssignments();
-  const { data: nextInvoiceNumber } = useNextInvoiceNumber();
-  const { data: settings } = useSettings();
-  const { data: articles } = useArticles();
-  const { data: customerPrices } = useCustomerPriceList(customerId || undefined);
+  const customersQuery = useCustomers();
+  const assignmentsQuery = useAssignments();
+  const numberQuery = useNextInvoiceNumber();
+  const settingsQuery = useSettings();
+  const articlesQuery = useArticles();
+  const pricesQuery = useCustomerPriceList(customerId || undefined);
+  const { data: customers } = customersQuery;
+  const { data: assignments } = assignmentsQuery;
+  const { data: nextInvoiceNumber } = numberQuery;
+  const { data: settings } = settingsQuery;
+  const { data: articles } = articlesQuery;
+  const { data: customerPrices } = pricesQuery;
   const createInvoice = useCreateReliableInvoice();
+  const requiredQueries = [customersQuery, assignmentsQuery, numberQuery, settingsQuery, articlesQuery, ...(customerId ? [pricesQuery] : [])];
+  const dataReady = requiredQueries.every(query => query.isSuccess);
+  const dataError = requiredQueries.some(query => query.isError);
+  const retryData = () => { void Promise.allSettled(requiredQueries.filter(query => !query.isSuccess || query.isError).map(query => query.refetch())); };
 
   const customer = (customers ?? []).find(item => item.id === customerId);
   const uninvoicedAssignments = (assignments ?? []).filter(item =>
     item.customer_id === customerId && item.status === 'completed' && !item.invoiced,
   );
+  const invalidSelection = dataReady && customerId && (!customer || selectedAssignments.some(id => !uninvoicedAssignments.some(item => item.id === id)));
+  const selectionKey = JSON.stringify([customerId, [...selectedAssignments].sort()]);
+  const isPrepared = preparedSelection === selectionKey;
+  const missingSources = missingInvoiceSources(lines, sourceLines);
+  const hasZeroPrices = lines.some(line => line.unitPrice === 0);
 
   const articlePrices = useMemo(() => {
     const prices = new Map<string, number>();
@@ -65,121 +83,108 @@ export default function NewInvoicePage() {
   }, [articles, customerPrices]);
 
   const buildLines = useCallback(async () => {
-    const built: PersistedInvoiceLine[] = [];
-
-    for (const assignmentId of selectedAssignments) {
-      const assignment = (assignments ?? []).find(item => item.id === assignmentId);
-      if (!assignment) continue;
-
-      const { data: assignmentArticles, error } = await supabase
-        .from('assignment_articles')
-        .select('*')
-        .eq('assignment_id', assignmentId);
-      if (error) throw error;
-
-      if (assignmentArticles?.length) {
-        assignmentArticles.forEach(article => {
-          const quantity = Number(article.quantity);
-          const unitPrice = articlePrices.get(article.article_id ?? '') ?? Number(article.unit_price);
-          built.push({
-            id: nextLineId(),
-            description: article.name,
-            quantity,
-            unit: article.unit,
-            unitPrice,
-            vatRate: Number(article.vat_rate),
-            amount: quantity * unitPrice,
-            date: assignment.actual_start,
-            driver: assignment.driver?.full_name ?? '',
-            assignmentId,
-            articleId: article.article_id,
-            source: 'article',
-          });
-        });
-        continue;
+    if (!dataReady || !customer || !selectedAssignments.length || invalidSelection) return;
+    if (isPrepared) { setStep(2); return; }
+    const request = ++buildRequest.current;
+    setIsBuilding(true);
+    setBuildError(null);
+    try {
+      const sources: PersistedInvoiceLine[] = [];
+      const added: PersistedInvoiceLine[] = [];
+      for (const assignmentId of selectedAssignments) {
+        const existing = sourceLines.filter(line => line.assignmentId === assignmentId);
+        if (existing.length) { sources.push(...existing); continue; }
+        const assignment = (assignments ?? []).find(item => item.id === assignmentId);
+        if (!assignment || assignment.customer_id !== customer.id || assignment.status !== 'completed' || assignment.invoiced) {
+          throw new Error('Ett valt uppdrag kan inte faktureras. Kontrollera urvalet i steg 1.');
+        }
+        const { data: assignmentArticles, error } = await supabase.from('assignment_articles').select('*').eq('assignment_id', assignmentId);
+        if (error) throw error;
+        if (request !== buildRequest.current) return;
+        const built = assignmentInvoiceLines(assignment, customer, assignmentArticles ?? [], articlePrices);
+        sources.push(...built);
+        added.push(...built);
       }
-
-      const hours = assignment.actual_start && assignment.actual_stop
-        ? calculateDecimalHours(assignment.actual_start, assignment.actual_stop)
-        : 0;
-      const record = assignment as typeof assignment & { pickup_address?: string; delivery_address?: string };
-      const route = record.pickup_address && record.delivery_address
-        ? ` (${record.pickup_address} → ${record.delivery_address})`
-        : '';
-
-      let quantity = 1;
-      let unit = 'st';
-      let unitPrice = Number(assignment.cost ?? 0);
-      let suffix = '';
-
-      if (!unitPrice && customer?.pricing_type === 'per_delivery') {
-        unitPrice = Number(customer.price_per_delivery ?? 0);
-        suffix = ' — leverans';
-      } else if (!unitPrice && customer?.pricing_type === 'per_hour') {
-        quantity = hours || 1;
-        unit = 'h';
-        unitPrice = Number(customer.price_per_hour ?? 0);
-      }
-
-      built.push({
-        id: nextLineId(),
-        description: `${assignment.title}${route}${suffix}`,
-        quantity,
-        unit,
-        unitPrice,
-        vatRate: 25,
-        amount: quantity * unitPrice,
-        date: assignment.actual_start,
-        driver: assignment.driver?.full_name ?? '',
-        assignmentId,
-        source: 'assignment',
-      });
+      if (request !== buildRequest.current) return;
+      // Freeze new source rows once. Returning to selection keeps edits and free
+      // rows; removing an assignment removes only that assignment's source rows.
+      setLines([...lines.filter(line => !line.assignmentId || selectedAssignments.includes(line.assignmentId)), ...added]);
+      setSourceLines(sources);
+      setPreparedSelection(selectionKey);
+      setZeroPricesApproved(false);
+      setStep(2);
+    } catch (error) {
+      if (request === buildRequest.current) setBuildError(error instanceof Error ? error.message : 'Kunde inte hämta uppdragens artiklar. Försök igen.');
+    } finally {
+      if (request === buildRequest.current) setIsBuilding(false);
     }
-
-    setLines(built);
-  }, [articlePrices, assignments, customer, selectedAssignments]);
+  }, [dataReady, customer, selectedAssignments, invalidSelection, isPrepared, sourceLines, assignments, articlePrices, lines, selectionKey]);
 
   useEffect(() => {
-    if (!didBuildInitialLines && customerId && selectedAssignments.length && (assignments?.length ?? 0) > 0) {
-      setDidBuildInitialLines(true);
-      void buildLines().catch(error => toast.error(error instanceof Error ? error.message : 'Kunde inte skapa fakturarader'));
-    }
-  }, [assignments?.length, buildLines, customerId, didBuildInitialLines, selectedAssignments.length]);
+    if (!autoBuildPending || !dataReady || invalidSelection) return;
+    let cancelled = false;
+    // Deferring the initial request also makes StrictMode's effect replay safe.
+    void Promise.resolve().then(() => {
+      if (cancelled) return;
+      setAutoBuildPending(false);
+      void buildLines();
+    });
+    return () => { cancelled = true; };
+  }, [autoBuildPending, dataReady, invalidSelection, buildLines]);
 
-  const totals = invoiceLineTotals(lines);
-  const invoiceNumber = invoiceNumberOverride ?? nextInvoiceNumber ?? 1001;
-  const defaultDueDate = customer
-    ? new Date(new Date(invoiceDate).getTime() + Number(customer.payment_terms_days ?? 30) * 86400000).toISOString().slice(0, 10)
-    : invoiceDate;
-  const dueDate = dueDateOverride || defaultDueDate;
-  const invoiceMode = settings?.invoice_mode || 'invoice';
-  const isBasis = invoiceMode === 'basis';
-
-  const toggleAssignment = (id: string) => {
-    setSelectedAssignments(current => current.includes(id) ? current.filter(item => item !== id) : [...current, id]);
-    setDidBuildInitialLines(false);
+  const cancelBuild = () => {
+    buildRequest.current += 1;
+    setIsBuilding(false);
+    setBuildError(null);
+    setAutoBuildPending(false);
   };
+  const changeCustomer = (value: string) => {
+    cancelBuild();
+    setCustomerId(value);
+    setSelectedAssignments([]);
+    setLines([]);
+    setSourceLines([]);
+    setPreparedSelection('');
+    setZeroPricesApproved(false);
+  };
+  const toggleAssignment = (id: string) => {
+    cancelBuild();
+    setSelectedAssignments(current => current.includes(id) ? current.filter(item => item !== id) : [...current, id]);
+    setZeroPricesApproved(false);
+  };
+  const updateLines = (next: PersistedInvoiceLine[]) => { setLines(next); setZeroPricesApproved(false); };
+  const totals = invoiceLineTotals(lines);
+  const invoiceNumber = invoiceNumberOverride ?? nextInvoiceNumber ?? '';
+  const invoiceDateMs = Date.parse(invoiceDate);
+  const dueDateMs = invoiceDateMs + Number(customer?.payment_terms_days ?? 30) * 86400000;
+  const defaultDueDate = Number.isFinite(dueDateMs) && Number.isFinite(new Date(dueDateMs).getTime())
+    ? new Date(dueDateMs).toISOString().slice(0, 10) : '';
+  const dueDate = dueDateOverride || defaultDueDate;
+  const isBasis = settings?.invoice_mode === 'basis';
+  const canReview = dataReady && isPrepared && !isBuilding && !invalidSelection;
 
+  const validateLines = (status: 'draft' | 'sent' = 'draft') => {
+    if (!canReview || !customer) return 'Kontrollera kunden och uppdragsvalet i steg 1.';
+    return invoiceLinesError(lines, sourceLines, selectedAssignments, zeroPricesApproved, status);
+  };
+  const preview = () => {
+    const error = validateLines();
+    if (error) return toast.error(error);
+    setStep(3);
+  };
   const submit = (status: 'draft' | 'sent') => {
-    if (!customerId) return toast.error('Välj kund.');
-    if (!lines.length) return toast.error('Fakturan måste innehålla minst en rad.');
-    if (lines.some(line => !line.description.trim() || line.quantity <= 0 || line.unitPrice < 0)) {
-      return toast.error('Kontrollera beskrivning, antal och pris på samtliga rader.');
+    const error = validateLines(status);
+    if (error) return toast.error(error);
+    if (!Number.isInteger(invoiceNumber) || Number(invoiceNumber) <= 0) return toast.error('Ange ett giltigt fakturanummer.');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(invoiceDate) || !Number.isFinite(invoiceDateMs) || !/^\d{4}-\d{2}-\d{2}$/.test(dueDate) || !Number.isFinite(Date.parse(dueDate)) || dueDate < invoiceDate) {
+      return toast.error('Ange giltiga datum. Förfallodatum får inte vara före fakturadatum.');
     }
-
     createInvoice.mutate({
-      invoice_number: invoiceNumber,
-      customer_id: customerId,
-      assignment_ids: selectedAssignments,
-      status,
-      invoice_date: invoiceDate,
-      due_date: dueDate,
-      total_ex_vat: totals.totalExVat,
-      vat_amount: totals.vatAmount,
-      total_inc_vat: totals.totalIncVat,
-      reference: reference || null,
-      message: message || null,
-      lines,
+      invoice_number: Number(invoiceNumber), customer_id: customerId, assignment_ids: selectedAssignments, status,
+      invoice_date: invoiceDate, due_date: dueDate, total_ex_vat: totals.totalExVat,
+      vat_amount: totals.vatAmount, total_inc_vat: totals.totalIncVat,
+      reference: reference || null, message: message || null,
+      lines: lines.map(line => ({ ...line, amount: line.quantity * line.unitPrice })),
     }, { onSuccess: () => navigate('/admin/invoices') });
   };
 
@@ -192,35 +197,44 @@ export default function NewInvoicePage() {
           </div>
         )}
 
-        <Button variant="ghost" size="sm" onClick={() => step > 1 ? setStep(step - 1) : navigate(-1)}>
+        <Button variant="ghost" size="sm" onClick={() => { cancelBuild(); if (step > 1) setStep(step - 1); else navigate(-1); }}>
           <ArrowLeft className="mr-1 h-4 w-4" /> {step > 1 ? 'Föregående steg' : 'Tillbaka'}
         </Button>
         <div className="flex gap-2">{[1, 2, 3].map(item => <div key={item} className={`h-1.5 flex-1 rounded-full ${item <= step ? 'bg-primary' : 'bg-muted'}`} />)}</div>
 
+        {dataError ? (
+          <div role="alert" className="rounded-lg border border-destructive/30 p-4"><p>Kunde inte läsa kund-, artikel- eller fakturauppgifter.</p><Button variant="outline" className="mt-2" onClick={retryData}>Försök läsa uppgifterna igen</Button></div>
+        ) : !dataReady && <p role="status">Hämtar kund, artiklar och aktuella priser…</p>}
+        {invalidSelection && <div role="alert" className="rounded-lg border border-destructive/30 p-4"><p>Kunden eller ett valt uppdrag är inte tillgängligt för fakturering. Uppdraget kan redan vara fakturerat eller tillhöra en annan kund.</p><Button variant="outline" className="mt-2" onClick={() => { cancelBuild(); setSelectedAssignments([]); setPreparedSelection(''); setStep(1); }}>Välj uppdrag på nytt</Button></div>}
+        {isBuilding && <p role="status">Hämtar uppdragens artiklar och skapar fakturarader…</p>}
+        {buildError && <div role="alert" className="rounded-lg border border-destructive/30 p-4"><p>{buildError}</p><Button variant="outline" className="mt-2" onClick={() => void buildLines()} disabled={!dataReady || isBuilding || Boolean(invalidSelection)}>Försök skapa rader igen</Button></div>}
+
         {step === 1 && (
           <Card><CardHeader><CardTitle>1. Kund och uppdrag</CardTitle></CardHeader><CardContent className="space-y-5">
-            <Select value={customerId} onValueChange={value => { setCustomerId(value); setSelectedAssignments([]); setLines([]); setDidBuildInitialLines(false); }}>
-              <SelectTrigger><SelectValue placeholder="Välj kund" /></SelectTrigger>
+            <Select value={customerId} onValueChange={changeCustomer}>
+              <SelectTrigger aria-label="Kund" disabled={!customersQuery.isSuccess}><SelectValue placeholder="Välj kund" /></SelectTrigger>
               <SelectContent>{(customers ?? []).map(item => <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>)}</SelectContent>
             </Select>
 
-            {customerId && (
+            {customerId && assignmentsQuery.isSuccess && (
               uninvoicedAssignments.length === 0 ? <p className="py-4 text-muted-foreground">Inga slutförda och ofakturerade uppdrag.</p> : (
                 <Table><TableHeader><TableRow><TableHead className="w-10" /><TableHead>Datum</TableHead><TableHead>Uppdrag</TableHead><TableHead>Chaufför</TableHead><TableHead>Tid</TableHead></TableRow></TableHeader>
                   <TableBody>{uninvoicedAssignments.map(item => {
                     const hours = item.actual_start && item.actual_stop ? calculateDecimalHours(item.actual_start, item.actual_stop) : 0;
-                    return <TableRow key={item.id}><TableCell><Checkbox checked={selectedAssignments.includes(item.id)} onCheckedChange={() => toggleAssignment(item.id)} /></TableCell><TableCell>{item.actual_start ? formatSwedishDate(item.actual_start) : '–'}</TableCell><TableCell className="font-medium">{item.title}</TableCell><TableCell>{item.driver?.full_name}</TableCell><TableCell>{hours.toFixed(1)} h</TableCell></TableRow>;
+                    return <TableRow key={item.id}><TableCell><Checkbox aria-label={`Välj ${item.title}`} checked={selectedAssignments.includes(item.id)} onCheckedChange={() => toggleAssignment(item.id)} /></TableCell><TableCell>{item.actual_start ? formatSwedishDate(item.actual_start) : '–'}</TableCell><TableCell className="font-medium">{item.title}</TableCell><TableCell>{item.driver?.full_name}</TableCell><TableCell>{hours.toFixed(1)} h</TableCell></TableRow>;
                   })}</TableBody>
                 </Table>
               )
             )}
-            <Button disabled={!customerId || !selectedAssignments.length} onClick={async () => { await buildLines(); setStep(2); }}>Skapa fakturarader</Button>
+            <Button disabled={!dataReady || !customer || !selectedAssignments.length || isBuilding || Boolean(invalidSelection)} onClick={() => void buildLines()}>{isPrepared ? 'Fortsätt till fakturarader' : 'Skapa fakturarader'}</Button>
           </CardContent></Card>
         )}
 
-        {step === 2 && (
+        {step === 2 && canReview && (
           <Card><CardHeader><CardTitle>2. Fakturarader och villkor</CardTitle></CardHeader><CardContent className="space-y-6">
-            <InvoiceLineEditor lines={lines} onChange={setLines} articles={articles ?? []} articlePrices={articlePrices} />
+            <InvoiceLineEditor lines={lines} onChange={updateLines} articles={articles ?? []} articlePrices={articlePrices} />
+            {missingSources.length > 0 && <div role="alert" className="rounded-lg border border-destructive/30 p-4"><p>{missingSources.length} uppdragsrad saknas. Alla artikelrader måste följa med när uppdraget faktureras. Ta bort hela uppdraget i steg 1 om det ska faktureras senare.</p><Button variant="outline" className="mt-2" onClick={() => updateLines([...lines, ...missingSources])}>Återställ borttagna uppdragsrader</Button></div>}
+            {hasZeroPrices && <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-amber-950"><p className="mb-3 text-sm">En eller flera rader har 0 kr. Ett pris kan saknas. Fyll i rätt pris eller godkänn uttryckligen att dessa rader är kostnadsfria. En skickad faktura måste totalt överstiga 0 kr.</p><label className="flex items-center gap-2 text-sm"><Checkbox checked={zeroPricesApproved} onCheckedChange={checked => setZeroPricesApproved(checked === true)} />Jag har kontrollerat och godkänner samtliga rader med 0 kr</label></div>}
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2"><Label>Fakturanummer</Label><Input type="number" value={invoiceNumber} onChange={event => setInvoiceNumberOverride(Number(event.target.value))} /></div>
               <div className="space-y-2"><Label>Fakturadatum</Label><Input type="date" value={invoiceDate} onChange={event => setInvoiceDate(event.target.value)} /></div>
@@ -228,11 +242,11 @@ export default function NewInvoicePage() {
               <div className="space-y-2"><Label>Er referens</Label><Input value={reference} onChange={event => setReference(event.target.value)} /></div>
             </div>
             <div className="space-y-2"><Label>Meddelande</Label><Textarea value={message} onChange={event => setMessage(event.target.value)} /></div>
-            <Button disabled={!lines.length} onClick={() => setStep(3)}>Förhandsgranska</Button>
+            <Button disabled={!lines.length || missingSources.length > 0 || (hasZeroPrices && !zeroPricesApproved)} onClick={preview}>Förhandsgranska</Button>
           </CardContent></Card>
         )}
 
-        {step === 3 && (
+        {step === 3 && canReview && (
           <Card><CardHeader><CardTitle>3. Förhandsgranska</CardTitle></CardHeader><CardContent className="space-y-5">
             <div className="rounded-lg border p-6">
               <div className="flex justify-between gap-6"><div><p className="text-lg font-bold">{settings?.company_name}</p><p className="text-sm text-muted-foreground">{settings?.address} {settings?.zip_city}</p></div><div className="text-right"><p className="text-2xl font-bold text-primary">{isBasis ? 'FAKTURAUNDERLAG' : 'FAKTURA'}</p><p>Nr {invoiceNumber}</p><p>{invoiceDate} · förfaller {dueDate}</p></div></div>

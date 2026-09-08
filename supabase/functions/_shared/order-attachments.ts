@@ -19,6 +19,11 @@ type AttachmentRow = {
   content_type: string;
   size: number;
   text_content?: string;
+  storage_path?: string;
+  pages?: number;
+  extracted_characters?: number;
+  text_preview?: string;
+  error?: string;
 };
 
 export async function processOrderAttachments(supabase: SupabaseClient, companyId: string, emailRowId: string, attachments: OrderAttachment[]) {
@@ -34,15 +39,18 @@ export async function processOrderAttachments(supabase: SupabaseClient, companyI
     };
     try {
       if (attachment.size > 20 * 1024 * 1024) throw new Error('Bilagan är större än 20 MB');
-      const response = await fetch(attachment.download_url);
+      const downloadUrl = new URL(attachment.download_url);
+      if (downloadUrl.protocol !== 'https:') throw new Error('Ogiltig bilageadress');
+      const response = await fetch(downloadUrl, { signal: AbortSignal.timeout(20_000) });
       if (!response.ok) throw new Error(`Bilagan kunde inte hämtas (${response.status})`);
       const bytes = new Uint8Array(await response.arrayBuffer());
+      if (bytes.length > 20 * 1024 * 1024) throw new Error('Bilagan är större än 20 MB');
       const filename = safeName(attachment.filename);
       const path = `${companyId}/${emailRowId}/${attachment.id}-${filename}`;
       const { error } = await supabase.storage.from('order-inbox').upload(path, bytes, {
         contentType: attachment.content_type || 'application/octet-stream',
       });
-      if (error) throw error;
+      if (error && String(error.statusCode) !== '409') throw error;
       row.storage_path = path;
 
       if (attachment.content_type === 'application/pdf' || filename.toLowerCase().endsWith('.pdf')) {

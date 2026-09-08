@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,7 +6,7 @@ import { Send, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
-import { PUBLIC_SITE_URL } from '@/lib/constants';
+import { fetchSupabaseFunction } from '@/lib/supabase-url';
 
 interface PortalChatProps {
   token: string;
@@ -21,104 +21,99 @@ interface Message {
   created_at: string;
 }
 
-export function PortalChat({ token, customerName }: PortalChatProps) {
+export function PortalChat(props: PortalChatProps) {
+  return <PortalChatSession key={props.token} {...props} />;
+}
+
+function PortalChatSession({ token, customerName }: PortalChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const customerIdRef = useRef<string | null>(null);
+  const [loadError, setLoadError] = useState('');
+  const [sendError, setSendError] = useState('');
+  const mounted = useRef(true);
+  const reading = useRef<AbortController | null>(null);
+  const writing = useRef<AbortController | null>(null);
+  const requestNumber = useRef(0);
 
-  // Load initial messages
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const { data, error } = await supabase.rpc('get_portal_messages', { p_token: token });
-        if (error) throw error;
+  const load = useCallback(async () => {
+    reading.current?.abort();
+    const controller = new AbortController();
+    reading.current = controller;
+    const revision = ++requestNumber.current;
+    const timeout = window.setTimeout(() => controller.abort(), 15_000);
+    try {
+      const { data, error } = await supabase.rpc('get_portal_messages', { p_token: token }).abortSignal(controller.signal);
+      if (error) throw error;
+      if (mounted.current && revision === requestNumber.current) {
         setMessages((data as unknown as Message[]) || []);
-
-        // Also get customer_id for realtime subscription
-        const { data: tokenData } = await supabase.rpc('validate_customer_token', { p_token: token });
-        if (tokenData && typeof tokenData === 'object' && 'customer_id' in tokenData) {
-          customerIdRef.current = (tokenData as Record<string, unknown>).customer_id as string;
-        }
-      } catch {
-        // silently handled — UI shows empty state
-      } finally {
-        setLoading(false);
+        setLoadError('');
       }
-    };
-    load();
+    } catch {
+      if (mounted.current && revision === requestNumber.current) setLoadError('Kunde inte hämta meddelanden. Kontrollera anslutningen eller be om en ny portallänk.');
+    } finally {
+      window.clearTimeout(timeout);
+      if (mounted.current && revision === requestNumber.current) setLoading(false);
+      if (reading.current === controller) reading.current = null;
+    }
   }, [token]);
 
-  // Realtime subscription
   useEffect(() => {
-    if (!customerIdRef.current) return;
-
-    const channel = supabase
-      .channel('portal-chat-' + customerIdRef.current)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'portal_messages',
-          filter: `customer_id=eq.${customerIdRef.current}`,
-        },
-        (payload) => {
-          const newMsg = payload.new as Message;
-          setMessages((prev) => {
-            if (prev.some((m) => m.id === newMsg.id)) return prev;
-            return [...prev, newMsg];
-          });
-        }
-      )
-      .subscribe();
-
+    mounted.current = true;
+    void load();
+    // Token-authorized RPC polling works for anonymous portal visitors. Direct
+    // Realtime subscriptions cannot read rows protected by authenticated RLS.
+    const poll = () => { if (!document.hidden && !reading.current && !writing.current) void load(); };
+    const interval = window.setInterval(poll, 15_000);
+    window.addEventListener('online', poll);
+    document.addEventListener('visibilitychange', poll);
     return () => {
-      supabase.removeChannel(channel);
+      mounted.current = false;
+      requestNumber.current += 1;
+      reading.current?.abort(); writing.current?.abort();
+      window.clearInterval(interval);
+      window.removeEventListener('online', poll);
+      document.removeEventListener('visibilitychange', poll);
     };
-  }, [loading]); // re-run after loading when customerIdRef is set
+  }, [load]);
 
-  // Auto-scroll
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
+    scrollRef.current?.scrollTo?.({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages]);
 
-  const handleSend = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newMessage.trim()) return;
-    setSending(true);
-
+  const handleSend = async (event: React.FormEvent) => {
+    event.preventDefault();
+    const message = newMessage.trim();
+    if (sending || !message) return;
+    setSending(true); setSendError('');
+    const controller = new AbortController();
+    writing.current = controller;
+    const timeout = window.setTimeout(() => controller.abort(), 15_000);
     try {
-      const { error } = await supabase.rpc('send_portal_message', {
-        p_token: token,
-        p_message: newMessage.trim(),
-        p_sender_name: customerName,
-      });
+      const { error } = await supabase.rpc('send_portal_message', { p_token: token, p_message: message, p_sender_name: customerName }).abortSignal(controller.signal);
       if (error) throw error;
-
-      // Notify admin via email (fire and forget)
-      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-      fetch(`https://${projectId}.supabase.co/functions/v1/notify-admin`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          token,
-          type: 'new-customer-message',
-          data: {
-            customerName,
-            message: newMessage.trim(),
-            customerUrl: `${PUBLIC_SITE_URL}/admin/customers/${customerIdRef.current}`,
-          },
-        }),
-      }).catch(() => {});
-
+      window.clearTimeout(timeout);
+      if (!mounted.current) return;
       setNewMessage('');
+      await load();
+      // The saved chat message remains visible even if its email alert fails.
+      void fetchSupabaseFunction('notify-admin', {}, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, type: 'new-customer-message', data: { message } }),
+      }).catch(() => { if (mounted.current) toast.warning('Meddelandet är sparat i chatten, men e-postaviseringen kunde inte skickas.'); });
     } catch {
-      toast.error('Kunde inte skicka meddelandet');
+      if (mounted.current) {
+        const message = controller.signal.aborted
+          ? 'Bekräftelsen dröjer. Uppdatera chatten innan du försöker skicka igen.'
+          : 'Kunde inte skicka meddelandet. Texten finns kvar så att du kan försöka igen.';
+        setSendError(message); toast.error(message);
+      }
     } finally {
-      setSending(false);
+      window.clearTimeout(timeout);
+      if (writing.current === controller) writing.current = null;
+      if (mounted.current) setSending(false);
     }
   };
 
@@ -130,6 +125,8 @@ export function PortalChat({ token, customerName }: PortalChatProps) {
         <h3 className="text-sm font-semibold">Chatt med oss</h3>
       </div>
 
+      {loadError && <div role="alert" className="border-b px-4 py-2 text-sm text-destructive">{loadError} <Button size="sm" variant="ghost" onClick={() => void load()}>Försök igen</Button></div>}
+      {sendError && <p role="alert" className="px-4 py-2 text-sm text-destructive">{sendError}</p>}
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
         {loading ? (
@@ -164,13 +161,15 @@ export function PortalChat({ token, customerName }: PortalChatProps) {
       {/* Input */}
       <form onSubmit={handleSend} className="flex gap-2 px-3 py-3 border-t">
         <Input
+          aria-label="Meddelande"
+          maxLength={4000}
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Skriv ett meddelande..."
           className="flex-1"
           disabled={sending}
         />
-        <Button type="submit" size="icon" disabled={sending || !newMessage.trim()}>
+        <Button aria-label="Skicka meddelande" type="submit" size="icon" disabled={sending || !newMessage.trim()}>
           <Send className="h-4 w-4" />
         </Button>
       </form>

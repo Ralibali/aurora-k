@@ -79,12 +79,14 @@ export type DispatchApi = {
   failNextMutation: boolean;
   partialNextMutation: boolean;
   unexpectedRequests: string[];
+  notificationRequests: number;
+  failNotifications: boolean;
 };
 
 /** All auth/data traffic stays inside the browser fixture. No real credentials are read. */
 export async function installDispatchFixture(context: BrowserContext): Promise<DispatchApi> {
   const state: DispatchApi = {
-    assignments: createAssignments(), writes: [], failNextMutation: false, partialNextMutation: false, unexpectedRequests: [],
+    assignments: createAssignments(), writes: [], failNextMutation: false, partialNextMutation: false, unexpectedRequests: [], notificationRequests: 0, failNotifications: false,
   };
   const user = {
     id: ADMIN_ID, aud: 'authenticated', role: 'authenticated', email: 'admin@example.test',
@@ -129,6 +131,10 @@ export async function installDispatchFixture(context: BrowserContext): Promise<D
       'access-control-allow-methods': 'GET, POST, PATCH, HEAD, OPTIONS',
       'access-control-allow-headers': '*',
     } });
+    if (url.pathname === '/functions/v1/dispatch-notifications' && request.method() === 'POST') {
+      state.notificationRequests++;
+      return state.failNotifications ? json({ error: 'Resend temporarily unavailable' }, 503) : json({ sent: 1, failed: 0 });
+    }
     if (url.pathname.startsWith('/auth/')) return json(url.pathname.endsWith('/user') ? user : session);
     if (url.pathname === '/rest/v1/rpc/is_platform_admin') return json(false);
     if (url.pathname === '/rest/v1/user_roles') return json([{ role: 'admin', company_id: COMPANY_ID }]);

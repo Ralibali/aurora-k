@@ -13,10 +13,11 @@
     "test": "vitest run",
     "test:dispatch": "playwright test --config e2e/dispatch.config.ts",
     "test:watch": "vitest",
-    "validate": "npm run typecheck && npm run lint && npm test && npm run build",
+    "validate": "npm run typecheck && npm run lint && npm test && npm run test:db && npm run build",
     "build:ios": "npm run build && npx cap sync ios",
     "editorial:check": "node scripts/editorial-check.mjs",
-    "prebuild": "npm run editorial:check"
+    "prebuild": "npm run editorial:check",
+    "test:db": "node supabase/tests/launch-security.mjs"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.0",
@@ -93,6 +94,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
     "@eslint/js": "^9.32.0",
     "@playwright/test": "^1.57.0",
     "@prerenderer/renderer-puppeteer": "^1.2.4",

@@ -1,4 +1,5 @@
 import { Webhook } from 'npm:svix@1.68.0';
+import { requestResend, resendConfig } from './resend.ts';
 
 export type ReceivedEmail = {
   id: string;
@@ -27,11 +28,7 @@ export function verifyResendWebhook(rawBody: string, headers: Headers, secret: s
 }
 
 async function resendGet(path: string, apiKey: string) {
-  const response = await fetch(`https://api.resend.com${path}`, {
-    headers: { Authorization: `Bearer ${apiKey}`, Accept: 'application/json' },
-  });
-  if (!response.ok) throw new Error(`Resend API ${response.status}: ${await response.text()}`);
-  return response.json();
+  return requestResend(path, {}, { ...resendConfig(), apiKey });
 }
 
 export async function getReceivedEmail(emailId: string, apiKey: string) {
@@ -46,7 +43,7 @@ export async function listReceivedAttachments(emailId: string, apiKey: string) {
 export function extractOrderInboxKey(addresses: string[]) {
   for (const address of addresses) {
     const local = address.toLowerCase().split('@')[0] ?? '';
-    const match = local.match(/order[+-]([0-9a-f]{8}-[0-9a-f-]{27})/i);
+    const match = local.match(/^order[+-]([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i);
     if (match) return match[1];
   }
   return null;

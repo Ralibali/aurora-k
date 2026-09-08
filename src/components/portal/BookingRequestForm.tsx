@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Send, Loader2, CheckCircle2, Inbox } from 'lucide-react';
 import { toast } from 'sonner';
+import { fetchSupabaseFunction } from '@/lib/supabase-url';
 
 export type PortalBookingItem = {
   id: string;
@@ -34,44 +35,40 @@ export function BookingRequestForm({ token, bookings, onCreated }: BookingReques
   const [preferredDate, setPreferredDate] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
+  const controllerRef = useRef<AbortController | null>(null);
+  useEffect(() => () => controllerRef.current?.abort(), [token]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim()) return;
+    if (submitting || !title.trim()) return;
 
     setSubmitting(true);
+    setError('');
+    const controller = new AbortController();
+    controllerRef.current = controller;
     try {
-      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-      const res = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/customer-portal?token=${encodeURIComponent(token)}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            title: title.trim(),
-            description: description.trim() || undefined,
-            preferred_date: preferredDate || undefined,
-          }),
-        }
-      );
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || 'Kunde inte skicka förfrågan');
-      }
-
-      const { booking } = await res.json();
+      const { booking } = await fetchSupabaseFunction<{ booking: PortalBookingItem }>('customer-portal', { token }, {
+        method: 'POST', signal: controller.signal, headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: title.trim(), description: description.trim() || undefined, preferred_date: preferredDate || undefined }),
+      });
+      if (controller.signal.aborted) return;
+      if (!booking?.id) throw new Error('Servern bekräftade inte förfrågan. Uppdatera portalen innan du försöker igen.');
       onCreated(booking);
       setTitle('');
       setDescription('');
       setPreferredDate('');
       setSubmitted(true);
       toast.success('Förfrågan skickad!');
-      setTimeout(() => setSubmitted(false), 3000);
+
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Något gick fel');
+      if (!controller.signal.aborted) {
+        const message = err instanceof Error ? err.message : 'Kunde inte skicka förfrågan.';
+        setError(message);
+        toast.error(message);
+      }
     } finally {
-      setSubmitting(false);
+      if (!controller.signal.aborted) setSubmitting(false);
     }
   };
 
@@ -86,10 +83,11 @@ export function BookingRequestForm({ token, bookings, onCreated }: BookingReques
             <div className="text-center py-6">
               <CheckCircle2 className="h-10 w-10 mx-auto mb-3 text-primary" />
               <p className="font-medium">Tack! Din förfrågan har skickats.</p>
-              <p className="text-sm text-muted-foreground mt-1">Vi återkommer så snart som möjligt.</p>
+              <p className="text-sm text-muted-foreground mt-1">Vi återkommer så snart som möjligt.</p><Button className="mt-4" variant="outline" onClick={() => setSubmitted(false)}>Skicka en ny förfrågan</Button>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
+              {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
               <div className="space-y-2">
                 <Label htmlFor="booking-title">Titel *</Label>
                 <Input

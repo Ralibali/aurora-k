@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { usePageMeta } from '@/lib/use-page-meta';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,13 +14,16 @@ export default function ResetPasswordPage() {
   const [confirm, setConfirm] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [ready, setReady] = useState(false);
+  const [invalidLink, setInvalidLink] = useState(false);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') setReady(true);
+      if (event === 'PASSWORD_RECOVERY') { setReady(true); setInvalidLink(false); }
     });
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
       if (session) setReady(true);
+      else setInvalidLink(true);
+      if (error) setInvalidLink(true);
     });
     return () => subscription.unsubscribe();
   }, []);
@@ -28,15 +31,20 @@ export default function ResetPasswordPage() {
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirm) { toast.error('Lösenorden matchar inte'); return; }
-    if (password.length < 6) { toast.error('Lösenordet måste vara minst 6 tecken'); return; }
+    if (password.length < 10) { toast.error('Lösenordet måste vara minst 10 tecken'); return; }
+    if (new TextEncoder().encode(password).length > 72) { toast.error('Lösenordet får innehålla högst 72 byte'); return; }
+    if (!ready) return;
     setSubmitting(true);
-    const { error } = await supabase.auth.updateUser({ password });
-    if (error) { toast.error('Kunde inte uppdatera lösenord: ' + error.message); setSubmitting(false); return; }
-    toast.success('Lösenordet har uppdaterats!');
-    navigate('/', { replace: true });
+    try {
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) throw error;
+      toast.success('Lösenordet har uppdaterats!');
+      navigate('/login', { replace: true });
+    } catch { toast.error('Lösenordet kunde inte sparas. Försök igen eller begär en ny länk.'); }
+    finally { setSubmitting(false); }
   };
 
-  const content = !ready ? (
+  const content = invalidLink && !ready ? <div className="space-y-4 text-center"><p className="text-sm text-sidebar-foreground/70">Länken har gått ut eller kunde inte verifieras. Begär en ny återställningslänk.</p><Button asChild className="w-full"><Link to="/forgot-password">Skicka en ny länk</Link></Button></div> : !ready ? (
     <p className="text-sm text-sidebar-foreground/60 text-center py-8">Verifierar återställningslänk...</p>
   ) : (
     <form onSubmit={handleReset} className="space-y-5">
@@ -44,7 +52,7 @@ export default function ResetPasswordPage() {
         <Label htmlFor="password" className="text-sidebar-foreground/80 text-sm font-medium">Nytt lösenord</Label>
         <div className="relative">
           <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-sidebar-foreground/40" />
-          <Input id="password" type="password" placeholder="Minst 6 tecken" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6}
+          <Input id="password" type="password" placeholder="Minst 10 tecken" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={10}
             className="pl-10 bg-sidebar border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/30 focus-visible:ring-primary h-11" />
         </div>
       </div>
@@ -52,7 +60,7 @@ export default function ResetPasswordPage() {
         <Label htmlFor="confirm" className="text-sidebar-foreground/80 text-sm font-medium">Bekräfta lösenord</Label>
         <div className="relative">
           <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-sidebar-foreground/40" />
-          <Input id="confirm" type="password" placeholder="Upprepa lösenordet" value={confirm} onChange={(e) => setConfirm(e.target.value)} required minLength={6}
+          <Input id="confirm" type="password" placeholder="Upprepa lösenordet" value={confirm} onChange={(e) => setConfirm(e.target.value)} required minLength={10}
             className="pl-10 bg-sidebar border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/30 focus-visible:ring-primary h-11" />
         </div>
       </div>

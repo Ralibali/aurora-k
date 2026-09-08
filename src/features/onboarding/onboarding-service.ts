@@ -4,11 +4,13 @@ import { PUBLIC_SITE_URL } from '@/lib/constants';
 export type DriverInvite = { name: string; email: string };
 
 export async function saveOnboardingCompany(companyId: string, name: string, orgNumber: string) {
-  const { error } = await supabase.from('companies').update({
+  if (!name.trim()) throw new Error('Företagsnamn krävs');
+  const { data, error } = await supabase.from('companies').update({
     name: name.trim(),
     org_nr: orgNumber.trim() || null,
-  }).eq('id', companyId);
+  }).eq('id', companyId).select('id').single();
   if (error) throw error;
+  if (!data) throw new Error('Företaget kunde inte sparas');
 }
 
 export async function sendOnboardingInvites(input: {
@@ -64,6 +66,7 @@ export async function createOnboardingAssignment(input: {
   driverId: string;
 }) {
   if (!input.driverId) throw new Error('Välj en chaufför innan uppdraget skapas');
+  if (!input.customerName.trim() || !input.title.trim() || !Number.isFinite(new Date(input.scheduledStart).getTime())) throw new Error('Ange kund, uppdrag och en giltig starttid');
 
   const { data: customer, error: customerError } = await supabase.from('customers').insert({
     company_id: input.companyId,
@@ -91,6 +94,7 @@ export async function createOnboardingAssignment(input: {
 }
 
 export async function finishOnboarding(companyId: string) {
-  const { error } = await supabase.from('companies').update({ onboarding_completed: true }).eq('id', companyId);
+  const { data, error } = await supabase.from('companies').update({ onboarding_completed: true }).eq('id', companyId).select('id').single();
   if (error) throw error;
+  if (!data) throw new Error('Onboardingen kunde inte slutföras');
 }

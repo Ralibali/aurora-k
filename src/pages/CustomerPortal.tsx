@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { fetchSupabaseFunction } from '@/lib/supabase-url';
 import { usePageMeta } from '@/lib/use-page-meta';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -43,7 +44,7 @@ interface PortalData {
 }
 
 const statusLabels: Record<string, string> = {
-  pending: 'Väntande', active: 'Aktiv', in_progress: 'Pågår', completed: 'Slutförd',
+  pending: 'Väntande', unassigned: 'Planerad', delayed: 'Försenad', active: 'Aktiv', in_progress: 'Pågår', completed: 'Slutförd',
   cancelled: 'Avbruten', draft: 'Utkast', sent: 'Skickad', paid: 'Betald', overdue: 'Förfallen',
 };
 
@@ -61,7 +62,7 @@ function routeText(a: PortalAssignment) {
 
 function formatDateTime(value?: string | null) {
   if (!value) return '—';
-  return new Date(value).toLocaleString('sv-SE', { dateStyle: 'medium', timeStyle: 'short' });
+  return new Date(value).toLocaleString('sv-SE', { timeZone: 'Europe/Stockholm', dateStyle: 'medium', timeStyle: 'short' });
 }
 
 function hasDeliveryProof(a: PortalAssignment) {
@@ -123,25 +124,32 @@ export default function CustomerPortal() {
   const [data, setData] = useState<PortalData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [loadedToken, setLoadedToken] = useState<string | null>(null);
+  const [reload, setReload] = useState(0);
+  const [activeTab, setActiveTab] = useState('assignments');
 
   useEffect(() => {
-    if (!token) { setError('Ingen åtkomsttoken angiven'); setLoading(false); return; }
-
+    const controller = new AbortController();
+    setData(null);
+    setActiveTab('assignments');
+    setError('');
+    setLoading(true);
+    setLoadedToken(token);
     const fetchData = async () => {
-      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-      const res = await fetch(`https://${projectId}.supabase.co/functions/v1/customer-portal?token=${encodeURIComponent(token)}`, { headers: { 'Content-Type': 'application/json' } });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        setError(err.error || 'Kunde inte ladda data');
-        setLoading(false);
-        return;
+      try {
+        if (!token) throw new Error('Ingen åtkomsttoken angiven');
+        const payload = await fetchSupabaseFunction<PortalData>('customer-portal', { token }, { signal: controller.signal });
+        if (!payload.customer?.id) throw new Error('Kundportalen gav ett ogiltigt svar.');
+        if (!controller.signal.aborted) setData(payload);
+      } catch (err) {
+        if (!controller.signal.aborted) setError(err instanceof Error ? err.message : 'Kunde inte ladda kundportalen.');
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
       }
-      setData(await res.json());
-      setLoading(false);
     };
-
-    fetchData();
-  }, [token]);
+    void fetchData();
+    return () => controller.abort();
+  }, [token, reload]);
 
   const assignments: PortalAssignment[] = useMemo(() => data?.assignments ?? [], [data]);
   const invoices: PortalInvoice[] = useMemo(() => data?.invoices ?? [], [data]);
@@ -151,7 +159,7 @@ export default function CustomerPortal() {
   const settings = data?.settings;
 
   const stats = useMemo(() => {
-    const activeAssignments = assignments.filter((a) => ['pending', 'active', 'in_progress'].includes(a.status)).length;
+    const activeAssignments = assignments.filter((a) => ['pending', 'unassigned', 'active', 'delayed', 'in_progress'].includes(a.status)).length;
     const completedAssignments = assignments.filter((a) => a.status === 'completed').length;
     const openInvoices = invoices.filter((i) => ['draft', 'sent', 'overdue'].includes(i.status)).length;
     const overdue = invoices.filter((i) => i.status === 'overdue').length;
@@ -170,14 +178,14 @@ export default function CustomerPortal() {
     setData((prev: PortalData | null) => prev ? { ...prev, bookings: [booking, ...(prev.bookings || [])] } : prev);
   }, []);
 
-  if (loading) {
+  if (loading || loadedToken !== token) {
     return <div className="min-h-screen bg-slate-950 p-6"><div className="max-w-6xl mx-auto space-y-4"><Skeleton className="h-12 w-64 bg-white/10" /><Skeleton className="h-96 w-full bg-white/10" /></div></div>;
   }
 
   if (error) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
-        <Card className="max-w-md"><CardContent className="pt-6 text-center"><AlertTriangle className="mx-auto mb-3 h-10 w-10 text-destructive" /><p className="text-destructive font-medium">{error}</p><p className="text-sm text-muted-foreground mt-2">Kontakta oss om problemet kvarstår.</p></CardContent></Card>
+        <Card className="max-w-md"><CardContent className="pt-6 text-center"><AlertTriangle className="mx-auto mb-3 h-10 w-10 text-destructive" /><p className="text-destructive font-medium">{error}</p><p className="text-sm text-muted-foreground mt-2">Kontakta oss om problemet kvarstår.</p><Button className="mt-4" variant="outline" onClick={() => setReload(value => value + 1)}>Försök igen</Button></CardContent></Card>
       </div>
     );
   }
@@ -193,7 +201,7 @@ export default function CustomerPortal() {
               <p className="mt-2 max-w-2xl text-slate-300">Följ uppdrag, se status, hämta fakturor, se leveransbevis och skicka nya transportförfrågningar på ett ställe.</p>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row">
-              <Button asChild variant="secondary"><Link to={`/boka/aurora-transport`} target="_blank"><CalendarPlus className="mr-2 h-4 w-4" /> Ny bokning</Link></Button>
+              <Button variant="secondary" onClick={() => { setActiveTab('booking'); document.getElementById('portal-tabs')?.scrollIntoView?.({ behavior: 'smooth' }); }}><CalendarPlus className="mr-2 h-4 w-4" /> Ny bokning</Button>
               <Button variant="outline" className="border-white/20 bg-white/10 text-white hover:bg-white/20" onClick={() => navigator.clipboard?.writeText(window.location.href)}>Kopiera portallänk</Button>
             </div>
           </div>
@@ -222,7 +230,7 @@ export default function CustomerPortal() {
           </Card>
         )}
 
-        <Tabs defaultValue="assignments" className="space-y-4">
+        <Tabs id="portal-tabs" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList className="flex h-auto flex-wrap justify-start">
             <TabsTrigger value="assignments" className="gap-1"><ClipboardList className="h-3.5 w-3.5" /> Uppdrag</TabsTrigger>
             <TabsTrigger value="proof" className="gap-1"><CheckCircle2 className="h-3.5 w-3.5" /> Leveransbevis</TabsTrigger>
@@ -250,8 +258,8 @@ export default function CustomerPortal() {
             <Card><CardContent className="p-0"><Table><TableHeader><TableRow><TableHead>Fakturanr</TableHead><TableHead>Datum</TableHead><TableHead>Förfallodatum</TableHead><TableHead className="text-right">Belopp</TableHead><TableHead>Status</TableHead><TableHead /></TableRow></TableHeader><TableBody>{invoices.length === 0 && <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Inga fakturor</TableCell></TableRow>}{invoices.map((inv) => <TableRow key={inv.id}><TableCell className="font-medium">#{inv.invoice_number}</TableCell><TableCell>{inv.invoice_date}</TableCell><TableCell>{inv.due_date}</TableCell><TableCell className="text-right font-mono">{inv.total_inc_vat?.toFixed(0)} kr</TableCell><TableCell><Badge variant={statusVariant(inv.status)}>{statusLabels[inv.status] || inv.status}</Badge></TableCell><TableCell className="text-right"><PortalInvoiceDownloadButton invoice={{ ...inv, customer }} assignments={assignments} settings={settings} /></TableCell></TableRow>)}</TableBody></Table></CardContent></Card>
           </TabsContent>
 
-          <TabsContent value="booking"><BookingRequestForm token={token!} bookings={bookings} onCreated={handleBookingCreated} /></TabsContent>
-          <TabsContent value="chat"><PortalChat token={token!} customerName={customer?.name || 'Kund'} /></TabsContent>
+          <TabsContent value="booking"><BookingRequestForm key={token} token={token!} bookings={bookings} onCreated={handleBookingCreated} /></TabsContent>
+          <TabsContent value="chat"><PortalChat key={token} token={token!} customerName={customer?.name || 'Kund'} /></TabsContent>
         </Tabs>
       </main>
     </div>

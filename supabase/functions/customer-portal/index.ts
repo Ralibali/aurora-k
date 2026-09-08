@@ -1,4 +1,4 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { z } from 'https://esm.sh/zod@3';
 
 const corsHeaders = {
@@ -61,8 +61,8 @@ Deno.serve(async (req) => {
 
     const customer = Array.isArray(tokenData.customer) ? tokenData.customer[0] : tokenData.customer;
     const customerId = tokenData.customer_id;
-    const companyId = tokenData.company_id ?? customer?.company_id;
-    if (!customerId || !companyId || !customer) return json({ error: 'Portal access is incomplete' }, 403);
+    const companyId = tokenData.company_id;
+    if (!customerId || !companyId || !customer || customer.company_id !== companyId) return json({ error: 'Portal access is incomplete' }, 403);
 
     if (req.method === 'POST') {
       const bookingParsed = BookingSchema.safeParse(await req.json().catch(() => ({})));
@@ -89,26 +89,29 @@ Deno.serve(async (req) => {
       return json({ booking }, 201);
     }
 
-    const companyFilter = <T extends { eq: (column: string, value: string) => T }>(query: T) => query.eq('customer_id', customerId).eq('company_id', companyId);
     const [assignmentsRes, ordersRes, invoicesRes, bookingsRes, settingsRes] = await Promise.all([
-      companyFilter(supabase
+      supabase
         .from('assignments')
-        .select('id, title, address, pickup_address, delivery_address, service_type, status, scheduled_start, scheduled_end, actual_start, actual_stop, priority, tracking_token, consignment_photo_url, signature_url, require_photo, require_signature, driver:profiles!assignments_assigned_driver_id_fkey(full_name)'))
+        .select('id, title, address, pickup_address, delivery_address, service_type, status, scheduled_start, scheduled_end, actual_start, actual_stop, priority, tracking_token, consignment_photo_url, signature_url, require_photo, require_signature, driver:profiles!assignments_assigned_driver_id_fkey(full_name)')
+        .eq('customer_id', customerId).eq('company_id', companyId)
         .order('scheduled_start', { ascending: false })
         .limit(100),
-      companyFilter(supabase
+      supabase
         .from('orders')
-        .select('id, order_number, title, description, status, created_at'))
+        .select('id, order_number, title, description, status, created_at')
+        .eq('customer_id', customerId).eq('company_id', companyId)
         .order('created_at', { ascending: false })
         .limit(100),
-      companyFilter(supabase
+      supabase
         .from('invoices')
-        .select('id, invoice_number, invoice_date, due_date, total_ex_vat, vat_amount, total_inc_vat, reference, message, assignment_ids, lines, status'))
+        .select('id, invoice_number, invoice_date, due_date, total_ex_vat, vat_amount, total_inc_vat, reference, message, assignment_ids, lines, status')
+        .eq('customer_id', customerId).eq('company_id', companyId)
         .order('invoice_date', { ascending: false })
         .limit(100),
-      companyFilter(supabase
+      supabase
         .from('booking_requests')
-        .select('id, title, description, preferred_date, status, created_at'))
+        .select('id, title, description, preferred_date, status, created_at')
+        .eq('customer_id', customerId).eq('company_id', companyId)
         .order('created_at', { ascending: false })
         .limit(100),
       supabase
