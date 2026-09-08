@@ -616,6 +616,8 @@ export type Database = {
           org_nr: string | null
           public_booking_slug: string | null
           stripe_customer_id: string | null
+          stripe_event_created: number
+          stripe_last_event_id: string | null
           stripe_subscription_id: string | null
           subscription_status: string | null
           trial_ends_at: string | null
@@ -628,6 +630,8 @@ export type Database = {
           org_nr?: string | null
           public_booking_slug?: string | null
           stripe_customer_id?: string | null
+          stripe_event_created?: number
+          stripe_last_event_id?: string | null
           stripe_subscription_id?: string | null
           subscription_status?: string | null
           trial_ends_at?: string | null
@@ -640,6 +644,8 @@ export type Database = {
           org_nr?: string | null
           public_booking_slug?: string | null
           stripe_customer_id?: string | null
+          stripe_event_created?: number
+          stripe_last_event_id?: string | null
           stripe_subscription_id?: string | null
           subscription_status?: string | null
           trial_ends_at?: string | null
@@ -1619,27 +1625,33 @@ export type Database = {
       invitations: {
         Row: {
           accepted_at: string | null
+          accepted_by: string | null
           company_id: string
           created_at: string | null
           email: string
+          expires_at: string | null
           id: string
           name: string | null
           token: string | null
         }
         Insert: {
           accepted_at?: string | null
+          accepted_by?: string | null
           company_id: string
           created_at?: string | null
           email: string
+          expires_at?: string | null
           id?: string
           name?: string | null
           token?: string | null
         }
         Update: {
           accepted_at?: string | null
+          accepted_by?: string | null
           company_id?: string
           created_at?: string | null
           email?: string
+          expires_at?: string | null
           id?: string
           name?: string | null
           token?: string | null
@@ -1833,13 +1845,33 @@ export type Database = {
         }
         Relationships: []
       }
+      mail_rate_limits: {
+        Row: {
+          key: string
+          requests: number
+          window_started_at: string
+        }
+        Insert: {
+          key: string
+          requests?: number
+          window_started_at?: string
+        }
+        Update: {
+          key?: string
+          requests?: number
+          window_started_at?: string
+        }
+        Relationships: []
+      }
       notification_outbox: {
         Row: {
           attempts: number
           channel: string
           company_id: string | null
           created_at: string
+          event_key: string | null
           id: string
+          last_attempt_at: string | null
           last_error: string | null
           payload: Json
           recipient_email: string | null
@@ -1855,7 +1887,9 @@ export type Database = {
           channel: string
           company_id?: string | null
           created_at?: string
+          event_key?: string | null
           id?: string
+          last_attempt_at?: string | null
           last_error?: string | null
           payload?: Json
           recipient_email?: string | null
@@ -1871,7 +1905,9 @@ export type Database = {
           channel?: string
           company_id?: string | null
           created_at?: string
+          event_key?: string | null
           id?: string
+          last_attempt_at?: string | null
           last_error?: string | null
           payload?: Json
           recipient_email?: string | null
@@ -2744,6 +2780,46 @@ export type Database = {
         Args: { p_token: string; p_user_id: string }
         Returns: undefined
       }
+      claim_notification_emails: {
+        Args: { p_company_id?: string; p_limit?: number }
+        Returns: {
+          attempts: number
+          channel: string
+          company_id: string | null
+          created_at: string
+          event_key: string | null
+          id: string
+          last_attempt_at: string | null
+          last_error: string | null
+          payload: Json
+          recipient_email: string | null
+          recipient_phone: string | null
+          recipient_user_id: string | null
+          sent_at: string | null
+          status: string
+          subject: string | null
+          type: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "notification_outbox"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      complete_company_registration: {
+        Args: {
+          _name: string
+          _org_nr?: string
+          _phone?: string
+          _user_full_name?: string
+        }
+        Returns: string
+      }
+      consume_mail_rate_limit: {
+        Args: { p_key: string; p_limit: number; p_window_seconds: number }
+        Returns: boolean
+      }
       consume_public_booking_rate_limit: {
         Args: { p_company_id: string; p_fingerprint: string; p_limit?: number }
         Returns: boolean
@@ -2798,6 +2874,13 @@ export type Database = {
           _status?: string
         }
         Returns: undefined
+      }
+      find_auth_user_for_mail: {
+        Args: { p_email: string }
+        Returns: {
+          email_confirmed_at: string
+          id: string
+        }[]
       }
       get_my_company_id: { Args: never; Returns: string }
       get_portal_messages: {
@@ -2906,6 +2989,18 @@ export type Database = {
       submit_satisfaction: {
         Args: { p_comment?: string; p_rating: number; p_token: string }
         Returns: undefined
+      }
+      sync_driver_operation: {
+        Args: {
+          p_assignment_id: string
+          p_metadata: Json
+          p_operation_id: string
+          p_operation_type: string
+          p_photo_url?: string
+          p_signature_url?: string
+          p_user_id: string
+        }
+        Returns: Json
       }
       validate_customer_token: { Args: { p_token: string }; Returns: Json }
     }
