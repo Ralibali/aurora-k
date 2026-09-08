@@ -1,6 +1,8 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { BrowserRouter, Route, Routes, useNavigate } from 'react-router-dom';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import AuthConfirmationPage from './AuthConfirmationPage';
 
 const mocks = vi.hoisted(() => ({ verifyOtp: vi.fn() }));
@@ -27,6 +29,26 @@ beforeEach(() => { mocks.verifyOtp.mockReset().mockResolvedValue(success); });
 afterEach(() => { cleanup(); window.history.replaceState(null, '', '/'); });
 
 describe('auth email confirmation', () => {
+  it('consumes the actual HTML bootstrap after it has removed the URL fragment', async () => {
+    vi.resetModules();
+    window.history.replaceState(null, '', link('recovery'));
+    const document = new DOMParser().parseFromString(readFileSync(resolve(process.cwd(), 'index.html'), 'utf8'), 'text/html');
+    const bootstrap = document.querySelector('#aurora-auth-confirmation-bootstrap')!.textContent!;
+    new Function('window', bootstrap)(window);
+    expect(window.location.hash).toBe('');
+    expect(Object.prototype.hasOwnProperty.call(window, '__auroraTakeAuthConfirmation')).toBe(true);
+    const { default: FreshConfirmationPage } = await import('./AuthConfirmationPage');
+    expect(Object.prototype.hasOwnProperty.call(window, '__auroraTakeAuthConfirmation')).toBe(false);
+    render(<BrowserRouter><Routes>
+      <Route path="/auth/confirm" element={<FreshConfirmationPage />} />
+      <Route path="/reset-password" element={<h1>Lösenordsbyte</h1>} />
+    </Routes></BrowserRouter>);
+    expect(mocks.verifyOtp).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Fortsätt till lösenordsbyte' }));
+    expect(await screen.findByRole('heading', { name: 'Lösenordsbyte' })).toBeInTheDocument();
+    expect(mocks.verifyOtp).toHaveBeenCalledWith({ token_hash: token, type: 'recovery' });
+  });
+
   it('scrubs a fresh email URL at module load and retains its token until the confirmation click', async () => {
     vi.resetModules();
     window.history.replaceState(null, '', link('recovery'));

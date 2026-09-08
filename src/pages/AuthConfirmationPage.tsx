@@ -9,7 +9,8 @@ type Confirmation = { token_hash: string; type: 'signup' | 'recovery' };
 
 function takeConfirmationFragment(): Confirmation | null {
   if (typeof window === 'undefined' || window.location.pathname !== '/auth/confirm') return null;
-  const params = new URLSearchParams(window.location.hash.slice(1));
+  const fragment = (window as Window & { __auroraTakeAuthConfirmation?: string }).__auroraTakeAuthConfirmation ?? window.location.hash;
+  const params = new URLSearchParams(fragment.slice(1));
   // Keep the bearer token in this page's memory only, never in a query string,
   // storage, outgoing navigation or telemetry URL. Ignore all redirect inputs.
   window.history.replaceState(window.history.state, '', '/auth/confirm');
@@ -19,8 +20,8 @@ function takeConfirmationFragment(): Confirmation | null {
   return { token_hash, type };
 }
 
-// Eagerly imported by App: scrub a fresh email link before main.tsx initializes
-// Sentry or other telemetry. The page also handles ordinary SPA navigation.
+// index.html scrubs fresh email links before any external script can run. Take
+// its one-use memory value eagerly; SPA navigation still reads the URL directly.
 let initialConfirmation = takeConfirmationFragment();
 
 export default function AuthConfirmationPage() {

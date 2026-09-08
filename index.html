@@ -2,6 +2,24 @@
 <html lang="sv">
   <head>
     <meta charset="UTF-8" />
+    <!-- Remove auth bearer fragments before analytics or other external scripts. -->
+    <script id="aurora-auth-confirmation-bootstrap">
+      (function () {
+        if (window.location.pathname !== '/auth/confirm') return;
+        var fragment = window.location.hash;
+        window.history.replaceState(window.history.state, '', '/auth/confirm');
+        Object.defineProperty(window, '__auroraTakeAuthConfirmation', {
+          configurable: true,
+          enumerable: false,
+          get: function () {
+            var captured = fragment;
+            fragment = '';
+            delete window.__auroraTakeAuthConfirmation;
+            return captured;
+          }
+        });
+      })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
     <title>Transportledningssystem för åkerier och budfirmor | Aurora Transport</title>
