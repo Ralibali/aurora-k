@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { AlertTriangle, Lock, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
@@ -20,6 +20,14 @@ function AccountCard({ icon, title, text, action, actionLabel, busy }: {
   actionLabel: string;
   busy: boolean;
 }) {
+  const { signOut } = useAuth();
+  const [signingOut, setSigningOut] = useState(false);
+  const leave = async () => {
+    setSigningOut(true);
+    try { await signOut(); }
+    catch { toast.error('Utloggningen misslyckades. Försök igen.'); }
+    finally { setSigningOut(false); }
+  };
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <div className="max-w-md rounded-2xl border bg-card p-8 text-center shadow-sm">
@@ -27,6 +35,10 @@ function AccountCard({ icon, title, text, action, actionLabel, busy }: {
         <h2 className="mb-2 text-lg font-semibold">{title}</h2>
         <p className="mb-6 text-sm text-muted-foreground">{text}</p>
         <Button onClick={action} className="h-12 w-full rounded-xl font-semibold" disabled={busy}>{busy ? 'Laddar…' : actionLabel}</Button>
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+          <Button variant="ghost" disabled={signingOut} onClick={() => void leave()}>{signingOut ? 'Loggar ut…' : 'Logga ut'}</Button>
+          <Button asChild variant="link"><Link to="/kontakt">Kontakta support</Link></Button>
+        </div>
       </div>
     </div>
   );

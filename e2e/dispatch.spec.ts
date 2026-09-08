@@ -242,3 +242,35 @@ test('a mail service failure preserves the saved driver assignment without dupli
   expect(dispatchApi.notificationRequests).toBe(1);
   expect(dispatchApi.assignments.slice(0, 2).every(item => item.assigned_driver_id === drivers[1].id)).toBe(true);
 });
+
+test('mobile menu exposes every module, supports search and keeps navigation usable', async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await openDispatch(page);
+  await page.getByRole('button', { name: 'Öppna mer-meny' }).click();
+  const menu = page.getByRole('dialog', { name: 'Alla funktioner' });
+  await expect(menu).toBeVisible();
+  await expect(menu.getByRole('link', { name: 'Fakturaunderlag', exact: true })).toHaveAttribute('href', '/admin/invoice-basis');
+  await expect(menu.getByRole('link', { name: 'Godkännanden', exact: true })).toHaveAttribute('href', '/admin/approvals');
+  await menu.getByRole('textbox', { name: 'Sök funktion' }).fill('faktura');
+  await expect(menu.getByRole('link', { name: 'Fakturaunderlag', exact: true })).toBeVisible();
+  await expect(menu.getByRole('link', { name: 'Godkännanden', exact: true })).toHaveCount(0);
+  await page.screenshot({ path: testInfo.outputPath('mobile-menu.png'), fullPage: true });
+  await page.keyboard.press('Escape');
+  await expect(menu).toBeHidden();
+  await expect(page.getByRole('button', { name: 'Öppna mer-meny' })).toBeFocused();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
+
+test('public hero has usable touch targets and permanent support links', async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  const hero = page.locator('main section').first();
+  const demoButton = hero.getByRole('button', { name: 'Boka demo', exact: true });
+  await expect(demoButton).toBeVisible();
+  expect((await demoButton.boundingBox())?.height).toBeGreaterThanOrEqual(48);
+  const footer = page.getByRole('navigation', { name: 'Sidfot' });
+  await expect(footer.getByRole('link', { name: 'Integritetspolicy' })).toHaveAttribute('href', '/privacy');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.screenshot({ path: testInfo.outputPath('landing-mobile.png'), fullPage: false });
+});

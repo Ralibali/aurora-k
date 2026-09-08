@@ -1,8 +1,9 @@
 import { ReactNode } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 
 export function PlatformAdminGuard({ children }: { children: ReactNode }) {
+  const location = useLocation();
   const { user, isPlatformAdmin, loading } = useAuth();
 
   if (loading) {
@@ -13,7 +14,7 @@ export function PlatformAdminGuard({ children }: { children: ReactNode }) {
     );
   }
 
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/login" replace state={{ from: location.pathname + location.search + location.hash }} />;
   if (!isPlatformAdmin) return <Navigate to="/admin" replace />;
 
   return <>{children}</>;

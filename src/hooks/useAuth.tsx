@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, useCallback, useRef, type ReactNode } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { removeCurrentDevicePushToken } from '@/lib/push-notifications';
@@ -31,6 +32,7 @@ async function fetchProfile(userId: string): Promise<AuthProfile> {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const queryClient = useQueryClient();
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<AuthProfile>(emptyProfile);
   const [loading, setLoading] = useState(true);
@@ -44,6 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (sessionError) throw sessionError;
     if (!current?.user) throw new Error('Logga in igen för att fortsätta.');
     const request = ++revision.current;
+    if (currentUser.current !== current.user.id) { queryClient.clear(); setProfile(emptyProfile); setLoading(true); }
     currentUser.current = current.user.id;
     setSession(current);
     setError(null);
@@ -55,7 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (mounted.current && request === revision.current) { setError('Kontouppgifterna kunde inte hämtas. Försök igen.'); setLoading(false); }
       throw cause;
     }
-  }, []);
+  }, [queryClient]);
 
   useEffect(() => {
     mounted.current = true;
@@ -68,7 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       currentUser.current = nextSession?.user.id ?? null;
       setSession(nextSession);
       setError(null);
-      if (changedUser) setProfile(emptyProfile);
+      if (changedUser) { queryClient.clear(); setProfile(emptyProfile); }
       if (!nextSession) { setProfile(emptyProfile); setLoading(false); return; }
       if (changedUser) setLoading(true);
       try {
@@ -90,18 +93,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (disposed || receivedAuthEvent) return;
       if (sessionError) { setError('Inloggningen kunde inte läsas. Försök igen.'); setLoading(false); }
       else void apply(data.session);
+    }).catch(() => {
+      if (!disposed && !receivedAuthEvent) { setError('Inloggningen kunde inte läsas. Försök igen.'); setLoading(false); }
     });
     return () => { disposed = true; mounted.current = false; subscription.unsubscribe(); };
-  }, []);
+  }, [queryClient]);
 
   const signOut = useCallback(async () => {
-    await removeCurrentDevicePushToken(currentUser.current);
+    try { await removeCurrentDevicePushToken(currentUser.current); }
+    catch { console.warn('[auth] Push cleanup failed during sign out'); }
     const { error: signOutError } = await supabase.auth.signOut();
     if (signOutError) throw signOutError;
     revision.current++;
+    queryClient.clear();
     currentUser.current = null;
     setSession(null); setProfile(emptyProfile); setError(null); setLoading(false);
-  }, []);
+  }, [queryClient]);
 
   return <AuthContext.Provider value={{ ...profile, session, user: session?.user ?? null, loading, error, refreshProfile, signOut }}>{children}</AuthContext.Provider>;
 }

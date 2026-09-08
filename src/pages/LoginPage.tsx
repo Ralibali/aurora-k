@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { usePageMeta } from '@/lib/use-page-meta';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,10 +9,12 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { getRegistrationDraft } from '@/features/onboarding/registration-service';
+import { loginDestination } from '@/lib/login-destination';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { session, role, companyId, isPlatformAdmin, loading, error: profileError, refreshProfile } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -27,11 +29,9 @@ export default function LoginPage() {
       const { error: signInError } = await supabase.auth.signInWithPassword({ email: data.email, password: data.password });
       if (signInError) throw signInError;
       toast.success(`Inloggad som ${data.companyName} — omdirigerar...`);
-      setTimeout(() => navigate('/admin'), 500);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Demo-inloggning misslyckades');
-      setDemoLoading(false);
-    }
+    } finally { setDemoLoading(false); }
   };
 
   usePageMeta({
@@ -44,25 +44,22 @@ export default function LoginPage() {
   useEffect(() => {
     if (!loading && session && !profileError) {
       if (!companyId && getRegistrationDraft(session.user.user_metadata)) { navigate('/register', { replace: true }); return; }
-      if (!role) { navigate('/admin', { replace: true }); return; }
-      if (isPlatformAdmin) navigate('/platform', { replace: true });
-      else if (role === 'admin') navigate('/admin', { replace: true });
-      else navigate('/driver', { replace: true });
+      navigate(loginDestination(location.state?.from, { role, isPlatformAdmin }), { replace: true });
     }
-  }, [loading, session, role, companyId, isPlatformAdmin, profileError, navigate]);
+  }, [loading, session, role, companyId, isPlatformAdmin, profileError, navigate, location.state]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      const msg = error.message?.includes('Invalid login credentials') ? 'Fel e-post eller lösenord. Försök igen.' : error.message || 'Inloggningen misslyckades.';
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+      if (error) throw error;
+      toast.success('Välkommen!');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '';
+      const msg = message.includes('Invalid login credentials') ? 'Fel e-post eller lösenord. Försök igen.' : message.includes('Email not confirmed') ? 'Bekräfta din e-post via länken i välkomstmejlet innan du loggar in.' : 'Inloggningen misslyckades. Kontrollera din anslutning och försök igen.';
       toast.error(msg);
-      setSubmitting(false);
-      return;
-    }
-    toast.success('Välkommen!');
-    setSubmitting(false);
+    } finally { setSubmitting(false); }
   };
 
   return (
@@ -84,11 +81,11 @@ export default function LoginPage() {
             <form onSubmit={handleLogin} className="space-y-5">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-bold text-slate-200">E-post</Label>
-                <div className="relative"><Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" /><Input id="email" type="email" placeholder="namn@foretag.se" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-12 border-[#1e1e5a] bg-[#0f0f2a] pl-10 text-white placeholder:text-slate-600 focus-visible:ring-[#4f46e5]" /></div>
+                <div className="relative"><Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" /><Input id="email" type="email" autoComplete="username" autoCapitalize="none" placeholder="namn@foretag.se" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-12 border-[#1e1e5a] bg-[#0f0f2a] pl-10 text-white placeholder:text-slate-600 focus-visible:ring-[#4f46e5]" /></div>
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between"><Label htmlFor="password" className="text-sm font-bold text-slate-200">Lösenord</Label><Link to="/forgot-password" className="text-xs font-semibold text-[#818cf8] hover:text-white">Glömt lösenord?</Link></div>
-                <div className="relative"><Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" /><Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required className="h-12 border-[#1e1e5a] bg-[#0f0f2a] pl-10 text-white placeholder:text-slate-600 focus-visible:ring-[#4f46e5]" /></div>
+                <div className="relative"><Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" /><Input id="password" type="password" autoComplete="current-password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required className="h-12 border-[#1e1e5a] bg-[#0f0f2a] pl-10 text-white placeholder:text-slate-600 focus-visible:ring-[#4f46e5]" /></div>
               </div>
               <Button type="submit" disabled={submitting} className="h-12 w-full rounded-2xl bg-[#4f46e5] text-sm font-black text-white shadow-lg shadow-[#4f46e5]/25 hover:bg-[#4338ca]">{submitting ? 'Loggar in...' : 'Logga in'}</Button>
             </form>
