@@ -10,8 +10,14 @@ Deno.serve(async request => {
     const service=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const admin=createClient(Deno.env.get('SUPABASE_URL')!,service,{auth:{persistSession:false}});
     const token=request.headers.get('Authorization')?.replace(/^Bearer\s+/i,'');
-    const cronSecret=Deno.env.get('NOTIFICATION_CRON_SECRET');
-    const trusted=token===service || (cronSecret && request.headers.get('x-cron-secret')===cronSecret);
+    let trusted=token===service;
+    const cronSecret=request.headers.get('x-cron-secret');
+    if (!trusted && cronSecret && cronSecret.length >= 32 && cronSecret.length <= 256) {
+      // Vault owns the scheduler credential. The service-only RPC verifies it
+      // without duplicating or exposing its value in Edge configuration.
+      const {data:valid,error}=await admin.rpc('validate_notification_cron_secret',{p_secret:cronSecret});
+      trusted=!error && valid===true;
+    }
     let companyId: string | null=null;
     if (!trusted) {
       const {data:{user},error}=await admin.auth.getUser(token ?? '');

@@ -1,5 +1,5 @@
--- Run after dispatch-notifications is deployed and the matching secret is stored
--- in Edge Functions and Vault. This never replays legacy outbox entries.
+-- Run after dispatch-notifications and its credential-validation RPC are deployed.
+-- The credential lives only in Vault. This never replays legacy outbox entries.
 create extension if not exists pg_cron;
 create extension if not exists pg_net;
 do $$ begin

@@ -6,7 +6,7 @@ Den här releasen rättar registrering, förarsynk, kundportal, kartmarkörer, f
 
 - `npm run validate`: appens typkontroll, lint, unit-/komponenttester, PostgreSQL-tester och produktionsbygge.
 - `npm run test:dispatch`: isolerade webbläsartester för desktop, mobil, tilldelning, samtidiga ändringar och mejlfel. Alla externa anrop måste vara mockade.
-- `npm run test:db`: PGlite med riktiga PostgreSQL-roller, RLS, databasfunktioner och de tre nya migrationerna. Testdata lämnar aldrig processen.
+- `npm run test:db`: PGlite med riktiga PostgreSQL-roller, RLS, databasfunktioner och releasens nya migrationer. Testdata lämnar aldrig processen.
 - Serverfunktioner kontrolleras separat med `deno check --node-modules-dir=none --no-lock` på respektive `index.ts`.
 
 ## Resend
@@ -15,7 +15,7 @@ Projektets befintliga `RESEND_API_KEY` är en Lovable-anslutningsnyckel. Standar
 
 Nya transport-, boknings- och portalhändelser köas i samma databastransaktion som själva händelsen. Kön använder idempotens, begränsade återförsök och en atomisk lease. Den behandlar endast nya servergenererade `event_key`-rader; historiska aviseringar skickas inte om. Demoföretagen `556000-0001` och `556000-0002` skickar inga automatiska mejl.
 
-Schemaläggaren aktiveras med `supabase/ops/enable-notification-schedule.sql` efter att funktionen `dispatch-notifications` har driftsatts. `NOTIFICATION_CRON_SECRET` måste finnas både i Edge Functions och i Vault under `aurora_notification_cron_secret`. Scriptet skapar en minutvis köarbetare och rensar gamla hashade rate-limit-nycklar dagligen. Hemliga värden ska aldrig skrivas i repot eller i driftloggar.
+Schemaläggaren aktiveras med `supabase/ops/enable-notification-schedule.sql` efter att funktionen `dispatch-notifications` och dess validerings-RPC har driftsatts. Nyckeln finns endast i Vault under `aurora_notification_cron_secret`. En RPC som bara serverrollen får anropa validerar den utan att lämna ut värdet; ingen extra Edge-hemlighet behöver hållas synkroniserad. Scriptet skapar en minutvis köarbetare och rensar gamla hashade rate-limit-nycklar dagligen. Hemliga värden ska aldrig skrivas i repot eller i driftloggar.
 
 ## Inkommande ordermejl
 

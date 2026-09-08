@@ -88,7 +88,7 @@ await db.query('insert into driver_documents(company_id,driver_id,notes) values(
 await db.query('insert into vehicles(id,company_id) values($1,$2)',[vehicleA,A]);
 await db.query('insert into vehicle_maintenance(company_id,vehicle_id,notes) values($1,$2,$3)',[A,vehicleA,'maintenance']);
 await db.query('insert into invitations(token,company_id,email,created_at) values($1,$2,$3,now()),($4,$2,$3,now()-interval \'30 days\')',[invite,A,'invite@a.se',expired]);
-for (const filename of ['20260908120643_driver_workflow_atomicity.sql','20260908131323_durable_transport_notifications.sql','20260908132142_launch_tenant_security.sql']) {
+for (const filename of ['20260908120643_driver_workflow_atomicity.sql','20260908131323_durable_transport_notifications.sql','20260908132142_launch_tenant_security.sql','20260908145027_notification_cron_secret_verifier.sql']) {
   await db.exec(await readFile(`supabase/migrations/${filename}`,'utf8'));
 }
 let checks=0;
@@ -237,6 +237,44 @@ await check('mail limiter enforces quota and reopens only after its window',asyn
 });
 await denied('public callers cannot inspect auth identities','anon',null,'select find_auth_user_for_mail($1)',['admin@a.se']);
 await denied('authenticated callers cannot reset mail limiter','authenticated',admin,'select consume_mail_rate_limit($1,$2,$3)',['test/security',100,1]);
+
+// Vault is private, and these are disposable fixtures, never live credentials.
+const cronSecret='test-only-cron-credential-'.repeat(3);
+const verifyCronSecret=secret=>actor('service_role',null,()=>db.query('select public.validate_notification_cron_secret($1) valid',[secret]));
+await check('cron verifier returns false when Vault is not installed',async()=>{
+ assert.equal((await verifyCronSecret(cronSecret)).rows[0].valid,false);
+});
+await db.exec('create schema vault; create table vault.decrypted_secrets(name text primary key,decrypted_secret text);');
+await check('cron verifier requires the named Vault secret',async()=>{
+ await db.query('insert into vault.decrypted_secrets(name,decrypted_secret) values($1,$2)',['unrelated_secret',cronSecret]);
+ assert.equal((await verifyCronSecret(cronSecret)).rows[0].valid,false);
+ await db.query('insert into vault.decrypted_secrets(name,decrypted_secret) values($1,null)',['aurora_notification_cron_secret']);
+ assert.equal((await verifyCronSecret(cronSecret)).rows[0].valid,false);
+});
+await db.query('update vault.decrypted_secrets set decrypted_secret=$1 where name=$2',[cronSecret,'aurora_notification_cron_secret']);
+await check('service role can verify the exact cron secret only',async()=>{
+ assert.equal((await verifyCronSecret(cronSecret)).rows[0].valid,true);
+ assert.equal((await verifyCronSecret(cronSecret.slice(0,-1)+'X')).rows[0].valid,false);
+ assert.equal((await verifyCronSecret(cronSecret+' ')).rows[0].valid,false);
+});
+await denied('anonymous caller cannot execute cron verifier','anon',null,'select public.validate_notification_cron_secret($1)',[cronSecret]);
+await denied('authenticated caller cannot execute cron verifier','authenticated',admin,'select public.validate_notification_cron_secret($1)',[cronSecret]);
+await denied('platform admin cannot execute cron verifier','authenticated',platform,'select public.validate_notification_cron_secret($1)',[cronSecret]);
+await denied('service role cannot directly read Vault secrets','service_role',null,'select decrypted_secret from vault.decrypted_secrets');
+await check('cron verifier enforces inclusive 32 to 256 character bounds',async()=>{
+ assert.equal((await verifyCronSecret(null)).rows[0].valid,false);
+ for (const length of [0,31,32,256,257]) {
+  const fixture='a'.repeat(length);
+  await db.query('update vault.decrypted_secrets set decrypted_secret=$1 where name=$2',[fixture,'aurora_notification_cron_secret']);
+  assert.equal((await verifyCronSecret(fixture)).rows[0].valid,length>=32 && length<=256);
+ }
+});
+await check('cron verifier returns false after the named secret or Vault table is removed',async()=>{
+ await db.query('delete from vault.decrypted_secrets where name=$1',['aurora_notification_cron_secret']);
+ assert.equal((await verifyCronSecret(cronSecret)).rows[0].valid,false);
+ await db.exec('drop table vault.decrypted_secrets');
+ assert.equal((await verifyCronSecret(cronSecret)).rows[0].valid,false);
+});
 const { default: driverChecks }=await import('./driver-integration.mjs');
 checks+=await driverChecks(db);
 await db.close();
