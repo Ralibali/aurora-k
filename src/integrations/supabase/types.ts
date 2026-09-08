@@ -3003,6 +3003,10 @@ export type Database = {
         Returns: Json
       }
       validate_customer_token: { Args: { p_token: string }; Returns: Json }
+      validate_notification_cron_secret: {
+        Args: { p_secret: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "driver"
