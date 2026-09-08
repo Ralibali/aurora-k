@@ -37,4 +37,10 @@ export default tseslint.config(
       "react-refresh/only-export-components": "off",
     },
   },
+  {
+    // Lovable regenerates this broker with a timer declared before its callback.
+    // Keep its generated form; the other correctness checks still apply.
+    files: ["src/integrations/supabase/previewAuthStorage.ts"],
+    rules: { "prefer-const": "off" },
+  },
 );
