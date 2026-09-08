@@ -17,6 +17,6 @@ export function loadGoogleMaps(): Promise<void> {
   loaderPromise ??= (async () => {
     setOptions({ key: GOOGLE_MAPS_API_KEY, v: 'weekly', language: 'sv', region: 'SE' });
     await Promise.all([importLibrary('maps'), importLibrary('marker'), importLibrary('core')]);
-  })();
+  })().catch(error => { loaderPromise = null; throw error; });
   return loaderPromise;
 }

@@ -1,3 +1,4 @@
+import FortnoxExportDialog from '@/features/integrations/FortnoxExportDialog';
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Download, Eye, Plus, Search } from 'lucide-react';
@@ -28,6 +29,7 @@ type InvoiceRecord = Record<string, unknown> & {
 };
 
 export default function InvoicesPage() {
+  const [exportInvoice, setExportInvoice] = useState<InvoiceRecord | null>(null);
   const [statusFilter, setStatusFilter] = useState('all');
   const [customerFilter, setCustomerFilter] = useState('all');
   const [search, setSearch] = useState('');
@@ -77,11 +79,12 @@ export default function InvoicesPage() {
               {!isLoading && filtered.length === 0 && <TableRow><TableCell colSpan={7} className="py-10 text-center text-muted-foreground">Inga fakturor</TableCell></TableRow>}
               {!isLoading && filtered.map(invoice => <TableRow key={invoice.id}>
                 <TableCell className="font-mono">#{invoice.invoice_number}</TableCell><TableCell>{invoice.customer?.name}</TableCell><TableCell>{invoice.invoice_date}</TableCell><TableCell>{invoice.due_date}</TableCell><TableCell className="text-right font-mono">{Number(invoice.total_inc_vat).toLocaleString('sv-SE')} kr</TableCell><TableCell><InvoiceStatusBadge status={invoice.status} /></TableCell>
-                <TableCell><div className="flex gap-1"><Button variant="ghost" size="icon" onClick={() => setPreview(invoice)}><Eye className="h-4 w-4" /></Button><Button variant="ghost" size="icon" onClick={() => downloadPdf(invoice)}><Download className="h-4 w-4" /></Button>{invoice.status === 'draft' && <Button variant="ghost" size="sm" disabled={showingDemo} onClick={() => updateStatus.mutate({ id: invoice.id, status: 'sent' })}>Skicka</Button>}{['sent','overdue'].includes(invoice.status) && <Button variant="ghost" size="sm" disabled={showingDemo} onClick={() => updateStatus.mutate({ id: invoice.id, status: 'paid' })}>Betald</Button>}</div></TableCell>
+                <TableCell><div className="flex flex-wrap gap-1">{invoice.status === 'draft' && <Button variant="outline" size="sm" disabled={showingDemo} onClick={() => setExportInvoice(invoice)}>Fortnox</Button>}<Button variant="ghost" size="icon" onClick={() => setPreview(invoice)}><Eye className="h-4 w-4" /></Button><Button variant="ghost" size="icon" onClick={() => downloadPdf(invoice)}><Download className="h-4 w-4" /></Button>{invoice.status === 'draft' && <Button variant="ghost" size="sm" disabled={showingDemo} onClick={() => updateStatus.mutate({ id: invoice.id, status: 'sent' })}>Skicka</Button>}{['sent','overdue'].includes(invoice.status) && <Button variant="ghost" size="sm" disabled={showingDemo} onClick={() => updateStatus.mutate({ id: invoice.id, status: 'paid' })}>Betald</Button>}</div></TableCell>
               </TableRow>)}
             </TableBody>
           </Table>
         </div>
+        <>{exportInvoice && <FortnoxExportDialog key={exportInvoice.id} invoiceId={exportInvoice.id} invoiceNumber={String(exportInvoice.invoice_number)} onClose={() => setExportInvoice(null)} />}</>
         <InvoicePreviewDialog invoice={preview} lines={preview ? getInvoiceDocumentLines(preview, assignments ?? []) : []} settings={settings} onClose={() => setPreview(null)} onDownload={() => preview && downloadPdf(preview)} />
       </div>
     </AdminLayout>

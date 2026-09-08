@@ -17,7 +17,7 @@
     "build:ios": "npm run build && npx cap sync ios",
     "editorial:check": "node scripts/editorial-check.mjs",
     "prebuild": "npm run editorial:check",
-    "test:db": "node supabase/tests/launch-security.mjs"
+    "test:db": "node supabase/tests/launch-security.mjs && node supabase/tests/fortnox-integration.mjs"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.0",

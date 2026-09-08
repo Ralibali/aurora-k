@@ -3,7 +3,7 @@ import { defineConfig } from '@playwright/test';
 // A separate config keeps these tests independent of Lovable's hosted runner.
 export default defineConfig({
   testDir: '.',
-  testMatch: 'dispatch.spec.ts',
+  testMatch: ['dispatch.spec.ts', 'integrations.spec.ts'],
   fullyParallel: true,
   workers: 2,
   timeout: 30_000,

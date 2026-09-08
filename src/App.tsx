@@ -18,6 +18,7 @@ import { AdminShell } from "@/components/AdminLayout";
 import { DriverLayout } from "@/components/DriverLayout";
 import { PlatformAdminShell } from "@/components/PlatformAdminLayout";
 import { DriverPushNotifications } from "@/components/DriverPushNotifications";
+import FortnoxCallbackPage from "@/pages/FortnoxCallbackPage";
 import AuthConfirmationPage from "@/pages/AuthConfirmationPage";
 
 const LandingPage = lazy(() => import("./pages/LandingPageV3"));
@@ -174,6 +175,7 @@ const App = () => (
                   <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                   <Route path="/portal" element={<CustomerPortal />} />
                   <Route path="/reset-password" element={<ResetPasswordPage />} />
+                  <Route path="/integrations/fortnox/callback" element={<FortnoxCallbackPage />} />
                   <Route path="/auth/confirm" element={<AuthConfirmationPage />} />
                   <Route path="/om-oss" element={<AboutPage />} />
                   <Route path="/privacy" element={<PrivacyPage />} />

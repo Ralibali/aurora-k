@@ -15,11 +15,12 @@ interface Assignment {
 
 interface RouteMapProps {
   assignments: Assignment[];
+  roadPath?: google.maps.LatLngLiteral[];
 }
 
 const COLORS = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316'];
 
-export default function RouteMapGoogle({ assignments }: RouteMapProps) {
+export default function RouteMapGoogle({ assignments, roadPath }: RouteMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
   const overlaysRef = useRef<(google.maps.Marker | google.maps.Polyline)[]>([]);
@@ -103,20 +104,21 @@ export default function RouteMapGoogle({ assignments }: RouteMapProps) {
     });
 
     // Streckad rutlinje mellan stoppen (Google-stil: symboler längs linjen)
-    if (path.length >= 2) {
+    if (roadPath?.length || path.length >= 2) {
       const line = new google.maps.Polyline({
-        path,
-        geodesic: true,
+        path: roadPath ?? path,
+        geodesic: !roadPath,
         strokeColor: '#3b82f6',
-        strokeOpacity: 0,
+        strokeOpacity: roadPath ? 0.85 : 0,
         strokeWeight: 3,
-        icons: [{ icon: { path: 'M 0,-1 0,1', strokeOpacity: 0.7, strokeWeight: 3, strokeColor: '#3b82f6', scale: 2 }, offset: '0', repeat: '14px' }],
+        icons: roadPath ? [] : [{ icon: { path: 'M 0,-1 0,1', strokeOpacity: 0.7, strokeWeight: 3, strokeColor: '#3b82f6', scale: 2 }, offset: '0', repeat: '14px' }],
       });
       line.setMap(map);
       overlaysRef.current.push(line);
     }
 
-    if (path.length > 0) {
+    roadPath?.forEach(point => bounds.extend(point));
+    if (roadPath?.length || path.length > 0) {
       map.fitBounds(bounds, 50);
     }
     return () => {
@@ -124,7 +126,7 @@ export default function RouteMapGoogle({ assignments }: RouteMapProps) {
       overlaysRef.current.forEach(overlay => { google.maps.event.clearInstanceListeners(overlay); overlay.setMap(null); });
       overlaysRef.current = [];
     };
-  }, [assignments, ready]);
+  }, [assignments, ready, roadPath]);
 
   if (loadError) {
     return (

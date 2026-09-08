@@ -1,3 +1,4 @@
+import IntegrationsTab from '@/features/integrations/IntegrationsTab';
 import { useState, lazy, Suspense } from 'react';
 import { AdminLayout } from '@/components/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -50,9 +51,10 @@ function AppearanceTab() {
   );
 }
 
-type SettingsSection = 'company' | 'features' | 'appearance' | 'demo' | 'subscription' | null;
+type SettingsSection = 'integrations' | 'company' | 'features' | 'appearance' | 'demo' | 'subscription' | null;
 
 const settingsMenu = [
+  { key: 'integrations' as const, label: 'Anslutningar', description: 'Fortnox och Google Maps', icon: Building },
   { key: 'company' as const, label: 'Företag', description: 'Namn, adress och betaluppgifter', icon: Building },
   { key: 'features' as const, label: 'Funktioner', description: 'Aktivera eller dölja moduler', icon: ToggleLeft },
   { key: 'appearance' as const, label: 'Utseende', description: 'Ljust, mörkt eller systemläge', icon: Palette },
@@ -68,7 +70,7 @@ export default function AdminSettings() {
   const [form, setForm] = useState<TablesUpdate<'settings'> | null>(null);
   const [uploading, setUploading] = useState(false);
   const isMobile = useIsMobile();
-  const [mobileSection, setMobileSection] = useState<SettingsSection>(null);
+  const [mobileSection, setMobileSection] = useState<SettingsSection>(() => new URLSearchParams(window.location.search).get('section') === 'integrations' ? 'integrations' : null);
 
   const { data: features, isLoading: featuresLoading } = useFeatureSettings();
   const toggleFeature = useToggleFeature();
@@ -263,6 +265,7 @@ export default function AdminSettings() {
   );
 
   const sectionContent: Record<string, React.ReactNode> = {
+    integrations: <IntegrationsTab />,
     company: companyContent,
     features: featuresContent,
     appearance: <AppearanceTab />,
@@ -336,8 +339,9 @@ export default function AdminSettings() {
   return (
     <AdminLayout title="Inställningar" description="Företagsinformation och systemkonfiguration">
       <div className="max-w-3xl">
-        <Tabs defaultValue="company">
-          <TabsList className="mb-6">
+        <Tabs defaultValue={new URLSearchParams(window.location.search).get('section') === 'integrations' ? 'integrations' : 'company'}>
+          <TabsList className="mb-6 flex h-auto flex-wrap">
+            <TabsTrigger value="integrations">Anslutningar</TabsTrigger>
             <TabsTrigger value="company">Företag</TabsTrigger>
             <TabsTrigger value="features" className="gap-1.5">
               <ToggleLeft className="h-3.5 w-3.5" /> Funktioner
@@ -346,6 +350,7 @@ export default function AdminSettings() {
             <TabsTrigger value="demo" className="gap-1.5"><Sparkles className="h-3.5 w-3.5" /> Exempeldata</TabsTrigger>
             <TabsTrigger value="subscription">Prenumeration</TabsTrigger>
           </TabsList>
+          <TabsContent value="integrations"><IntegrationsTab /></TabsContent>
           <TabsContent value="company">{companyContent}</TabsContent>
           <TabsContent value="features">{featuresContent}</TabsContent>
           <TabsContent value="appearance"><AppearanceTab /></TabsContent>
