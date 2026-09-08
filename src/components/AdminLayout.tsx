@@ -66,7 +66,7 @@ function SearchTrigger() {
   return (
     <button onClick={trigger} className="hidden md:inline-flex h-9 min-w-[230px] items-center gap-2 rounded-full border border-border/80 bg-white/70 px-3 text-xs text-muted-foreground shadow-sm backdrop-blur transition-colors hover:bg-white hover:text-foreground dark:bg-white/5 dark:hover:bg-white/10">
       <Search className="h-3.5 w-3.5" />
-      <span className="flex-1 text-left">Sök kunder, uppdrag, sidor…</span>
+      <span className="flex-1 text-left">Sök sidor och åtgärder…</span>
       <kbd className="hidden lg:inline-flex items-center gap-0.5 rounded-full border border-border bg-muted/50 px-1.5 py-0.5 font-mono text-[10px] font-medium text-muted-foreground">{isMac ? '⌘' : 'Ctrl'}K</kbd>
     </button>
   );

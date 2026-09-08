@@ -194,7 +194,7 @@ export default function LandingPageV3() {
                 {t.hero.badge}
               </div>
 
-              <h1 className="mt-6 text-4xl font-black tracking-[-0.03em] text-white [hyphens:auto] [overflow-wrap:break-word] sm:text-5xl lg:text-[3.25rem] lg:leading-[1.02] xl:text-6xl xl:leading-[0.98]" lang="sv">
+              <h1 className="mt-6 text-4xl font-black tracking-[-0.03em] text-white [hyphens:auto] [overflow-wrap:break-word] sm:text-5xl lg:text-[3.25rem] lg:leading-[1.02] xl:text-6xl xl:leading-[0.98]" lang={lang}>
                 {t.hero.h1}
               </h1>
 
@@ -203,16 +203,16 @@ export default function LandingPageV3() {
               </p>
 
               <div className="mt-8 flex flex-col flex-wrap gap-3 sm:flex-row">
-                <Button size="lg" onClick={() => setDemoModalOpen(true)} className="h-13 rounded-2xl bg-[#4f46e5] px-7 text-base font-bold text-white shadow-xl shadow-[#4f46e5]/30 hover:bg-[#4338ca]">
+                <Button size="lg" onClick={() => setDemoModalOpen(true)} className="h-auto min-h-[52px] whitespace-normal py-3 rounded-2xl bg-[#4f46e5] px-7 text-base font-bold text-white shadow-xl shadow-[#4f46e5]/30 hover:bg-[#4338ca]">
                   {t.hero.ctaPrimary}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
-                <Button size="lg" variant="outline" onClick={handleDemo} disabled={demoLoading} className="h-13 rounded-2xl border-[#1e1e5a] bg-[#141432] px-7 text-base font-bold text-white hover:bg-[#141432]">
+                <Button size="lg" variant="outline" onClick={handleDemo} disabled={demoLoading} className="h-auto min-h-[52px] whitespace-normal py-3 rounded-2xl border-[#1e1e5a] bg-[#141432] px-7 text-base font-bold text-white hover:bg-[#141432]">
                   {demoLoading ? (
                     <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{t.hero.ctaSecondaryLoading}</>
                   ) : t.hero.ctaSecondaryIdle}
                 </Button>
-                <Button asChild size="lg" variant="ghost" className="h-13 rounded-2xl px-7 text-base font-bold text-[#818cf8] hover:bg-[#4f46e5]/5">
+                <Button asChild size="lg" variant="ghost" className="h-auto min-h-[52px] whitespace-normal py-3 rounded-2xl px-7 text-base font-bold text-[#818cf8] hover:bg-[#4f46e5]/5">
                   <Link to="/register">
                     {t.hero.ctaRegister}
                     <ArrowRight className="ml-2 h-4 w-4" />
@@ -231,7 +231,7 @@ export default function LandingPageV3() {
             </motion.div>
 
             <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.12 }} className="w-full min-w-0">
-              <HeroProductMockup />
+              <HeroProductMockup onDemo={handleDemo} busy={demoLoading} lang={lang} />
             </motion.div>
           </div>
         </section>
@@ -478,7 +478,7 @@ export default function LandingPageV3() {
           <div className="mx-auto max-w-5xl rounded-[2.2rem] border border-white/10 bg-white/[0.04] p-8 text-center shadow-2xl shadow-black/20 sm:p-12">
             <h2 className="text-4xl font-black tracking-tight sm:text-5xl">{t.finalCta.h2}</h2>
             <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-slate-400">{t.finalCta.sub}</p>
-            <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+            <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row sm:flex-wrap">
               <Button size="lg" onClick={() => setDemoModalOpen(true)} className="rounded-2xl bg-[#4f46e5] px-7 font-black text-white shadow-[0_0_30px_rgba(79,70,229,0.45)] hover:bg-[#4338ca]">
                 {t.finalCta.primary}
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -499,13 +499,24 @@ export default function LandingPageV3() {
         </section>
       </main>
 
+      <footer className="border-t border-[#1e1e5a] px-4 py-10 text-sm text-slate-400 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-7xl flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+          <div><p className="font-semibold text-white">Aurora Transport</p><p className="mt-1">© {new Date().getFullYear()} Aurora Media AB</p></div>
+          <nav aria-label={lang === 'en' ? 'Footer' : 'Sidfot'} className="flex flex-wrap gap-x-6 gap-y-3">
+            <Link to="/kontakt" className="py-2 hover:text-white">{lang === 'en' ? 'Contact' : 'Kontakt'}</Link>
+            <Link to="/privacy" className="py-2 hover:text-white">{lang === 'en' ? 'Privacy policy' : 'Integritetspolicy'}</Link>
+            <Link to="/om-oss" className="py-2 hover:text-white">{lang === 'en' ? 'About us' : 'Om oss'}</Link>
+          </nav>
+        </div>
+      </footer>
+
       <LeadFormModal open={leadModalOpen} onOpenChange={setLeadModalOpen} />
       <DemoBookingModal open={demoModalOpen} onOpenChange={setDemoModalOpen} lang={lang} />
     </div>
   );
 }
 
-function HeroProductMockup() {
+function HeroProductMockup({ onDemo, busy, lang }: { onDemo: () => void; busy: boolean; lang: Lang }) {
   return (
     <div className="relative mx-auto w-full min-w-0 max-w-2xl lg:max-w-none">
       <div className="absolute inset-6 rounded-[2rem] bg-[#4f46e5]/25 blur-3xl" />
@@ -546,7 +557,7 @@ function HeroProductMockup() {
                   <p>Kund: Nilsson Åkeri AB</p>
                   <p>Förare: Johan Svensson</p>
                 </div>
-                <button className="mt-5 rounded-xl bg-[#4f46e5] px-4 py-2.5 text-sm font-black text-white">Markera som slutförd</button>
+                <button type="button" onClick={onDemo} disabled={busy} className="mt-5 rounded-xl bg-[#4f46e5] px-4 py-2.5 text-sm font-black text-white">{lang === 'en' ? 'Explore the demo' : 'Utforska demon'}</button>
               </div>
               <div className="rounded-2xl border border-[#1e1e5a] bg-[#1e1e5a]/20 p-5">
                 <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Live-rutt</p>

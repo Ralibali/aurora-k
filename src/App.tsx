@@ -134,7 +134,7 @@ function ScrollToTop() {
 
 function PublicSiteEnhancements() {
   const location = useLocation();
-  const isAppRoute = location.pathname.startsWith('/admin') || location.pathname.startsWith('/driver') || location.pathname.startsWith('/platform') || location.pathname.startsWith('/portal') || location.pathname.startsWith('/onboarding') || location.pathname.startsWith('/track/') || location.pathname.startsWith('/auth/');
+  const isAppRoute = location.pathname.startsWith('/admin') || location.pathname.startsWith('/driver') || location.pathname.startsWith('/platform') || location.pathname.startsWith('/portal') || location.pathname.startsWith('/onboarding') || location.pathname.startsWith('/track/') || location.pathname.startsWith('/auth/') || ['/login', '/register', '/join', '/forgot-password', '/reset-password', '/boka'].includes(location.pathname) || location.pathname.startsWith('/boka/') || location.pathname.startsWith('/integrations/');
   if (isAppRoute) return null;
   return <><PwaInstallPrompt /><CookieConsent /><ExitIntentPopup /><QuickContactButton /></>;
 }
@@ -253,7 +253,7 @@ const App = () => (
                   </Route>
 
                   <Route path="/driver" element={<ProtectedRoute requiredRole="driver"><DriverLayout /></ProtectedRoute>}>
-                    <Route index element={<DriverAssignments />} />
+                    <Route index element={<Navigate to="assignments" replace />} />
                     <Route path="assignments" element={<DriverAssignments />} />
                     <Route path="assignments/:id" element={<DriverAssignmentDetail />} />
                     <Route path="assignment/:id" element={<DriverAssignmentDetail />} />

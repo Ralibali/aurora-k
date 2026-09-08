@@ -1,4 +1,4 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { getRegistrationDraft } from '@/features/onboarding/registration-service';
@@ -9,6 +9,7 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
+  const location = useLocation();
   const { session, role, loading, error, refreshProfile, signOut } = useAuth();
 
   // Still loading auth state, or session exists but role hasn't resolved yet
@@ -21,7 +22,7 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
   }
 
   if (!session) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" replace state={{ from: location.pathname + location.search + location.hash }} />;
   }
 
   if (!error && !role && getRegistrationDraft(session.user.user_metadata)) return <Navigate to="/register" replace />;
