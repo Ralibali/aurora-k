@@ -10,10 +10,10 @@ export function DemoBanner() {
       <div className="flex items-center gap-3 px-4 md:px-6 py-2 text-xs">
         <span className="inline-flex items-center gap-1.5 font-semibold">
           <Sparkles className="h-3.5 w-3.5" />
-          Exempeldata visas
+          Demoläge är aktivt
         </span>
         <span className="hidden sm:inline text-amber-800/80 dark:text-amber-200/70">
-          Visas bara i tomma vyer. Din egen data påverkas inte.
+          Översikt och dispatch visar exempeldata. Övriga vyer kan visa dina egna uppgifter.
         </span>
         <button
           onClick={disable}

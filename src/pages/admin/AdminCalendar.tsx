@@ -5,8 +5,8 @@ import { useAssignments, useDrivers } from '@/hooks/useData';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { StatusBadge } from '@/components/StatusBadge';
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { formatStockholmTime, getStockholmDateKey } from '@/features/dispatch/dispatch-utils';
+import { AlertTriangle, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import {
   format,
   startOfWeek,
@@ -14,7 +14,6 @@ import {
   startOfMonth,
   endOfMonth,
   eachDayOfInterval,
-  isSameDay,
   isSameMonth,
   addWeeks,
   subWeeks,
@@ -29,12 +28,14 @@ import { CalendarDays, Info } from 'lucide-react';
 
 type ViewMode = 'week' | 'month';
 
+const statusLabels: Record<string, string> = { pending: 'Planerad', active: 'Pågående', delayed: 'Försenad', completed: 'Slutförd', cancelled: 'Avbokad', unassigned: 'Ej tilldelad' };
+
 export default function AdminCalendar() {
   const navigate = useNavigate();
-  const { data: assignments, isLoading } = useAssignments();
+  const { data: assignments, isLoading, isError, isFetching, refetch } = useAssignments();
   const { data: drivers } = useDrivers();
   const { enabled: demoEnabled } = useDemoMode();
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState(() => new Date(`${getStockholmDateKey()}T12:00:00`));
   const [viewMode, setViewMode] = useState<ViewMode>('week');
   const [driverFilter, setDriverFilter] = useState<string>('all');
 
@@ -53,7 +54,7 @@ export default function AdminCalendar() {
   const filteredAssignments = useMemo(() => {
     if (!effectiveAssignments.length) return [];
     if (driverFilter === 'all') return effectiveAssignments;
-    return effectiveAssignments.filter((a) => a.assigned_driver_id === driverFilter);
+    return effectiveAssignments.filter((a) => driverFilter === 'unassigned' ? !a.assigned_driver_id : a.assigned_driver_id === driverFilter);
   }, [effectiveAssignments, driverFilter]);
 
   const days = useMemo(() => {
@@ -64,7 +65,6 @@ export default function AdminCalendar() {
     }
     const start = startOfMonth(currentDate);
     const end = endOfMonth(currentDate);
-    const monthDays = eachDayOfInterval({ start, end });
     // Pad start to Monday
     const firstDay = startOfWeek(start, { locale: sv });
     const lastDay = endOfWeek(end, { locale: sv });
@@ -74,7 +74,7 @@ export default function AdminCalendar() {
   const assignmentsByDay = useMemo(() => {
     const map = new Map<string, typeof filteredAssignments>();
     for (const a of filteredAssignments) {
-      const key = format(new Date(a.scheduled_start), 'yyyy-MM-dd');
+      const key = getStockholmDateKey(a.scheduled_start);
       if (!map.has(key)) map.set(key, []);
       map.get(key)!.push(a);
     }
@@ -97,20 +97,21 @@ export default function AdminCalendar() {
     ? `${format(days[0], 'd MMM', { locale: sv })} – ${format(days[days.length - 1], 'd MMM yyyy', { locale: sv })}`
     : format(currentDate, 'MMMM yyyy', { locale: sv });
 
-  const today = new Date();
+  const today = getStockholmDateKey();
 
   const statusColor = (status: string) => {
     switch (status) {
       case 'completed': return 'bg-green-500/15 border-green-500/30 text-green-700 dark:text-green-400';
-      case 'in_progress': return 'bg-blue-500/15 border-blue-500/30 text-blue-700 dark:text-blue-400';
+      case 'active': return 'bg-blue-500/15 border-blue-500/30 text-blue-700 dark:text-blue-400';
+      case 'delayed': return 'bg-amber-500/15 border-amber-500/40 text-amber-800 dark:text-amber-400';
       case 'cancelled': return 'bg-destructive/15 border-destructive/30 text-destructive';
       default: return 'bg-orange-500/15 border-orange-500/30 text-orange-700 dark:text-orange-400';
     }
   };
 
   return (
-    <AdminLayout title="Kalender">
-      <div className="space-y-4">
+    <AdminLayout title="Transportkalender" description="Planera veckan och öppna dagens transporter i dispatch.">
+      <div className="min-w-0 space-y-4">
         {/* Helper banner */}
         <div className="flex items-start gap-3 rounded-lg border border-border bg-card/50 px-4 py-3 text-sm">
           <Info className="h-4 w-4 text-primary mt-0.5 shrink-0" />
@@ -120,18 +121,27 @@ export default function AdminCalendar() {
               Färgerna visar status: <span className="text-orange-600 dark:text-orange-400">väntande</span>,{' '}
               <span className="text-blue-600 dark:text-blue-400">pågående</span>,{' '}
               <span className="text-green-600 dark:text-green-400">slutförda</span>,{' '}
-              <span className="text-destructive">avbokade</span>.
+              <span className="text-amber-700 dark:text-amber-400">försenade</span>,{' '}
+              <span className="text-destructive">avbokade</span>. Alla tider visas i svensk tid.
             </p>
           </div>
         </div>
 
+        {!demoEnabled && isError && (
+          <div role="alert" className="flex flex-wrap items-center gap-3 rounded-lg border border-destructive/30 bg-card p-4">
+            <AlertTriangle className="h-4 w-4 text-destructive" />
+            <p className="flex-1 text-sm">Kalenderns uppdrag kunde inte hämtas.</p>
+            <Button variant="outline" size="sm" disabled={isFetching} onClick={() => void refetch()}>Försök igen</Button>
+          </div>
+        )}
+
         {/* Toolbar */}
         <div className="flex flex-wrap items-center gap-3 justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button variant="outline" size="icon" aria-label="Föregående period" onClick={() => navigate_period(-1)}>
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <Button variant="outline" size="sm" onClick={() => setCurrentDate(new Date())}>
+            <Button variant="outline" size="sm" onClick={() => setCurrentDate(new Date(`${getStockholmDateKey()}T12:00:00`))}>
               Idag
             </Button>
             <Button variant="outline" size="icon" aria-label="Nästa period" onClick={() => navigate_period(1)}>
@@ -139,20 +149,21 @@ export default function AdminCalendar() {
             </Button>
             <h2 className="text-lg font-semibold capitalize ml-2">{headerLabel}</h2>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Select value={driverFilter} onValueChange={setDriverFilter}>
-              <SelectTrigger className="w-[180px] h-9">
+              <SelectTrigger className="w-[180px] h-9" aria-label="Filtrera på chaufför">
                 <SelectValue placeholder="Alla chaufförer" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Alla chaufförer</SelectItem>
+                <SelectItem value="unassigned">Saknar chaufför</SelectItem>
                 {effectiveDrivers.map((d) => (
                   <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <Select value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)}>
-              <SelectTrigger className="w-[120px] h-9">
+              <SelectTrigger className="w-[120px] h-9" aria-label="Kalendervy">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -167,14 +178,14 @@ export default function AdminCalendar() {
         </div>
 
         {/* Skeleton during load */}
-        {isLoading && effectiveAssignments.length === 0 && (
+        {!demoEnabled && isLoading && effectiveAssignments.length === 0 && (
           <div className="grid grid-cols-7 gap-2">
             {[...Array(7)].map((_, i) => <Skeleton key={i} className="h-[180px] w-full rounded-lg" />)}
           </div>
         )}
 
         {/* CTA overlay when no assignments at all */}
-        {!isLoading && effectiveAssignments.length === 0 && (
+        {!isLoading && !isError && effectiveAssignments.length === 0 && (
           <div className="rounded-lg border border-dashed border-border bg-card/50 p-8 text-center">
             <div className="inline-flex items-center justify-center h-12 w-12 rounded-2xl bg-primary/5 border border-primary/10 mb-3">
               <CalendarDays className="h-6 w-6 text-primary/70" />
@@ -190,7 +201,8 @@ export default function AdminCalendar() {
         )}
 
         {/* Calendar Grid */}
-        <div className="border rounded-lg overflow-hidden bg-card">
+        <div className="overflow-x-auto rounded-lg border bg-card" role="region" aria-label="Transportkalender, rulla i sidled på små skärmar" tabIndex={0}>
+          <div className="min-w-[760px]">
           {/* Day headers */}
           <div className="grid grid-cols-7 border-b">
             {['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön'].map(d => (
@@ -205,7 +217,7 @@ export default function AdminCalendar() {
             {days.map((day, i) => {
               const key = format(day, 'yyyy-MM-dd');
               const dayAssignments = assignmentsByDay.get(key) || [];
-              const isToday = isSameDay(day, today);
+              const isToday = key === today;
               const isCurrentMonth = isSameMonth(day, currentDate);
               const maxShow = viewMode === 'week' ? 20 : 4;
               const overflow = dayAssignments.length - maxShow;
@@ -219,35 +231,43 @@ export default function AdminCalendar() {
                     !isCurrentMonth && viewMode === 'month' && 'bg-muted/30',
                   )}
                 >
-                  <div className={cn(
-                    'text-xs font-medium mb-1 w-6 h-6 flex items-center justify-center rounded-full',
-                    isToday && 'bg-primary text-primary-foreground',
-                    !isToday && !isCurrentMonth && 'text-muted-foreground/50',
-                  )}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigate(`/admin/assignments?date=${key}${driverFilter === 'unassigned' ? '&filter=unassigned' : ''}`)}
+                    aria-label={`Visa transporter ${format(day, 'd MMMM yyyy', { locale: sv })}`}
+                    className={cn(
+                      'mb-1 h-7 w-7 rounded-full p-0 text-xs',
+                      isToday && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground',
+                      !isToday && !isCurrentMonth && 'text-muted-foreground/50',
+                    )}
+                  >
                     {format(day, 'd')}
-                  </div>
+                  </Button>
                   <div className="space-y-0.5">
                     {dayAssignments.slice(0, maxShow).map(a => (
                       <button
                         key={a.id}
-                        onClick={() => navigate(`/admin/assignments/${a.id}`)}
+                        onClick={() => navigate(a.id.startsWith('demo-') ? `/admin/assignments?date=${key}` : `/admin/assignments/${a.id}`)}
                         className={cn(
-                          'w-full text-left text-[11px] leading-tight px-1.5 py-1 rounded border truncate block hover:opacity-80 transition-opacity',
+                          'w-full text-left text-[11px] leading-tight px-1.5 py-1.5 rounded border truncate block hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                           statusColor(a.status),
                         )}
-                        title={`${format(new Date(a.scheduled_start), 'HH:mm')} ${a.title} — ${a.driver?.full_name || 'Ej tilldelad'}`}
+                        title={`${formatStockholmTime(a.scheduled_start)} ${a.title} — ${statusLabels[a.status] ?? a.status} — ${a.driver?.full_name || 'Ej tilldelad'}`}
+                        aria-label={`${formatStockholmTime(a.scheduled_start)} ${a.title}, ${statusLabels[a.status] ?? a.status}, ${a.driver?.full_name || 'Ej tilldelad'}`}
                       >
-                        <span className="font-medium">{format(new Date(a.scheduled_start), 'HH:mm')}</span>{' '}
+                        <span className="font-medium">{formatStockholmTime(a.scheduled_start)}</span>{' '}
                         {a.title}
                       </button>
                     ))}
                     {overflow > 0 && (
-                      <p className="text-[10px] text-muted-foreground pl-1">+{overflow} till</p>
+                      <Button variant="ghost" size="sm" className="h-6 px-1 text-[10px] text-muted-foreground" onClick={() => navigate(`/admin/assignments?date=${key}`)}>Visa {overflow} till</Button>
                     )}
                   </div>
                 </div>
               );
             })}
+          </div>
           </div>
         </div>
       </div>

@@ -311,18 +311,50 @@ export function useDeleteAssignment() {
   });
 }
 
+export function useCancelAssignment() {
+  const qc = useQueryClient();
+  const { companyId } = useAuth();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      if (!companyId) throw new Error('Företag saknas.');
+      const { data, error } = await supabase.from('assignments')
+        .update({ status: 'cancelled' })
+        .eq('company_id', companyId)
+        .eq('id', id)
+        .in('status', ['pending', 'unassigned', 'active', 'delayed'])
+        .select('id')
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => toast.success('Uppdraget avbokat'),
+    onSettled: async () => { await qc.invalidateQueries({ queryKey: ['assignments'] }); },
+  });
+}
+
 export function useBulkAssignDriver() {
   const qc = useQueryClient();
+  const { companyId } = useAuth();
   return useMutation({
     mutationFn: async ({ assignmentIds, driverId }: { assignmentIds: string[]; driverId: string }) => {
-      const { error } = await supabase
+      const ids = [...new Set(assignmentIds)];
+      if (!companyId || !driverId || ids.length === 0) throw new Error('Välj uppdrag och chaufför först.');
+      const { data, error } = await supabase
         .from('assignments')
         .update({ assigned_driver_id: driverId })
-        .in('id', assignmentIds);
+        .eq('company_id', companyId)
+        .in('id', ids)
+        .in('status', ['pending', 'unassigned'])
+        .is('actual_start', null)
+        .select('id');
       if (error) throw error;
+      if (data.length !== ids.length) throw new Error('Några uppdrag har ändrats. Kontrollera tilldelningen innan du försöker igen.');
+      return data;
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['assignments'] });
+    onSettled: async () => {
+      // A concurrent status change can leave only part of the selection eligible.
+      // Refresh even on failure so the dispatcher sees what actually changed.
+      await qc.invalidateQueries({ queryKey: ['assignments'] });
     },
   });
 }

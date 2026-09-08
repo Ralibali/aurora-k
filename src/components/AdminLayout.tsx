@@ -3,7 +3,7 @@ import { PageTransition } from '@/components/PageTransition';
 import { AdminSidebar } from '@/components/AdminSidebar';
 import { MobileTabBar } from '@/components/MobileTabBar';
 import { Outlet } from 'react-router-dom';
-import { Search, ShieldCheck, Sparkles } from 'lucide-react';
+import { Search, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { QuickCreateMenu } from '@/components/admin/QuickCreateMenu';
 import { CommandPalette } from '@/components/admin/CommandPalette';
@@ -72,16 +72,6 @@ function SearchTrigger() {
   );
 }
 
-function TrustPill() {
-  return (
-    <div className="hidden items-center gap-2 xl:flex">
-      <span className="nordic-trust-pill"><ShieldCheck className="h-3.5 w-3.5 text-success" /> Svensk admin</span>
-      <span className="nordic-trust-pill">Realtid</span>
-      <span className="nordic-trust-pill">Trygg fakturakoll</span>
-    </div>
-  );
-}
-
 export function AdminLayout({ children, title, description, actions }: AdminLayoutProps) {
   return (
     <>
@@ -91,12 +81,10 @@ export function AdminLayout({ children, title, description, actions }: AdminLayo
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
               <h1 className="truncate text-base font-semibold leading-tight tracking-tight text-foreground md:text-lg">{title}</h1>
-              <span className="hidden rounded-full bg-success/10 px-2 py-0.5 text-[10px] font-medium text-success md:inline-flex">Aktiv</span>
             </div>
             {description && <p className="mt-0.5 truncate text-xs text-muted-foreground md:text-sm">{description}</p>}
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            <TrustPill />
             <SearchTrigger />
             <DemoToggle />
             {actions ?? <QuickCreateMenu />}
