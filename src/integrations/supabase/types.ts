@@ -1491,6 +1491,7 @@ export type Database = {
         Row: {
           company_id: string
           created_at: string
+          expected_org_number: string | null
           expires_at: string
           id: string
           redirect_after: string
@@ -1501,6 +1502,7 @@ export type Database = {
         Insert: {
           company_id: string
           created_at?: string
+          expected_org_number?: string | null
           expires_at: string
           id?: string
           redirect_after?: string
@@ -1511,6 +1513,7 @@ export type Database = {
         Update: {
           company_id?: string
           created_at?: string
+          expected_org_number?: string | null
           expires_at?: string
           id?: string
           redirect_after?: string
@@ -1523,6 +1526,32 @@ export type Database = {
             foreignKeyName: "fortnox_oauth_states_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fortnox_operation_locks: {
+        Row: {
+          company_id: string
+          expires_at: string
+          owner: string
+        }
+        Insert: {
+          company_id: string
+          expires_at: string
+          owner: string
+        }
+        Update: {
+          company_id?: string
+          expires_at?: string
+          owner?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fortnox_operation_locks_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
@@ -2780,6 +2809,10 @@ export type Database = {
         Args: { p_token: string; p_user_id: string }
         Returns: undefined
       }
+      claim_fortnox_operation: {
+        Args: { p_company_id: string; p_owner: string }
+        Returns: boolean
+      }
       claim_notification_emails: {
         Args: { p_company_id?: string; p_limit?: number }
         Returns: {
@@ -2863,6 +2896,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      disconnect_fortnox: { Args: { p_company_id: string }; Returns: undefined }
       driver_update_assignment: {
         Args: {
           _actual_start?: string
