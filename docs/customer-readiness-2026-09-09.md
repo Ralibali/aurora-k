@@ -14,7 +14,15 @@
 
 Ett manuellt registreringsförsök nådde backend och visade bekräftelsesidan men skapade ingen ny användare. Diagnosen pekar på en redan befintlig obekräftad adress; inga frekvensbegränsningar eller felsteg loggades.
 
-Rättningen låter upprepad registrering skicka en ny bekräftelse för ett obekräftat konto, med samma skydd som den befintliga resend-funktionen. Ursprungligt lösenord och företagsmetadata ersätts inte. Bekräftade adresser får samma generella svar utan nytt utskick. Samtidiga registreringsförsök hanteras genom en ny uppslagning. Riktade regressionstester: 17 passerade.
+Rättningen låter upprepad registrering skicka en ny bekräftelse för ett obekräftat konto, med samma skydd som den befintliga resend-funktionen. Ursprungligt lösenord och företagsmetadata ersätts inte. Bekräftade adresser får samma generella svar utan nytt utskick. Samtidiga registreringsförsök hanteras genom en ny uppslagning. Riktade regressionstester: 17 passerade. Alla fem GitHub-kontroller för PR29 passerade. PR29 mergades som `1978f0c293fafc8345630f803097dfe1c9211fa1` och `auth-email` publicerades från den versionen.
+
+## Verifiering efter publicering av PR29
+
+- Första och upprepade registreringen via den publika `auth-email`-funktionen svarade HTTP 200. Båda bekräftelsemejlen rapporterades levererade till Resends testmottagare: `cf9e1fa5-a720-4098-a8b4-aae65106166e` och `d4d67e19-8ac4-44e4-844e-a410ce8ffa63`.
+- Databasen innehöll exakt ett obekräftat QA-konto. Ursprungligt företagsnamn och namn behölls; inga lösenords-, återställnings- eller inloggningsfält ändrades enligt kontrollen.
+- Lovables domänstatus: `auroratransport.se` är aktiv huvuddomän; `www.auroratransport.se` är aktiv och omdirigerar till huvuddomänen. Båda har A-post `185.158.133.1`.
+- Resends avsändning är aktiv med verifierad SPF/DKIM. Mottagningsposten är fortfarande felande eftersom root-MX saknas. Simplys webbläsaranslutning och säker överlämning misslyckades; ingen DNS-ändring gjordes.
+- Det isolerade obekräftade QA-kontot från detta test finns kvar: radering via administrativt API var blockerad. Inga alternativa inloggningsuppgifter eller behörighetsvägar användes för att kringgå spärren.
 
 ## Kvar före fullständig kundverifiering
 
