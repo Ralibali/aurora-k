@@ -34,11 +34,23 @@ Google-inloggning behövs inte för kartor eller navigeringslänkar. Befintliga 
 
 För adressökning och vägberäkning behövs ett Google Cloud-projekt med Maps JavaScript API, Places API (New) och Routes API aktiverade och tillämplig fakturering. Använd en separat **webbläsarnyckel**, begränsad till dessa API:er och till `https://auroratransport.se/*`. Lägg endast till exakta preview- eller utvecklingsvärdar om de faktiskt behövs. Sätt kvoter och budgetaviseringar i det valda projektet.
 
-Spara webbläsarnyckeln som `VITE_GOOGLE_MAPS_API_KEY` i webbappens byggmiljö och publicera en ny byggnad. En Lovable gateway-nyckel kan inte användas i Maps JavaScript SDK. Fortnox och andra serverhemligheter får aldrig läggas i webbläsarens byggmiljö.
+Aurora förvaltar Google-konfigurationen centralt; kundföretag och chaufförer behöver inget eget Google-konto eller egna nycklar. Spara webbläsarnyckeln som `GOOGLE_MAPS_BROWSER_KEY` i projektets Lovable Cloud Secrets och publicera Edge-funktionen `maps-config` samt webbappen. Funktionen verifierar användarens JWT och kräver en företagsanknuten administratörsroll i `user_roles` genom anroparens RLS-klient. Endast den avsedda Google-webbläsarnyckeln returneras, med `Cache-Control: no-store`. Frontend hämtar konfigurationen vid användning och återställer den vid utloggning eller kontobyte.
+
+`VITE_GOOGLE_MAPS_API_KEY` stöds fortfarande för en separat, faktiskt konfigurerad byggmiljö. Projektets Cloud Secrets injiceras inte i Lovables frontendbygge; Lovables workspace Build Secrets kräver Enterprise. Att lägga till en Cloud Secret med `VITE_`-prefix räcker därför inte. Nyckeln ska inte skrivas i GitHub-repot. En Lovable gateway-nyckel kan inte användas i Maps JavaScript SDK. Fortnox och andra serverhemligheter får aldrig lämnas ut till webbläsaren.
 
 På nya uppdrag öppnar **Sök adress med Google Maps** Googles aktuella Places-widget. Den vanliga adressinmatningen fungerar också om Google inte svarar. Inga platskoordinater eller hela Place-svar sparas från adressökningen.
 
 I ruttplaneringen beräknar **Beräkna körväg** en riktig körväg genom hämtnings- och leveransadresserna i vald ordning (högst 27 adresser). Köravstånd och uppskattad körtid visas med Google Maps. Hämtning ligger alltid före leverans inom uppdraget. Körtiden omfattar inte stopptider eller aktuell trafik. Google DRIVING är inte lastbilsspecifik vägledning för höjd, vikt eller farligt gods. Streckade linjer utan en beräkning är endast en illustration av ordningen.
+
+## Verifierad Google-status 2026-09-09
+
+Runtime-kopplingen publicerades i commit `a2c3254b41c05c1f33c0ad95784dc2598d3e68f4`. Produktionsfilen `assets/index-DFdx5ztI.js` innehöll `maps-config`-anropet. Anrop utan inloggning nekades med HTTP 401; Lovables kontroll med en normalt utfärdad administratörssession fick en konfigurerad nyckel. Detta bevisar konfigurationsleveransen, inte en fungerande Google-karta.
+
+Google blockerade kartan med `ApiTargetBlockedMapError` och Places/Routes med nekade API-anrop. Ägaren behöver i Google Cloud → Credentials → webbläsarnyckeln → API restrictions tillåta Maps JavaScript API, Places API (New) och Routes API. Om ett API inte kan väljas, aktivera det först i API Library. Behåll webbplatsbegränsningen. En fungerande renderad karta, adressökning och körväg måste verifieras efter ändringen; de är ännu inte godkända som fungerande.
+
+Den lokala kontrollen körde 18 godkända tester: 5 för runtime-konfiguration, 5 för endpointens behörighetsgränser, 4 för ruttberäkning och 4 för kartkomponenter. Produktionsbygget passerade. Testerna använder isolerade tjänstesvar och bevisar inte Googles kontoinställningar.
+
+Källor: [Lovable Build Secrets](https://docs.lovable.dev/features/build-secrets), [Google Maps-fel](https://developers.google.com/maps/documentation/javascript/error-messages).
 
 ## Kontroller
 
