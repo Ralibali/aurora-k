@@ -38,3 +38,14 @@ Rättningen låter upprepad registrering skicka en ny bekräftelse för ett obek
 `user_roles` är den auktoritativa rollkällan. Ändring av visningsfältet `profiles.role` är i sig inte visad privilegieeskalering. Inga behörighetsspärrar ska kringgås för att bekräfta testkonton.
 
 QA-profiler rapporterades som noll efter städning. Det är inte liktydigt med att alla QA-poster i `auth.users` är borttagna; kvarvarande autentiseringskonton måste identifieras säkert innan städning.
+
+## Inkommande orderinkorg – verifiering 2026-09-09
+
+- Root-MX för `auroratransport.se` finns nu i publik DNS (prioritet 10, `inbound-smtp.eu-west-1.amazonaws.com`).
+- Domänen är omkontrollerad hos e-postleverantören: DKIM, SPF och mottagnings-MX är verifierade; både sändning och mottagning är aktiverade.
+- Osignerat anrop mot mottagningsfunktionen avvisas med HTTP 401.
+- Ett internt märkt testmejl skickades från den verifierade avsändaren till en isolerad QA-kanal och fick status `delivered`.
+- Den signerade webhooken behandlade mejlet och skapade exakt en rad i `inbound_order_emails`, bunden enbart till QA-företaget, status `ready` med tolkningssäkerhet 100 och utan felmeddelande.
+- Känd tolkningsbrist: telefonnummer utan angivet organisationsnummer kopieras felaktigt till fältet för organisationsnummer.
+- `ORDER_INBOX_ENABLED` är satt till `true` och `order-inbox-api` är omdistribuerad.
+- QA-fixturerna (testföretag, kanal och inkommande rad) togs bort efter verifieringen.
