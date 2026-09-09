@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { hasGoogleMapsKey, loadGoogleMaps } from '@/lib/google-maps';
+import { loadGoogleMaps, useGoogleMapsAvailable } from '@/lib/google-maps';
 
 export default function GoogleAddressSearch({ label, onSelect }: { label: string; onSelect: (address: string) => void }) {
   const [open, setOpen] = useState(false);
+  const mapsAvailable = useGoogleMapsAvailable();
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const host = useRef<HTMLDivElement>(null);
@@ -36,6 +37,6 @@ export default function GoogleAddressSearch({ label, onSelect }: { label: string
     }).catch(() => { window.clearTimeout(timeout); if (!cancelled) { setLoading(false); fail(); } });
     return () => { cancelled = true; window.clearTimeout(timeout); widget?.removeEventListener('gmp-select', choose); widget?.removeEventListener('gmp-error', fail); widget?.remove(); };
   }, [open, label]);
-  if (!hasGoogleMapsKey) return null;
+  if (!mapsAvailable) return null;
   return <div className="space-y-2"><Button type="button" variant="ghost" size="sm" onClick={() => setOpen(v => !v)}>{open ? 'Stäng adressökning' : 'Sök adress med Google Maps'}</Button>{open && <><div ref={host} />{loading && <p role="status" className="text-xs">Laddar adressökning…</p>}{error && <p role="alert" className="text-xs text-muted-foreground">{error}</p>}</>}</div>;
 }

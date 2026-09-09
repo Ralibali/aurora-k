@@ -3,7 +3,7 @@ import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { formatStockholmTime, getStockholmDateKey, isOpenAssignment } from '@/features/dispatch/dispatch-utils';
 import { ArrowDown, ArrowUp, CalendarDays, MapPin, Route, Save, Sparkles, Users } from 'lucide-react';
 import { toast } from 'sonner';
-import { hasGoogleMapsKey } from '@/lib/google-maps';
+import { useGoogleMapsAvailable } from '@/lib/google-maps';
 import { AdminLayout } from '@/components/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -34,6 +34,7 @@ type RouteAssignment = {
 };
 
 export default function AdminRouteOptimizerPage() {
+  const mapsAvailable = useGoogleMapsAvailable();
   const { data: assignments } = useAssignments();
   const { data: drivers } = useDrivers();
   const { enabled: demoEnabled } = useDemoMode();
@@ -104,7 +105,7 @@ export default function AdminRouteOptimizerPage() {
           <div className="space-y-1"><label className="text-sm font-medium">Chaufför</label><Select value={selectedDriver} onValueChange={setSelectedDriver}><SelectTrigger className="w-[220px]"><SelectValue placeholder="Välj chaufför" /></SelectTrigger><SelectContent>{effectiveDrivers.map(driver => <SelectItem key={driver.id} value={driver.id}>{driver.full_name}</SelectItem>)}</SelectContent></Select></div>
           <div className="space-y-1"><label className="text-sm font-medium">Datum</label><input type="date" value={selectedDate} onChange={event => setSelectedDate(event.target.value)} className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm" /></div>
           <Button variant="outline" onClick={optimize} disabled={orderedAssignments.length < 2}><Sparkles className="mr-1 h-4 w-4" /> Optimera</Button>
-          <>{hasGoogleMapsKey && <Button variant="outline" onClick={calculateRoad} disabled={routing || !orderedAssignments.length}>{routing ? 'Beräknar…' : 'Beräkna körväg'}</Button>}</>
+          <>{mapsAvailable && <Button variant="outline" onClick={calculateRoad} disabled={routing || !orderedAssignments.length}>{routing ? 'Beräknar…' : 'Beräkna körväg'}</Button>}</>
           <Button onClick={save} disabled={!orderedAssignments.length || saving || showDemoExample}><Save className="mr-1 h-4 w-4" /> {saving ? 'Sparar…' : 'Spara körordning'}</Button>
         </div>
 
@@ -114,7 +115,7 @@ export default function AdminRouteOptimizerPage() {
         {showDemoExample && <Card><CardHeader><CardTitle className="flex items-center gap-2 text-sm">Exempelrutt <Badge variant="secondary">Demo</Badge></CardTitle></CardHeader><CardContent className="space-y-2">{demoRouteStops.map((item, index) => <div key={item.id} className="flex gap-3 rounded-lg border p-3"><div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground">{index + 1}</div><div><p className="font-medium">{item.title}</p><p className="text-xs text-muted-foreground">{item.address}</p></div></div>)}</CardContent></Card>}
 
         {orderedAssignments.length > 0 && <div className="grid gap-5 lg:grid-cols-2">
-          <Card className="overflow-hidden"><CardHeader><CardTitle className="text-sm">Ruttkarta</CardTitle><p className="text-xs text-muted-foreground">{activeRoad ? `${activeRoad.distanceKm.toLocaleString('sv-SE', { maximumFractionDigits: 1 })} km · cirka ${activeRoad.minutes} min körning enligt Google Maps. Stopptid och trafik tillkommer. Kontrollera fordonets höjd- och viktbegränsningar.` : 'Streckade linjer visar stoppens ordning. Beräkna körväg för vägavstånd och uppskattad körtid.'}</p></CardHeader><CardContent className="p-0"><div className="h-[420px]"><Suspense fallback={<div className="flex h-full items-center justify-center">Laddar karta…</div>}>{hasGoogleMapsKey ? <RouteMapGoogle assignments={orderedAssignments} roadPath={activeRoad?.path} /> : <RouteMapLeaflet assignments={orderedAssignments} />}</Suspense></div></CardContent></Card>
+          <Card className="overflow-hidden"><CardHeader><CardTitle className="text-sm">Ruttkarta</CardTitle><p className="text-xs text-muted-foreground">{activeRoad ? `${activeRoad.distanceKm.toLocaleString('sv-SE', { maximumFractionDigits: 1 })} km · cirka ${activeRoad.minutes} min körning enligt Google Maps. Stopptid och trafik tillkommer. Kontrollera fordonets höjd- och viktbegränsningar.` : 'Streckade linjer visar stoppens ordning. Beräkna körväg för vägavstånd och uppskattad körtid.'}</p></CardHeader><CardContent className="p-0"><div className="h-[420px]"><Suspense fallback={<div className="flex h-full items-center justify-center">Laddar karta…</div>}>{mapsAvailable ? <RouteMapGoogle assignments={orderedAssignments} roadPath={activeRoad?.path} /> : <RouteMapLeaflet assignments={orderedAssignments} />}</Suspense></div></CardContent></Card>
           <Card><CardHeader><CardTitle className="text-sm">Körordning ({orderedAssignments.length} stopp)</CardTitle></CardHeader><CardContent className="space-y-2">{orderedAssignments.map((item, index) => <div key={item.id} className="flex items-center gap-3 rounded-lg border p-3"><div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground">{index + 1}</div><div className="min-w-0 flex-1"><p className="truncate font-medium">{item.title}</p><p className="flex items-center gap-1 truncate text-xs text-muted-foreground"><MapPin className="h-3 w-3" /> {item.address}</p><a href={googleDirectionsUrl(item)} target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline">Öppna körväg i Google Maps</a><p className="text-xs text-muted-foreground">{formatStockholmTime(item.scheduled_start)}{item.geofence_lat == null && <Badge variant="outline" className="ml-2 text-[10px]">saknar koordinat</Badge>}</p></div><div className="flex gap-1"><Button variant="ghost" size="icon" onClick={() => setOrderedIds(moveStop(orderedIds, index, -1))} disabled={index === 0}><ArrowUp className="h-4 w-4" /></Button><Button variant="ghost" size="icon" onClick={() => setOrderedIds(moveStop(orderedIds, index, 1))} disabled={index === orderedAssignments.length - 1}><ArrowDown className="h-4 w-4" /></Button></div></div>)}</CardContent></Card>
         </div>}
       </div>

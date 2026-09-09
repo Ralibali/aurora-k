@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { removeCurrentDevicePushToken } from '@/lib/push-notifications';
+import { resetGoogleMapsConfig } from '@/lib/google-maps';
 
 type AuthProfile = { role: 'admin' | 'driver' | null; companyId: string | null; isPlatformAdmin: boolean };
 const emptyProfile: AuthProfile = { role: null, companyId: null, isPlatformAdmin: false };
@@ -71,7 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       currentUser.current = nextSession?.user.id ?? null;
       setSession(nextSession);
       setError(null);
-      if (changedUser) { queryClient.clear(); setProfile(emptyProfile); }
+      if (changedUser) { queryClient.clear(); resetGoogleMapsConfig(); setProfile(emptyProfile); }
       if (!nextSession) { setProfile(emptyProfile); setLoading(false); return; }
       if (changedUser) setLoading(true);
       try {
@@ -105,6 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { error: signOutError } = await supabase.auth.signOut();
     if (signOutError) throw signOutError;
     revision.current++;
+    resetGoogleMapsConfig();
     queryClient.clear();
     currentUser.current = null;
     setSession(null); setProfile(emptyProfile); setError(null); setLoading(false);
