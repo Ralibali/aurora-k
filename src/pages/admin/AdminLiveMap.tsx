@@ -56,6 +56,7 @@ const LeafletMap = lazy(() => import('./AdminLiveMapLeaflet'));
 const GoogleMap = lazy(() => import('./AdminLiveMapGoogle'));
 
 export default function AdminLiveMap() {
+  const mapsAvailable = useGoogleMapsAvailable();
   const navigate = useNavigate();
   const [locations, setLocations] = useState<DriverLocation[]>([]);
   const [loading, setLoading] = useState(true);

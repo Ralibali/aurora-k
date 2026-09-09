@@ -10,6 +10,7 @@ import { useGoogleMapsAvailable } from '@/lib/google-maps';
 import { fortnox, FORTNOX_STATE_KEY, type FortnoxStatus } from './fortnox-api';
 
 export default function IntegrationsTab() {
+  const mapsAvailable = useGoogleMapsAvailable();
   const { companyId } = useAuth();
   const [busy, setBusy] = useState(false);
   const status = useQuery({ queryKey: ['fortnox', companyId], queryFn: () => fortnox<FortnoxStatus>('status'), enabled: !!companyId, retry: false });

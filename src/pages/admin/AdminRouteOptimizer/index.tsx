@@ -34,6 +34,7 @@ type RouteAssignment = {
 };
 
 export default function AdminRouteOptimizerPage() {
+  const mapsAvailable = useGoogleMapsAvailable();
   const { data: assignments } = useAssignments();
   const { data: drivers } = useDrivers();
   const { enabled: demoEnabled } = useDemoMode();

@@ -4,6 +4,7 @@ import { loadGoogleMaps, useGoogleMapsAvailable } from '@/lib/google-maps';
 
 export default function GoogleAddressSearch({ label, onSelect }: { label: string; onSelect: (address: string) => void }) {
   const [open, setOpen] = useState(false);
+  const mapsAvailable = useGoogleMapsAvailable();
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const host = useRef<HTMLDivElement>(null);
