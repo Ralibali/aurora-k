@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
-import { hasGoogleMapsKey } from '@/lib/google-maps';
+import { useGoogleMapsAvailable } from '@/lib/google-maps';
 import { fortnox, FORTNOX_STATE_KEY, type FortnoxStatus } from './fortnox-api';
 
 export default function IntegrationsTab() {
@@ -50,10 +50,10 @@ export default function IntegrationsTab() {
       </>}
     </CardContent></Card>
     <Card><CardHeader><CardTitle className="flex items-center gap-2"><MapPinned className="h-5 w-5" /> Google Maps</CardTitle></CardHeader><CardContent className="space-y-3">
-      <Badge variant="secondary">{hasGoogleMapsKey ? 'Konfigurerat – kontrolleras när kartan öppnas' : 'Grundkarta och navigeringslänkar tillgängliga'}</Badge>
+      <Badge variant="secondary">{mapsAvailable ? 'Konfigurerat – kontrolleras när kartan öppnas' : 'Grundkarta och navigeringslänkar tillgängliga'}</Badge>
       <p className="text-sm text-muted-foreground">Öppna uppdragets adresser i Google Maps för navigering. Med Google Maps aktiverat får du även adressökning och beräknad körväg i ruttplaneringen.</p>
       <p className="text-sm text-muted-foreground">Google Maps sköts centralt av Aurora. Företaget och förarna behöver inga egna Google-konton eller API-nycklar.</p>
-      {!hasGoogleMapsKey && <p className="text-sm text-muted-foreground">Adressökning och körvägsberäkning väntar på aktivering hos Aurora. Du kan redan skriva in adresser och öppna dem i Google Maps.</p>}
+      {!mapsAvailable && <p className="text-sm text-muted-foreground">Adressökning och körvägsberäkning väntar på aktivering hos Aurora. Du kan redan skriva in adresser och öppna dem i Google Maps.</p>}
     </CardContent></Card>
   </div>;
 }
