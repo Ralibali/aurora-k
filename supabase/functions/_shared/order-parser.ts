@@ -115,7 +115,13 @@ export function parseInboundOrder(input: string, subject = ''): ParsedInboundOrd
   const values = labelledValues(multiline);
   const inferred = addresses(multiline);
   const phone = multiline.match(/(?:\+46|0)[\d\s-]{7,14}/)?.[0]?.trim() ?? '';
-  const org = multiline.match(/\b(?:16)?\d{6}[- ]?\d{4}\b/)?.[0]?.replace(/\s/g, '') ?? '';
+  // Endast tydligt märkta organisationsnummer. Ett omärkt 10/12-siffrigt tal är
+  // oftast ett telefonnummer eller en ordernummerreferens och får aldrig tolkas som org.nr.
+  const orgMatch = multiline.match(
+    /\borg(?:anisation)?(?:s)?(?:[\s.]*n(?:umme)?r)\.?\s*[:#]?\s*((?:16)?\d{6}[-\s]?\d{4})\b/i,
+  )?.[1];
+  const orgDigits = orgMatch ? orgMatch.replace(/[\s-]/g, '') : '';
+  const org = orgDigits.length === 10 || orgDigits.length === 12 ? orgMatch!.replace(/\s/g, '') : '';
   const reference = multiline.match(/(?:ordernr|ordernummer|referens|bokningsnummer)\s*[:#]?\s*([A-ZÅÄÖ0-9-]{3,30})/i)?.[1] ?? '';
   const serviceType = values.serviceType || serviceTypes.find(type => text.toLowerCase().includes(type.toLowerCase())) || '';
   const scheduledStart = parseDateTime(values.scheduledStart || multiline);
