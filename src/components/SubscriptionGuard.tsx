@@ -35,6 +35,7 @@ function AccountCard({ icon, title, text, action, actionLabel, busy }: {
         <h2 className="mb-2 text-lg font-semibold">{title}</h2>
         <p className="mb-6 text-sm text-muted-foreground">{text}</p>
         <Button onClick={action} className="h-12 w-full rounded-xl font-semibold" disabled={busy}>{busy ? 'Laddar…' : actionLabel}</Button>
+        <a href="/#pris" className="mt-3 inline-block text-sm text-primary underline underline-offset-4">Prislista och uppstartsavgift</a>
         <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
           <Button variant="ghost" disabled={signingOut} onClick={() => void leave()}>{signingOut ? 'Loggar ut…' : 'Logga ut'}</Button>
           <Button asChild variant="link"><Link to="/kontakt">Kontakta support</Link></Button>
