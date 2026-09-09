@@ -49,3 +49,12 @@ QA-profiler rapporterades som noll efter städning. Det är inte liktydigt med a
 - Känd tolkningsbrist: telefonnummer utan angivet organisationsnummer kopieras felaktigt till fältet för organisationsnummer.
 - `ORDER_INBOX_ENABLED` är satt till `true` och `order-inbox-api` är omdistribuerad.
 - QA-fixturerna (testföretag, kanal och inkommande rad) togs bort efter verifieringen.
+
+## Rättning av organisationsnummer i ordertolkningen 2026-09-09
+
+- `supabase/functions/_shared/order-parser.ts`: den omärkta 10/12-siffriga regeln är borttagen. Organisationsnummer plockas nu bara från tydligt märkta former (`org.nr`, `org nr`, `orgnr`, `organisationsnummer`, med eller utan kolon) och måste ha 10 eller 12 siffror.
+- `contactPhone` och `orderReference` är oförändrade.
+- Nya regressionstester i `supabase/functions/_shared/order-parser.test.ts`: enbart telefonnummer, enbart numerisk referens, märkta organisationsnummer i fyra skrivsätt samt tolvsiffrigt nummer. Alla fyra tester passerar och typkontrollen är ren.
+- Exempel efter rättningen: text med "Telefon: 070-123 45 67" ger telefon ifyllt och tomt organisationsnummer.
+- Distribuerade funktioner som använder tolkningen: `resend-inbound-order` och `parse-order-document`.
+- Mottagning via e-post är fortsatt aktiverad och oförändrad.
