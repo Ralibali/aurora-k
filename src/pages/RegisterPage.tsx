@@ -247,7 +247,10 @@ export default function RegisterPage() {
 
             <div className="flex items-start gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-xs text-emerald-200">
               <BadgeCheck className="mt-0.5 h-4 w-4 shrink-0" />
-              <p>Full tillgång till allt i 14 dagar. Inget kort, ingen bindningstid — du betalar först om du väljer att fortsätta efteråt (449 kr/mån).</p>
+              <p>
+                Full tillgång till allt i 14 dagar. Inget kort, ingen bindningstid — du betalar först om du väljer att fortsätta efteråt (449 kr/mån).
+                {' '}<a href="/#pris" className="font-semibold underline underline-offset-2">Se hela prislistan, inklusive uppstart och onboarding.</a>
+              </p>
             </div>
           </form>
         </div>
