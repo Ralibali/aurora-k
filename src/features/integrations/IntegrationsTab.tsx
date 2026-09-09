@@ -52,7 +52,8 @@ export default function IntegrationsTab() {
     <Card><CardHeader><CardTitle className="flex items-center gap-2"><MapPinned className="h-5 w-5" /> Google Maps</CardTitle></CardHeader><CardContent className="space-y-3">
       <Badge variant="secondary">{hasGoogleMapsKey ? 'Konfigurerat – kontrolleras när kartan öppnas' : 'Grundkarta och navigeringslänkar tillgängliga'}</Badge>
       <p className="text-sm text-muted-foreground">Öppna uppdragets adresser i Google Maps för navigering. Med Google Maps aktiverat får du även adressökning och beräknad körväg i ruttplaneringen.</p>
-      {!hasGoogleMapsKey && <p className="text-sm text-muted-foreground">Adressökning och körvägar väntar på företagets Google Maps-anslutning. Ingen Google-inloggning behövs för förarna.</p>}
+      <p className="text-sm text-muted-foreground">Google Maps sköts centralt av Aurora. Företaget och förarna behöver inga egna Google-konton eller API-nycklar.</p>
+      {!hasGoogleMapsKey && <p className="text-sm text-muted-foreground">Adressökning och körvägsberäkning väntar på aktivering hos Aurora. Du kan redan skriva in adresser och öppna dem i Google Maps.</p>}
     </CardContent></Card>
   </div>;
 }
