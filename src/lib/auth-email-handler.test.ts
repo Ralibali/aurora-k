@@ -39,14 +39,30 @@ describe('public auth email boundary', () => {
     expect(html).not.toContain('evil.test');
     expect(html).not.toContain('redirect_to');
   });
-  it.each([null, '2026-09-01T12:00:00Z'])('does not mutate or send signup mail for an existing account (confirmed=%s)', async email_confirmed_at => {
-    deps.findUser.mockResolvedValue({ ...user, email_confirmed_at });
+  it('does not mutate or send signup mail for a confirmed account', async () => {
+    deps.findUser.mockResolvedValue({ ...user, email_confirmed_at: '2026-09-01T12:00:00Z' });
     expect(await (await handleAuthEmail(request(signup), deps)).json()).toEqual({ accepted: true });
     expect(deps.createUser).not.toHaveBeenCalled();
     expect(deps.generateLink).not.toHaveBeenCalled();
     expect(deps.sendMail).not.toHaveBeenCalled();
   });
-  it('handles a concurrent duplicate creation without changing the other account', async () => {
+  it('resends confirmation when signup is retried without replacing the original account details', async () => {
+    deps.findUser.mockResolvedValue(user);
+    expect(await (await handleAuthEmail(request(signup), deps)).json()).toEqual({ accepted: true });
+    expect(deps.createUser).not.toHaveBeenCalled();
+    expect(deps.generateLink).toHaveBeenCalledWith({ type: 'signup', email: 'anna@example.com', password: expect.any(String) });
+    expect(deps.generateLink.mock.calls[0][0].password).not.toBe(signup.password);
+    expect(deps.generateLink.mock.calls[0][0]).not.toHaveProperty('options');
+    expect(deps.sendMail).toHaveBeenCalledOnce();
+  });
+  it.each([null, '2026-09-01T12:00:00Z'])('handles concurrent duplicate creation without changing the other account (confirmed=%s)', async email_confirmed_at => {
+    deps.findUser.mockResolvedValueOnce(null).mockResolvedValueOnce({ ...user, email_confirmed_at });
+    deps.createUser.mockResolvedValue({ data: { user: null }, error: { code: 'email_exists' } });
+    expect(await (await handleAuthEmail(request(signup), deps)).json()).toEqual({ accepted: true });
+    expect(deps.createUser).toHaveBeenCalledOnce();
+    expect(deps.sendMail).toHaveBeenCalledTimes(email_confirmed_at ? 0 : 1);
+  });
+  it('does not generate a signup link if a concurrently created account cannot be found', async () => {
     deps.createUser.mockResolvedValue({ data: { user: null }, error: { code: 'email_exists' } });
     expect(await (await handleAuthEmail(request(signup), deps)).json()).toEqual({ accepted: true });
     expect(deps.generateLink).not.toHaveBeenCalled();
