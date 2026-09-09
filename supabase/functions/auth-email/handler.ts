@@ -64,17 +64,17 @@ export async function handleAuthEmail(request: Request, deps: AuthEmailDependenc
   try {
     if (type !== 'recovery') {
       let user = await deps.findUser(email);
-      // A fresh signup never modifies or confirms an existing account. The
-      // separate resend action is for a registration the recipient initiated.
-      if (type === 'signup' && user) return accepted();
-      if (type === 'signup') {
+      // Retrying an unfinished signup resends confirmation without replacing
+      // the existing password or business metadata. Confirmed accounts remain
+      // a private no-op, just as they are for the explicit resend action.
+      if (type === 'signup' && !user) {
         stage = 'create-user';
         const created = await deps.createUser({ email, password: input.password as string, email_confirm: false, user_metadata: { full_name: registration!.fullName, company_registration: registration! } });
         if (created.error) {
           // Another request may have created this address concurrently. Never
           // update that account's password or business metadata.
           if (!['email_exists', 'user_already_exists'].includes(created.error.code ?? '')) throw new Error('create-user');
-          return accepted();
+          user = await deps.findUser(email);
         } else user = created.data.user;
       }
       if (!user || user.email_confirmed_at) return accepted();
