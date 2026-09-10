@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "status": "draft",
+  "writtenAt": "2026-09-10T18:29:08Z",
+  "repository": "Ralibali/aurora-k",
+  "publicationGate": "Recheck current main and all published content; complete previous live article and product/source-link browser checks before promotion. Set actual publication dates only at publication.",
+  "sourceReview": {
+    "checkedAt": "2026-09-10T18:29:08Z",
+    "status": "product_html_and_repository_reviewed_browser_pending",
+    "note": "Original editorial work template. Recheck the live product and links before publishing; no human review or measured outcomes claimed."
+  },
+  "article": {
+    "slug": "stam-av-transportunderlag-fore-fakturering",
+    "title": "Stäm av transportunderlaget före faktureringen",
+    "seoTitle": "Stäm av transportunderlaget före faktureringen",
+    "metaDescription": "En arbetsmall för att koppla utförda uppdrag till tidrapporter, ändringar och öppna frågor innan underlaget lämnas till fakturering.",
+    "readTime": "5 min",
+    "excerpt": "En arbetsmall för att koppla utförda uppdrag till tidrapporter, ändringar och öppna frågor innan underlaget lämnas till fakturering.",
+    "tags": [
+      "transportledning",
+      "överlämning",
+      "arbetsrutiner"
+    ],
+    "intro": "Ett utfört uppdrag kan fortfarande ha öppna frågor i administrationen. En tidrapport saknas, en ändring behöver förklaras eller underlaget hänvisar till olika referenser. Med en avstämningslista kan transportledning och administration se vad som är klart och vad som kräver ett besked.",
+    "sections": [
+      {
+        "heading": "Välj en tydlig mängd uppdrag",
+        "content": "Börja med en avgränsad period eller en överenskommen uppdragsgrupp. Ange datum för uttaget och var originaluppgifterna finns. Då går det att förstå vilka uppdrag listan omfattar även när nya uppdrag tillkommer.\n\nBehåll samma uppdragsidentifiering genom kontrollen. Om kunden och den egna verksamheten använder olika referenser behöver kopplingen vara tydlig. Låt en okänd referens stå som en fråga tills rätt uppgift har bekräftats."
+      },
+      {
+        "heading": "Kontrollera vad varje uppgift betyder",
+        "content": "Läs status och tidrapport tillsammans med uppdragets underlag. Skilj planerade uppgifter från rapporterade eller bekräftade uppgifter. En planerad sluttid är inte samma sak som en kontrollerad rapport.\n\nNotera vem som kan förklara en skillnad. Ändra inte originalet bara för att få två listor att se likadana ut. Dokumentera frågan och hänvisa till den plats där ett korrigerat underlag ska sparas enligt verksamhetens rutiner."
+      },
+      {
+        "heading": "Kopiera en avstämningsrad",
+        "content": "En rad per uppdrag kan innehålla följande:\n\n- Uppdrags-ID och bekräftad kundreferens.\n- Period eller datum som kontrolleras.\n- Hänvisning till utfört uppdrag och tidrapport.\n- Ändringar som behöver stämmas av.\n- Saknat underlag eller öppen fråga.\n- Ansvarig för nästa besked.\n- Status och tid för senaste kontroll.\n\nAnvänd en status som ”väntar på underlag” när något saknas. Att uppdraget är utfört behöver inte betyda att den administrativa kontrollen är färdig."
+      },
+      {
+        "heading": "Håll ändringar och besked ihop",
+        "content": "Om uppdragets omfattning har ändrats, ange vad ändringen avser och var den bekräftades. Spara hänvisningen tillsammans med frågan. En muntlig uppgift som ingen kan hitta tillbaka till kan behöva förtydligas innan nästa steg tas.\n\nDen som svarar bör kunna se exakt vad som efterfrågas. Skriv hellre ”vilket underlag bekräftar den ändrade omfattningen?” än ”kontrollera uppdraget”. Mallen avgör inte vad som får debiteras; det bedöms mot era överenskommelser och ordinarie faktureringsrutiner."
+      },
+      {
+        "heading": "Lämna över färdiga och öppna punkter tydligt",
+        "content": "Samla kontrollerade uppdrag och kvarstående frågor med synlig status. Ange vem som tar över nästa steg. Om ett passbyte sker under arbetet kan ni använda [överlämningsmallen för transportledning](/blogg/overlamning-transportledning-checklista).\n\nSkriv vilken version av underlaget som lämnades vidare och när. Om en rättning kommer efteråt ska det vara tydligt vilket uppdrag och vilken uppgift den gäller. Undvik flera fristående kopior som alla ser ut att vara det senaste originalet."
+      },
+      {
+        "heading": "Förbättra den uppgift som oftast saknas",
+        "content": "Gå igenom återkommande frågor när ni har använt listan. Är referensen otydlig, lämnas rapporten på fel plats eller saknar ändringar en ansvarig? Välj en av dessa orsaker och förtydliga rutinen där uppgiften först uppstår.\n\nSe [Aurora Transports tjänster](/tjanster) för att jämföra ert arbetssätt med systemets uppdragshantering och fakturering. Arbetsmallen är ett redaktionellt förslag, inte ett löfte om en automatisk avstämningsfunktion. AI-assisterad originalguide utan påstådda kundresultat eller juridisk bedömning av fakturor."
+      }
+    ],
+    "links": [
+      {
+        "label": "Se Aurora Transports tjänster",
+        "href": "/tjanster"
+      }
+    ],
+    "editorial": {
+      "createdWith": "ChatGPT",
+      "aiAssisted": true,
+      "searchIntent": "Transportledning som behöver samla öppna administrativa frågor före överlämning av uppdragsunderlag till fakturering.",
+      "sourceUrls": [
+        "https://auroratransport.se/tjanster"
+      ]
+    }
+  }
+}
