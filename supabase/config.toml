@@ -31,3 +31,6 @@ verify_jwt = false
 verify_jwt = false
 [functions.fortnox]
 verify_jwt = false
+
+[functions.store-review-provision-039d4b33]
+verify_jwt = false
