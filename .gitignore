@@ -29,3 +29,17 @@ playwright-report/
 .cache/
 
 supabase/.temp/
+
+dist-native/
+android/.gradle/
+android/local.properties
+android/app/build/
+android/build/
+android/app/google-services.json
+*.keystore
+*.jks
+*.p12
+*.mobileprovision
+ios/App/App/public/
+ios/App/Pods/
+ios/App/build/

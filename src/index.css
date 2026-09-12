@@ -283,3 +283,6 @@ input:-webkit-autofill:focus {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* Capacitor 8 exposes safe-area insets for edge-to-edge screens. */
+.native-safe-page { padding-top: max(2rem, env(safe-area-inset-top, 0px)); padding-bottom: max(2rem, env(safe-area-inset-bottom, 0px)); }

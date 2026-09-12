@@ -1,3 +1,4 @@
+import { isDriverApp } from '@/lib/driver-app';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -24,6 +25,8 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
   if (!session) {
     return <Navigate to="/login" replace state={{ from: location.pathname + location.search + location.hash }} />;
   }
+
+  if (isDriverApp && !error && role !== 'driver') return <Navigate to="/login" replace />;
 
   if (!error && !role && getRegistrationDraft(session.user.user_metadata)) return <Navigate to="/register" replace />;
   if (error || !role) return <div className="flex min-h-screen items-center justify-center p-6"><div className="max-w-md space-y-4 rounded-xl border bg-card p-6"><h1 className="font-semibold">Kontot kunde inte öppnas</h1><p className="text-sm text-muted-foreground">{error || 'Kontot saknar en företagsroll. Be administratören kontrollera din inbjudan.'}</p><Button onClick={() => void refreshProfile().catch(() => {})}>Försök igen</Button><Button variant="ghost" onClick={() => void signOut()}>Logga ut</Button></div></div>;

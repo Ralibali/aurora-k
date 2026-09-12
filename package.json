@@ -1,7 +1,7 @@
 {
   "name": "aurora-transport",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -14,12 +14,18 @@
     "test:dispatch": "playwright test --config e2e/dispatch.config.ts",
     "test:watch": "vitest",
     "validate": "npm run typecheck && npm run lint && npm test && npm run test:db && npm run build",
-    "build:ios": "npm run build && npx cap sync ios",
+    "build:ios": "npm run build:native && cap sync ios",
     "editorial:check": "node scripts/editorial-check.mjs",
     "prebuild": "npm run editorial:check",
-    "test:db": "node supabase/tests/launch-security.mjs && node supabase/tests/fortnox-integration.mjs"
+    "test:db": "node supabase/tests/launch-security.mjs && node supabase/tests/fortnox-integration.mjs",
+    "build:native": "vite build --mode native --outDir dist-native",
+    "build:android": "npm run build:native && cap sync android",
+    "native:prepare": "npm run build:native && node scripts/native-prepare.mjs",
+    "test:driver-db": "node supabase/tests/launch-security.mjs",
+    "test:mobile": "playwright test --config e2e/mobile.config.ts"
   },
   "dependencies": {
+    "@capacitor/android": "8.3.0",
     "@capacitor/app": "^8.1.0",
     "@capacitor/cli": "^8.3.0",
     "@capacitor/core": "^8.3.0",
@@ -94,6 +100,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@capacitor/assets": "3.0.5",
     "@electric-sql/pglite": "^0.5.8",
     "@eslint/js": "^9.32.0",
     "@playwright/test": "^1.57.0",

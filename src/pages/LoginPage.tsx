@@ -1,3 +1,4 @@
+import { isDriverApp } from '@/lib/driver-app';
 import { useState, useEffect } from 'react';
 import { usePageMeta } from '@/lib/use-page-meta';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
@@ -15,7 +16,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { session, role, companyId, isPlatformAdmin, loading, error: profileError, refreshProfile } = useAuth();
+  const { session, role, companyId, isPlatformAdmin, loading, error: profileError, refreshProfile, signOut } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -43,6 +44,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!loading && session && !profileError) {
+      if (isDriverApp && role !== 'driver') return;
       if (!companyId && getRegistrationDraft(session.user.user_metadata)) { navigate('/register', { replace: true }); return; }
       navigate(loginDestination(location.state?.from, { role, isPlatformAdmin }), { replace: true });
     }
@@ -63,21 +65,22 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[#0a0a1a] px-4 py-8 text-white">
+    <div className="min-h-screen overflow-hidden bg-[#0a0a1a] px-4 py-8 text-white native-safe-page">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(79,70,229,0.25),transparent_40rem)]" />
       <div className="absolute inset-0 bg-[linear-gradient(rgba(79,70,229,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(79,70,229,0.08)_1px,transparent_1px)] bg-[size:72px_72px] [mask-image:linear-gradient(to_bottom,black,transparent_80%)]" />
 
       <div className="relative z-10 mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-6xl items-center justify-center">
         <div className="w-full max-w-md">
-          <Link to="/" className="mb-8 inline-flex items-center gap-2 text-sm font-semibold text-slate-400 transition hover:text-white"><ArrowLeft className="h-4 w-4" /> Till startsidan</Link>
+          {!isDriverApp && <Link to="/" className="mb-8 inline-flex items-center gap-2 text-sm font-semibold text-slate-400 transition hover:text-white"><ArrowLeft className="h-4 w-4" /> Till startsidan</Link>}
           <div className="mb-8 text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#4f46e5] shadow-xl shadow-[#4f46e5]/30"><Truck className="h-8 w-8 text-white" /></div>
             <h1 className="text-3xl font-black tracking-tight text-white">Aurora Transport</h1>
-            <p className="mt-2 text-sm text-slate-400">Logga in på ditt konto</p>
+            <p className="mt-2 text-sm text-slate-400">{isDriverApp ? 'För dig som kör. Dina jobb, tider och kvittenser.' : 'Logga in på ditt konto'}</p>
           </div>
 
           <div className="rounded-[2rem] border border-[#1e1e5a] bg-[#141432]/90 p-6 shadow-[0_30px_100px_rgba(0,0,0,0.35)] backdrop-blur">
             {profileError && <div role="alert" className="mb-4 text-sm text-amber-200">{profileError}<Button variant="ghost" size="sm" onClick={() => void refreshProfile().catch(() => {})}>Försök igen</Button></div>}
+            {isDriverApp && session && !loading && role !== 'driver' && <div role="alert" className="mb-5 space-y-3 text-sm text-slate-200"><p>Appen kräver ett chaufförskonto. Be din trafikledare att bjuda in dig som chaufför. Administratörer använder auroratransport.se.</p><Button variant="outline" className="text-foreground" onClick={() => void signOut().catch(() => toast.error('Kunde inte logga ut. Försök igen.'))}>Byt konto</Button></div>}
             <form onSubmit={handleLogin} className="space-y-5">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-bold text-slate-200">E-post</Label>
@@ -91,14 +94,15 @@ export default function LoginPage() {
             </form>
           </div>
 
-          <div className="mt-4 text-center">
+          {!isDriverApp && <div className="mt-4 text-center">
             <DropdownMenu>
               <DropdownMenuTrigger asChild><Button variant="outline" size="sm" disabled={demoLoading} className="gap-1.5 rounded-xl border-[#1e1e5a] bg-[#141432] text-slate-200 hover:bg-[#1e1e5a]/60 hover:text-white"><Play className="h-3.5 w-3.5" />{demoLoading ? 'Laddar...' : 'Testa demo'}</Button></DropdownMenuTrigger>
               <DropdownMenuContent align="center" className="w-56"><DropdownMenuItem onClick={() => handleDemo('akeri')} className="cursor-pointer"><div><p className="font-medium">Demo Åkeri AB</p><p className="text-xs text-muted-foreground">Transport & logistik</p></div></DropdownMenuItem><DropdownMenuItem onClick={() => handleDemo('bemanning')} className="cursor-pointer"><div><p className="font-medium">Demo Bemanning AB</p><p className="text-xs text-muted-foreground">Bemanning & personal</p></div></DropdownMenuItem></DropdownMenuContent>
             </DropdownMenu>
-          </div>
+          </div>}
 
-          <p className="mt-6 text-center text-sm text-slate-500">Inget konto? <Link to="/register" className="font-bold text-[#818cf8] hover:text-white">Skapa konto</Link> eller <Link to="/kontakt" className="font-bold text-[#818cf8] hover:text-white">kontakta oss</Link></p>
+          {!isDriverApp && <p className="mt-6 text-center text-sm text-slate-500">Inget konto? <Link to="/register" className="font-bold text-[#818cf8] hover:text-white">Skapa konto</Link> eller <Link to="/kontakt" className="font-bold text-[#818cf8] hover:text-white">kontakta oss</Link></p>}
+          {isDriverApp && <div className="mt-6 space-y-3 text-center text-sm text-slate-300"><p>Använd kontot från din trafikledare. Saknar du konto, be om en inbjudan.</p><Link to="/privacy" className="underline">Integritetspolicy</Link></div>}
           <p className="mt-3 text-center text-xs text-slate-600">© {new Date().getFullYear()} Aurora Transport</p>
         </div>
       </div>

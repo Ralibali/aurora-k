@@ -1,3 +1,6 @@
+import { isDriverApp } from '@/lib/driver-app';
+import { DriverAppBoundary } from '@/components/DriverAppBoundary';
+import { NativeAppRuntime } from '@/components/NativeAppRuntime';
 import { lazy, Suspense, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
@@ -135,7 +138,7 @@ function ScrollToTop() {
 function PublicSiteEnhancements() {
   const location = useLocation();
   const isAppRoute = location.pathname.startsWith('/admin') || location.pathname.startsWith('/driver') || location.pathname.startsWith('/platform') || location.pathname.startsWith('/portal') || location.pathname.startsWith('/onboarding') || location.pathname.startsWith('/track/') || location.pathname.startsWith('/auth/') || ['/login', '/register', '/join', '/forgot-password', '/reset-password', '/boka'].includes(location.pathname) || location.pathname.startsWith('/boka/') || location.pathname.startsWith('/integrations/');
-  if (isAppRoute) return null;
+  if (isDriverApp || isAppRoute) return null;
   return <><PwaInstallPrompt /><CookieConsent /><ExitIntentPopup /><QuickContactButton /></>;
 }
 
@@ -148,9 +151,10 @@ const App = () => (
           <AuthProvider>
             <ErrorBoundary>
               <ScrollToTop />
+              <NativeAppRuntime />
               <DriverPushNotifications />
               <Suspense fallback={<PageLoader />}>
-                <Routes>
+                <DriverAppBoundary><Routes>
                   <Route path="/" element={<LandingPage />} />
                   <Route path="/boka" element={<PublicBookingPage />} />
                   <Route path="/boka/:slug" element={<PublicBookingPage />} />
@@ -262,7 +266,7 @@ const App = () => (
                     <Route path="invoices" element={<DriverInvoices />} />
                   </Route>
                   <Route path="*" element={<NotFound />} />
-                </Routes>
+                </Routes></DriverAppBoundary>
               </Suspense>
             </ErrorBoundary>
           </AuthProvider>

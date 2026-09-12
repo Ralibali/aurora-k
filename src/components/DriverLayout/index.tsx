@@ -8,7 +8,7 @@ import { DriverDeliveryProofRuntime } from '@/components/DriverDeliveryProofRunt
 import { DriverOfflineSyncRuntime } from '@/components/DriverOfflineSyncRuntime';
 import { DriverStatusOfflineRuntime } from '@/components/DriverStatusOfflineRuntime';
 
-export function DriverLayout() {
+export function DriverLayout({ showInvoices = true }: { showInvoices?: boolean }) {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <DriverLocationRuntime />
@@ -28,7 +28,7 @@ export function DriverLayout() {
       <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border flex z-40" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
         <NavLink to="/driver/assignments" className="flex-1 flex flex-col items-center justify-center py-2.5 text-muted-foreground min-h-[48px]" activeClassName="!text-primary"><Briefcase className="h-5 w-5" /><span className="text-[10px] mt-0.5 font-medium">Mina uppdrag</span></NavLink>
         <NavLink to="/driver/time-report" className="flex-1 flex flex-col items-center justify-center py-2.5 text-muted-foreground min-h-[48px]" activeClassName="!text-primary"><Clock className="h-5 w-5" /><span className="text-[10px] mt-0.5 font-medium">Tidrapport</span></NavLink>
-        <NavLink to="/driver/invoices" className="flex-1 flex flex-col items-center justify-center py-2.5 text-muted-foreground min-h-[48px]" activeClassName="!text-primary"><FileText className="h-5 w-5" /><span className="text-[10px] mt-0.5 font-medium">Fakturor</span></NavLink>
+        {showInvoices && <NavLink to="/driver/invoices" className="flex-1 flex flex-col items-center justify-center py-2.5 text-muted-foreground min-h-[48px]" activeClassName="!text-primary"><FileText className="h-5 w-5" /><span className="text-[10px] mt-0.5 font-medium">Fakturor</span></NavLink>}
         <NavLink to="/driver/profile" className="flex-1 flex flex-col items-center justify-center py-2.5 text-muted-foreground min-h-[48px]" activeClassName="!text-primary"><User className="h-5 w-5" /><span className="text-[10px] mt-0.5 font-medium">Profil</span></NavLink>
       </nav>
     </div>

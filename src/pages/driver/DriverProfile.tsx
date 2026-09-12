@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,8 +28,8 @@ export default function DriverProfile() {
   const isAvailable = profile?.is_available ?? true;
 
   const handleLogout = async () => {
-    await signOut();
-    navigate('/');
+    try { await signOut(); navigate('/login'); }
+    catch { toast.error('Kunde inte logga ut. Försök igen.'); }
   };
 
   const handleChangePassword = async (e: React.FormEvent) => {
@@ -54,6 +55,7 @@ export default function DriverProfile() {
   return (
     <>
       <div className="p-4 space-y-4">
+        <Link to="/privacy" className="inline-flex min-h-11 items-center text-sm underline">Integritet och personuppgifter</Link>
         {/* Profile card */}
         <Card className="overflow-hidden">
           <div className="h-20 bg-gradient-to-br from-primary/80 to-primary" />

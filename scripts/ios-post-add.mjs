@@ -93,3 +93,15 @@ if (!appDelegate.includes('didRegisterForRemoteNotificationsWithDeviceToken')) {
 } else {
   console.log('[ios-post-add] AppDelegate har redan push-metoder.');
 }
+
+// Camera/photo picker and both location descriptions are required by the installed plugins.
+plist = readFileSync(plistPath, 'utf8');
+for (const [key, description] of Object.entries({
+  NSLocationAlwaysAndWhenInUseUsageDescription: LOCATION_USAGE_DESCRIPTION,
+  NSCameraUsageDescription: 'Ta ett foto som leveransbevis för ditt uppdrag.',
+  NSPhotoLibraryUsageDescription: 'Välj ett foto att bifoga som leveransbevis.',
+})) {
+  if (!plist.includes(`<key>${key}</key>`)) plist = plist.replace('</dict>', `<key>${key}</key><string>${description}</string>\n</dict>`);
+}
+plist = plist.replace('<string>en</string>', '<string>sv</string>');
+writeFileSync(plistPath, plist);

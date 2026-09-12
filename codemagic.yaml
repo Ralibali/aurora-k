@@ -1,41 +1,31 @@
 workflows:
   ios-release:
-    name: Aurora Transport iOS Release
+    name: Aurora Transport iOS TestFlight
     max_build_duration: 60
     environment:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: se.auroramedia.auroratransport
       node: 22
+      xcode: latest
       vars:
         XCODE_PROJECT: ios/App/App.xcodeproj
         XCODE_SCHEME: App
     scripts:
-      - name: Install deps
-        script: npm ci
-      - name: Build web
-        script: npm run build
-      - name: Add iOS platform if missing
+      - name: Install and verify
+        script: npm ci && npm run typecheck && npm test && npm run test:driver-db
+      - name: Prepare driver app
+        script: npm run build:native && node scripts/native-prepare.mjs ios
+      - name: Generate icons
+        script: npx --no-install capacitor-assets generate --ios
+      - name: Version
         script: |
-          if [ ! -d "ios" ]; then
-            npx cap add ios
-          fi
-      - name: Patch iOS project (Info.plist-behörigheter)
-        script: node scripts/ios-post-add.mjs
-      - name: Generate app icons & splash
-        script: npx --yes @capacitor/assets generate --ios
-      - name: Bump build number
-        script: |
-          cd ios/App
-          agvtool next-version -all
-          cd ../..
-      - name: Capacitor sync
-        script: npx cap sync ios
+          export BUILD_NUMBER=$((PROJECT_BUILD_NUMBER + 1))
+          node scripts/native-version.mjs
+      - name: Apply signing profiles
+        script: xcode-project use-profiles
       - name: Build IPA
-        script: |
-          xcode-project build-ipa \
-            --project "$XCODE_PROJECT" \
-            --scheme "$XCODE_SCHEME"
+        script: xcode-project build-ipa --project "$XCODE_PROJECT" --scheme "$XCODE_SCHEME"
     artifacts:
       - build/ios/ipa/*.ipa
     publishing:
@@ -46,48 +36,32 @@ workflows:
         submit_to_testflight: true
 
   android-release:
-    name: Aurora Transport Android Release
+    name: Aurora Transport Google Play Internal
     max_build_duration: 60
     environment:
       android_signing:
         - aurora_keystore
       node: 22
-      java: 17
+      java: 21
       groups:
         - google_play
       vars:
         PACKAGE_NAME: se.auroramedia.auroratransport
     scripts:
-      - name: Install deps
+      - name: Install and verify
+        script: npm ci && npm run typecheck && npm test && npm run test:driver-db
+      - name: Check Firebase configuration
+        script: test -n "$GOOGLE_SERVICES_JSON"
+      - name: Prepare driver app
+        script: npm run build:native && node scripts/native-prepare.mjs android
+      - name: Generate icons
+        script: npx --no-install capacitor-assets generate --android
+      - name: Version
         script: |
-          npm ci
-          npm install --no-save @capacitor/android@8.3.0
-      - name: Build web
-        script: npm run build
-      - name: Add Android platform if missing
-        script: |
-          if [ ! -d "android" ]; then
-            npx cap add android
-          fi
-      - name: Generate app icons & splash
-        script: npx --yes @capacitor/assets generate --android
-      - name: Patch AndroidManifest (permissions, FCM)
-        script: node scripts/android-post-add.mjs
-      - name: Capacitor sync
-        script: npx cap sync android
-      - name: Set version code
-        script: |
-          cd android
-          VERSION_CODE=$(($(google-play get-latest-build-number --package-name "$PACKAGE_NAME" --tracks=internal 2>/dev/null || echo 0) + 1))
-          sed -i.bak "s/versionCode .*/versionCode $VERSION_CODE/" app/build.gradle
-      - name: Build AAB
-        script: |
-          cd android
-          ./gradlew bundleRelease \
-            -PMYAPP_UPLOAD_STORE_FILE="$CM_KEYSTORE_PATH" \
-            -PMYAPP_UPLOAD_KEY_ALIAS="$CM_KEY_ALIAS" \
-            -PMYAPP_UPLOAD_STORE_PASSWORD="$CM_KEYSTORE_PASSWORD" \
-            -PMYAPP_UPLOAD_KEY_PASSWORD="$CM_KEY_PASSWORD"
+          export BUILD_NUMBER=$((PROJECT_BUILD_NUMBER + 1))
+          node scripts/native-version.mjs
+      - name: Build signed AAB
+        script: cd android && ./gradlew bundleRelease
     artifacts:
       - android/app/build/outputs/**/*.aab
       - android/app/build/outputs/**/mapping.txt

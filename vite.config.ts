@@ -11,6 +11,7 @@ import { VitePWA } from "vite-plugin-pwa";
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   define: {
+    'import.meta.env.VITE_DRIVER_APP': JSON.stringify(mode === 'native' || process.env.VITE_DRIVER_APP === 'true' ? 'true' : 'false'),
     // Ensure Supabase publishable config is always baked into the production
     // bundle even when the .env file is not picked up during deploy builds.
     // These are public/anon keys – safe to commit.
@@ -34,9 +35,21 @@ export default defineConfig(({ mode }) => ({
     },
   },
   plugins: [
+    mode === 'native' && {
+      name: 'driver-app-document',
+      transformIndexHtml: { order: 'pre', handler: () => `<!doctype html><html lang="sv"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" /><meta name="theme-color" content="#0a0a1a" /><title>Aurora Transport</title></head><body><div id="root"></div><script type="module" src="/src/main-native.tsx"></script></body></html>` },
+      generateBundle(_options, bundle) {
+        const forbidden = /(?:\/node_modules\/(?:jspdf(?:-autotable)?|xlsx|@sentry)\/|\/src\/(?:App|main)\.tsx$|\/src\/pages\/(?:admin\/|platform\/|driver\/DriverInvoices\.tsx))/;
+        for (const output of Object.values(bundle)) {
+          if (output.type !== 'chunk') continue;
+          const unexpected = Object.keys(output.modules).find(id => forbidden.test(id.replaceAll('\\', '/')));
+          if (unexpected) this.error(`Native app must not include website, invoice or tracking code: ${unexpected}`);
+        }
+      },
+    },
     react(),
     mode === "development" && componentTagger(),
-    VitePWA({
+    mode !== "native" && VitePWA({
       registerType: "autoUpdate",
       // Registreringen görs manuellt i src/main.tsx så att den kan spärras
       // under prerender/build på 127.0.0.1. Annars kan HeadlessChrome försöka

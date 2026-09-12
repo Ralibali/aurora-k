@@ -1,3 +1,4 @@
+import { isDriverApp } from '@/lib/driver-app';
 import { Link } from "react-router-dom";
 import { useEffect, useMemo } from "react";
 import { ArrowLeft, Shield } from "lucide-react";
@@ -21,7 +22,7 @@ const PrivacyPage = () => {
     <header className="border-b border-border bg-card/80 backdrop-blur sticky top-0 z-30">
       <div className="max-w-3xl mx-auto px-4 py-4 flex items-center gap-3">
         <Button variant="ghost" size="icon" asChild>
-          <Link to="/"><ArrowLeft className="h-5 w-5" /></Link>
+          <Link to={isDriverApp ? "/driver/profile" : "/"} aria-label="Tillbaka"><ArrowLeft className="h-5 w-5" /></Link>
         </Button>
         <Shield className="h-5 w-5 text-primary" />
         <h1 className="text-lg font-semibold text-foreground">Integritetspolicy</h1>

@@ -4,7 +4,7 @@ import { Style } from '@capacitor/status-bar';
 const config: CapacitorConfig = {
   appId: 'se.auroramedia.auroratransport',
   appName: 'Aurora Transport',
-  webDir: 'dist',
+  webDir: 'dist-native',
   plugins: {
     SplashScreen: {
       launchShowDuration: 2000,

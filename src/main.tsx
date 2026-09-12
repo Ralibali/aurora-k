@@ -1,3 +1,4 @@
+import { isDriverApp } from './lib/driver-app';
 import { createRoot } from "react-dom/client";
 import { Capacitor } from "@capacitor/core";
 import { registerSW } from "virtual:pwa-register";
@@ -24,7 +25,7 @@ installPlausibleRouteGuard();
 Sentry.init({
   dsn: "https://d838e2cf945e668ad9d1f63d7586ba00@o4511191910383616.ingest.de.sentry.io/4511191916675152",
   sendDefaultPii: false,
-  enabled: import.meta.env.PROD,
+  enabled: import.meta.env.PROD && !isDriverApp,
   tracesSampleRate: 0.2,
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1.0,
@@ -84,9 +85,7 @@ if (window.location.pathname === "/boka-demo") {
   root.render(
     <>
       <App />
-      <FormAnalyticsObserver />
-      <MobileConversionShell />
-      <LandingMobileNavigation />
+      {!isDriverApp && <><FormAnalyticsObserver /><MobileConversionShell /><LandingMobileNavigation /></>}
     </>,
   );
 }
