@@ -12,7 +12,7 @@ Dokumentet uppdaterat 13 september 2026 med dagens verifiering av bygge 3, produ
 | Google Play | Apppost skapad med ID 4973838583465137566. Integritetspolicy och Ads: No är sparade, 2 av 11 uppgifter klara. Signerad AAB och APK för 1.0.0 (3) finns; ingen AAB-uppladdning till Play är verifierad. |
 | Firebase | Android-appen är registrerad i projektet aurora-transport-f71c5 på Spark, utan Analytics. Firebase-konfiguration finns för Android-bygget. Backendens utskick via FCM/APNs är inte färdigkonfigurerade eller verifierade. |
 | Granskningskonto | Separat testföretag och chaufförskonto verifierade. Det uttryckligen godkända syntetiska tidjobbet har startats och slutförts via produktions-API: 56,8 sekunder, ett leveransbevis och idempotent återförsök. Ett jobb är slutfört, två är oförändrat väntande och testföretagets notifieringskö är tom. |
-| Källkod | [codex/driver-mobile-release](https://github.com/Ralibali/aurora-k/tree/codex/driver-mobile-release) innehåller tidigare mobilrelease. Ändringarna för build 3 finns lokalt och är ännu inte committade eller publicerade. Ingen mobilkod har slagits ihop med main. |
+| Källkod | Build 3 är committad och publicerad på [codex/driver-mobile-release](https://github.com/Ralibali/aurora-k/tree/codex/driver-mobile-release). Publicerat och lokalt källträd är verifierat identiska. Ingen mobilkod har slagits ihop med main. |
 
 Följande återstår före lansering:
 
@@ -157,7 +157,7 @@ Krypteringsgranskningen för build 2 fann endast OS-, WebCrypto- och CommonCrypt
 
 **Undertitel (Apple):** Uppdrag och tid för chaufförer
 
-**Kort beskrivning (Google):** Dina körningar, tider och leveransbevis – samlat för arbetsdagen.
+**Kort beskrivning (Google):** Dina körningar, tider och leveransbevis samlade för arbetsdagen.
 
 **Beskrivning:**
 
