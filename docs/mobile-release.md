@@ -2,22 +2,22 @@
 
 Dokumentet uppdaterat 13 september 2026 med dagens verifiering av bygge 3, produktionsflöde och butikskonsoler.
 
-**Build 3 är signerad och exporterad för iOS och Android. Riktig iPhone-inloggning och visning av produktionsuppdrag är verifierade. Apple tog emot build 3 den 13 september kl. 21.44 svensk tid och behandlar paketet. Ingen offentlig lansering eller slutlig butiksgranskning har skickats in.**
+**Build 3 är signerad för iOS och Android. Apple har behandlat bygget, som är valt och sparat på versionen. Google Play har tagit emot AAB 3 och optimerar den. Riktig iPhone-inloggning och uppdragsvisning är verifierade. Ingen release har startats, ingen offentlig lansering eller slutlig butiksgranskning har skickats in.**
 
 ## Release och återstående arbete
 
 | Del | Senast verifierat |
 |---|---|
-| App Store | Apppost skapad. Build 2 är vald på distributionsversionen. Build 3 har godkänd arkivering, signering, export och uppladdning; Apple bekräftar att paketet behandlas. Färdig behandling är ännu inte verifierad. En inloggningsskärmbild är uppladdad. Nio datatyper är publicerade med App Functionality, Linked to User: Yes och Tracking: No. Granskningskontaktens namn, telefon och e-post är godkända och sparade. |
-| Google Play | Apppost skapad med ID 4973838583465137566. Integritetspolicy och Ads: No är sparade, 2 av 11 uppgifter klara. Signerad AAB och APK för 1.0.0 (3) finns; ingen AAB-uppladdning till Play är verifierad. |
+| App Store | Build 3 visar Complete och Ready to Submit efter sparad krypteringsdeklaration och är valt/sparat på versionen. Två iPhone-bilder och en iPad-bild är uppladdade. Nio datatyper är publicerade med App Functionality, Linked to User: Yes och Tracking: No. Granskningskontaktens namn, telefon och e-post är godkända och sparade. Add for Review-valideringen listar endast Content Rights och granskningsanvändarnamn/lösenord som saknade fält. |
+| Google Play | Apppost skapad med ID 4973838583465137566. Integritetspolicy och Ads: No är sparade. Svenska texter, ikon och feature graphic är uppladdade. AAB för 1.0.0 (3) är uppladdad och optimeras; ingen release har startats. |
 | Firebase | Android-appen är registrerad i projektet aurora-transport-f71c5 på Spark, utan Analytics. Firebase-konfiguration finns för Android-bygget. Backendens utskick via FCM/APNs är inte färdigkonfigurerade eller verifierade. |
 | Granskningskonto | Separat testföretag och chaufförskonto verifierade. Det uttryckligen godkända syntetiska tidjobbet har startats och slutförts via produktions-API: 56,8 sekunder, ett leveransbevis och idempotent återförsök. Ett jobb är slutfört, två är oförändrat väntande och testföretagets notifieringskö är tom. |
 | Källkod | Build 3 är committad och publicerad på [codex/driver-mobile-release](https://github.com/Ralibali/aurora-k/tree/codex/driver-mobile-release). Publicerat och lokalt källträd är verifierat identiska. Ingen mobilkod har slagits ihop med main. |
 
 Följande återstår före lansering:
 
-1. **Apple:** verifiera att behandlingen av build 3 blir klar, välj därefter detta bygge för versionen, lämna granskningsinloggningen efter det väntande uttryckliga godkännandet och komplettera skärmbilderna. Integritetsdeklarationerna och granskningskontakten är redan sparade. Manuell publicering efter godkänd granskning är vald.
-2. **Google Play:** slutför återstående formulär, Data safety, butiksmaterial och granskningsåtkomst samt ladda upp build 3 till testspåret. Klassningen av myndighets-, hälso- och finansfunktioner samt målgruppen 18+ inväntar användarens svar. Därefter återstår tillämplig testning och Googles granskning.
+1. **Apple:** slutför Content Rights och lämna granskningsinloggningen efter det väntande uttryckliga godkännandet. Byggval, skärmbilder, integritetsdeklarationer och granskningskontakt är redan sparade. Manuell publicering efter godkänd granskning är vald.
+2. **Google Play:** verifiera att AAB-optimeringen blir klar och slutför återstående formulär, Data safety, butiksmaterial och granskningsåtkomst före testrelease. Klassningen av myndighets-, hälso- och finansfunktioner samt målgruppen 18+ inväntar användarens svar. Därefter återstår tillämplig testning och Googles granskning.
 3. **Push och enhetstest:** konfigurera backendens APNs-/FCM-uppgifter och verifiera notiser. Kamera/foto, signatur, nekade behörigheter, nätavbrott, återförsök och utloggning behöver fortfarande kontrolleras på avsedda fysiska enheter. Produktions-API:ts tidflöde och iPhone-inloggningen är verifierade separat. Använd endast de syntetiska granskningsuppdragen för produktionstest.
 4. **Databehandling:** kontrollera lagringsregion, lagringstider, faktisk radering, personuppgiftsansvar och leverantörernas behandling. Integritetspolicy och butikssvar måste stämma med produktionen.
 
@@ -127,9 +127,10 @@ Behåll keystore, privata nycklar, distributionsprofiler och granskningslösenor
 - Dagens 32 riktade tester, full TypeScript-kontroll och riktad ESLint passerar. Native-bygget för build 3 är godkänt.
 - Tidigare grundkontroller: 250 tester och 59 kontroller av de riktiga migrationerna i en separat PostgreSQL-testmiljö godkända. De kördes inte om i sin helhet för build 3. Databaskontrollerna täcker bland annat företagsisolering, behörigheter, statusbyten, kvittenser, idempotens och återförsök.
 - Fyra mobiltester godkända med isolerade API-svar: appstart/lösenordshjälp; inloggning/navigering/utloggning; administratörsavvisning; jobbstart till leveransbevis och tidrapport. De verifierar även att fakturavyn inte exponeras i native-flödet.
-- iOS build 3: arkivering, distributionssignering och App Store-export passerar. Riktig iPhone-inloggning visar Granskningschaufför, två väntande uppdrag, korrekt navigation och ingen felaktig Offline-indikering. Skärmbilden `outputs/app-store/iphone69/02-uppdrag.png` dokumenterar uppdragsvyn; endast inloggningsbilden är hittills verifierat uppladdad till Apple.
+- iOS build 3: arkivering, distributionssignering, App Store-export och uppladdning passerar. Apple har behandlat bygget och det är valt/sparat på versionen. Riktig iPhone-inloggning visar Granskningschaufför, två väntande uppdrag, korrekt navigation och ingen felaktig Offline-indikering. Två iPhone-bilder och en iPad-bild är uppladdade; `outputs/app-store/iphone69/02-uppdrag.png` dokumenterar uppdragsvyn.
 - Android build 3: AAB-signatur och APK:s v2-signatur verifierade. ZIP-alignment och samtliga fyra native-biblioteks 16 KB LOAD-alignment godkända. Release är inte debuggable och saknar reklam-ID- och bakgrundsplatsbehörighet.
 - Produktionskontot har en chaufförsroll och ett isolerat syntetiskt företag. Det särskilda tidjobbet startades/slutfördes på 56,8 sekunder via det riktiga driver-sync-API:t. Ett leveransbevis skapades; återförsök gav ingen dubblett. Två andra uppdrag lämnades väntande och notifieringskön för testföretaget förblev tom. Inga verkliga kunduppgifter eller e-postutskick användes.
+- Serverrättningen `20260913200132_driver_push_tokens_select_own.sql` tillåter en autentiserad användare att läsa sina egna push-tokenrader, vilket krävs för upprepad upsert. 16 isolerade PostgreSQL/RLS-kontroller passerar i `supabase/tests/driver-push-tokens.mjs`. Policyn är applicerad i produktion och första/upprepad syntetisk upsert verifierades som granskningsanvändaren med RLS aktiv; hela testet rullades tillbaka och lämnade noll rader. Ingen notis skickades. Detta är en serverändring; klienten och build 3-binärerna är oförändrade. APNs-/FCM-konfiguration saknas fortfarande, och klientens återförsök efter ett första tillfälligt tokenfel är en kvarvarande begränsning.
 
 Leveransfiler för build 3 ligger i arbetsytans `outputs/`, utanför repot:
 
