@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { DriverOfflineOperation } from './driver-offline-queue';
-const mocks = vi.hoisted(() => ({ session: { user: { id: 'driver-a' }, access_token: 'token-a' }, invoke: vi.fn() }));
+const mocks = vi.hoisted(() => ({ session: { user: { id: 'driver-a' }, access_token: 'token-a' }, invoke: vi.fn(), connected: true }));
+vi.mock('@/lib/app-connectivity', () => ({ isAppOnline: () => mocks.connected }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { auth: { getSession: async () => ({ data: { session: mocks.session } }) }, functions: { invoke: mocks.invoke } } }));
 import { enqueueDriverOperation, flushDriverOfflineQueue, listDriverOperations, syncOrQueueDriverOperation, discardRejectedDriverOperation } from './driver-offline-queue';
 
@@ -42,6 +43,7 @@ const input = (assignmentId = 'assignment-a') => ({ assignmentId, operationType:
 const rejectedResponse = () => ({ data: null, error: { message: 'Rejected', context: new Response(JSON.stringify({ error: 'Uppdraget är avbokat' }), { status: 409 }) } });
 beforeEach(() => {
   rows = new Map(); abortNextWrite = false;
+  mocks.connected = true;
   mocks.session = { user: { id: 'driver-a' }, access_token: 'token-a' };
   mocks.invoke.mockReset().mockResolvedValue({ data: { synced: true, result: { status: 'active' } }, error: null });
   vi.stubGlobal('indexedDB', fakeDatabase());
@@ -50,6 +52,22 @@ beforeEach(() => {
   Object.defineProperty(navigator, 'onLine', { configurable: true, value: true });
 });
 describe('durable driver offline queue', () => {
+  it('sends when the shared native connection is online despite a false WebView hint', async () => {
+    Object.defineProperty(navigator, 'onLine', { configurable: true, value: false });
+    expect((await syncOrQueueDriverOperation(input())).queued).toBe(false);
+    expect(mocks.invoke).toHaveBeenCalledTimes(1);
+    expect(rows.size).toBe(0);
+  });
+  it('keeps work durable while the shared connection is offline and sends after recovery', async () => {
+    mocks.connected = false;
+    expect((await syncOrQueueDriverOperation(input())).queued).toBe(true);
+    expect((await flushDriverOfflineQueue()).remaining).toBe(1);
+    expect(mocks.invoke).not.toHaveBeenCalled();
+    mocks.connected = true;
+    const report = await flushDriverOfflineQueue();
+    expect(report).toMatchObject({ synced: 1, remaining: 0 });
+    expect(mocks.invoke).toHaveBeenCalledTimes(1);
+  });
   it('waits for a committed write before declaring the operation saved', async () => {
     abortNextWrite = true;
     await expect(enqueueDriverOperation(input())).rejects.toThrow('Disk full');

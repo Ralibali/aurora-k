@@ -4,12 +4,13 @@ import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
+import { isAppOnline, refreshAppConnectivity, subscribeAppConnectivity } from '@/lib/app-connectivity';
 import { driverAssignmentPath } from '@/features/driver/assignment-flow';
 import { discardRejectedDriverOperation, flushDriverOfflineQueue, legacyDriverOperationCount, listDriverOperations, type DriverOfflineOperation } from '@/lib/driver-offline-queue';
 
 export function DriverOfflineSyncRuntime() {
   const { user } = useAuth();
-  const [online, setOnline] = useState(navigator.onLine);
+  const [online, setOnline] = useState(isAppOnline);
   const [operations, setOperations] = useState<DriverOfflineOperation[]>([]);
   const [legacyCount, setLegacyCount] = useState(0);
   const [syncing, setSyncing] = useState(false);
@@ -23,7 +24,7 @@ export function DriverOfflineSyncRuntime() {
     } catch { setStorageError('Lokal lagring är inte tillgänglig. Ändringar kan inte sparas offline.'); }
   }, [user?.id]);
   const flush = useCallback(async () => {
-    if (!navigator.onLine || !user?.id) return refresh();
+    if (!isAppOnline() || !user?.id) return refresh();
     setSyncing(true);
     try { await flushDriverOfflineQueue(); }
     catch { setStorageError('Kunde inte läsa eller synka mobilens sparade ändringar.'); }
@@ -31,19 +32,16 @@ export function DriverOfflineSyncRuntime() {
   }, [refresh, user?.id]);
   useEffect(() => {
     void refresh();
-    const onlineHandler = () => { setOnline(true); void flush(); };
-    const offlineHandler = () => setOnline(false);
+    const connectivityHandler = (connected: boolean) => { setOnline(connected); if (connected) void flush(); };
+    const unsubscribe = subscribeAppConnectivity(connectivityHandler);
+    connectivityHandler(isAppOnline());
     const queueHandler = () => void refresh();
-    const visibilityHandler = () => { if (document.visibilityState === 'visible') void flush(); };
-    window.addEventListener('online', onlineHandler);
-    window.addEventListener('offline', offlineHandler);
+    const visibilityHandler = () => { if (document.visibilityState === 'visible') void refreshAppConnectivity().then(flush); };
     window.addEventListener('aurora-offline-queue-change', queueHandler);
     document.addEventListener('visibilitychange', visibilityHandler);
-    const interval = window.setInterval(() => { if (navigator.onLine) void flush(); }, 60_000);
-    if (navigator.onLine) void flush();
+    const interval = window.setInterval(() => { if (isAppOnline()) void flush(); }, 60_000);
     return () => {
-      window.removeEventListener('online', onlineHandler);
-      window.removeEventListener('offline', offlineHandler);
+      unsubscribe();
       window.removeEventListener('aurora-offline-queue-change', queueHandler);
       document.removeEventListener('visibilitychange', visibilityHandler);
       window.clearInterval(interval);

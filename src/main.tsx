@@ -1,4 +1,5 @@
 import { isDriverApp } from './lib/driver-app';
+import { initializeAppConnectivity } from './lib/app-connectivity';
 import { createRoot } from "react-dom/client";
 import { Capacitor } from "@capacitor/core";
 import { registerSW } from "virtual:pwa-register";
@@ -77,6 +78,8 @@ if (shouldUseServiceWorker) {
   });
 }
 
+const stopConnectivity = initializeAppConnectivity();
+if (import.meta.hot) import.meta.hot.dispose(stopConnectivity);
 const root = createRoot(document.getElementById("root")!);
 
 if (window.location.pathname === "/boka-demo") {

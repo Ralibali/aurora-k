@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { isAppOnline } from '@/lib/app-connectivity';
 
 export type DriverOfflineOperation = {
   id: string;
@@ -146,7 +147,7 @@ export function flushDriverOfflineQueue() {
     const report: FlushReport = { synced: 0, remaining: 0, results: {}, rejected: {} };
     const operations = await listDriverOperations();
     const blockedAssignments = new Set<string>();
-    if (navigator.onLine) for (const operation of operations) {
+    if (isAppOnline()) for (const operation of operations) {
       if (blockedAssignments.has(operation.assignmentId)) continue;
       if (operation.rejected || operation.nextAttemptAt > Date.now()) {
         blockedAssignments.add(operation.assignmentId);
@@ -163,7 +164,7 @@ export function flushDriverOfflineQueue() {
         if (permanent) report.rejected[operation.id] = message;
         await updateOperation({ ...operation, attempts, rejected: permanent, nextAttemptAt: Date.now() + retryDelay(attempts), lastError: message });
         blockedAssignments.add(operation.assignmentId);
-        if (!navigator.onLine) break;
+        if (!isAppOnline()) break;
       }
     }
     report.remaining = await driverOfflineQueueCount();
@@ -174,7 +175,7 @@ export function flushDriverOfflineQueue() {
 
 export async function syncOrQueueDriverOperation(input: Omit<DriverOfflineOperation, 'id' | 'createdAt' | 'attempts' | 'nextAttemptAt'>) {
   const operation = await enqueueDriverOperation(input);
-  if (!navigator.onLine) return { queued: true, operationId: operation.id, result: null };
+  if (!isAppOnline()) return { queued: true, operationId: operation.id, result: null };
   // Use one sender for both immediate and background work. A later completion
   // must never overtake its queued start or duplicate an in-flight request.
   const running = flushPromise;

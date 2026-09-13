@@ -285,4 +285,10 @@ input:-webkit-autofill:focus {
 }
 
 /* Capacitor 8 exposes safe-area insets for edge-to-edge screens. */
+.driver-native input,
+.driver-native textarea,
+.driver-native select {
+  /* Keep iOS from zooming the viewport when a form field receives focus. */
+  font-size: max(16px, 1rem);
+}
 .native-safe-page { padding-top: max(2rem, env(safe-area-inset-top, 0px)); padding-bottom: max(2rem, env(safe-area-inset-bottom, 0px)); }
