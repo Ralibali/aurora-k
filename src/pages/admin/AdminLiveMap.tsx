@@ -123,7 +123,7 @@ export default function AdminLiveMap() {
   }, []);
 
   return (
-    <AdminLayout title="Live-karta" description="Realtidsposition för chaufförer med aktiva uppdrag">
+    <AdminLayout title="Fleet live" description="Realtidsposition, hastighet och senaste GPS-signal för aktiva uppdrag">
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <Badge variant="outline" className="gap-1.5">
@@ -137,6 +137,7 @@ export default function AdminLiveMap() {
             <Link to="/admin/assignments/new"><Plus className="h-3.5 w-3.5 mr-1" /> Skapa uppdrag</Link>
           </Button>
         </div>
+        <p className="text-xs text-muted-foreground">Telefon- och fordonspositioner sparas bara under aktiva uppdrag. Historik gallras enligt företagets retentionstid.</p>
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4">
           {/* Map */}

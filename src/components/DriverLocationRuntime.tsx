@@ -22,6 +22,6 @@ export function DriverLocationRuntime() {
     };
   }, [active]);
 
-  useDriverLocationTracker(user?.id, active?.id, companyId, geofence);
+  useDriverLocationTracker(user?.id, active?.id, companyId, active?.vehicle_id, geofence);
   return null;
 }
