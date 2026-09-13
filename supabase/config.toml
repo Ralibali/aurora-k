@@ -31,3 +31,6 @@ verify_jwt = false
 verify_jwt = false
 [functions.fortnox]
 verify_jwt = false
+
+[functions.fleet-provider-webhook]
+verify_jwt = false
