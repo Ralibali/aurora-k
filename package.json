@@ -17,7 +17,7 @@
     "build:ios": "npm run build:native && cap sync ios",
     "editorial:check": "node scripts/editorial-check.mjs",
     "prebuild": "npm run editorial:check",
-    "test:db": "node supabase/tests/launch-security.mjs && node supabase/tests/fortnox-integration.mjs",
+    "test:db": "node supabase/tests/launch-security.mjs && node supabase/tests/fortnox-integration.mjs && node supabase/tests/driver-push-tokens.mjs && node supabase/tests/driver-support.mjs && node supabase/tests/driver-push-registration.mjs && node supabase/tests/profile-authorization.mjs",
     "build:native": "vite build --mode native --outDir dist-native",
     "build:android": "npm run build:native && cap sync android",
     "native:prepare": "npm run build:native && node scripts/native-prepare.mjs",

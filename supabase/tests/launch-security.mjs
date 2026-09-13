@@ -88,7 +88,7 @@ await db.query('insert into driver_documents(company_id,driver_id,notes) values(
 await db.query('insert into vehicles(id,company_id) values($1,$2)',[vehicleA,A]);
 await db.query('insert into vehicle_maintenance(company_id,vehicle_id,notes) values($1,$2,$3)',[A,vehicleA,'maintenance']);
 await db.query('insert into invitations(token,company_id,email,created_at) values($1,$2,$3,now()),($4,$2,$3,now()-interval \'30 days\')',[invite,A,'invite@a.se',expired]);
-for (const filename of ['20260908120643_driver_workflow_atomicity.sql','20260908131323_durable_transport_notifications.sql','20260908132142_launch_tenant_security.sql','20260908145027_notification_cron_secret_verifier.sql']) {
+for (const filename of ['20260908120643_driver_workflow_atomicity.sql','20260908131323_durable_transport_notifications.sql','20260908132142_launch_tenant_security.sql','20260908145027_notification_cron_secret_verifier.sql','20260913204221_protect_profile_authorization.sql']) {
   await db.exec(await readFile(`supabase/migrations/${filename}`,'utf8'));
 }
 let checks=0;

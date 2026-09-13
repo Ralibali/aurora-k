@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, useCallback, useRef, ty
 import { useQueryClient } from '@tanstack/react-query';
 import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { removeCurrentDevicePushToken } from '@/lib/push-notifications';
+import { removeCurrentDevicePushToken, startCurrentDeviceForDriverPush } from '@/lib/push-notifications';
 import { resetGoogleMapsConfig } from '@/lib/google-maps';
 
 type AuthProfile = { role: 'admin' | 'driver' | null; companyId: string | null; isPlatformAdmin: boolean };
@@ -103,14 +103,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(async () => {
     try { await removeCurrentDevicePushToken(currentUser.current); }
     catch { console.warn('[auth] Push cleanup failed during sign out'); }
-    const { error: signOutError } = await supabase.auth.signOut();
-    if (signOutError) throw signOutError;
+    try {
+      const { error: signOutError } = await supabase.auth.signOut();
+      if (signOutError) throw signOutError;
+    } catch (cause) {
+      if (currentUser.current && profile.role === 'driver') void startCurrentDeviceForDriverPush(currentUser.current).catch(() => {});
+      throw cause;
+    }
     revision.current++;
     resetGoogleMapsConfig();
     queryClient.clear();
     currentUser.current = null;
     setSession(null); setProfile(emptyProfile); setError(null); setLoading(false);
-  }, [queryClient]);
+  }, [queryClient, profile.role]);
 
   return <AuthContext.Provider value={{ ...profile, session, user: session?.user ?? null, loading, error, refreshProfile, signOut }}>{children}</AuthContext.Provider>;
 }

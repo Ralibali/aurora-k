@@ -1,6 +1,6 @@
 import AssignmentDeviations from '@/components/AssignmentDeviations';
 import { useEffect, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useAssignment, useDriverUpdateAssignment } from '@/hooks/useData';
 import { Button } from '@/components/ui/button';
@@ -171,7 +171,8 @@ export default function DriverAssignmentDetail() {
           </Card>
         )}
 
-        <AssignmentDeviations assignmentId={assignment.id} legacyComment={assignment.driver_comment} />
+        <AssignmentDeviations key={assignment.id} assignmentId={assignment.id} legacyComment={assignment.driver_comment} driverReporting />
+        <p className="text-sm text-muted-foreground">Vill du kontakta Aurora-support om innehåll eller en användare? <Link to="/driver/profile#report-problem" className="inline-flex min-h-11 items-center underline">Rapportera via din profil</Link>.</p>
 
         <Card>
           <CardHeader><CardTitle className="flex items-center gap-2 text-base"><MessageSquare className="h-4 w-4" /> Förarkommentar</CardTitle></CardHeader>

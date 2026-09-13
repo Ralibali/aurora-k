@@ -1,164 +1,152 @@
 # Aurora Transport — mobilrelease 1.0.0
 
-Dokumentet uppdaterat 13 september 2026 med dagens verifiering av bygge 3, produktionsflöde och butikskonsoler.
+Uppdaterat 13 september 2026 efter den verifierade interna releasen kl. 22.45 svensk tid.
 
-**Build 3 är signerad för iOS och Android. Apple har behandlat bygget, som är valt och sparat på versionen. Google Play har tagit emot AAB 3 och optimerar den. Riktig iPhone-inloggning och uppdragsvisning är verifierade. Ingen release har startats, ingen offentlig lansering eller slutlig butiksgranskning har skickats in.**
+**Build 4 är signerad för båda plattformarna och ACTIVE i Google Plays interna testspår, release 2. Apple visar Complete/Ready to Submit för build 4 efter sparad krypteringsdeklaration; build 4 är valt och sparat på versionen, verifierat efter återbesök. Ingen offentlig lansering eller slutlig butiksgranskning har skickats in.**
 
-## Release och återstående arbete
+## Distribution och återstående steg
 
-| Del | Senast verifierat |
+| Del | Verifierad status |
 |---|---|
-| App Store | Build 3 visar Complete och Ready to Submit efter sparad krypteringsdeklaration och är valt/sparat på versionen. Två iPhone-bilder och en iPad-bild är uppladdade. Nio datatyper är publicerade med App Functionality, Linked to User: Yes och Tracking: No. Granskningskontaktens namn, telefon och e-post är godkända och sparade. Add for Review-valideringen listar endast Content Rights och granskningsanvändarnamn/lösenord som saknade fält. |
-| Google Play | Apppost skapad med ID 4973838583465137566. Integritetspolicy och Ads: No är sparade. Svenska texter, ikon och feature graphic är uppladdade. AAB för 1.0.0 (3) är uppladdad och optimeras; ingen release har startats. |
-| Firebase | Android-appen är registrerad i projektet aurora-transport-f71c5 på Spark, utan Analytics. Firebase-konfiguration finns för Android-bygget. Backendens utskick via FCM/APNs är inte färdigkonfigurerade eller verifierade. |
-| Granskningskonto | Separat testföretag och chaufförskonto verifierade. Det uttryckligen godkända syntetiska tidjobbet har startats och slutförts via produktions-API: 56,8 sekunder, ett leveransbevis och idempotent återförsök. Ett jobb är slutfört, två är oförändrat väntande och testföretagets notifieringskö är tom. |
-| Källkod | Build 3 är committad och publicerad på [codex/driver-mobile-release](https://github.com/Ralibali/aurora-k/tree/codex/driver-mobile-release). Publicerat och lokalt källträd är verifierat identiska. Ingen mobilkod har slagits ihop med main. |
+| Google Play | Version 1.0.0 (4) är aktiv i internt test från 13 september kl. 22.45. Samma separata testlista innehåller endast ägarens bekräftade konto. Appen är inte granskad eller offentlig. |
+| App Store | Build 4 är uppladdad kl. 22.38.10.851, färdigbehandlad och visar Complete/Ready to Submit. Krypteringssvaret None är sparat och build 4 är valt/sparat på versionen. Två iPhone-bilder, en iPad-bild, nio integritetsdatatyper och den privata granskningskontakten är sparade. Content Rights och granskningsinloggning återstår. |
+| Firebase och push | Android-konfiguration finns för aurora-transport-f71c5, Spark utan Analytics. FCM HTTP v1 är aktiverat. Privata FCM-/APNs-uppgifter och faktisk pushleverans är inte färdigverifierade. |
+| Granskningskonto | Separat syntetiskt företag med en chaufför, ett slutfört och två väntande testuppdrag. Ett avgränsat produktionsflöde är verifierat via API. Inloggningsuppgifterna har inte lämnats till butikernas granskning. |
+| Källa | Separat [releasegren](https://github.com/Ralibali/aurora-k/tree/codex/driver-mobile-release). Build 4-källan finns på releasegrenen. Exakt commit, träd och källarkiv redovisas i leveransens separata verifieringsmanifest. Serverändringen för seed-users är separat publicerad på main. Ingen mobilgren har slagits ihop med main. |
 
-Följande återstår före lansering:
+[Intern testlänk](https://play.google.com/apps/internaltest/4700850323167782555) gäller den tillagda testaren. Google visar varningar om saknade native-symboler och deobfuskeringsfil. R8/minifiering används inte, så någon R8-mappningsfil finns inte. Varningarna hindrade inte den interna releasen; native-symboler är fortfarande inte uppladdade.
 
-1. **Apple:** slutför Content Rights och lämna granskningsinloggningen efter det väntande uttryckliga godkännandet. Byggval, skärmbilder, integritetsdeklarationer och granskningskontakt är redan sparade. Manuell publicering efter godkänd granskning är vald.
-2. **Google Play:** verifiera att AAB-optimeringen blir klar och slutför återstående formulär, Data safety, butiksmaterial och granskningsåtkomst före testrelease. Klassningen av myndighets-, hälso- och finansfunktioner samt målgruppen 18+ inväntar användarens svar. Därefter återstår tillämplig testning och Googles granskning.
-3. **Push och enhetstest:** konfigurera backendens APNs-/FCM-uppgifter och verifiera notiser. Kamera/foto, signatur, nekade behörigheter, nätavbrott, återförsök och utloggning behöver fortfarande kontrolleras på avsedda fysiska enheter. Produktions-API:ts tidflöde och iPhone-inloggningen är verifierade separat. Använd endast de syntetiska granskningsuppdragen för produktionstest.
-4. **Databehandling:** kontrollera lagringsregion, lagringstider, faktisk radering, personuppgiftsansvar och leverantörernas behandling. Integritetspolicy och butikssvar måste stämma med produktionen.
+Före offentlig release återstår Apples Content Rights, granskningsåtkomst, EU DSA/trader-uppgifter, återstående Google-formulär och Data safety samt fysisk enhetstestning och faktisk pushverifiering. Manuell Apple-publicering efter granskning är vald. Ready to Submit är inte ett godkännande av App Review.
 
-Ready to Submit är Apples status för det behandlade bygget och innebär inte att App Review har godkänt appen. Lokala byggen och CI-konfiguration bevisar inte att butikskonton, formulär eller distributionskanaler är färdigkonfigurerade.
+## Implementerat chaufförsflöde
 
-Två redan ställda frågor inväntar svar: uttryckligt tillstånd att lämna granskningsinloggningen till Apple och Google samt Googles innehålls-/målgruppsklassning. Automatisk godkännandegranskning stoppade den nya överföringen av granskningsuppgifter till Apple och sparandet av Government app: No. Tidigare hinder för integritetsdeklarationer, kontaktuppgifter och det särskilda produktionstestet är lösta.
+Chauffören loggar in med företagets konto, ser tilldelade uppdrag, startar körningar, lämnar leveransbevis och följer tidrapporter. Foto, signatur och mottagarnamn kan krävas per uppdrag. Nya konton och självständigt skapande av jobb ingår inte. Lösenordshjälp begärs i appen och slutförs via tjänstens webblänk.
 
-## Produkt och implementation
+Separata src/main-native.tsx och src/NativeApp.tsx paketerar chaufförsvyer, inloggning, lösenordshjälp, integritets- och innehållspolicy lokalt i dist-native. Administrations-, försäljnings-, demo-, registrerings- och fakturasidor är uteslutna. Webbversionen behåller sina funktioner. Byggkontrollen utesluter jsPDF, xlsx, Sentry och administrativa webbmoduler.
 
-Chaufförer använder företagets konto, ser sina tilldelade uppdrag, startar körningar, lämnar leveransbevis och följer tidrapporter. Foto, signatur och mottagarnamn kan krävas per uppdrag. Självständigt skapande av nya jobb ingår inte i mobilflödet.
+Build 4 kräver ett aktivt godkännande av innehållsregler innan chaufförsvyer eller uppladdningar kan användas, även via direktlänk. Rutan är från början omarkerad. Godkännandet lagras lokalt per konto och policyversion; lagringsfel ger ingen tyst passage och utloggning är tillgänglig. Reglerna kan läsas igen via Profil eller /content-policy. Detta skapar ingen ny serverlogg och är inget generellt databehandlingssamtycke.
 
-Appen startar i förarflödet. Administratörskonton får en förklaring och kan byta konto utan omdirigeringsloop. Lösenordsåterställning begärs i appen och slutförs med tjänstens befintliga webblänk; därefter loggar chauffören in med sitt nya lösenord.
+Olämpligt innehåll och användarbeteende kan rapporteras på åtkomliga uppdrag, även avslutade/avbokade, och från Profil utan uppdrag. Profilrapporten skickas till Aurora Transports support och kan läsas av företagets administratörer. Gränssnittet utlovar ingen särskild svarstid.
 
-`src/main-native.tsx` och `src/NativeApp.tsx` begränsar appen till chaufförsvyer, inloggning, lösenordshjälp och integritetspolicy. Administrations-, försäljnings-, registrerings-, demo- och fakturasidor ingår inte. Webbversionen behåller sina separata funktioner.
-
-`npm run build:native` paketerar tillgångar i `dist-native`, som Capacitor använder lokalt utan en fjärrwebbplats som start-URL. Native-bygget innehåller inte jsPDF, xlsx, Sentry eller marknadsföringsspårning. Vites byggkontroll stoppar återinförande av de förbjudna webbmodulerna.
+Gemensam anslutningsstatus via Capacitor Network styr Query, offlineindikering och kö. Initiering och återgång till appen hämtar native-status, med webbreserv. Hemvyn skiljer ohämtade/pausade data från tomma resultat och visar användbar cache vid avbrott. Inmatningsfält använder minst 16 px för att undvika iPhones fokuszoom.
 
 | Inställning | Värde |
 |---|---|
 | Appnamn | Aurora Transport |
 | Bundle ID / application ID | se.auroramedia.auroratransport |
-| Version / byggnummer | 1.0.0 / 3 |
+| Version / byggnummer | 1.0.0 / 4 |
 | Android | min SDK 24, target SDK 36 |
 | iOS | minimum 15.0 |
 | Byggverktyg | Node 22+, Xcode 26+, Java 21 och Android SDK 36 |
 
-`ios/` och `android/` är incheckade i releasegrenen. Genererade webbtillgångar, lokala byggkataloger och privata konfigurationsfiler är ignorerade.
+## Bygga från releasegrenen
 
-## Bygga och verifiera från releasegrenen
-
-Välj releasegrenen i en ren checkout. Kör från repots rot:
+Kontrollera att checkouten innehåller den avsedda build 4-källan. Kör från repots rot:
 
 ```sh
 npm ci
 npm run typecheck
 npm run lint
 npm test
-npm run test:driver-db
+npm run test:db
 npx --no-install playwright install chromium
 npm run test:mobile
 npm run build
 npm run native:prepare
 ```
 
-`npm run build` kontrollerar webbversionen. `native:prepare` bygger chaufförsappen, kör plattformspatcharna och synkar Capacitor för båda plattformarna. För en enda plattform:
+npm run build kontrollerar webben. native:prepare bygger chaufförsappen, kör plattformspatchar och synkar Capacitor. För en plattform används npm run build:native följt av node scripts/native-prepare.mjs ios eller android.
+
+Byggnummer 4 är redan använt i båda butikerna. Kontrollera högsta aktuella nummer före nästa ändrade bygge; använd därefter ett högre nummer för båda plattformarna, exempelvis:
 
 ```sh
-npm run build:native
-node scripts/native-prepare.mjs ios
-# Eller: node scripts/native-prepare.mjs android
+BUILD_NUMBER=5 node scripts/native-version.mjs
 ```
 
-Build 3 är redan byggd och uppladdad till Apple. Återanvänd inte numret för ett ändrat bygge. Kontrollera båda butikernas senaste nummer innan körning; nästa nummer är 4 om inget senare bygge har skapats:
+Skriptet hämtar versionsnamnet från package.json och uppdaterar båda native-projekten. Vid ändrade bilder kan npx --no-install capacitor-assets generate --ios --android användas; granska resultat och diff före distribution.
 
-```sh
-BUILD_NUMBER=4 node scripts/native-version.mjs
-```
+### Android
 
-Versionsskriptet använder `package.json` för versionsnamnet och uppdaterar båda plattformarnas byggnummer. Ändra därför inte versioneringen separat i endast ett native-projekt.
+Återanvänd den befintliga upload key. Tillför CM_KEYSTORE_PATH, CM_KEYSTORE_PASSWORD, CM_KEY_ALIAS och CM_KEY_PASSWORD via säker lokal miljö eller CI. Android behöver även gitignored android/app/google-services.json. scripts/android-post-add.mjs kan tillföra den från den base64-kodade CI-variabeln GOOGLE_SERVICES_JSON. Detta är appkonfiguration och är separat från backendens privata FCM-tjänstekonto.
 
-Vid ändrad appikon eller splash-resurs genereras plattformstillgångarna med:
-
-```sh
-npx --no-install capacitor-assets generate --ios --android
-```
-
-Granska genererade bilder och diffen innan de används i ett nytt distributionsbygge.
-
-### Android-signering och AAB
-
-Återanvänd den befintliga upload key som skapades för build 2. Tillför signeringsuppgifterna genom en säker lokal miljö eller CI:s hemlighetshantering:
-
-- `CM_KEYSTORE_PATH`
-- `CM_KEYSTORE_PASSWORD`
-- `CM_KEY_ALIAS`
-- `CM_KEY_PASSWORD`
-
-Android behöver också `android/app/google-services.json`. Filen är gitignored. Den kan tillföras av `scripts/android-post-add.mjs` genom den base64-kodade CI-variabeln `GOOGLE_SERVICES_JSON`. Detta är Android-appens Firebase-konfiguration, inte backendens privata FCM-tjänstekonto.
-
-När konfigurering, native-synk och versionering är klara:
+Efter native-synk och versionering:
 
 ```sh
 cd android
 ./gradlew bundleRelease assembleRelease
 ```
 
-AAB finns under `android/app/build/outputs/bundle/release/` och APK under `android/app/build/outputs/apk/release/`. Releaseuppgifterna avbryts om signeringsvariabler eller Firebase-filen saknas. `./gradlew assembleDebug` kan användas för lokal utveckling utan distributionssignering.
+AAB finns i android/app/build/outputs/bundle/release/ och APK i android/app/build/outputs/apk/release/. Release avbryts om signering eller Firebase-konfiguration saknas. assembleDebug kräver inte distributionssignering.
 
-### iOS och Codemagic
+### iOS och CI
 
-Apple App ID med Push Notifications och distributionssignering har redan använts framgångsrikt för build 2. Vid lokal arkivering öppnas `ios/App/App.xcodeproj` i Xcode, schemat `App` väljs och arkivet exporteras för App Store Connect med rätt team och distributionsprofil.
+Öppna ios/App/App.xcodeproj, välj schemat App, arkivera med rätt Apple-team och exportera för App Store Connect. Distributionssignering och push-entitlement är verifierade för build 4. Info.plist saknar ITSAppUsesNonExemptEncryption, så exportdeklarationen måste kontrolleras separat i App Store Connect för uppladdningen.
 
-[codemagic.yaml](../codemagic.yaml) innehåller två workflows:
+[codemagic.yaml](../codemagic.yaml) har ios-release för signerad IPA/TestFlight och android-release för signerad AAB/Plays interna testspår. iOS kräver APP_STORE_CONNECT_PRIVATE_KEY, APP_STORE_CONNECT_KEY_IDENTIFIER och APP_STORE_CONNECT_ISSUER_ID. Android kräver signeringsidentiteten aurora_keystore, variabelgruppen google_play, GOOGLE_SERVICES_JSON och GCLOUD_SERVICE_ACCOUNT_CREDENTIALS.
 
-| Workflow | Funktion och nödvändig konfigurering |
-|---|---|
-| `ios-release` | Förbereder native-koden, ikoner och versionsnummer, använder App Store-signering och bygger IPA. Publiceringen begär TestFlight. Kräver App Store Connect-uppgifterna `APP_STORE_CONNECT_PRIVATE_KEY`, `APP_STORE_CONNECT_KEY_IDENTIFIER` och `APP_STORE_CONNECT_ISSUER_ID`. |
-| `android-release` | Kräver signeringsidentiteten `aurora_keystore` och variabelgruppen `google_play`. Bygger signerad AAB och publicerar till Plays interna testspår. Kräver `GOOGLE_SERVICES_JSON` och `GCLOUD_SERVICE_ACCOUNT_CREDENTIALS`. |
+Workflows kör npm ci, typecheck, enhetstester och test:driver-db före native-förberedelse. Den bredare lokala kontrollen test:db ovan ska också köras inför release. CI använder PROJECT_BUILD_NUMBER + 1; resultatet måste överstiga alla använda byggnummer, nu minst 4. CI:s åtkomst/hemligheter måste kopplas säkert. Ingen genomförd CI-release är verifierad och workflows innebär ingen offentlig publicering.
 
-Workflows använder `PROJECT_BUILD_NUMBER + 1`. Säkerställ att resultatet är högre än alla redan använda byggnummer; en ny CI-räknare får inte återanvända 1, 2 eller 3. CI:s butiksåtkomst och hemligheter behöver kopplas innan workflows kan användas. Konfigurationen innebär ingen automatisk offentlig publicering och det finns ingen verifierad genomförd CI-release.
+Privata nycklar, keystore, lösenord, distributionsprofiler, lokala miljöfiler och granskningsuppgifter hör inte hemma i Git eller delade källkodsarkiv.
 
-Behåll keystore, privata nycklar, distributionsprofiler och granskningslösenord utanför Git och delade källkodsarkiv. Granskningskontots uppgifter ska endast lämnas i butikernas avsedda säkra granskningsfält.
+## Verifiering och serverstatus
 
-## Genomförd verifiering och dess gränser
+- Den slutliga enhetstestsvepningen passerar 357 tester i 55 filer, inklusive build 4 och de senare serverrättningarna. Full TypeScript-kontroll, lint, native-förberedelse och webbbygge passerar. Fem mobilflödestester med isolerade API-svar passerar, inklusive aktivt policygodkännande, spärrad direktlänk och sparat godkännande efter omladdning.
+- Pushregistreringens 11 isolerade PostgreSQL/RLS-kontroller, tokenpolicyns 16 kontroller och supportrapporteringens 11 kontroller passerar. De verifierar bland annat konto-/företagsisolering, atomisk tokenöverföring och idempotens utan verkliga mottagartokens eller utskick.
+- Profilskyddets 16 isolerade PostgreSQL/RLS-kontroller och 59 lanseringskontroller med skyddet passerar. Skyddet är applicerat i produktion: triggern är aktiv, funktionen är SECURITY INVOKER med tom search_path och både anon och authenticated saknar direkt EXECUTE. Inga verkliga kundrader ändrades vid kontrollen.
+- seed-users avstängningssvar har sju fokuserade tester och godkänd avgränsad lint; testerna ingår nu i den slutliga totalsiffran 357.
+- Android build 4: AAB-signatur, APK:s v2-signatur, ZIP-alignment och samtliga fyra native-biblioteks 16 KB LOAD-alignment passerar. Rätt paket, version 1.0.0/build 4, min SDK 24 och target SDK 36 är verifierade. Release är inte debuggable och saknar reklam-ID- och bakgrundsplatsbehörighet.
+- iOS build 4: arkivering, distributionssignering, App Store-export och uppladdning passerar. Bundle ID och team stämmer, get-task-allow är false och aps-environment är production. Apples uppladdningslogg kvitterar Upload succeeded den 13 september kl. 22.38.10.851 svensk tid. Därefter verifierades Complete/Ready to Submit, sparat krypteringssvar ”None of the algorithms mentioned above” och att build 4 är valt och sparat på versionen efter återbesök. App Review har inte skickats in.
+- Native build 4 har byggts, installerats och startats i den avsedda iPhone 17 Pro Max-simulatorn. Den riktiga appens innehållsregler, omarkerade kryssruta och inaktiva fortsättknapp observerades. Klickkontrollen avbröts av CUA-felet NoWindowsAvailable, även efter Raise. Godkännande, navigering och hela arbetsflödet i denna installerade build 4 är därför ännu inte verifierade.
+- För build 3 verifierades verklig inloggning och uppdragsvisning i native-appen i iPhone-simulatorn: Granskningschaufför, två väntande uppdrag och ingen felaktig Offline-indikering. Detta var inget fysiskt enhetstest.
+- Separat produktions-API-test av det uttryckligen godkända syntetiska tidjobbet verifierade start/slut efter 56,8 sekunder, ett leveransbevis och återförsök utan dubblett. Ett jobb är slutfört, två förblev väntande och testföretagets notifieringskö var tom. Kamera, GPS och telefonens hela knappflöde verifierades inte av detta API-test.
 
-- Build 3 använder Capacitor Network för gemensam anslutningsstatus och återhämtning. Hemvyn skiljer ohämtade/pausade data från ett verkligt tomt resultat och behåller användbar cache offline. Inmatningsfält använder minst 16 px i mobilvyn för att undvika fokuszoom på iPhone.
-- Dagens 32 riktade tester, full TypeScript-kontroll och riktad ESLint passerar. Native-bygget för build 3 är godkänt.
-- Tidigare grundkontroller: 250 tester och 59 kontroller av de riktiga migrationerna i en separat PostgreSQL-testmiljö godkända. De kördes inte om i sin helhet för build 3. Databaskontrollerna täcker bland annat företagsisolering, behörigheter, statusbyten, kvittenser, idempotens och återförsök.
-- Fyra mobiltester godkända med isolerade API-svar: appstart/lösenordshjälp; inloggning/navigering/utloggning; administratörsavvisning; jobbstart till leveransbevis och tidrapport. De verifierar även att fakturavyn inte exponeras i native-flödet.
-- iOS build 3: arkivering, distributionssignering, App Store-export och uppladdning passerar. Apple har behandlat bygget och det är valt/sparat på versionen. Riktig iPhone-inloggning visar Granskningschaufför, två väntande uppdrag, korrekt navigation och ingen felaktig Offline-indikering. Två iPhone-bilder och en iPad-bild är uppladdade; `outputs/app-store/iphone69/02-uppdrag.png` dokumenterar uppdragsvyn.
-- Android build 3: AAB-signatur och APK:s v2-signatur verifierade. ZIP-alignment och samtliga fyra native-biblioteks 16 KB LOAD-alignment godkända. Release är inte debuggable och saknar reklam-ID- och bakgrundsplatsbehörighet.
-- Produktionskontot har en chaufförsroll och ett isolerat syntetiskt företag. Det särskilda tidjobbet startades/slutfördes på 56,8 sekunder via det riktiga driver-sync-API:t. Ett leveransbevis skapades; återförsök gav ingen dubblett. Två andra uppdrag lämnades väntande och notifieringskön för testföretaget förblev tom. Inga verkliga kunduppgifter eller e-postutskick användes.
-- Serverrättningen `20260913200132_driver_push_tokens_select_own.sql` tillåter en autentiserad användare att läsa sina egna push-tokenrader, vilket krävs för upprepad upsert. 16 isolerade PostgreSQL/RLS-kontroller passerar i `supabase/tests/driver-push-tokens.mjs`. Policyn är applicerad i produktion och första/upprepad syntetisk upsert verifierades som granskningsanvändaren med RLS aktiv; hela testet rullades tillbaka och lämnade noll rader. Ingen notis skickades. Detta är en serverändring; klienten och build 3-binärerna är oförändrade. APNs-/FCM-konfiguration saknas fortfarande, och klientens återförsök efter ett första tillfälligt tokenfel är en kvarvarande begränsning.
+Serverns egna-token-SELECT-policy och report_driver_support_ticket är applicerade och har verifierats med avgränsade, återställda produktionstester. Build 4 använder register_driver_push_token för atomisk överföring av en hemlig enhetstoken till aktuell behörig chaufför. Registrerings-RPC:n är applicerad i produktion. Första och upprepad registrering verifierades med granskningschauffören och aktiv RLS: en rad ägdes av aktuell chaufför, anon saknade EXECUTE och authenticated hade EXECUTE. Transaktionen rullades tillbaka och lämnade noll syntetiska rader. Klientens återförsök vid återanslutning/återgång och spärr mot återregistrering under utloggning ingår i build 4. Inga verkliga notiser har skickats vid dessa tester.
 
-Leveransfiler för build 3 ligger i arbetsytans `outputs/`, utanför repot:
+Profilskyddet i 20260913204221_protect_profile_authorization.sql är applicerat och verifierat aktivt i produktion. Det förhindrar att vanliga klienter ändrar profilens identitet, företag eller roll och lämnar befintliga RLS-policyer kvar.
+
+seed-users har ersatts med ett statiskt avstängningssvar i tre källfiler. OPTIONS ger 204; övriga metoder ger 410 utan att läsa anropskropp, skapa konton eller anropa nätverk/databas. Källan är publicerad på main i commit eef9a23 och Lovable har synkat. Det senaste oautentiserade liveanropet gav fortfarande 401, vilket inte identifierar vilken handler som är driftsatt. **Driftsättningen är blockerad av att Lovable saknar krediter och är inte verifierad.** Den senare main-committen 42803261496cf67ff062efc3dacfe43734fd60bb tar även bort profilrollens osäkra reservväg i send-push och generate-recurring-assignments och lägger till profilskyddets migration/tester; SQL-skyddet är redan aktivt, men Edge-ändringarna måste fortfarande driftsättas. Lovables deployanrop stoppades uttryckligen med OUT OF CREDITS; inga krediter köptes. [Lovables dokumentation](https://docs.lovable.dev/features/edge-functions) beskriver driftsättning genom Lovable-agenten och visning/övervakning i Cloud.
+
+Kamera, foto, signatur, GPS, push, nekade behörigheter, nätavbrott, återförsök och utloggning på avsedda fysiska enheter återstår. Ett lyckat automatiserat test eller distributionsbygge ersätter inte den kontrollen.
+
+Leveransfilerna ligger i arbetsytans outputs, utanför repot:
 
 | Fil | Storlek | SHA-256 |
 |---|---:|---|
-| Aurora-Transport-1.0.0-build3.aab | 6 388 122 byte | `fb0e6e469608ceae67f09b454d7a466f76c4c7a386b32e5d205d8ef032b62eab` |
-| Aurora-Transport-1.0.0-build3.apk | 6 793 504 byte | `7c5e91c226367f0e7e1fe51aaa5dc2540a08dc1ca10aff4592b46037f467c464` |
-| Aurora-Transport-AppStore.ipa | 2 755 325 byte | `2ac585e7e11a6240ef1a78147cad331b0a1858e425ca4d828cf80bf642f6a474` |
+| Aurora-Transport-1.0.0-build4.aab | 6 392 846 byte | `f11ab263b1e2f3ed415ece2f90b489dca9659c20925734d1343f4ddece1d9ef3` |
+| Aurora-Transport-1.0.0-build4.apk | 6 798 312 byte | `fbbfec2b161c2db6c7b9b37a33577b52a43343096618e10496bb6c4e6598536a` |
+| Aurora-Transport-1.0.0-build4.ipa | 2 759 997 byte | `b462cce55e261df519d7c7918275748f02648c1573d03ab6b482a1a6b9c35ec8` |
+| Aurora-Transport-AppStore.ipa | 2 759 997 byte | Samma signerade bytes som build4.ipa ovan. |
 
-De fyra tidigare mobilflödestesterna använder isolerade API-svar. Dagens produktionstest verifierar separat API→databas→chaufförens läsbehörighet för tidjobbet. iPhone-kontrollen verifierar inloggning och uppdragsvisning. Kamera, signatur, GPS, push och hela arbetsflödet via telefonens knappar är ännu inte färdigverifierade.
+Apples åldersfråga Messaging and Chat är sparad som Yes eftersom förarkommentarer och administratörsmeddelanden ger direkt kommunikation i appen. UGC och Social Media kvarstår som No: tilldelat företagsmaterial saknar Apples beskrivna breda spridning/sociala flöde. Det är en bedömning mot Apples definition, inget uttryckligt företagsundantag. Beräknat betyg är 4+ (Brasilien 12+); detta är inte en barnmålgrupp. Googles bredare UGC-fråga är separat besvarad Yes. [Apples definitioner](https://developer.apple.com/help/app-store-connect/reference/app-information/age-ratings-values-and-definitions)
 
-## Integritet och kryptering
+## Integritet och öppna ägarbesked
 
-Appen behandlar kontouppgifter/användar-ID, jobbstatus och tider, leveransfoton, mottagarnamn/signatur, anteckningar, position under aktiva uppdrag och pushidentifierare för appfunktion och kontohantering. Uppgifterna är kopplade till användarkontot och ska inte beskrivas som anonyma. Position och notiser kräver behörighet; grundflödet kan användas utan dessa. Foto och signatur kan krävas av ett enskilt uppdrag.
+Native-appen behandlar kontouppgifter, användar-/enhets-ID, jobbstatus och tider, leveransfoton, mottagarnamn/signatur, rapporter och position under aktiva uppdrag. Uppgifterna används för appfunktion och kontohantering och är kopplade till kontot. Inget nytt marknadsförings-/spårningsflöde har lagts till i build 4.
 
-Androids Firebase Messaging inkluderar Firebase Installations-ID. Nuvarande konfiguration stänger inte av automatisk initiering, så Googles kategori Device or other IDs får inte utelämnas enbart för att användaren nekar notiser. Frånvaro av Analytics betyder inte att inga data samlas in. Native-koden innehåller ingen marknadsföringsspårning. Googles återstående Data safety-svar behöver motsvara hela produktionskedjan, inklusive leverantörsbehandling, lagring och radering.
+Androids Firebase Messaging inkluderar automatiskt Firebase Installations-ID även om användaren nekar notiser. Analytics är avstängt, BigQuery och annonseringskopplingar är inte anslutna och frivillig användning av Firebase Service Data utanför Firebase har stängts av. Detta gör inte appen fri från identifierarinsamling. Google Data safety och ansvarsfördelningen för hela tjänsten återstår att slutföra.
 
-Appen skapar inga nya konton; företagsadministratören tillhandahåller chaufförskontot. Policyn lovar EU/EES och radering inom 30 dagar, men dagens metadata bekräftar varken region eller komplett raderingsrutin. Administratörens inaktivering ändrar endast tillgänglighet; produktionsdatabasens schemalagda jobb rensar inte konton. En eventuell manuell rutin måste beläggas. Apples nio datatyper är publicerade; Googles Data safety återstår. Se det separata integritetsunderlaget för leverantörsflöden och kvarvarande ägarfakta.
+Databasen är verifierad i Irland. Region för filer/säkerhetskopior, ansvarig juridisk person och en fungerande fullständig raderingsprocess är ännu inte belagda. Administratörens inaktivering är ingen kontoradering. Den befintliga policyns generella löften om EU/EES och radering inom 30 dagar måste stämma med verklig drift.
 
-Krypteringsgranskningen för build 2 fann endast OS-, WebCrypto- och CommonCrypto-funktioner. Native-bundlen innehåller inte jsPDF:s RC4/MD5-kod. Apples deklaration för build 2 är sparad utifrån detta. Build 1 innehöll äldre webbberoenden och ska inte användas som underlag för build 2. Gör en ny kontroll om native-beroenden eller appfunktioner ändras.
+Build 4:s exporterade IPA innehåller bara den granskade OS-/WebCrypto-/CommonCrypto-kryptografin. Alla 25 JavaScript-chunkar matchar det byggkontrollerade native-bygget, utan jsPDF/RC4/MD5 eller nya egna kryptobibliotek. Krypteringssvaret ”None of the algorithms mentioned above” är nu separat sparat för build 4 och bygget visar Ready to Submit.
+
+Sju tidigare ställda ägarfrågor är fortfarande öppna. Därtill har en ny fråga om Lovable-krediter ställts eftersom Edge-driftsättningen är blockerad; inga köp har gjorts:
+
+1. Tillstånd att lämna det isolerade granskningskontots inloggning i Apples och Googles privata granskningsfält. Kontot är färdigt; automatisk godkännandegranskning stoppade den nya överföringen av uppgifterna.
+2. Googles funktions-/målgruppsklassning: inga myndighets-, hälso- eller finansfunktioner samt vuxna 18+. Automatisk godkännandegranskning stoppade sparandet av Government app: No.
+3. Apples Content Rights: bekräftelse på rätten att visa företagens uppladdade uppdragsmaterial, foton och signaturer.
+4. Tillstånd till CUA-anslutning för den officiella Android-emulatorn via qemu-system-aarch64. Automatisk godkännandegranskning stoppade anslutningen på grund av identifierarfrågan; checksumma och kodsignering är verifierade.
+5. Offentlig postadress och tillstånd att publicera den föreslagna telefonen och e-posten för Apples EU DSA/trader-uppgifter. Den privata granskningskontakten är redan godkänd och sparad.
+6. Tillstånd att skapa ett tjänstekonto med avgränsad FCM-sändningsbehörighet och en APNs-produktionsnyckel för appens topic samt lagra uppgifterna privat i Lovables backend. Automatisk godkännandegranskning stoppade skapandet av tjänstekontot. Inga sådana nycklar har skapats och frågan omfattar inga notiser till andra.
+7. Ansvarig juridisk person och faktisk personuppgiftsansvarsfördelning samt verifierbar lagring/radering: region för filer och säkerhetskopior, lagringstider, hur konto, historik, leveransfiler och leverantörsdata raderas eller anonymiseras. Databasens region är redan verifierad som Irland; ett generellt löfte om EU/EES och radering inom 30 dagar är ännu inte belagt för hela kedjan.
 
 ## Butikstexter — svenska
 
+
 **Namn:** Aurora Transport
 
-**Undertitel (Apple):** Uppdrag och tid för chaufförer
+**Undertitel, Apple:** Uppdrag och tid för chaufförer
 
-**Kort beskrivning (Google):** Dina körningar, tider och leveransbevis samlade för arbetsdagen.
+**Kort beskrivning, Google:** Dina körningar, tider och leveransbevis samlade för arbetsdagen.
 
 **Beskrivning:**
 
@@ -183,7 +171,8 @@ Ett chaufförskonto hos ett anslutet företag krävs. Kontakta företagets admin
 
 **Granskningsanteckning:**
 
-Aurora Transport is a companion app for drivers at transport companies. Company administrators manage subscriptions and assignments on the website. There are no purchases or account creation in the mobile app. A dedicated review driver account with an isolated company and three synthetic assignments has been prepared. Enter its credentials in the store’s secure review fields. Log in, open an assigned job, start the trip, and complete it with delivery evidence. Denying notifications or location does not prevent the basic job workflow. Please use only the synthetic review assignments.
+Aurora Transport is a companion app for drivers at transport companies. Company administrators manage subscriptions and assignments on the website. There are no purchases or account creation in the mobile app. A dedicated review driver account has an isolated company with one completed and two pending synthetic assignments. Credentials belong in the stores’ secure review fields. After login, read the content rules, actively select the unchecked acceptance box, and continue. Open a pending assignment, start the trip, and complete it with delivery evidence. Content and user reports are available in Profile and on accessible assignments. Denying notifications or location does not prevent the basic job workflow. Please use only the synthetic review assignments.
+
 
 ## Referenser
 

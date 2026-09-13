@@ -1,8 +1,10 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PushNotifications } from '@capacitor/push-notifications';
+import { App } from '@capacitor/app';
 import { useAuth } from '@/hooks/useAuth';
-import { isNativePushAvailable, registerCurrentDeviceForDriverPush } from '@/lib/push-notifications';
+import { isNativePushAvailable, registerCurrentDeviceForDriverPush, startCurrentDeviceForDriverPush, removeCurrentDevicePushToken } from '@/lib/push-notifications';
+import { subscribeAppConnectivity } from '@/lib/app-connectivity';
 
 export function DriverPushNotifications() {
   const { user, role } = useAuth();
@@ -11,9 +13,29 @@ export function DriverPushNotifications() {
   useEffect(() => {
     if (!user?.id || role !== 'driver' || !isNativePushAvailable()) return;
 
-    registerCurrentDeviceForDriverPush(user.id).catch((err) => {
-      console.warn('[push] driver registration failed', err);
+    let active = true;
+    const retry = () => {
+      if (active) void registerCurrentDeviceForDriverPush(user.id).catch(() => {
+        console.warn('[push] Driver registration unavailable');
+      });
+    };
+    void startCurrentDeviceForDriverPush(user.id).catch(() => {
+      console.warn('[push] Driver registration unavailable');
     });
+    const unsubscribe = subscribeAppConnectivity(online => { if (online) retry(); });
+    const visible = () => { if (document.visibilityState === 'visible') retry(); };
+    document.addEventListener('visibilitychange', visible);
+    let resume: { remove: () => Promise<void> } | null = null;
+    void App.addListener('appStateChange', ({ isActive }) => { if (isActive) retry(); })
+      .then(handle => { if (active) resume = handle; else void handle.remove().catch(() => {}); })
+      .catch(() => {});
+    return () => {
+      active = false;
+      unsubscribe();
+      document.removeEventListener('visibilitychange', visible);
+      void resume?.remove().catch(() => {});
+      void removeCurrentDevicePushToken(user.id).catch(() => {});
+    };
   }, [role, user?.id]);
 
   useEffect(() => {

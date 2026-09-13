@@ -13,6 +13,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useEffectiveDriverSettings } from '@/hooks/useDriverSettings';
+import DriverSupportReport from '@/components/DriverSupportReport';
+import { Capacitor } from '@capacitor/core';
 
 export default function DriverProfile() {
   const navigate = useNavigate();
@@ -56,6 +58,7 @@ export default function DriverProfile() {
     <>
       <div className="p-4 space-y-4">
         <Link to="/privacy" className="inline-flex min-h-11 items-center text-sm underline">Integritet och personuppgifter</Link>
+        {Capacitor.isNativePlatform() && <Link to="/content-policy" className="ml-3 inline-flex min-h-11 items-center text-sm underline">Regler för innehåll och användning</Link>}
         {/* Profile card */}
         <Card className="overflow-hidden">
           <div className="h-20 bg-gradient-to-br from-primary/80 to-primary" />
@@ -102,6 +105,8 @@ export default function DriverProfile() {
             </CardContent>
           </Card>
         )}
+
+        <DriverSupportReport key={user?.id} />
 
         {/* Change password */}
         <Card>

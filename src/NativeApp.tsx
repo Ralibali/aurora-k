@@ -11,6 +11,8 @@ import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { DriverLayout } from '@/components/DriverLayout';
 import { DriverPushNotifications } from '@/components/DriverPushNotifications';
 import { NativeAppRuntime } from '@/components/NativeAppRuntime';
+import { NativeContentPolicyGate } from '@/features/driver/NativeContentPolicyGate';
+import { DriverContentPolicyPage } from '@/features/driver/DriverContentPolicy';
 
 const LoginPage = lazy(() => import('@/pages/LoginPage'));
 const ForgotPasswordPage = lazy(() => import('@/pages/ForgotPasswordPage'));
@@ -47,7 +49,9 @@ export default function NativeApp() {
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                     <Route path="/privacy" element={<PrivacyPage />} />
-                    <Route path="/driver" element={<ProtectedRoute requiredRole="driver"><DriverLayout showInvoices={false} /></ProtectedRoute>}>
+                    <Route path="/content-policy" element={<DriverContentPolicyPage />} />
+                    <Route path="/driver/content-policy" element={<ProtectedRoute requiredRole="driver"><DriverContentPolicyPage /></ProtectedRoute>} />
+                    <Route path="/driver" element={<ProtectedRoute requiredRole="driver"><NativeContentPolicyGate><DriverLayout showInvoices={false} /></NativeContentPolicyGate></ProtectedRoute>}>
                       <Route index element={<Navigate to="assignments" replace />} />
                       <Route path="assignments" element={<DriverAssignments />} />
                       <Route path="assignments/:id" element={<DriverAssignmentDetail />} />

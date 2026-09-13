@@ -41,6 +41,44 @@ async function login(page: Page) {
   await page.getByLabel('Lösenord', { exact: true }).fill('fixture-password');
   await page.getByRole('button', { name: 'Logga in', exact: true }).click();
 }
+async function acceptContentPolicy(page: Page) {
+  await expect(page.getByRole('heading', { name: 'Regler för innehåll', exact: true })).toBeVisible();
+  const consent = page.getByRole('checkbox', { name: 'Jag har läst och godkänner reglerna för innehåll.' });
+  const continueButton = page.getByRole('button', { name: 'Godkänn och fortsätt' });
+  await expect(consent).not.toBeChecked();
+  await expect(continueButton).toBeDisabled();
+  await consent.check();
+  await continueButton.click();
+  await expect(page.getByRole('heading', { name: 'Regler för innehåll', exact: true })).toHaveCount(0);
+}
+
+test('content rules block driver workflows until explicit consent and persist after reload', async ({ page }) => {
+  const unexpected = await fixture(page, 'driver', true);
+  const submittedMaterial: string[] = [];
+  page.on('request', request => {
+    const path = new URL(request.url()).pathname;
+    if (request.method() === 'POST' && /driver-sync|report_assignment_deviation|report_driver_support_ticket/.test(path)) submittedMaterial.push(path);
+  });
+  await page.goto('/');
+  await login(page);
+  await expect(page.getByRole('heading', { name: 'Regler för innehåll', exact: true })).toBeVisible();
+  await expect(page.getByRole('navigation')).toHaveCount(0);
+  await expect(page.getByRole('link', { name: /Öppna och starta körning/ })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Rapportera problem', exact: true })).toHaveCount(0);
+  await page.screenshot({ path: 'test-results/mobile-content-policy.png', fullPage: true });
+  // A direct URL must still require the driver's decision.
+  await page.goto('/driver/profile');
+  await expect(page.getByRole('heading', { name: 'Regler för innehåll', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Rapportera problem', exact: true })).toHaveCount(0);
+  expect(submittedMaterial).toEqual([]);
+  await acceptContentPolicy(page);
+  await expect(page.getByText('Rapportera innehåll eller användare', { exact: true })).toBeVisible();
+  await page.reload();
+  await expect(page.getByText('Rapportera innehåll eller användare', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Godkänn och fortsätt' })).toHaveCount(0);
+  expect(submittedMaterial).toEqual([]);
+  expect(unexpected).toEqual([]);
+});
 
 test('app opens login, has no sales links or tracking, and supports password recovery', async ({ page }) => {
   const unexpected = await fixture(page);
@@ -62,6 +100,7 @@ test('driver logs in, sees empty jobs, opens reports and signs out', async ({ pa
   const unexpected = await fixture(page);
   await page.goto('/');
   await login(page);
+  await acceptContentPolicy(page);
   await expect(page.getByRole('heading', { name: 'Hej, Alex!' })).toBeVisible();
   await expect(page.getByText('Inga uppdrag i detta urval.')).toBeVisible();
   await expect(page.getByRole('navigation').getByRole('link', { name: 'Fakturor' })).toHaveCount(0);
@@ -92,6 +131,7 @@ test('driver opens, starts and completes a job and finds it in time report', asy
   const unexpected = await fixture(page, 'driver', true);
   await page.goto('/');
   await login(page);
+  await acceptContentPolicy(page);
   await page.getByRole('link', { name: /Öppna och starta körning/ }).click();
   await expect(page.getByRole('button', { name: 'Starta körning', exact: true })).toBeVisible();
   await expect(page.getByText('Ditt uppdrag', { exact: true })).toBeVisible();
