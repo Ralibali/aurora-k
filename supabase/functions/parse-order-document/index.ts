@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { extractPdfText } from '../_shared/pdf-text.ts';
-import { parseInboundOrder, parseTransportDocument } from '../_shared/order-parser.ts';
+import { parseTransportDocument } from '../_shared/order-parser.ts';
 import { azureOcrConfigured, extractTextWithAzureOcr } from '../_shared/azure-document-ocr.ts';
 
 const cors = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type' };
@@ -160,4 +160,3 @@ Deno.serve(async request => {
   }
 });
 
-export { parseInboundOrder };
