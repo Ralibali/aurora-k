@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertTriangle,
   Check,
+  Clock,
   Gauge,
   Route,
   Sparkles,
@@ -19,7 +20,11 @@ import {
   optimizeDayRoutes,
   type DayRoutePlan,
 } from "./day-route-api";
-import { savedDistancePercent } from "./route-metrics";
+import {
+  savedDistancePercent,
+  savedDurationPercent,
+  savedDurationSeconds,
+} from "./route-metrics";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -38,6 +43,15 @@ import {
 
 const kilometers = (meters: number | null) =>
   `${((meters ?? 0) / 1_000).toLocaleString("sv-SE", { maximumFractionDigits: 1 })} km`;
+
+const duration = (seconds: number) => {
+  if (seconds <= 0) return "0 min";
+  const minutes = Math.round(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  if (hours === 0) return `${minutes} min`;
+  return rest === 0 ? `${hours} h` : `${hours} h ${rest} min`;
+};
 
 export function DayOptimizerPanel() {
   const queryClient = useQueryClient();
@@ -110,10 +124,22 @@ export function DayOptimizerPanel() {
     }
   };
 
-  const savings = result
+  const distanceSavings = result
     ? savedDistancePercent(
         result.plan.distance_before_m,
         result.plan.distance_after_m,
+      )
+    : 0;
+  const timeSaved = result
+    ? savedDurationSeconds(
+        result.plan.duration_before_s,
+        result.plan.duration_after_s,
+      )
+    : 0;
+  const timeSavings = result
+    ? savedDurationPercent(
+        result.plan.duration_before_s,
+        result.plan.duration_after_s,
       )
     : 0;
 
@@ -122,7 +148,7 @@ export function DayOptimizerPanel() {
       <CardHeader className="gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="mb-2 flex items-center gap-2">
-            <Badge>Fleet add-on</Badge>
+            <Badge variant="secondary">Ingår i Aurora Transport</Badge>
             <Badge variant="outline">
               {result?.plan.optimizer_provider === "vroom" ? "VROOM" : "Aurora"}
             </Badge>
@@ -132,8 +158,9 @@ export function DayOptimizerPanel() {
           </CardTitle>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
             Fördela öppna jobb mellan tillgängliga chaufförer utifrån
-            koordinater, kapacitet, kompetens och tidsfönster. Inget ändras
-            innan du godkänner.
+            koordinater, kapacitet, kompetens och tidsfönster. Ruttoptimeringen
+            är en ordinarie del av Aurora Transport och inget ändras innan du
+            godkänner förslaget.
           </p>
         </div>
         <div className="flex flex-wrap items-end gap-2">
@@ -202,15 +229,15 @@ export function DayOptimizerPanel() {
                 </AlertDescription>
               </Alert>
             )}
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
               <div className="rounded-xl border p-4">
-                <p className="text-xs text-muted-foreground">Före</p>
+                <p className="text-xs text-muted-foreground">Körsträcka före</p>
                 <p className="text-xl font-bold">
                   {kilometers(result.plan.distance_before_m)}
                 </p>
               </div>
               <div className="rounded-xl border p-4">
-                <p className="text-xs text-muted-foreground">Förslag</p>
+                <p className="text-xs text-muted-foreground">Optimerat förslag</p>
                 <p className="text-xl font-bold">
                   {kilometers(result.plan.distance_after_m)}
                 </p>
@@ -220,7 +247,16 @@ export function DayOptimizerPanel() {
                   Minskad körsträcka
                 </p>
                 <p className="flex items-center gap-2 text-xl font-bold text-primary">
-                  <Gauge className="h-5 w-5" /> {savings}%
+                  <Gauge className="h-5 w-5" /> {distanceSavings}%
+                </p>
+              </div>
+              <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+                <p className="text-xs text-muted-foreground">Beräknad tidsvinst</p>
+                <p className="flex items-center gap-2 text-xl font-bold text-primary">
+                  <Clock className="h-5 w-5" /> {duration(timeSaved)}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {timeSavings > 0 ? `${timeSavings}% kortare beräknad körtid` : "Ingen beräknad tidsvinst"}
                 </p>
               </div>
             </div>
