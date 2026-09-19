@@ -1,3 +1,10 @@
+import {
+  classifyTransportDocument,
+  detectSignature,
+  extractAmount,
+  type TransportDocumentType,
+} from './document-classifier.ts';
+
 export type ParsedInboundOrder = {
   title: string;
   customerName: string;
@@ -146,4 +153,88 @@ export function parseInboundOrder(input: string, subject = ''): ParsedInboundOrd
   result.confidence = Math.round((important.filter(key => Boolean(result[key])).length / important.length) * 100);
   for (const key of important) if (result[key]) result.evidence[key] = String(result[key]);
   return result;
+}
+
+export type ParsedTransportDocument = {
+  documentType: TransportDocumentType;
+  typeConfidence: number;
+  confidence: number;
+  requiresReview: boolean;
+  signatureDetected: boolean;
+  fields: {
+    title: string;
+    orderReference: string;
+    customerName: string;
+    organizationNumber: string;
+    pickupAddress: string;
+    deliveryAddress: string;
+    scheduledStart: string;
+    contactName: string;
+    contactPhone: string;
+    serviceType: string;
+    goods: string;
+    weightKg: number | null;
+    amount: number | null;
+    currency: string;
+  };
+  fieldConfidence: Record<string, number>;
+  order: ParsedInboundOrder;
+};
+
+const criticalFields = ['orderReference', 'customerName', 'pickupAddress', 'deliveryAddress', 'scheduledStart'] as const;
+
+/**
+ * Tolkar ett transportdokument (order, POD eller fraktsedel) utan att ändra
+ * beteendet hos parseInboundOrder, som fortsätter användas av e-postinkorgen.
+ */
+export function parseTransportDocument(input: string, subject = ''): ParsedTransportDocument {
+  const text = `${subject}\n${input}`;
+  const order = parseInboundOrder(input, subject);
+  const { documentType, typeConfidence } = classifyTransportDocument(text);
+  const { amount, currency } = extractAmount(text);
+  const signatureDetected = detectSignature(text);
+
+  const fields = {
+    title: order.title,
+    orderReference: order.orderReference,
+    customerName: order.customerName,
+    organizationNumber: order.organizationNumber,
+    pickupAddress: order.pickupAddress,
+    deliveryAddress: order.deliveryAddress,
+    scheduledStart: order.scheduledStart,
+    contactName: order.contactName,
+    contactPhone: order.contactPhone,
+    serviceType: order.serviceType,
+    goods: order.instructions,
+    weightKg: order.weightKg,
+    amount,
+    currency,
+  };
+
+  const labelled = labelledValues(text);
+  const fieldConfidence: Record<string, number> = {};
+  for (const key of criticalFields) {
+    const value = fields[key];
+    if (!value) {
+      fieldConfidence[key] = 0;
+      continue;
+    }
+    // Uttryckligt märkta värden är säkrare än värden som härletts ur fritext.
+    fieldConfidence[key] = labelled[key] ? 95 : 65;
+  }
+
+  const filled = criticalFields.filter(key => Boolean(fields[key])).length;
+  const fieldScore = Math.round((filled / criticalFields.length) * 100);
+  const confidence = Math.round(fieldScore * 0.7 + typeConfidence * 0.3);
+
+  return {
+    documentType,
+    typeConfidence,
+    confidence,
+    requiresReview: confidence < 70 || documentType === 'unknown',
+    signatureDetected,
+    fields,
+    fieldConfidence,
+    order,
+  };
 }
