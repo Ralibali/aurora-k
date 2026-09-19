@@ -1,6 +1,7 @@
 import { test, expect } from './dispatch-fixture';
 
 test('integration settings report missing setup on desktop and mobile', async ({ page }) => {
+  await page.route('**/functions/v1/maps-config', route => route.fulfill({ contentType: 'application/json', body: JSON.stringify({ configured: false }) }));
   await page.route('**/functions/v1/fortnox', route => route.fulfill({ contentType: 'application/json', body: JSON.stringify({ configured: false, organizationValid: false, company: { name: 'Testbolag', organizationNumber: '5591234567' }, connection: null }) }));
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
   await page.goto('/admin/settings?section=integrations');
