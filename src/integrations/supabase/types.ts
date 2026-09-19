@@ -3350,6 +3350,10 @@ export type Database = {
         Args: { _name: string; _org_nr?: string; _user_full_name?: string }
         Returns: string
       }
+      register_driver_push_token: {
+        Args: { p_platform: string; p_token: string }
+        Returns: undefined
+      }
       report_assignment_deviation: {
         Args: {
           p_assignment_id: string
@@ -3374,6 +3378,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      report_driver_support_ticket: {
+        Args: { p_message: string; p_operation_id: string }
+        Returns: string
       }
       resolve_assignment_deviation: {
         Args: { p_deviation_id: string; p_resolution: string }
