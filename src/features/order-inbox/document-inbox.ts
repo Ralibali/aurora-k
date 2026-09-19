@@ -78,7 +78,7 @@ export function normalizeDocumentFields(value: Partial<DocumentFields> | null | 
     return raw === null || raw === undefined ? '' : String(raw).trim();
   };
   const numeric = (key: 'weightKg' | 'amount') => {
-    const raw = source[key];
+    const raw: unknown = source[key];
     if (raw === null || raw === undefined || raw === '') return null;
     const parsed = Number(raw);
     return Number.isFinite(parsed) ? parsed : null;
