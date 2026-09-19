@@ -1779,6 +1779,81 @@ export type Database = {
           },
         ]
       }
+      inbound_documents: {
+        Row: {
+          assignment_id: string | null
+          company_id: string
+          confidence: number
+          content_type: string
+          created_at: string
+          document_type: string
+          error_message: string | null
+          field_confidence: Json
+          filename: string
+          id: string
+          parsed_payload: Json
+          signature_detected: boolean
+          size_bytes: number
+          status: string
+          storage_path: string | null
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          assignment_id?: string | null
+          company_id: string
+          confidence?: number
+          content_type?: string
+          created_at?: string
+          document_type?: string
+          error_message?: string | null
+          field_confidence?: Json
+          filename: string
+          id?: string
+          parsed_payload?: Json
+          signature_detected?: boolean
+          size_bytes?: number
+          status?: string
+          storage_path?: string | null
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          assignment_id?: string | null
+          company_id?: string
+          confidence?: number
+          content_type?: string
+          created_at?: string
+          document_type?: string
+          error_message?: string | null
+          field_confidence?: Json
+          filename?: string
+          id?: string
+          parsed_payload?: Json
+          signature_detected?: boolean
+          size_bytes?: number
+          status?: string
+          storage_path?: string | null
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inbound_documents_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inbound_documents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inbound_order_emails: {
         Row: {
           attachments: Json
