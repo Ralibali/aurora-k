@@ -131,6 +131,8 @@ export async function installDispatchFixture(context: BrowserContext): Promise<D
       'access-control-allow-methods': 'GET, POST, PATCH, HEAD, OPTIONS',
       'access-control-allow-headers': '*',
     } });
+    // Explicitly exercise the no-key fallback without contacting a maps provider.
+    if (url.pathname === '/functions/v1/maps-config' && request.method() === 'POST') return json({ configured: false });
     if (url.pathname === '/functions/v1/dispatch-notifications' && request.method() === 'POST') {
       state.notificationRequests++;
       return state.failNotifications ? json({ error: 'Resend temporarily unavailable' }, 503) : json({ sent: 1, failed: 0 });
