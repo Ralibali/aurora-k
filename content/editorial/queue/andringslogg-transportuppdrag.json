@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "status": "draft",
+  "writtenAt": "2026-09-20T13:58:28.424302+00:00",
+  "repository": "Ralibali/aurora-k",
+  "publicationGate": "Earliest 2026-09-22 Europe/Stockholm. Recheck previous live article, current main, complete inventory, sources and all reader links. Set true dates only when publishing.",
+  "sourceReview": {
+    "checkedAt": "2026-09-20T13:58:28.424302+00:00",
+    "status": "product_entry_and_inventory_reviewed_recheck_before_publication",
+    "note": "Original editorial template. Product entry read in browser; no unverified integration, capacity, price or result claimed."
+  },
+  "article": {
+    "slug": "andringslogg-transportuppdrag",
+    "title": "Ändringar i transportuppdrag: håll besked och ansvar samlade",
+    "metaDescription": "Skriv en tydlig ändringsrad när ett transportuppdrag får nya förutsättningar. En mall för att skilja önskemål, bekräftade besked och nästa ansvariga person.",
+    "intro": "Ett transportuppdrag kan ändras efter att den första informationen har delats. Då behöver transportledningen kunna se vad som gäller och vilka personer som har fått beskedet. En ändringslogg samlar frågan, svaret och nästa steg kring samma uppdrag.",
+    "sections": [
+      {
+        "heading": "Börja med det besked som faktiskt kom",
+        "content": "Anteckna när ändringen togs emot, vilken kontaktväg som användes och vilket uppdrag den gäller. Skriv vad personen efterfrågade med tillräcklig precision för att någon annan ska kunna följa frågan. Behåll hänvisningen till originalmeddelandet där verksamheten normalt sparar det.\n\nSkilj mellan ett önskemål och en bekräftad förändring. Om kunden frågar om en annan tid behöver det synas att frågan fortfarande behandlas. Låt inte en önskad tid ersätta den gällande uppgiften innan den ansvariga personen har lämnat ett besked."
+      },
+      {
+        "heading": "Beskriv skillnaden mot det gällande underlaget",
+        "content": "Skriv vilken tidigare uppgift som berörs och vad den föreslagna ändringen innebär. Det kan röra en plats, en kontaktperson eller omfattningen som beskrivs i uppdraget. Begränsa raden till det som förändras och länka till resten av uppdragsunderlaget.\n\nUndvik formuleringar som ”ny information enligt samtal” om samtalet är den enda plats där informationen finns. Nästa person behöver kunna förstå förändringen utan att ha deltagit. Om en uppgift är oklar, skriv den som en fråga och ange vem som kan reda ut den."
+      },
+      {
+        "heading": "Använd samma fält för varje ändring",
+        "content": "Gör en rad med följande uppgifter:\n\n- Uppdragsreferens och ändringens egen beteckning.\n- När frågan kom in och var originalbeskedet finns.\n- Tidigare uppgift och föreslagen förändring.\n- Vem som ska bedöma frågan.\n- Status: frågat, utreds, bekräftat eller avböjt.\n- Vilka berörda som behöver informationen.\n- Vem som lämnar nästa besked och när ni följer upp.\n\nAnpassa statusorden till era rutiner. Det viktiga är att alla som använder listan förstår skillnaden mellan att ha tagit emot information och att ha beslutat hur uppdraget ska genomföras."
+      },
+      {
+        "heading": "Låt rätt person bedöma följderna",
+        "content": "Den som tar emot ett meddelande behöver inte vara den som kan besluta om förändringen. Ange vem som ska bedöma genomförandet och vilka ytterligare uppgifter som behövs. Samla de faktiska frågorna i raden i stället för att själv fylla i ett förmodat svar.\n\nLoggen avgör inte om en ändring är möjlig, säker eller överenskommen. Den ersätter inte verksamhetens ordinarie beslut och rutiner. När ett besked kommer, anteckna vad som bekräftades och vem som lämnade det. Spara också sådant som fortfarande återstår."
+      },
+      {
+        "heading": "Kontrollera att nästa person fått rätt version",
+        "content": "Skriv vilka roller som berörs av det nya beskedet och hur informationen lämnas vidare. Följ upp mottagandet enligt verksamhetens rutiner. Ett sparat dokument visar inte i sig att alla berörda har läst eller förstått ändringen.\n\nVid passbyte kan öppna ändringar följa med i [överlämningen till nästa transportledare](/blogg/overlamning-transportledning-checklista). Hänvisa till samma ändringsrad så att efterträdaren hittar både det senaste beskedet och de frågor som ännu saknar svar."
+      },
+      {
+        "heading": "Behåll spåret när uppdraget är avslutat",
+        "content": "Markera när ändringsfrågan har fått ett avslut och låt hänvisningen finnas kvar tillsammans med uppdraget. Underlaget kan sedan användas i [avstämningen före fakturering](/blogg/stam-av-transportunderlag-fore-fakturering). Vilka belopp eller villkor som gäller bedöms i den ordinarie processen.\n\nSe [Aurora Transports tjänster](/tjanster) när ni granskar ert stöd för uppdragshantering. Använd ändringsloggen som ett eget underlag i dialogen om arbetssättet. AI-assisterad originalguide; mallen beskriver ingen särskild automatisk ändringsfunktion eller garanterad effekt i produkten."
+      }
+    ],
+    "editorial": {
+      "createdWith": "ChatGPT",
+      "aiAssisted": true,
+      "searchIntent": "Dokumentera och fördela ansvar för föreslagna ändringar under pågående transportuppdrag; skilt från passöverlämning och ekonomisk avstämning.",
+      "sourceUrls": [
+        "https://auroratransport.se/tjanster"
+      ]
+    },
+    "seoTitle": "Ändringar i transportuppdrag: håll besked och ansvar samlade",
+    "readTime": "5 min läsning",
+    "excerpt": "Skriv en tydlig ändringsrad när ett transportuppdrag får nya förutsättningar. En mall för att skilja önskemål, bekräftade besked och nästa ansvariga person.",
+    "tags": [
+      "transportledning",
+      "arbetsrutiner"
+    ],
+    "links": [
+      {
+        "href": "/tjanster",
+        "label": "Se Aurora Transports tjänster"
+      }
+    ]
+  }
+}
