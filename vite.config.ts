@@ -75,7 +75,11 @@ export default defineConfig(({ mode }) => ({
         ],
       },
       workbox: {
-        navigateFallbackDenylist: [/^\/~oauth/],
+        // Public articles must use their current prerendered network response.
+        // Keep the offline app shell for the operational app routes.
+        skipWaiting: true,
+        clientsClaim: true,
+        navigateFallbackDenylist: [/^\/~oauth/, /^\/blogg(?:\/|\?|$)/],
         runtimeCaching: [
           // Authenticated API responses are intentionally not cached. The app's
           // dedicated IndexedDB queue handles offline writes without risking that
