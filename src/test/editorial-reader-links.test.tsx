@@ -15,6 +15,6 @@ it('keeps editorial body links usable after React takes over the prerendered pag
   </MemoryRouter>);
   expect(screen.getByRole('link', { name: 'överlämningsmallen för transportledning' }).getAttribute('href'))
     .toBe('/blogg/overlamning-transportledning-checklista');
-  fireEvent.click(screen.getByRole('link', { name: 'Aurora Transports tjänster', exact: true }));
+  fireEvent.click(screen.getByRole('link', { name: /^Aurora Transports tjänster$/ }));
   expect(screen.getByRole('heading', { name: 'Tjänster öppnade' })).toBeTruthy();
 });
