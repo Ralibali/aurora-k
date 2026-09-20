@@ -66,9 +66,9 @@ const PrivacyPage = () => {
 
       <h2>5. Cookies</h2>
       <p>
-        Vi använder <strong>enbart nödvändiga förstapartscookies</strong> för att hålla dig inloggad
-        och lagra dina preferenser (t.ex. tema och cookie-samtycke). Vi använder inga
-        tredjepartscookies för spårning eller marknadsföring.
+        Vi använder nödvändiga cookies för inloggning och preferenser. Med ditt samtycke
+        använder vi Google Analytics 4 från Google för sidvisningar och produkthändelser.
+        Statistikcookies skiljer besök åt. Du kan när som helst återkalla samtycket via Cookieinställningar.
       </p>
 
       <h2>6. Delning av uppgifter</h2>

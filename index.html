@@ -54,7 +54,7 @@
 
     <!-- Theme -->
     <meta name="theme-color" content="#0F172A" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://maps.gstatic.com https://fonts.googleapis.com https://unpkg.com https://www.googletagmanager.com https://www.google-analytics.com https://plausible.io; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https: http:; connect-src 'self' https://places.googleapis.com https://routes.googleapis.com https://maps.googleapis.com https://maps.gstatic.com https://*.supabase.co wss://*.supabase.co https://fonts.googleapis.com https://fonts.gstatic.com https://*.tile.openstreetmap.org https://www.google-analytics.com https://plausible.io https://*.sentry.io https://*.ingest.de.sentry.io; frame-src 'self'; worker-src 'self' blob:;" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://maps.gstatic.com https://fonts.googleapis.com https://unpkg.com https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https: http:; connect-src 'self' https://places.googleapis.com https://routes.googleapis.com https://maps.googleapis.com https://maps.gstatic.com https://*.supabase.co wss://*.supabase.co https://fonts.googleapis.com https://fonts.gstatic.com https://*.tile.openstreetmap.org https://www.google-analytics.com https://*.google-analytics.com https://*.sentry.io https://*.ingest.de.sentry.io; frame-src 'self'; worker-src 'self' blob:;" />
 
     <!-- iOS PWA -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -134,28 +134,7 @@
     </script>
 
     <!-- Google Analytics 4 -->
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('consent', 'default', {
-        analytics_storage: 'denied',
-        ad_storage: 'denied',
-        ad_user_data: 'denied',
-        ad_personalization: 'denied'
-      });
-    </script>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-YFK8HNQPSW"></script>
-    <script>
-      gtag('js', new Date());
-      gtag('config', 'G-YFK8HNQPSW', { anonymize_ip: true });
-    </script>
 
-    <!-- Privacy-friendly analytics by Plausible -->
-    <script async src="https://plausible.io/js/pa-m9wcKmUq-xqzFyXzD8RHo.js"></script>
-    <script>
-      window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
-      plausible.init()
-    </script>
   </head>
 
   <body>
