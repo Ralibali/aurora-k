@@ -27,7 +27,7 @@ Deno.serve(async request => {
 
   const { data: assignment, error } = await supabase
     .from('assignments')
-    .select('id, title, status, scheduled_start, scheduled_end, actual_start, actual_stop, pickup_address, delivery_address, address, assigned_driver_id, customer:customers(name)')
+    .select('id, title, status, scheduled_start, scheduled_end, actual_start, actual_stop, pickup_address, delivery_address, address, assigned_driver_id, eta_at, planned_arrival_at, geofence_entered_at, customer:customers(name)')
     .eq('tracking_token', token)
     .eq('tracking_enabled', true)
     .maybeSingle();
@@ -56,6 +56,8 @@ Deno.serve(async request => {
       scheduledEnd: assignment.scheduled_end,
       actualStart: assignment.actual_start,
       actualStop: assignment.actual_stop,
+      etaAt: assignment.eta_at || assignment.planned_arrival_at,
+      arrivedAt: assignment.geofence_entered_at,
       pickupAddress: assignment.pickup_address || assignment.address,
       deliveryAddress: assignment.delivery_address,
       customerName: Array.isArray(assignment.customer) ? assignment.customer[0]?.name : assignment.customer?.name,

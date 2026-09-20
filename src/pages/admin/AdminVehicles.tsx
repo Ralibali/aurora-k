@@ -38,6 +38,8 @@ export default function AdminVehicles() {
   const [model, setModel] = useState('');
   const [year, setYear] = useState('');
   const [notes, setNotes] = useState('');
+  const [routeCapacity, setRouteCapacity] = useState('100');
+  const [trackingDeviceId, setTrackingDeviceId] = useState('');
 
   const vehicleAssignmentCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -50,16 +52,17 @@ export default function AdminVehicles() {
   }, [assignments]);
 
   const resetForm = () => {
-    setEditId(null); setName(''); setRegNr(''); setType('vehicle'); setMake(''); setModel(''); setYear(''); setNotes('');
+    setEditId(null); setName(''); setRegNr(''); setType('vehicle'); setMake(''); setModel(''); setYear(''); setNotes(''); setRouteCapacity('100'); setTrackingDeviceId('');
   };
 
   const openEdit = (v) => {
-    setEditId(v.id); setName(v.name); setRegNr(v.registration_number || ''); setType(v.type); setMake(v.make || ''); setModel(v.model || ''); setYear(v.year ? String(v.year) : ''); setNotes(v.notes || ''); setDialogOpen(true);
+    const routeVehicle = v as typeof v & { route_capacity?: number; external_tracking_device_id?: string | null };
+    setEditId(v.id); setName(v.name); setRegNr(v.registration_number || ''); setType(v.type); setMake(v.make || ''); setModel(v.model || ''); setYear(v.year ? String(v.year) : ''); setNotes(v.notes || ''); setRouteCapacity(String(routeVehicle.route_capacity ?? 100)); setTrackingDeviceId(routeVehicle.external_tracking_device_id || ''); setDialogOpen(true);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const payload = { name, registration_number: regNr || null, type, make: make || null, model: model || null, year: year ? parseInt(year) : null, notes: notes || null };
+    const payload = { name, registration_number: regNr || null, type, make: make || null, model: model || null, year: year ? parseInt(year) : null, notes: notes || null, route_capacity: Math.max(1, parseInt(routeCapacity) || 100), external_tracking_device_id: trackingDeviceId.trim() || null };
     if (editId) {
       updateVehicle.mutate({ id: editId, ...payload }, { onSuccess: () => { setDialogOpen(false); resetForm(); } });
     } else {
@@ -111,6 +114,15 @@ export default function AdminVehicles() {
                     <Label>Årsmodell</Label>
                     <Input type="number" value={year} onChange={e => setYear(e.target.value)} placeholder="2024" />
                   </div>
+                  <div className="space-y-2">
+                    <Label>Ruttkapacitet</Label>
+                    <Input type="number" min="1" value={routeCapacity} onChange={e => setRouteCapacity(e.target.value)} />
+                  </div>
+                  <div className="space-y-2 col-span-2">
+                    <Label>Externt GPS-enhets-ID</Label>
+                    <Input value={trackingDeviceId} onChange={e => setTrackingDeviceId(e.target.value)} placeholder="Traccar uniqueId (valfritt)" />
+                    <p className="text-xs text-muted-foreground">Lämna tomt när förarens telefon används. ID:t kopplar en extern GPS-enhet till fordonet.</p>
+                  </div>
                   <div className="space-y-2 col-span-2">
                     <Label>Anteckningar</Label>
                     <Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Valfria anteckningar" />
@@ -150,7 +162,7 @@ export default function AdminVehicles() {
                 <TableBody>
                   {vehicles.map(v => (
                     <TableRow key={v.id}>
-                      <TableCell className="font-medium">{v.name}</TableCell>
+                      <TableCell className="font-medium">{v.name}{(v as typeof v & { external_tracking_device_id?: string | null }).external_tracking_device_id && <Badge variant="secondary" className="ml-2">GPS</Badge>}</TableCell>
                       <TableCell className="font-mono text-xs">{v.registration_number || '—'}</TableCell>
                       <TableCell><Badge variant="outline">{typeLabel(v.type)}</Badge></TableCell>
                       <TableCell>{[v.make, v.model].filter(Boolean).join(' ') || '—'}</TableCell>

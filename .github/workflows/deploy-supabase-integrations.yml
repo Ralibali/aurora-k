@@ -61,6 +61,7 @@ jobs:
             demo-login \
             create-driver \
             create-onboarding-link \
+            optimize-routes \
             update-password \
             send-push \
             share-assignment \
@@ -77,6 +78,7 @@ jobs:
             resend-inbound-order \
             stripe-webhook \
             track-assignment \
+            fleet-provider-webhook \
             customer-portal \
             public-booking \
             notify-admin \

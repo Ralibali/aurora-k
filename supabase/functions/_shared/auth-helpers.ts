@@ -41,28 +41,27 @@ export async function requireAdminForRecipientCompany(
 
   const { callerClient, serviceClient } = getSupabaseClients(caller.authHeader);
 
-  const { data: adminRoleRows, error: roleError } = await callerClient
+  // The profile supplies only the current tenant. Authorization must come from
+  // protected membership in that same tenant, never the profile's display role.
+  const { data: profile, error: profileError } = await callerClient
+    .from("profiles")
+    .select("company_id")
+    .eq("id", caller.userId)
+    .maybeSingle();
+
+  if (profileError) return { ok: false, error: profileError.message };
+  if (!profile?.company_id) return { ok: false, error: "Admin role required" };
+
+  const { data: adminRole, error: roleError } = await callerClient
     .from("user_roles")
-    .select("company_id, role")
+    .select("company_id")
     .eq("user_id", caller.userId)
-    .eq("role", "admin");
+    .eq("company_id", profile.company_id)
+    .eq("role", "admin")
+    .maybeSingle();
 
   if (roleError) return { ok: false, error: roleError.message };
-
-  const adminCompanyIds = new Set((adminRoleRows ?? []).map((row: { company_id: string | null }) => row.company_id).filter(Boolean));
-
-  if (adminCompanyIds.size === 0) {
-    const { data: profile, error: profileError } = await callerClient
-      .from("profiles")
-      .select("company_id, role")
-      .eq("id", caller.userId)
-      .maybeSingle();
-
-    if (profileError) return { ok: false, error: profileError.message };
-    if (profile?.role === "admin" && profile.company_id) adminCompanyIds.add(profile.company_id);
-  }
-
-  if (adminCompanyIds.size === 0) return { ok: false, error: "Admin role required" };
+  if (adminRole?.company_id !== profile.company_id) return { ok: false, error: "Admin role required" };
 
   const { data: recipientProfiles, error: recipientsError } = await serviceClient
     .from("profiles")
@@ -72,7 +71,7 @@ export async function requireAdminForRecipientCompany(
   if (recipientsError) return { ok: false, error: recipientsError.message };
   if ((recipientProfiles ?? []).length !== userIds.length) return { ok: false, error: "Recipient not found" };
 
-  const allSameCompany = (recipientProfiles ?? []).every((profile: { company_id: string | null }) => adminCompanyIds.has(profile.company_id));
+  const allSameCompany = (recipientProfiles ?? []).every((recipient: { company_id: string | null }) => recipient.company_id === profile.company_id);
   if (!allSameCompany) return { ok: false, error: "Recipients must belong to your company" };
 
   return { ok: true };

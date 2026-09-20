@@ -14,6 +14,7 @@ import { useDemoMode } from '@/hooks/useDemoMode';
 import { demoDrivers, demoRouteStops } from '@/lib/demo-data';
 import { moveStop, optimizeRoute } from '@/features/routes/route-order';
 import { supabase } from '@/integrations/supabase/client';
+import { DayOptimizerPanel } from '@/features/routes/DayOptimizerPanel';
 
 const RouteMapLeaflet = lazy(() => import('../AdminRouteMapLeaflet'));
 const RouteMapGoogle = lazy(() => import('../AdminRouteMapGoogle'));
@@ -99,6 +100,7 @@ export default function AdminRouteOptimizerPage() {
   return (
     <AdminLayout title="Slingor och ruttplanering" description="Ordna och spara dagens stopp till föraren">
       <div className="space-y-5">
+        <DayOptimizerPanel />
         <Card className="border-primary/10 bg-gradient-to-br from-primary/5 via-card to-card"><CardContent className="p-6"><div className="flex gap-3"><div className="rounded-xl bg-primary/10 p-2.5"><Route className="h-5 w-5 text-primary" /></div><div><h2 className="font-bold">Verklig körordning</h2><p className="mt-1 text-sm text-muted-foreground">Optimera efter koordinater, flytta stopp manuellt och spara ordningen. Stopp utan koordinater sorteras efter planerad tid.</p></div></div></CardContent></Card>
 
         <div className="flex flex-wrap items-end gap-3">

@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 const INTERVAL_MS = 15_000;
+const HISTORY_INTERVAL_MS = 60_000;
 
 interface GeofenceConfig {
   lat: number;
@@ -22,6 +23,8 @@ type Tracker = {
   driverId: string;
   assignmentId: string;
   companyId: string;
+  vehicleId?: string | null;
+  lastHistoryAt: number;
   geofence?: GeofenceConfig | null;
   onEnter?: () => void;
   onExit?: () => void;
@@ -39,14 +42,34 @@ function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
 }
 
 async function logGeofence(tracker: Tracker, action: 'geofence_enter' | 'geofence_exit') {
+  const occurredAt = new Date().toISOString();
   const { error } = await supabase.from('assignment_logs').insert({
     assignment_id: tracker.assignmentId,
     user_id: tracker.driverId,
     company_id: tracker.companyId,
     action,
-    new_value: new Date().toISOString(),
+    new_value: occurredAt,
   });
   if (error) console.warn('[GPS] Geofence log error:', error.message);
+  const position = tracker.lastPosition?.coords;
+  const eventType = action === 'geofence_enter' ? 'enter' : 'exit';
+  const [{ error: eventError }, { error: assignmentError }] = await Promise.all([
+    supabase.from('fleet_geofence_events' as never).insert({
+      company_id: tracker.companyId,
+      driver_id: tracker.driverId,
+      assignment_id: tracker.assignmentId,
+      event_type: eventType,
+      latitude: position?.latitude ?? null,
+      longitude: position?.longitude ?? null,
+      source: 'phone',
+      occurred_at: occurredAt,
+    } as never),
+    supabase.from('assignments').update({
+      [eventType === 'enter' ? 'geofence_entered_at' : 'geofence_exited_at']: occurredAt,
+    } as never).eq('id', tracker.assignmentId),
+  ]);
+  if (eventError) console.warn('[GPS] Fleet geofence event error:', eventError.message);
+  if (assignmentError) console.warn('[GPS] Assignment geofence update error:', assignmentError.message);
 }
 
 async function sendPosition(tracker: Tracker) {
@@ -63,12 +86,32 @@ async function sendPosition(tracker: Tracker) {
     updated_at: new Date().toISOString(),
   }, { onConflict: 'driver_id' });
   if (error) console.warn('[GPS] Upsert error:', error.message);
+
+  const now = Date.now();
+  if (now - tracker.lastHistoryAt >= HISTORY_INTERVAL_MS) {
+    const { error: historyError } = await supabase.from('fleet_location_history' as never).insert({
+      driver_id: tracker.driverId,
+      assignment_id: tracker.assignmentId,
+      company_id: tracker.companyId,
+      vehicle_id: tracker.vehicleId ?? null,
+      latitude: coordinates.latitude,
+      longitude: coordinates.longitude,
+      heading: Number.isFinite(coordinates.heading) ? coordinates.heading : null,
+      speed: coordinates.speed != null && Number.isFinite(coordinates.speed) ? coordinates.speed * 3.6 : null,
+      accuracy: Number.isFinite(coordinates.accuracy) ? coordinates.accuracy : null,
+      source: 'phone',
+      recorded_at: new Date(now).toISOString(),
+    } as never);
+    if (historyError) console.warn('[GPS] History insert error:', historyError.message);
+    else tracker.lastHistoryAt = now;
+  }
 }
 
 async function startTracker(
   driverId: string,
   assignmentId: string,
   companyId: string,
+  vehicleId?: string | null,
   geofence?: GeofenceConfig | null,
   onEnter?: () => void,
   onExit?: () => void,
@@ -77,6 +120,7 @@ async function startTracker(
   const existing = trackers.get(key);
   if (existing) {
     existing.subscribers += 1;
+    existing.vehicleId = vehicleId;
     existing.geofence = geofence;
     existing.onEnter = onEnter;
     existing.onExit = onExit;
@@ -93,6 +137,8 @@ async function startTracker(
     driverId,
     assignmentId,
     companyId,
+    vehicleId,
+    lastHistoryAt: 0,
     geofence,
     onEnter,
     onExit,
@@ -175,6 +221,7 @@ export function useDriverLocationTracker(
   driverId: string | undefined,
   activeAssignmentId: string | undefined,
   companyId: string | null | undefined,
+  vehicleId?: string | null,
   geofence?: GeofenceConfig | null,
   onGeofenceEnter?: () => void,
   onGeofenceExit?: () => void,
@@ -184,7 +231,7 @@ export function useDriverLocationTracker(
     if (!Capacitor.isNativePlatform() && !('geolocation' in navigator)) return;
     let cancelled = false;
     let resolvedKey: string | null = null;
-    startTracker(driverId, activeAssignmentId, companyId, geofence, onGeofenceEnter, onGeofenceExit)
+    startTracker(driverId, activeAssignmentId, companyId, vehicleId, geofence, onGeofenceEnter, onGeofenceExit)
       .then(key => {
         if (cancelled) releaseTracker(key);
         else resolvedKey = key;
@@ -194,5 +241,5 @@ export function useDriverLocationTracker(
       cancelled = true;
       if (resolvedKey) releaseTracker(resolvedKey);
     };
-  }, [activeAssignmentId, companyId, driverId, geofence, onGeofenceEnter, onGeofenceExit]);
+  }, [activeAssignmentId, companyId, driverId, geofence, onGeofenceEnter, onGeofenceExit, vehicleId]);
 }

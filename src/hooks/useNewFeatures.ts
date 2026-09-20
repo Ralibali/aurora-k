@@ -59,6 +59,8 @@ export function useDeleteArticle() {
 }
 
 // ─── VEHICLES ────────────────────────────────────────────
+type VehicleRouteFields = { route_capacity?: number; external_tracking_device_id?: string | null };
+
 export function useVehicles() {
   const { companyId } = useAuth();
   return useQuery({
@@ -78,8 +80,8 @@ export function useCreateVehicle() {
   const qc = useQueryClient();
   const { companyId } = useAuth();
   return useMutation({
-    mutationFn: async (vehicle: { name: string; registration_number?: string | null; type?: string; make?: string | null; model?: string | null; year?: number | null; notes?: string | null }) => {
-      const { data, error } = await supabase.from('vehicles').insert({ ...vehicle, company_id: companyId }).select().single();
+    mutationFn: async (vehicle: { name: string; registration_number?: string | null; type?: string; make?: string | null; model?: string | null; year?: number | null; notes?: string | null } & VehicleRouteFields) => {
+      const { data, error } = await supabase.from('vehicles').insert({ ...vehicle, company_id: companyId } as never).select().single();
       if (error) throw error;
       return data;
     },
@@ -91,8 +93,8 @@ export function useCreateVehicle() {
 export function useUpdateVehicle() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...updates }: { id: string } & TablesUpdate<'vehicles'>) => {
-      const { error } = await supabase.from('vehicles').update(updates).eq('id', id);
+    mutationFn: async ({ id, ...updates }: { id: string } & TablesUpdate<'vehicles'> & VehicleRouteFields) => {
+      const { error } = await supabase.from('vehicles').update(updates as never).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['vehicles'] }); toast.success('Fordon uppdaterat!'); },

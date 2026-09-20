@@ -135,7 +135,8 @@ Deno.serve(async (req) => {
   const startedAt = new Date().toISOString();
 
   if (!isServiceRole) {
-    // Validate user + admin role. Keep this in sync with frontend auth resolution.
+    // The profile supplies tenant identity only. Authorization must come from
+    // the protected membership for that exact user and tenant, under caller RLS.
     const userClient = createClient(SUPABASE_URL, ANON_KEY, {
       global: { headers: { Authorization: `Bearer ${token}` } },
       auth: { persistSession: false },
@@ -143,23 +144,23 @@ Deno.serve(async (req) => {
     const { data: userData, error: userErr } = await userClient.auth.getUser();
     if (userErr || !userData?.user) return json(401, { error: "invalid token" });
 
-    const [{ data: roleRows }, { data: profile }] = await Promise.all([
-      admin
-        .from("user_roles")
-        .select("role, company_id")
-        .eq("user_id", userData.user.id),
-      admin
-        .from("profiles")
-        .select("company_id, role")
-        .eq("id", userData.user.id)
-        .maybeSingle(),
-    ]);
-
-    const adminRole = roleRows?.find((row) => row.role === "admin");
-    const companyId = adminRole?.company_id ?? profile?.company_id ?? null;
-    const isAdmin = Boolean(adminRole) || profile?.role === "admin";
-
-    if (!companyId || !isAdmin) {
+    const { data: profile, error: profileError } = await userClient
+      .from("profiles")
+      .select("company_id")
+      .eq("id", userData.user.id)
+      .maybeSingle();
+    const companyId = profile?.company_id;
+    if (profileError || !companyId) {
+      return json(403, { error: "admin role required" });
+    }
+    const { data: adminRole, error: roleError } = await userClient
+      .from("user_roles")
+      .select("company_id")
+      .eq("user_id", userData.user.id)
+      .eq("company_id", companyId)
+      .eq("role", "admin")
+      .maybeSingle();
+    if (roleError || adminRole?.company_id !== companyId) {
       return json(403, { error: "admin role required" });
     }
 

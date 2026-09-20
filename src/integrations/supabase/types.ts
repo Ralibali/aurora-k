@@ -343,7 +343,10 @@ export type Database = {
           delivery_address: string | null
           distance_km: number | null
           driver_comment: string | null
+          eta_at: string | null
           fuel_liters: number | null
+          geofence_entered_at: string | null
+          geofence_exited_at: string | null
           geofence_lat: number | null
           geofence_lng: number | null
           geofence_radius: number | null
@@ -352,10 +355,15 @@ export type Database = {
           invoiced: boolean
           order_id: string | null
           pickup_address: string | null
+          planned_arrival_at: string | null
+          planned_departure_at: string | null
           priority: string
           require_photo: boolean
           require_signature: boolean
+          route_demand: number
+          route_plan_id: string | null
           route_sequence: number | null
+          route_skills: string[]
           scheduled_end: string | null
           scheduled_start: string
           series_date: string | null
@@ -384,7 +392,10 @@ export type Database = {
           delivery_address?: string | null
           distance_km?: number | null
           driver_comment?: string | null
+          eta_at?: string | null
           fuel_liters?: number | null
+          geofence_entered_at?: string | null
+          geofence_exited_at?: string | null
           geofence_lat?: number | null
           geofence_lng?: number | null
           geofence_radius?: number | null
@@ -393,10 +404,15 @@ export type Database = {
           invoiced?: boolean
           order_id?: string | null
           pickup_address?: string | null
+          planned_arrival_at?: string | null
+          planned_departure_at?: string | null
           priority?: string
           require_photo?: boolean
           require_signature?: boolean
+          route_demand?: number
+          route_plan_id?: string | null
           route_sequence?: number | null
+          route_skills?: string[]
           scheduled_end?: string | null
           scheduled_start: string
           series_date?: string | null
@@ -425,7 +441,10 @@ export type Database = {
           delivery_address?: string | null
           distance_km?: number | null
           driver_comment?: string | null
+          eta_at?: string | null
           fuel_liters?: number | null
+          geofence_entered_at?: string | null
+          geofence_exited_at?: string | null
           geofence_lat?: number | null
           geofence_lng?: number | null
           geofence_radius?: number | null
@@ -434,10 +453,15 @@ export type Database = {
           invoiced?: boolean
           order_id?: string | null
           pickup_address?: string | null
+          planned_arrival_at?: string | null
+          planned_departure_at?: string | null
           priority?: string
           require_photo?: boolean
           require_signature?: boolean
+          route_demand?: number
+          route_plan_id?: string | null
           route_sequence?: number | null
+          route_skills?: string[]
           scheduled_end?: string | null
           scheduled_start?: string
           series_date?: string | null
@@ -484,6 +508,13 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignments_route_plan_id_fkey"
+            columns: ["route_plan_id"]
+            isOneToOne: false
+            referencedRelation: "route_plans"
             referencedColumns: ["id"]
           },
           {
@@ -610,6 +641,11 @@ export type Database = {
       companies: {
         Row: {
           created_at: string | null
+          depot_address: string | null
+          depot_lat: number | null
+          depot_lng: number | null
+          fleet_location_retention_days: number
+          fleet_tracking_enabled: boolean
           id: string
           name: string
           onboarding_completed: boolean | null
@@ -624,6 +660,11 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          depot_address?: string | null
+          depot_lat?: number | null
+          depot_lng?: number | null
+          fleet_location_retention_days?: number
+          fleet_tracking_enabled?: boolean
           id?: string
           name: string
           onboarding_completed?: boolean | null
@@ -638,6 +679,11 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          depot_address?: string | null
+          depot_lat?: number | null
+          depot_lng?: number | null
+          fleet_location_retention_days?: number
+          fleet_tracking_enabled?: boolean
           id?: string
           name?: string
           onboarding_completed?: boolean | null
@@ -1332,6 +1378,182 @@ export type Database = {
           },
         ]
       }
+      fleet_geofence_events: {
+        Row: {
+          assignment_id: string
+          company_id: string
+          driver_id: string
+          event_type: string
+          id: number
+          latitude: number | null
+          longitude: number | null
+          occurred_at: string
+          source: string
+        }
+        Insert: {
+          assignment_id: string
+          company_id: string
+          driver_id: string
+          event_type: string
+          id?: never
+          latitude?: number | null
+          longitude?: number | null
+          occurred_at?: string
+          source?: string
+        }
+        Update: {
+          assignment_id?: string
+          company_id?: string
+          driver_id?: string
+          event_type?: string
+          id?: never
+          latitude?: number | null
+          longitude?: number | null
+          occurred_at?: string
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fleet_geofence_events_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fleet_geofence_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fleet_geofence_events_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fleet_location_history: {
+        Row: {
+          accuracy: number | null
+          assignment_id: string | null
+          company_id: string
+          driver_id: string
+          heading: number | null
+          id: number
+          latitude: number
+          longitude: number
+          recorded_at: string
+          source: string
+          speed: number | null
+          vehicle_id: string | null
+        }
+        Insert: {
+          accuracy?: number | null
+          assignment_id?: string | null
+          company_id: string
+          driver_id: string
+          heading?: number | null
+          id?: never
+          latitude: number
+          longitude: number
+          recorded_at?: string
+          source?: string
+          speed?: number | null
+          vehicle_id?: string | null
+        }
+        Update: {
+          accuracy?: number | null
+          assignment_id?: string | null
+          company_id?: string
+          driver_id?: string
+          heading?: number | null
+          id?: never
+          latitude?: number
+          longitude?: number
+          recorded_at?: string
+          source?: string
+          speed?: number | null
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fleet_location_history_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fleet_location_history_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fleet_location_history_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fleet_location_history_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fleet_provider_connections: {
+        Row: {
+          company_id: string
+          config: Json
+          created_at: string
+          id: string
+          last_error: string | null
+          last_event_at: string | null
+          provider: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          config?: Json
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          last_event_at?: string | null
+          provider: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          config?: Json
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          last_event_at?: string | null
+          provider?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fleet_provider_connections_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fortnox_connections: {
         Row: {
           access_token_secret_id: string
@@ -1552,6 +1774,81 @@ export type Database = {
             foreignKeyName: "fortnox_operation_locks_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inbound_documents: {
+        Row: {
+          assignment_id: string | null
+          company_id: string
+          confidence: number
+          content_type: string
+          created_at: string
+          document_type: string
+          error_message: string | null
+          field_confidence: Json
+          filename: string
+          id: string
+          parsed_payload: Json
+          signature_detected: boolean
+          size_bytes: number
+          status: string
+          storage_path: string | null
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          assignment_id?: string | null
+          company_id: string
+          confidence?: number
+          content_type?: string
+          created_at?: string
+          document_type?: string
+          error_message?: string | null
+          field_confidence?: Json
+          filename: string
+          id?: string
+          parsed_payload?: Json
+          signature_detected?: boolean
+          size_bytes?: number
+          status?: string
+          storage_path?: string | null
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          assignment_id?: string | null
+          company_id?: string
+          confidence?: number
+          content_type?: string
+          created_at?: string
+          document_type?: string
+          error_message?: string | null
+          field_confidence?: Json
+          filename?: string
+          id?: string
+          parsed_payload?: Json
+          signature_detected?: boolean
+          size_bytes?: number
+          status?: string
+          storage_path?: string | null
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inbound_documents_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inbound_documents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
@@ -2328,6 +2625,8 @@ export type Database = {
           id: string
           is_available: boolean
           role: string
+          route_capacity: number
+          route_skills: string[]
         }
         Insert: {
           company_id?: string | null
@@ -2337,6 +2636,8 @@ export type Database = {
           id: string
           is_available?: boolean
           role?: string
+          route_capacity?: number
+          route_skills?: string[]
         }
         Update: {
           company_id?: string | null
@@ -2346,6 +2647,8 @@ export type Database = {
           id?: string
           is_available?: boolean
           role?: string
+          route_capacity?: number
+          route_skills?: string[]
         }
         Relationships: [
           {
@@ -2533,6 +2836,161 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "recurring_generation_runs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      route_plan_stops: {
+        Row: {
+          assignment_id: string
+          company_id: string
+          created_at: string
+          distance_from_previous_m: number | null
+          driver_id: string
+          duration_from_previous_s: number | null
+          id: string
+          optimization_reason: string | null
+          planned_arrival_at: string | null
+          planned_departure_at: string | null
+          route_plan_id: string
+          sequence: number
+          vehicle_id: string | null
+        }
+        Insert: {
+          assignment_id: string
+          company_id: string
+          created_at?: string
+          distance_from_previous_m?: number | null
+          driver_id: string
+          duration_from_previous_s?: number | null
+          id?: string
+          optimization_reason?: string | null
+          planned_arrival_at?: string | null
+          planned_departure_at?: string | null
+          route_plan_id: string
+          sequence: number
+          vehicle_id?: string | null
+        }
+        Update: {
+          assignment_id?: string
+          company_id?: string
+          created_at?: string
+          distance_from_previous_m?: number | null
+          driver_id?: string
+          duration_from_previous_s?: number | null
+          id?: string
+          optimization_reason?: string | null
+          planned_arrival_at?: string | null
+          planned_departure_at?: string | null
+          route_plan_id?: string
+          sequence?: number
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_plan_stops_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "route_plan_stops_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "route_plan_stops_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "route_plan_stops_route_plan_id_fkey"
+            columns: ["route_plan_id"]
+            isOneToOne: false
+            referencedRelation: "route_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "route_plan_stops_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      route_plans: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          distance_after_m: number | null
+          distance_before_m: number | null
+          duration_after_s: number | null
+          duration_before_s: number | null
+          id: string
+          input_snapshot: Json
+          optimizer_provider: string
+          optimizer_version: string
+          output_snapshot: Json
+          plan_date: string
+          status: string
+          updated_at: string
+          warning: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          distance_after_m?: number | null
+          distance_before_m?: number | null
+          duration_after_s?: number | null
+          duration_before_s?: number | null
+          id?: string
+          input_snapshot?: Json
+          optimizer_provider?: string
+          optimizer_version?: string
+          output_snapshot?: Json
+          plan_date: string
+          status?: string
+          updated_at?: string
+          warning?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          distance_after_m?: number | null
+          distance_before_m?: number | null
+          duration_after_s?: number | null
+          duration_before_s?: number | null
+          id?: string
+          input_snapshot?: Json
+          optimizer_provider?: string
+          optimizer_version?: string
+          output_snapshot?: Json
+          plan_date?: string
+          status?: string
+          updated_at?: string
+          warning?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_plans_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
@@ -2752,12 +3210,14 @@ export type Database = {
           active: boolean
           company_id: string | null
           created_at: string
+          external_tracking_device_id: string | null
           id: string
           make: string | null
           model: string | null
           name: string
           notes: string | null
           registration_number: string | null
+          route_capacity: number
           type: string
           updated_at: string
           year: number | null
@@ -2766,12 +3226,14 @@ export type Database = {
           active?: boolean
           company_id?: string | null
           created_at?: string
+          external_tracking_device_id?: string | null
           id?: string
           make?: string | null
           model?: string | null
           name: string
           notes?: string | null
           registration_number?: string | null
+          route_capacity?: number
           type?: string
           updated_at?: string
           year?: number | null
@@ -2780,12 +3242,14 @@ export type Database = {
           active?: boolean
           company_id?: string | null
           created_at?: string
+          external_tracking_device_id?: string | null
           id?: string
           make?: string | null
           model?: string | null
           name?: string
           notes?: string | null
           registration_number?: string | null
+          route_capacity?: number
           type?: string
           updated_at?: string
           year?: number | null
@@ -2809,6 +3273,7 @@ export type Database = {
         Args: { p_token: string; p_user_id: string }
         Returns: undefined
       }
+      approve_route_plan: { Args: { _plan_id: string }; Returns: Json }
       claim_fortnox_operation: {
         Args: { p_company_id: string; p_owner: string }
         Returns: boolean
@@ -2945,6 +3410,7 @@ export type Database = {
       is_platform_admin: { Args: { _user_id: string }; Returns: boolean }
       lookup_invitation_by_token: { Args: { p_token: string }; Returns: Json }
       next_invoice_number: { Args: never; Returns: number }
+      prune_fleet_location_history: { Args: never; Returns: number }
       read_fortnox_tokens: {
         Args: { p_company_id: string }
         Returns: {
@@ -2958,6 +3424,10 @@ export type Database = {
       register_company: {
         Args: { _name: string; _org_nr?: string; _user_full_name?: string }
         Returns: string
+      }
+      register_driver_push_token: {
+        Args: { p_platform: string; p_token: string }
+        Returns: undefined
       }
       report_assignment_deviation: {
         Args: {
@@ -2983,6 +3453,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      report_driver_support_ticket: {
+        Args: { p_message: string; p_operation_id: string }
+        Returns: string
       }
       resolve_assignment_deviation: {
         Args: { p_deviation_id: string; p_resolution: string }
