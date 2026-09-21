@@ -10,13 +10,22 @@ describe('mobile navigation', () => {
     render(<MemoryRouter initialEntries={['/admin']}><MobileTabBar /></MemoryRouter>);
     fireEvent.click(screen.getByRole('button', { name: 'Öppna mer-meny' }));
     const menu = screen.getByRole('dialog', { name: 'Alla funktioner' });
-    expect(within(menu).getByRole('link', { name: 'Fakturaunderlag' })).toHaveAttribute('href', '/admin/invoice-basis');
-    expect(within(menu).getByRole('link', { name: 'Godkännanden' })).toBeInTheDocument();
-    expect(within(menu).getByRole('link', { name: 'Återkommande uppdrag' })).toBeInTheDocument();
-    fireEvent.change(within(menu).getByRole('textbox', { name: 'Sök funktion' }), { target: { value: 'faktura' } });
-    expect(within(menu).getByRole('link', { name: 'Fakturaunderlag' })).toBeInTheDocument();
-    expect(within(menu).queryByRole('link', { name: 'Godkännanden' })).not.toBeInTheDocument();
-    fireEvent.click(within(menu).getByRole('link', { name: 'Fakturaunderlag' }));
+    // Locate by visible text, then verify link semantics individually. Repeated
+    // named-role searches recompute styles for every link and time out in CI.
+    const link = (name: string) => {
+      const element = within(menu).getByText(name, { exact: true }).closest('a');
+      expect(element).toHaveAttribute('href');
+      expect(element).toHaveAccessibleName(name);
+      expect(element).toBeVisible();
+      return element!;
+    };
+    expect(link('Fakturaunderlag')).toHaveAttribute('href', '/admin/invoice-basis');
+    link('Godkännanden');
+    link('Återkommande uppdrag');
+    fireEvent.change(within(menu).getByLabelText('Sök funktion'), { target: { value: 'faktura' } });
+    const invoiceLink = link('Fakturaunderlag');
+    expect(within(menu).queryByText('Godkännanden', { exact: true })).not.toBeInTheDocument();
+    fireEvent.click(invoiceLink);
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
   it('does not overlay an assignment form with a duplicate create button', () => {

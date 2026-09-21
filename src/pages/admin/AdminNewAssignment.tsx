@@ -1,5 +1,6 @@
 import GoogleAddressSearch from '@/components/GoogleAddressSearch';
 import { useState } from 'react';
+import { useEffectiveDriverSettings } from '@/hooks/useDriverSettings';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AdminLayout } from '@/components/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -154,8 +155,12 @@ export default function AdminNewAssignment() {
   const [scheduledEnd, setScheduledEnd] = useState(copyFrom?.scheduled_end || '');
   const [driverId, setDriverId] = useState(copyFrom?.assigned_driver_id || '');
   const [adminComment, setAdminComment] = useState(copyFrom?.admin_comment || '');
-  const [requireSignature, setRequireSignature] = useState(copyFrom?.require_signature ?? false);
-  const [requirePhoto, setRequirePhoto] = useState(copyFrom?.require_photo ?? false);
+  const [signatureOverride, setRequireSignature] = useState<boolean | null>(copyFrom?.require_signature ?? null);
+  const [photoOverride, setRequirePhoto] = useState<boolean | null>(copyFrom?.require_photo ?? null);
+  const driverDefaults = useEffectiveDriverSettings(driverId || undefined);
+  const requireSignature = signatureOverride ?? driverDefaults.data?.require_signature ?? false;
+  const requirePhoto = photoOverride ?? driverDefaults.data?.require_photo ?? false;
+  const defaultsNeeded = signatureOverride === null || photoOverride === null;
   const [trackingEnabled, setTrackingEnabled] = useState(copyFrom?.tracking_enabled ?? true);
   const [cost, setCost] = useState<string>(copyFrom?.cost != null ? String(copyFrom.cost) : '');
   const [vehicleId, setVehicleId] = useState(copyFrom?.vehicle_id || '');
@@ -201,6 +206,11 @@ export default function AdminNewAssignment() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    if (defaultsNeeded && (driverDefaults.isLoading || driverDefaults.isError || !driverDefaults.data)) {
+      toast.error('Förarens standardkrav kunde inte läsas ännu. Vänta eller ange foto- och signaturkrav manuellt.');
+      return;
+    }
 
     const baseStart = new Date(scheduledStart);
     if (!scheduledStart || Number.isNaN(baseStart.getTime())) {
@@ -308,7 +318,7 @@ export default function AdminNewAssignment() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4"><div className="space-y-2"><Label>Tilldela chaufför</Label><Select value={driverId} onValueChange={setDriverId} required><SelectTrigger><SelectValue placeholder="Välj chaufför" /></SelectTrigger><SelectContent>{(drivers ?? []).map(d => <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>)}</SelectContent></Select></div><div className="space-y-2"><Label>Fordon</Label><Select value={vehicleId || 'none'} onValueChange={v => setVehicleId(v === 'none' ? '' : v)}><SelectTrigger><SelectValue placeholder="Inget fordon" /></SelectTrigger><SelectContent><SelectItem value="none">Inget fordon</SelectItem>{(vehicles ?? []).map(v => <SelectItem key={v.id} value={v.id}>{v.name} {v.registration_number ? `(${v.registration_number})` : ''}</SelectItem>)}</SelectContent></Select></div></div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4"><div className="space-y-2"><Label>Beställning</Label><Select value={orderId || 'none'} onValueChange={v => setOrderId(v === 'none' ? '' : v)}><SelectTrigger><SelectValue placeholder="Ingen beställning" /></SelectTrigger><SelectContent><SelectItem value="none">Ingen beställning</SelectItem>{(orders ?? []).filter(o => o.status === 'active').map(o => <SelectItem key={o.id} value={o.id}>{o.title}</SelectItem>)}</SelectContent></Select></div><div className="space-y-2"><Label htmlFor="cost">Kostnad / fakturabelopp</Label><Input id="cost" type="number" step="0.01" min="0" value={cost} onChange={e => setCost(e.target.value)} placeholder="T.ex. 1500" /></div></div>
               <div className="space-y-2"><Label htmlFor="comment">Meddelande till chauffören</Label><Textarea id="comment" value={adminComment} onChange={e => setAdminComment(e.target.value)} placeholder="Syns i förarappen..." /></div>
-              <div className="border rounded-lg p-4 space-y-3"><p className="text-sm font-medium flex items-center gap-2"><PackageCheck className="h-4 w-4" /> Krav vid slutförande</p><div className="flex items-center justify-between"><Label htmlFor="req-sig" className="cursor-pointer">Kräv mottagarsignatur</Label><Switch id="req-sig" checked={requireSignature} onCheckedChange={setRequireSignature} /></div><div className="flex items-center justify-between"><Label htmlFor="req-photo" className="cursor-pointer">Kräv fraktsedelsfoto</Label><Switch id="req-photo" checked={requirePhoto} onCheckedChange={setRequirePhoto} /></div><div className="flex items-center justify-between"><Label htmlFor="tracking-enabled" className="cursor-pointer">Avisera kund automatiskt</Label><Switch id="tracking-enabled" checked={trackingEnabled} onCheckedChange={setTrackingEnabled} /></div></div>
+              <div className="border rounded-lg p-4 space-y-3"><p className="text-sm font-medium flex items-center gap-2"><PackageCheck className="h-4 w-4" /> Krav vid slutförande</p><p className="text-xs text-muted-foreground">Förval från företagets inställningar och vald chaufför. Du kan ändra kraven för just detta uppdrag.</p><div className="flex items-center justify-between"><Label htmlFor="req-sig" className="cursor-pointer">Kräv mottagarsignatur</Label><Switch id="req-sig" checked={requireSignature} onCheckedChange={setRequireSignature} /></div><div className="flex items-center justify-between"><Label htmlFor="req-photo" className="cursor-pointer">Kräv fraktsedelsfoto</Label><Switch id="req-photo" checked={requirePhoto} onCheckedChange={setRequirePhoto} /></div><div className="flex items-center justify-between"><Label htmlFor="tracking-enabled" className="cursor-pointer">Avisera kund automatiskt</Label><Switch id="tracking-enabled" checked={trackingEnabled} onCheckedChange={setTrackingEnabled} /></div></div>
               <div className="border rounded-lg p-4 space-y-3"><div className="flex items-center justify-between"><Label>Upprepning</Label><Switch checked={recurrenceEnabled} onCheckedChange={setRecurrenceEnabled} /></div>{recurrenceEnabled && <div className="grid gap-3 sm:grid-cols-2"><div className="space-y-2"><Label>Frekvens</Label><Select value={recurrenceFrequency} onValueChange={v => setRecurrenceFrequency(v as RecurrenceFrequency)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="weekly">Varje vecka</SelectItem><SelectItem value="biweekly">Varannan vecka</SelectItem><SelectItem value="monthly">Varje månad</SelectItem></SelectContent></Select></div><div className="space-y-2"><Label htmlFor="recurrence-end">Upprepa till och med</Label><Input id="recurrence-end" type="date" value={recurrenceEndDate} onChange={e => setRecurrenceEndDate(e.target.value)} required={recurrenceEnabled} /></div></div>}</div>
               <div className="flex gap-2 pt-2"><Button type="submit" disabled={isSubmitting || createAssignment.isPending}>{isSubmitting ? 'Skapar...' : 'Skapa uppdrag'}</Button><Button type="button" variant="outline" onClick={() => navigate(-1)}>Avbryt</Button></div>
             </form>

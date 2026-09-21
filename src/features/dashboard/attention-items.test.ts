@@ -20,6 +20,7 @@ describe('dashboard attention routing', () => {
       { id: 'delayed', count: 1, href: '/admin/assignments?filter=delayed&date=all' },
       { id: 'unassigned', count: 1, href: '/admin/assignments?filter=unassigned&date=all' },
       { id: 'proof', count: 1, href: '/admin/assignments?filter=proof&date=all' },
+      { id: 'invoice-review', count: 1, href: '/admin/invoice-basis' },
     ]);
   });
 
@@ -43,11 +44,20 @@ describe('dashboard attention routing', () => {
   it('keeps missing delivery proof out of invoice-ready work', () => {
     const items = buildAttentionItems([
       assignment({ id: 'photo', status: 'completed', require_photo: true }),
-      assignment({ id: 'ready', status: 'completed', require_signature: true, signature_url: 'signature.png' }),
-    ], [], now);
+      { ...assignment({ id: 'ready', status: 'completed', require_signature: true, signature_url: 'signature.png' }), customer: { pricing_type: 'per_delivery', price_per_delivery: 500 } },
+    ], [], now, { deviationsAvailable: true });
     expect(items.map(({ id, count }) => ({ id, count }))).toEqual([
       { id: 'proof', count: 1 },
+      { id: 'invoice-review', count: 1 },
       { id: 'invoice-ready', count: 1 },
     ]);
   });
+  it('does not label missing prices, unresolved deviations or unavailable checks invoice-ready', () => {
+    const ready = { ...assignment({ id: 'job', status: 'completed' }), customer: { pricing_type: 'per_delivery', price_per_delivery: 500 } };
+    expect(buildAttentionItems([ready], [], now).some(item => item.id === 'invoice-ready')).toBe(false);
+    expect(buildAttentionItems([ready], [], now, { deviationsAvailable: true, openDeviations: [{ assignment_id: 'job' }] }).some(item => item.id === 'invoice-ready')).toBe(false);
+    expect(buildAttentionItems([{ ...ready, customer: { pricing_type: 'per_hour', price_per_hour: 700 } }], [], now, { deviationsAvailable: true }).some(item => item.id === 'invoice-ready')).toBe(false);
+    expect(buildAttentionItems([ready], [], now, { deviationsAvailable: true })).toContainEqual(expect.objectContaining({ id: 'invoice-ready', href: '/admin/invoice-basis' }));
+  });
+
 });

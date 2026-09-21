@@ -76,10 +76,12 @@ export function useAllDriverSettingsOverrides() {
 
 // Merged settings for a specific driver (global + override)
 export function useEffectiveDriverSettings(driverId: string | undefined) {
-  const { data: global } = useDriverSettings();
-  const { data: override } = useDriverSettingsOverride(driverId);
-
-  if (!global) return { data: null };
+  const globalQuery = useDriverSettings();
+  const overrideQuery = useDriverSettingsOverride(driverId);
+  const global = globalQuery.data;
+  const override = overrideQuery.data;
+  const state = { isLoading: globalQuery.isLoading || overrideQuery.isLoading, isError: globalQuery.isError || overrideQuery.isError };
+  if (!global) return { data: null, ...state };
 
   const effective: DriverSettings = {
     ...global,
@@ -90,7 +92,7 @@ export function useEffectiveDriverSettings(driverId: string | undefined) {
     show_total_hours: override?.show_total_hours ?? global.show_total_hours,
   };
 
-  return { data: effective };
+  return { data: effective, ...state };
 }
 
 export function useUpdateDriverSettings() {

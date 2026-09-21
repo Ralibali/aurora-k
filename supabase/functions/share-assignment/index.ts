@@ -1,104 +1,36 @@
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { z } from 'https://esm.sh/zod@3';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.100.1';
+import { sendResendMail } from '../_shared/resend.ts';
+import { handleShareAssignment, type SharedAssignment } from './handler.ts';
 
-const BodySchema = z.object({
-  assignment_id: z.string().uuid(),
-  recipient_email: z.string().email(),
-  message: z.string().optional(),
-});
-
-Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
-  }
-
-  try {
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'Missing authorization' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-    }
-
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    // Verify JWT and get caller
-    const anonClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!, {
-      global: { headers: { Authorization: authHeader } },
-    });
-    const { data: { user }, error: authError } = await anonClient.auth.getUser();
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-    }
-
-    // Get caller's company_id
-    const { data: callerProfile } = await anonClient
-      .from('profiles')
-      .select('company_id')
-      .eq('id', user.id)
-      .maybeSingle();
-
-    const parsed = BodySchema.safeParse(await req.json());
-    if (!parsed.success) {
-      return new Response(JSON.stringify({ error: parsed.error.flatten().fieldErrors }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-    }
-
-    const { assignment_id, recipient_email, message } = parsed.data;
-
-    // Fetch assignment details
-    const { data: assignment, error: fetchError } = await supabase
-      .from('assignments')
-      .select('*, customer:customers(*), driver:profiles!assignments_assigned_driver_id_fkey(*)')
-      .eq('id', assignment_id)
-      .single();
-
-    if (fetchError || !assignment) {
-      return new Response(JSON.stringify({ error: 'Assignment not found' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-    }
-
-    // Verify caller belongs to the same company as the assignment
-    if (!callerProfile?.company_id || callerProfile.company_id !== assignment.company_id) {
-      return new Response(
-        JSON.stringify({ error: 'Forbidden' }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Fetch company settings scoped by company_id
-    const { data: settings } = await supabase
-      .from('settings')
-      .select('*')
-      .eq('company_id', assignment.company_id)
-      .maybeSingle();
-
-    const companyName = settings?.company_name || 'Transport';
-    const scheduledDate = new Date(assignment.scheduled_start).toLocaleDateString('sv-SE');
-    const scheduledTime = new Date(assignment.scheduled_start).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
-
-    console.log(`[share-assignment] Sharing assignment ${assignment_id} to ${recipient_email}`);
-
-    return new Response(JSON.stringify({
-      success: true,
-      message: `Uppdragsinformation skickad till ${recipient_email}`,
-      preview: {
-        subject: `Uppdrag: ${assignment.title} - ${companyName}`,
-        to: recipient_email,
-        assignment_title: assignment.title,
-        address: assignment.address,
-        scheduled: `${scheduledDate} ${scheduledTime}`,
-        customer: assignment.customer?.name,
-        driver: assignment.driver?.full_name,
-      },
-    }), {
-      status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : 'Unknown error';
-    return new Response(JSON.stringify({ error: msg }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-  }
+Deno.serve(req => {
+  const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
+  return handleShareAssignment(req, {
+    user: async token => { const { data, error } = await db.auth.getUser(token); return error ? null : data.user; },
+    companyId: async userId => {
+      const { data, error } = await db.from('profiles').select('company_id').eq('id', userId).maybeSingle();
+      if (error) throw error;
+      return data?.company_id ?? null;
+    },
+    isAdmin: async (userId, companyId) => {
+      const { data, error } = await db.from('user_roles').select('company_id').eq('user_id', userId).eq('company_id', companyId).eq('role', 'admin').maybeSingle();
+      if (error) throw error;
+      return data?.company_id === companyId;
+    },
+    company: async companyId => {
+      const { data, error } = await db.from('companies').select('name,org_nr').eq('id', companyId).maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    assignment: async (id, companyId) => {
+      const { data, error } = await db.from('assignments').select('id,company_id,title,status,scheduled_start,address,pickup_address,delivery_address,customer:customers(name,email)').eq('id', id).eq('company_id', companyId).maybeSingle();
+      if (error) throw error;
+      return data as SharedAssignment | null;
+    },
+    allowSend: async companyId => {
+      const { data, error } = await db.rpc('consume_mail_rate_limit', { p_key: `assignment-mail/${companyId}`, p_limit: 100, p_window_seconds: 3600 });
+      if (error) throw error;
+      return data === true;
+    },
+    send: sendResendMail,
+  });
 });

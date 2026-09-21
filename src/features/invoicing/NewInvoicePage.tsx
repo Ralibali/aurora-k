@@ -17,7 +17,7 @@ import { useCreateReliableInvoice } from '@/hooks/useInvoiceTransactions';
 import { InvoiceLineEditor } from '@/features/invoicing/InvoiceLineEditor';
 import { invoiceLineTotals, type PersistedInvoiceLine } from '@/lib/invoice-lines';
 import { calculateDecimalHours, formatSwedishDate } from '@/lib/format';
-import { supabase } from '@/integrations/supabase/client';
+import { loadAssignmentArticles } from './load-assignment-articles';
 import { assignmentInvoiceLines, invoiceLinesError, invoiceSelection, missingInvoiceSources, type InvoiceSelection } from './invoice-preparation';
 import { getStockholmDateKey } from '@/features/dispatch/dispatch-utils';
 
@@ -91,6 +91,16 @@ function InvoiceForm({ initial }: { initial: InvoiceSelection }) {
     try {
       const sources: PersistedInvoiceLine[] = [];
       const added: PersistedInvoiceLine[] = [];
+      const newIds = selectedAssignments.filter(id => !sourceLines.some(line => line.assignmentId === id));
+      // Batch the selected jobs instead of one round trip per job.
+      const articleRows = await loadAssignmentArticles(newIds);
+      if (request !== buildRequest.current) return;
+      const articlesByAssignment = new Map<string, NonNullable<typeof articleRows>>();
+      for (const article of articleRows ?? []) {
+        const rows = articlesByAssignment.get(article.assignment_id) ?? [];
+        rows.push(article);
+        articlesByAssignment.set(article.assignment_id, rows);
+      }
       for (const assignmentId of selectedAssignments) {
         const existing = sourceLines.filter(line => line.assignmentId === assignmentId);
         if (existing.length) { sources.push(...existing); continue; }
@@ -98,10 +108,7 @@ function InvoiceForm({ initial }: { initial: InvoiceSelection }) {
         if (!assignment || assignment.customer_id !== customer.id || assignment.status !== 'completed' || assignment.invoiced) {
           throw new Error('Ett valt uppdrag kan inte faktureras. Kontrollera urvalet i steg 1.');
         }
-        const { data: assignmentArticles, error } = await supabase.from('assignment_articles').select('*').eq('assignment_id', assignmentId);
-        if (error) throw error;
-        if (request !== buildRequest.current) return;
-        const built = assignmentInvoiceLines(assignment, customer, assignmentArticles ?? [], articlePrices);
+        const built = assignmentInvoiceLines(assignment, customer, articlesByAssignment.get(assignmentId) ?? [], articlePrices);
         sources.push(...built);
         added.push(...built);
       }
