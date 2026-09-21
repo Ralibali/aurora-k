@@ -10,7 +10,7 @@ vi.mock('@/components/AdminLayout', () => ({ AdminLayout: ({ children }: { child
 vi.mock('@/hooks/useData', () => ({ useCustomers: mocks.customers, useAssignments: mocks.assignments, useNextInvoiceNumber: () => ({ data: 1005, isSuccess: true }), useSettings: () => ({ data: { invoice_mode: 'invoice' }, isSuccess: true }) }));
 vi.mock('@/hooks/useNewFeatures', () => ({ useArticles: mocks.articles, useCustomerPriceList: mocks.prices }));
 vi.mock('@/hooks/useInvoiceTransactions', () => ({ useCreateReliableInvoice: () => ({ mutate: mocks.mutate, isPending: false }) }));
-vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: () => ({ select: () => ({ eq: mocks.loadArticles }) }) } }));
+vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: () => ({ select: () => ({ in: () => ({ order: () => ({ range: mocks.loadArticles }) }) }) }) } }));
 vi.mock('./InvoiceLineEditor', () => ({ InvoiceLineEditor: ({ lines, onChange }: { lines: PersistedInvoiceLine[]; onChange: (lines: PersistedInvoiceLine[]) => void }) => <div>{lines.map(line => <div key={line.id}><span>{line.description}: {line.unitPrice}</span><button onClick={() => onChange(lines.filter(item => item.id !== line.id))}>Ta bort {line.description}</button></div>)}<button onClick={() => onChange([...lines, { id: 'manual', source: 'manual', description: 'Manuellt tillägg', quantity: 1, unit: 'st', unitPrice: 100, vatRate: 25, amount: 100 }])}>Lägg till fri rad</button></div> }));
 const customer = { id: 'c1', name: 'Testkund', pricing_type: 'per_delivery', price_per_delivery: 500, price_per_hour: null, payment_terms_days: 30 };
 const assignments = ['a1', 'a2'].map((id, index) => ({ id, title: `Transport ${index + 1}`, customer_id: 'c1', status: 'completed', invoiced: false, cost: null, actual_start: null, actual_stop: null, driver: null }));
@@ -39,7 +39,7 @@ describe('invoice source preparation lifecycle', () => {
     rendered.rerender(view());
     expect(mocks.loadArticles).not.toHaveBeenCalled();
     mocks.prices.mockReturnValue(ready([{ article_id: 'article1', price: 250 }]));
-    mocks.loadArticles.mockResolvedValue({ data: [{ id: 'source1', article_id: 'article1', name: 'Pall', quantity: 2, unit: 'st', unit_price: 99, vat_rate: 25 }], error: null });
+    mocks.loadArticles.mockResolvedValue({ data: [{ id: 'source1', assignment_id: 'a1', article_id: 'article1', name: 'Pall', quantity: 2, unit: 'st', unit_price: 99, vat_rate: 25 }], error: null });
     rendered.rerender(view());
     await screen.findByText('Pall: 250');
     expect(mocks.loadArticles).toHaveBeenCalledTimes(1);

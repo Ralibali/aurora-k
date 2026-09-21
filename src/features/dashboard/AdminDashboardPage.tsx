@@ -14,6 +14,7 @@ import { useDemoMode } from '@/hooks/useDemoMode';
 import { demoAssignments, demoDrivers, demoInvoices, type DemoAssignment } from '@/lib/demo-data';
 import { calculateDecimalHours } from '@/lib/format';
 import { cn } from '@/lib/utils';
+import { useAssignmentDeviations } from '@/lib/assignment-deviations';
 
 type AssignmentRow = NonNullable<ReturnType<typeof useAssignments>['data']>[number];
 type ActivityItem = { key: string; title: string; driver: string; timestamp: string; completed: boolean; assignmentId: string };
@@ -52,6 +53,7 @@ export default function AdminDashboardPage() {
   const assignmentQuery = useAssignments();
   const driverQuery = useDrivers();
   const invoiceQuery = useInvoices();
+  const deviationQuery = useAssignmentDeviations();
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
@@ -69,9 +71,9 @@ export default function AdminDashboardPage() {
   const loading = !demoOn && assignmentQuery.isLoading;
   const failed = !demoOn && assignmentQuery.isError;
   const refreshing = !demoOn && (assignmentQuery.isFetching || driverQuery.isFetching || invoiceQuery.isFetching);
-  const incomplete = !demoOn && (assignmentQuery.isError || invoiceQuery.isError);
+  const incomplete = !demoOn && (assignmentQuery.isError || invoiceQuery.isError || deviationQuery.isError);
   const todayAssignments = useMemo(() => assignments.filter(item => getStockholmDateKey(item.scheduled_start) === today), [assignments, today]);
-  const attentionItems = buildAttentionItems(assignments, demoOn ? demoInvoices : invoiceQuery.data ?? [], now);
+  const attentionItems = buildAttentionItems(assignments, demoOn ? demoInvoices : invoiceQuery.data ?? [], now, { openDeviations: demoOn ? [] : deviationQuery.data, deviationsAvailable: demoOn || deviationQuery.isSuccess });
   const unassignedCount = assignments.filter(item => matchesDispatchFilter(item, 'unassigned', now)).length;
   const urgentCount = assignments.filter(item => matchesDispatchFilter(item, 'urgent', now)).length;
   const activeCount = todayAssignments.filter(item => item.status === 'active').length;
@@ -108,6 +110,7 @@ export default function AdminDashboardPage() {
     void assignmentQuery.refetch();
     void driverQuery.refetch();
     void invoiceQuery.refetch();
+    void deviationQuery.refetch();
     setNow(new Date());
   };
 
@@ -128,7 +131,7 @@ export default function AdminDashboardPage() {
           </div>
         </Card>
 
-        {!demoOn && (assignmentQuery.isError || driverQuery.isError || invoiceQuery.isError) && (
+        {!demoOn && (assignmentQuery.isError || driverQuery.isError || invoiceQuery.isError || deviationQuery.isError) && (
           <Card role="alert" className="flex flex-wrap items-center gap-3 border-destructive/30 p-4 shadow-none">
             <AlertTriangle className="h-4 w-4 shrink-0 text-destructive" />
             <p className="flex-1 text-sm">{failed ? 'Uppdragen kunde inte hämtas.' : 'En del uppgifter kunde inte hämtas. Översikten är inte komplett.'}</p>
@@ -143,7 +146,7 @@ export default function AdminDashboardPage() {
           <Kpi icon={CheckCheck} value={failed ? '–' : completedCount} label="Slutförda idag" detail={loading || failed ? 'Dagens planerade transporter' : `Av ${dayTotal} planerade transporter`} href={`${todayHref}&filter=completed`} loading={loading} />
         </div>
 
-        <AttentionQueue items={attentionItems} loading={loading || (!demoOn && invoiceQuery.isLoading)} incomplete={incomplete} />
+        <AttentionQueue items={attentionItems} loading={loading || (!demoOn && (invoiceQuery.isLoading || deviationQuery.isLoading))} incomplete={incomplete} />
 
         <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
           <Card className="min-w-0 overflow-hidden rounded-xl shadow-none">

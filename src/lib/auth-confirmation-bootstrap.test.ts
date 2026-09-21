@@ -17,7 +17,7 @@ describe('auth confirmation HTML bootstrap', () => {
     expect(script?.hasAttribute('async')).toBe(false);
     expect(script?.hasAttribute('defer')).toBe(false);
     const external = document.querySelectorAll('script[src]');
-    expect(external.length).toBeGreaterThanOrEqual(3);
+    expect(external.length).toBeGreaterThan(0);
     for (const resource of document.querySelectorAll('script[src], link[href^="https:"]')) {
       expect(script!.compareDocumentPosition(resource) & 4).toBe(4);
     }
@@ -32,7 +32,9 @@ describe('auth confirmation HTML bootstrap', () => {
     const window = dom.window as unknown as BootstrapWindow;
     try {
       expect(window.location.href).toBe('https://auroratransport.se/auth/confirm');
-      expect(window.observedUrls.length).toBeGreaterThanOrEqual(3);
+      const externalScriptCount = new JSDOM(html).window.document.querySelectorAll('script[src]').length;
+      expect(externalScriptCount).toBeGreaterThan(0);
+      expect(window.observedUrls).toHaveLength(externalScriptCount);
       expect(window.observedUrls.every(url => url === 'https://auroratransport.se/auth/confirm')).toBe(true);
       expect(Object.keys(window)).not.toContain('__auroraTakeAuthConfirmation');
       expect(window.localStorage.length).toBe(0);

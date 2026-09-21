@@ -108,4 +108,16 @@ describe('durable driver offline queue', () => {
     expect(operation.attempts).toBe(1);
     await expect(discardRejectedDriverOperation(operation.id)).rejects.toThrow();
   });
+  it('manual retry bypasses backoff without bypassing permanent rejections or operation order', async () => {
+    const start = await enqueueDriverOperation(input());
+    rows.set(start.id, { ...start, nextAttemptAt: Date.now() + 900_000 });
+    await enqueueDriverOperation({ assignmentId: 'assignment-a', operationType: 'delivery_proof', metadata: {} });
+    const denied = await enqueueDriverOperation(input('assignment-denied'));
+    rows.set(denied.id, { ...denied, rejected: true });
+    await flushDriverOfflineQueue({ force: true });
+    expect(mocks.invoke).toHaveBeenCalledTimes(2);
+    expect(mocks.invoke.mock.calls.map(call => (call[1].body as FormData).get('operationType'))).toEqual(['assignment_status', 'delivery_proof']);
+    expect((await listDriverOperations()).map(row => row.id)).toEqual([denied.id]);
+  });
+
 });
