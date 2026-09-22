@@ -14,10 +14,9 @@ import { useAssignment, useUpdateAssignment, useDeleteAssignment, useDrivers, us
 import { useAuth } from '@/hooks/useAuth';
 import { sendDriverAssignmentPush } from '@/lib/driver-notifications';
 import { formatSwedishDateTime, calculateDuration } from '@/lib/format';
-import { Trash2, Copy, History, Mail, Bell, X, MapPin, Calendar, Clock, User, FileText, AlertTriangle, CheckCircle2, MessageSquare, Navigation, Receipt } from 'lucide-react';
+import { Trash2, Copy, History, X, MapPin, Calendar, Clock, User, FileText, AlertTriangle, CheckCircle2, MessageSquare, Navigation, Receipt } from 'lucide-react';
 import { toast } from 'sonner';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { supabase } from '@/integrations/supabase/client';
+import { AssignmentMailActions } from '@/features/assignment-mail/AssignmentMailActions';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const ACTION_LABELS: Record<string, string> = {
@@ -84,9 +83,6 @@ export default function AdminAssignmentDetail() {
   const createLog = useCreateAssignmentLog();
   const [comment, setComment] = useState<string | null>(null);
   const [costInput, setCostInput] = useState<string | null>(null);
-  const [shareEmail, setShareEmail] = useState('');
-  const [shareMessage, setShareMessage] = useState('');
-  const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -260,7 +256,12 @@ export default function AdminAssignmentDetail() {
             <Label htmlFor="cost" className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Kostnad / fakturabelopp (kr)</Label>
             <div className="flex gap-2 mt-1">
               <Input id="cost" type="number" step="0.01" min="0" className="max-w-[200px]" value={costInput !== null ? costInput : (assignment.cost != null ? String(assignment.cost) : '')} onChange={e => setCostInput(e.target.value)} placeholder="Valfritt" />
-              <Button size="sm" variant="outline" onClick={() => { const val = costInput !== null ? costInput : ''; updateAssignment.mutate({ id: assignment.id, cost: val ? parseFloat(val) : null }); setCostInput(null); }}>Spara</Button>
+              <Button size="sm" variant="outline" disabled={costInput === null || updateAssignment.isPending} onClick={() => {
+                if (costInput === null) return;
+                const value = costInput.trim() ? Number(costInput) : null;
+                if (value !== null && (!Number.isFinite(value) || value < 0)) return toast.error('Ange ett giltigt belopp som är minst 0 kr.');
+                updateAssignment.mutate({ id: assignment.id, cost: value }, { onSuccess: () => setCostInput(null) });
+              }}>{updateAssignment.isPending ? 'Sparar…' : 'Spara'}</Button>
             </div>
           </div>
 
@@ -291,11 +292,7 @@ export default function AdminAssignmentDetail() {
           <div className="flex gap-2 flex-wrap border-t border-border pt-4">
             {canInvoice && <Button size="sm" onClick={() => navigate('/admin/invoices/new', { state: { customerId: assignment.customer_id, assignmentIds: [assignment.id], startAtStep: 3 } })}><Receipt className="h-4 w-4 mr-1" /> Skapa faktura</Button>}
             <Button variant="outline" size="sm" onClick={() => navigate('/admin/assignments/new', { state: { copy: assignment } })}><Copy className="h-4 w-4 mr-1" /> Kopiera</Button>
-            <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
-              <DialogTrigger asChild><Button variant="outline" size="sm"><Mail className="h-4 w-4 mr-1" /> Dela</Button></DialogTrigger>
-              <DialogContent><DialogHeader><DialogTitle>Dela uppdrag via e-post</DialogTitle></DialogHeader><div className="space-y-3"><div className="space-y-1"><Label>Mottagarens e-post</Label><Input type="email" value={shareEmail} onChange={e => setShareEmail(e.target.value)} placeholder="namn@example.com" /></div><div className="space-y-1"><Label>Meddelande (valfritt)</Label><Textarea value={shareMessage} onChange={e => setShareMessage(e.target.value)} placeholder="Hej, här är uppdragsinformation..." /></div><Button onClick={async () => { if (!shareEmail) return; const { error } = await supabase.functions.invoke('share-assignment', { body: { assignment_id: assignment.id, recipient_email: shareEmail, message: shareMessage } }); if (error) toast.error('Kunde inte dela uppdraget'); else { toast.success(`Uppdraget delat till ${shareEmail}`); setShareDialogOpen(false); setShareEmail(''); setShareMessage(''); } }}>Skicka</Button></div></DialogContent>
-            </Dialog>
-            <Button variant="outline" size="sm" onClick={() => { const customerEmail = assignment.customer?.email; if (!customerEmail) { toast.error('Kunden saknar e-postadress'); return; } toast.success(`Leveransavisering skickad till ${customerEmail}`); }}><Bell className="h-4 w-4 mr-1" /> Avisera</Button>
+            <AssignmentMailActions key={assignment.id} assignmentId={assignment.id} customerEmail={assignment.customer?.email} />
             <Button variant="destructive" size="sm" onClick={() => deleteAssignment.mutate(assignment.id, { onSuccess: () => navigate('/admin/assignments') })}><Trash2 className="h-4 w-4 mr-1" /> Ta bort</Button>
           </div>
         </div>

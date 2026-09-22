@@ -1,3 +1,4 @@
+import { sendAnalyticsEvent } from './ga4Runtime';
 // Lightweight GA4 event tracking helper.
 // Falls back to no-op when gtag is missing (dev/preview without GA loaded).
 
@@ -15,12 +16,7 @@ export type TrackParams = Record<string, string | number | boolean | undefined>;
 export function track(event: string, params: TrackParams = {}): void {
   try {
     if (typeof window === 'undefined') return;
-    const gtag = window.gtag;
-    if (typeof gtag === 'function') {
-      gtag('event', event, params);
-    } else if (Array.isArray(window.dataLayer)) {
-      window.dataLayer.push({ event, ...params });
-    }
+    sendAnalyticsEvent(event, { props: params });
     if (import.meta.env.DEV) {
       console.debug('[track]', event, params);
     }

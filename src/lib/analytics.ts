@@ -1,15 +1,6 @@
-// Central, type-safe analytics helper for Plausible.
-//
-// Rules:
-//  - Never send PII (name, email, phone, order id, reg no, customer name, free text).
-//  - Only allow the low-cardinality property set defined in `PropMap` below.
-//  - Do not fire events (or automatic pageviews) on internal work views:
-//    /admin, /driver, /platform, /portal, /onboarding, /track/*.
-//  - Do not send manual pageviews — the Plausible script already handles SPA
-//    history navigation. This helper is only for business events.
-//
-// The helper is a thin, side-effect-free wrapper over `window.plausible`, which
-// is initialised once by the snippet in `index.html`.
+// Type-safe GA4 business events, transported only after statistics consent.
+// ga4Runtime owns SPA pageviews and blocks internal route context.
+// Never pass personal data, free text, tokens or customer identifiers.
 
 export type Plan = 'aurora_449';
 export type BillingInterval = 'monthly' | 'yearly';
@@ -61,7 +52,7 @@ type PlausibleFn = (
 
 declare global {
   interface Window {
-    plausible?: PlausibleFn & { q?: unknown[]; o?: unknown; init?: (i?: unknown) => void };
+    analyticsEvent?: PlausibleFn & { q?: unknown[]; o?: unknown; init?: (i?: unknown) => void };
   }
 }
 
@@ -94,7 +85,7 @@ export function trackEvent<E extends EventName>(
 ): void {
   if (typeof window === 'undefined') return;
   if (!options.allowInternal && isInternalPath()) return;
-  const fn = window.plausible;
+  const fn = window.analyticsEvent;
   if (typeof fn !== 'function') return;
   try {
     const cleaned = sanitizeProps(props as Record<string, unknown>);
@@ -128,7 +119,7 @@ export function trackEventOnce<E extends EventName>(
 }
 
 /**
- * Install a wrapper around `window.plausible` so that automatic SPA pageviews
+ * Install a wrapper around `window.analyticsEvent` so that automatic SPA pageviews
  * (and any events) fired while the user is on an internal work view are
  * suppressed. Uses a property descriptor so a later reassignment by the
  * Plausible script bundle is re-wrapped automatically.
@@ -153,9 +144,9 @@ export function installPlausibleRouteGuard(): void {
     return wrapped;
   };
 
-  let current: PlausibleFn | undefined = wrap(window.plausible);
+  let current: PlausibleFn | undefined = wrap(window.analyticsEvent);
   try {
-    Object.defineProperty(window, 'plausible', {
+    Object.defineProperty(window, 'analyticsEvent', {
       configurable: true,
       get() {
         return current;
@@ -166,6 +157,6 @@ export function installPlausibleRouteGuard(): void {
     });
   } catch {
     // If defineProperty fails (some hardened envs), fall back to direct assign.
-    window.plausible = current;
+    window.analyticsEvent = current;
   }
 }

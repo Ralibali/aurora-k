@@ -140,7 +140,7 @@ async function sendOperation(operation: DriverOfflineOperation) {
   return response.result ?? {};
 }
 
-export function flushDriverOfflineQueue() {
+export function flushDriverOfflineQueue(options: { force?: boolean } = {}) {
   if (flushPromise) return flushPromise;
   flushPromise = (async () => {
     const report: FlushReport = { synced: 0, remaining: 0, results: {}, rejected: {} };
@@ -148,7 +148,7 @@ export function flushDriverOfflineQueue() {
     const blockedAssignments = new Set<string>();
     if (navigator.onLine) for (const operation of operations) {
       if (blockedAssignments.has(operation.assignmentId)) continue;
-      if (operation.rejected || operation.nextAttemptAt > Date.now()) {
+      if (operation.rejected || (!options.force && operation.nextAttemptAt > Date.now())) {
         blockedAssignments.add(operation.assignmentId);
         continue;
       }

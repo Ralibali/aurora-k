@@ -23,7 +23,7 @@ function assignment(number: number, title: string, overrides: Record<string, unk
     company_id: COMPANY_ID,
     title,
     customer_id: '40000000-0000-4000-8000-000000000001',
-    customer: { id: '40000000-0000-4000-8000-000000000001', name: 'Nordic Distribution' },
+    customer: { id: '40000000-0000-4000-8000-000000000001', name: 'Nordic Distribution', email: 'customer@example.test', pricing_type: 'per_delivery', price_per_delivery: 500 },
     address: 'Sveavägen 10, Stockholm',
     pickup_address: 'Terminal Arlandastad',
     delivery_address: 'Sveavägen 10, Stockholm',
@@ -81,12 +81,16 @@ export type DispatchApi = {
   unexpectedRequests: string[];
   notificationRequests: number;
   failNotifications: boolean;
+  mailRequests: Record<string, unknown>[];
+  failNextMail: boolean;
+  driverSettings: Record<string, unknown>;
+  settingsWrites: Record<string, unknown>[];
 };
 
 /** All auth/data traffic stays inside the browser fixture. No real credentials are read. */
 export async function installDispatchFixture(context: BrowserContext): Promise<DispatchApi> {
   const state: DispatchApi = {
-    assignments: createAssignments(), writes: [], failNextMutation: false, partialNextMutation: false, unexpectedRequests: [], notificationRequests: 0, failNotifications: false,
+    assignments: createAssignments(), writes: [], failNextMutation: false, partialNextMutation: false, unexpectedRequests: [], notificationRequests: 0, failNotifications: false, mailRequests: [], failNextMail: false, settingsWrites: [], driverSettings: { id: 'settings-id', company_id: COMPANY_ID, require_signature: true, require_photo: true, show_time_report: true, show_availability_toggle: true, show_total_hours: true },
   };
   const user = {
     id: ADMIN_ID, aud: 'authenticated', role: 'authenticated', email: 'admin@example.test',
@@ -137,6 +141,20 @@ export async function installDispatchFixture(context: BrowserContext): Promise<D
     }
     if (url.pathname.startsWith('/auth/')) return json(url.pathname.endsWith('/user') ? user : session);
     if (url.pathname === '/rest/v1/rpc/is_platform_admin') return json(false);
+    if (url.pathname === '/functions/v1/maps-config' && request.method() === 'POST') return json({ configured: false });
+    if (url.pathname === '/functions/v1/share-assignment') {
+      state.mailRequests.push(request.postDataJSON());
+      if (state.failNextMail) { state.failNextMail = false; return json({ error: 'E-posttjänsten är tillfälligt otillgänglig.' }, 502); }
+      return json({ success: true, id: 'fixture-mail', recipient: 'customer@example.test' });
+    }
+    if (url.pathname === '/rest/v1/driver_settings') {
+      if (request.method() === 'PATCH') {
+        const update = request.postDataJSON();
+        state.settingsWrites.push(update);
+        Object.assign(state.driverSettings, update);
+      }
+      return json(request.headers().accept?.includes('vnd.pgrst.object') ? state.driverSettings : [state.driverSettings]);
+    }
     if (url.pathname === '/rest/v1/user_roles') return json([{ role: 'admin', company_id: COMPANY_ID }]);
     if (url.pathname === '/rest/v1/companies') return json({ id: COMPANY_ID, name: 'Nordic Transport', subscription_status: 'active', trial_ends_at: null });
     if (url.pathname === '/rest/v1/profiles') return json(url.searchParams.has('role') ? drivers : { id: ADMIN_ID, company_id: COMPANY_ID, role: 'admin' });
@@ -172,7 +190,11 @@ export async function installDispatchFixture(context: BrowserContext): Promise<D
         }
         return json(request.headers().accept?.includes('vnd.pgrst.object') ? changed[0] : changed);
       }
-      if (request.method() === 'GET') return json(state.assignments);
+      if (request.method() === 'GET') {
+        const id = url.searchParams.get('id')?.replace(/^eq\./, '');
+        const matching = id ? state.assignments.filter(item => item.id === id) : state.assignments;
+        return json(request.headers().accept?.includes('vnd.pgrst.object') ? matching[0] : matching);
+      }
     }
     if (request.method() === 'GET' || request.method() === 'HEAD') return json([]);
     state.unexpectedRequests.push(`${request.method()} ${url.origin}${url.pathname}`);

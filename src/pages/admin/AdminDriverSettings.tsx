@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { DriverSettingsPresets } from '@/features/driver/DriverSettingsPresets';
 import { AdminLayout } from '@/components/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -33,11 +34,11 @@ const settingsGroups: { id: string; title: string; description: string; icon: ty
   {
     id: 'documentation',
     title: 'Dokumentation vid uppdrag',
-    description: 'Vad chauffören måste samla in när ett uppdrag slutförs.',
+    description: 'Förval för nya manuella uppdrag. Befintliga uppdrag behåller sina sparade krav.',
     icon: ShieldCheck,
     items: [
-      { key: 'require_signature', label: 'Kräv signatur vid slutförande', description: 'Föraren måste samla in mottagarens signatur innan uppdraget kan slutföras.', icon: PenLine, recommended: true },
-      { key: 'require_photo', label: 'Kräv fraktsedelfoto', description: 'Föraren uppmanas att ta foto på fraktsedeln vid slutförande.', icon: Camera, recommended: true },
+      { key: 'require_signature', label: 'Kräv signatur vid slutförande', description: 'Nya manuella uppdrag får signaturkrav som förval. Kravet kan ändras per uppdrag.', icon: PenLine, recommended: true },
+      { key: 'require_photo', label: 'Kräv fraktsedelfoto', description: 'Nya manuella uppdrag får fotokrav som förval. Kravet kan ändras per uppdrag.', icon: Camera, recommended: true },
     ],
   },
   {
@@ -56,7 +57,7 @@ const settingsGroups: { id: string; title: string; description: string; icon: ty
 const settingsConfig: SettingItem[] = settingsGroups.flatMap(g => g.items);
 
 export default function AdminDriverSettings() {
-  const { data: settings, isLoading } = useDriverSettings();
+  const { data: settings, isLoading, isError, refetch } = useDriverSettings();
   const updateSettings = useUpdateDriverSettings();
   const { data: drivers, isLoading: driversLoading } = useDrivers();
   const { data: overrides } = useAllDriverSettingsOverrides();
@@ -119,6 +120,9 @@ export default function AdminDriverSettings() {
           </div>
         </div>
 
+        {isError && <div role="alert" className="rounded-lg border border-destructive/30 p-4 text-sm">Förarinställningarna kunde inte hämtas. <Button variant="outline" size="sm" onClick={() => void refetch()}>Försök igen</Button></div>}
+        {!isLoading && !isError && !settings && <p role="alert" className="text-sm text-destructive">Företagets förarinställningar saknas. Kontakta support så att de kan återställas.</p>}
+        {settings && <DriverSettingsPresets settings={settings} />}
         {/* Global defaults — grouped */}
         {isLoading ? (
           <div className="space-y-3">{[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-20 w-full rounded-lg" />)}</div>
@@ -141,7 +145,7 @@ export default function AdminDriverSettings() {
                       </div>
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <Label className="text-sm font-medium">{item.label}</Label>
+                          <Label htmlFor={`global-${item.key}`} className="text-sm font-medium">{item.label}</Label>
                           {item.recommended && (
                             <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-success/10 text-success text-[10px] font-medium">
                               <Sparkles className="h-2.5 w-2.5" /> Rekommenderad
@@ -152,9 +156,10 @@ export default function AdminDriverSettings() {
                       </div>
                     </div>
                     <Switch
+                      id={`global-${item.key}`}
                       checked={settings?.[item.key] ?? true}
                       onCheckedChange={(v) => handleGlobalToggle(item.key, v)}
-                      disabled={updateSettings.isPending}
+                      disabled={!settings || isError || updateSettings.isPending}
                     />
                   </div>
                 ))}
@@ -233,7 +238,7 @@ export default function AdminDriverSettings() {
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <Label className="text-sm font-medium">{item.label}</Label>
+                            <Label htmlFor={`driver-${item.key}`} className="text-sm font-medium">{item.label}</Label>
                             {isOverridden && (
                               <Badge variant="secondary" className="text-[10px] py-0 cursor-pointer hover:bg-destructive/10" onClick={() => handleResetToGlobal(item.key)}>
                                 Åsidosatt ✕
@@ -246,6 +251,8 @@ export default function AdminDriverSettings() {
                         </div>
                       </div>
                       <Switch
+                        id={`driver-${item.key}`}
+                        aria-label={`${item.label} för vald chaufför`}
                         checked={effectiveValue}
                         onCheckedChange={(v) => handleDriverToggle(item.key, v)}
                         disabled={upsertOverride.isPending}

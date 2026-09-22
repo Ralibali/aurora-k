@@ -1,3 +1,4 @@
+import './lib/initGa4';
 import { createRoot } from "react-dom/client";
 import { Capacitor } from "@capacitor/core";
 import { registerSW } from "virtual:pwa-register";
@@ -18,7 +19,7 @@ import "@fontsource/dm-sans/600.css";
 import "@fontsource/dm-sans/700.css";
 
 // Ensure Plausible does not track internal work views (admin / driver / platform / portal / onboarding / track).
-// Must run before any route renders so the guard wraps the queued `window.plausible` from index.html.
+// Must run before any route renders so the guard wraps the queued `window.analyticsEvent` from index.html.
 installPlausibleRouteGuard();
 
 Sentry.init({

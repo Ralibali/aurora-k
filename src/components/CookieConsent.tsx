@@ -1,8 +1,9 @@
+import { setAnalyticsConsent } from '@/lib/ga4Runtime';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Cookie, X } from 'lucide-react';
 
-const COOKIE_CONSENT_KEY = 'aurora_cookie_consent';
+const COOKIE_CONSENT_KEY = 'aurora_ga4_consent_v1';
 
 type ConsentStatus = 'accepted' | 'rejected' | null;
 
@@ -15,19 +16,7 @@ function getConsent(): ConsentStatus {
 }
 
 function updateGoogleAnalyticsConsent(status: Exclude<ConsentStatus, null>) {
-  try {
-    const gtag = (window as Window & { gtag?: (...args: unknown[]) => void }).gtag;
-    if (typeof gtag === 'function') {
-      gtag('consent', 'update', {
-        analytics_storage: status === 'accepted' ? 'granted' : 'denied',
-        ad_storage: 'denied',
-        ad_user_data: 'denied',
-        ad_personalization: 'denied',
-      });
-    }
-  } catch {
-    // Consent updates must never break the UI.
-  }
+  setAnalyticsConsent(status === 'accepted');
 }
 
 export function CookieConsent() {
@@ -56,7 +45,7 @@ export function CookieConsent() {
     setVisible(false);
   };
 
-  if (!visible) return null;
+  if (!visible) return <button type="button" onClick={() => setVisible(true)} className="fixed bottom-2 left-2 z-40 rounded border bg-background px-2 py-1 text-xs">Cookieinställningar</button>;
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-[100] p-4 animate-in slide-in-from-bottom-4 duration-500">
@@ -67,7 +56,7 @@ export function CookieConsent() {
           </div>
           <div className="flex-1 space-y-3">
             <p className="text-sm text-foreground leading-relaxed">
-              Vi använder nödvändiga cookies för inloggning och kan använda analysverktyg för att förstå hur webbplatsen används.{' '}
+              Vi använder nödvändiga cookies för inloggning och använder Google Analytics 4 efter ditt samtycke för att förstå hur webbplatsen används.{' '}
               <a href="/privacy" className="underline text-primary hover:text-primary/80 transition-colors">
                 Läs vår integritetspolicy
               </a>
