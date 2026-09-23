@@ -34,7 +34,7 @@ export default function RegisterPage() {
 
   usePageMeta({
     title: 'Starta gratis provperiod – 14 dagar utan kostnad | Aurora Transport',
-    description: 'Skapa konto och testa Aurora Transport gratis i 14 dagar. Inget betalkort krävs. 449 kr/mån efteråt, ingen bindningstid.',
+    description: 'Skapa konto och testa Aurora Transport gratis i 14 dagar. Inget betalkort krävs. 449 kr/mån exkl. moms efteråt, ingen bindningstid.',
     canonical: 'https://auroratransport.se/register',
     noindex: true,
   });
@@ -78,7 +78,7 @@ export default function RegisterPage() {
     if (!draft || attemptedUser.current === session.user.id) return;
     attemptedUser.current = session.user.id;
     setCompanyName(draft.companyName); setOrgNumber(draft.orgNr); setFullName(draft.fullName); setPhone(draft.phone);
-    void finishRegistration(session, draft);
+    // Företaget skapas först när användaren aktivt godkänner de visade avtalen.
   }, [session, authLoading, companyId, role, navigate, finishRegistration]);
 
   const validate = () => {
@@ -241,6 +241,7 @@ export default function RegisterPage() {
             </div>
             </>}
 
+            <p className="text-sm text-slate-300">Genom att skapa konto godkänner du <Link to="/villkor" target="_blank" className="underline">användarvillkoren</Link> och <Link to="/pub-avtal" target="_blank" className="underline">PUB-avtalet</Link>.</p>
             <Button type="submit" className="mt-2 h-12 w-full rounded-2xl bg-[#4f46e5] text-sm font-black text-white shadow-lg shadow-[#4f46e5]/25 hover:bg-[#4338ca]" disabled={submitting}>
               {submitting ? 'Skapar konto...' : 'Starta gratis provperiod'}
             </Button>
@@ -248,8 +249,8 @@ export default function RegisterPage() {
             <div className="flex items-start gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-xs text-emerald-200">
               <BadgeCheck className="mt-0.5 h-4 w-4 shrink-0" />
               <p>
-                Full tillgång till allt i 14 dagar. Inget kort, ingen bindningstid — du betalar först om du väljer att fortsätta efteråt (449 kr/mån).
-                {' '}<a href="/#pris" className="font-semibold underline underline-offset-2">Se hela prislistan, inklusive uppstart och onboarding.</a>
+                Full tillgång till allt i 14 dagar. Inget kort, ingen bindningstid — du betalar först om du väljer att fortsätta efteråt (449 kr/mån exkl. moms).
+                {' '}<a href="/#pris" className="font-semibold underline underline-offset-2">Se pris och vad som ingår.</a>
               </p>
             </div>
           </form>

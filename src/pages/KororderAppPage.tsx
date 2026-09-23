@@ -63,7 +63,7 @@ export default function KororderAppPage() {
             <Button size="lg" variant="outline" asChild className="h-12 px-6"><Link to="/">Se hela produkten</Link></Button>
           </div>
           <ul className="mt-7 grid grid-cols-2 gap-y-2 gap-x-6 text-sm text-muted-foreground max-w-lg">
-            {['Uppdrag & signatur i appen', 'GPS och automatiska tider', 'Funkar offline', 'Ingår i 449 kr/mån'].map(t => (
+            {['Uppdrag & signatur i appen', 'GPS och automatiska tider', 'Funkar offline', 'Ingår i 449 kr/mån exkl. moms'].map(t => (
               <li key={t} className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" />{t}</li>
             ))}
           </ul>
@@ -93,7 +93,7 @@ export default function KororderAppPage() {
             { q: 'Vad är en körorder?', a: 'Körordern är förarens arbetsorder: vad som ska hämtas, var det ska lämnas, hos vem och när. I Aurora Transport är den digital — alltid uppdaterad i förarens mobil.' },
             { q: 'Måste föraren ladda ner en app?', a: 'Nej, det fungerar direkt i mobilens webbläsare som en PWA. Föraren kan lägga den på hemskärmen som en vanlig app.' },
             { q: 'Vad händer om föraren saknar täckning?', a: 'Appen sparar signaturer, foton och status lokalt och synkar automatiskt när uppkoppling finns igen.' },
-            { q: 'Vad kostar körorder appen?', a: 'Den ingår i Aurora Transport: 449 kr per månad för hela bolaget, utan bindningstid. Boka en demo så visar vi allt på 15 minuter.' },
+            { q: 'Vad kostar körorder appen?', a: 'Den ingår i Aurora Transport: 449 kr per månad exkl. moms för hela bolaget, utan bindningstid. Boka en demo så visar vi allt på 15 minuter.' },
           ].map((f, i) => (
             <AccordionItem key={i} value={`q${i}`}>
               <AccordionTrigger className="text-left">{f.q}</AccordionTrigger>

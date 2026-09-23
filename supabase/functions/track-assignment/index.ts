@@ -1,3 +1,4 @@
+import { trackingExpired, trackingCustomerName } from './handler.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
@@ -27,7 +28,7 @@ Deno.serve(async request => {
 
   const { data: assignment, error } = await supabase
     .from('assignments')
-    .select('id, title, status, scheduled_start, scheduled_end, actual_start, actual_stop, pickup_address, delivery_address, address, assigned_driver_id, eta_at, planned_arrival_at, geofence_entered_at, customer:customers(name)')
+    .select('id, company_id, title, status, scheduled_start, scheduled_end, actual_start, actual_stop, pickup_address, delivery_address, address, assigned_driver_id, eta_at, planned_arrival_at, geofence_entered_at, customer:customers(name)')
     .eq('tracking_token', token)
     .eq('tracking_enabled', true)
     .maybeSingle();
@@ -38,9 +39,13 @@ Deno.serve(async request => {
   }
   if (!assignment) return response({ error: 'Spårningslänken finns inte eller är avstängd' }, 404);
 
-  const [driverResult, locationResult] = await Promise.all([
-    supabase.from('profiles').select('full_name, phone').eq('id', assignment.assigned_driver_id).maybeSingle(),
+  const { data: demo, error: demoError } = await supabase.rpc('is_demo_company', { company_id: assignment.company_id });
+  if (demoError || demo || trackingExpired(assignment)) return response({ error: 'Spårningslänken är inte tillgänglig' }, 404);
+
+  const [driverResult, locationResult, settingsResult] = await Promise.all([
+    supabase.from('profiles').select('full_name').eq('id', assignment.assigned_driver_id).maybeSingle(),
     supabase.from('driver_locations').select('latitude, longitude, heading, speed, updated_at').eq('driver_id', assignment.assigned_driver_id).eq('assignment_id', assignment.id).maybeSingle(),
+    supabase.from('settings').select('phone').eq('company_id', assignment.company_id).maybeSingle(),
   ]);
 
   const location = locationResult.data;
@@ -60,11 +65,12 @@ Deno.serve(async request => {
       arrivedAt: assignment.geofence_entered_at,
       pickupAddress: assignment.pickup_address || assignment.address,
       deliveryAddress: assignment.delivery_address,
-      customerName: Array.isArray(assignment.customer) ? assignment.customer[0]?.name : assignment.customer?.name,
+      customerName: trackingCustomerName(assignment.customer),
     },
+    companyPhone: settingsResult.data?.phone || null,
     driver: driverResult.data ? {
       firstName: driverResult.data.full_name?.split(' ')[0] || 'Chauffören',
-      phone: driverResult.data.phone || null,
+
     } : null,
     location: locationFresh && location ? {
       latitude: location.latitude,

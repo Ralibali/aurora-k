@@ -1,6 +1,6 @@
 # Aurora Transport
 
-> Svenskt transportledningssystem (TMS) för åkerier, budfirmor och transportbemanning. Hantera uppdrag, förare, tidrapportering och fakturaunderlag – 449 kr/månad, ingen bindningstid.
+> Svenskt transportledningssystem (TMS) för åkerier, budfirmor och transportbemanning. Hantera uppdrag, förare, tidrapportering och fakturaunderlag – 449 kr/månad exkl. moms, ingen bindningstid.
 
 Aurora Transport är en molnbaserad SaaS-plattform byggd av Aurora Media AB. Systemet riktar sig till små och medelstora transportföretag i Sverige som vill digitalisera dispatch, förarapp, körordrar, tidrapportering och fakturaunderlag i ett gränssnitt. Onboarding sker självständigt på under en dag.
 

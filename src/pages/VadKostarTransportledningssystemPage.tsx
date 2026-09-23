@@ -25,7 +25,7 @@ const costFactors = [
   },
   {
     title: 'Implementation och onboarding',
-    text: 'Vissa system kräver långa projekt, konsulter och anpassningar. För många mindre transportföretag är det viktigare att komma igång snabbt. Aurora Transport har en tydlig setupkostnad för uppstart, konfiguration och onboarding.',
+    text: 'Vissa system kräver långa projekt, konsulter och anpassningar. För många mindre transportföretag är det viktigare att komma igång snabbt. Aurora Transport har ingen startavgift. Valfri uppstartshjälp kan beställas separat.',
   },
 ];
 
@@ -64,12 +64,12 @@ export default function VadKostarTransportledningssystemPage() {
           <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_30px_90px_rgba(15,47,110,0.14)]">
             <div className="bg-[#0b1730] p-7 text-white">
               <p className="text-sm font-black uppercase tracking-[0.18em] text-blue-200">Aurora Transport</p>
-              <div className="mt-4 text-5xl font-black tracking-tight">449 kr</div>
+              <div className="mt-4 text-5xl font-black tracking-tight">449 kr exkl. moms</div>
               <p className="mt-2 text-slate-300">per månad</p>
             </div>
             <div className="p-7">
-              <div className="text-4xl font-black tracking-tight text-slate-950">3 500 kr</div>
-              <p className="mt-2 text-slate-600">engångskostnad för setup och onboarding</p>
+              <div className="text-4xl font-black tracking-tight text-slate-950">3 500 kr exkl. moms</div>
+              <p className="mt-2 text-slate-600">valfri uppstartshjälp på förfrågan via <Link to="/kontakt" className="underline">kontaktformuläret</Link></p>
               <div className="mt-6 space-y-3">
                 {included.slice(0, 5).map((item) => <div key={item} className="flex items-start gap-3 text-sm font-bold text-slate-700"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#123b88]" />{item}</div>)}
               </div>
@@ -83,7 +83,7 @@ export default function VadKostarTransportledningssystemPage() {
           <h2 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">Så ska du jämföra pris på transportledningssystem</h2>
           <div className="mt-6 space-y-6 text-lg leading-8 text-slate-600">
             <p>När någon söker efter vad ett transportledningssystem kostar handlar det sällan bara om själva priset. Det handlar om att förstå vad man får för pengarna, hur snabbt systemet kan börja användas och om det faktiskt minskar administrationen i vardagen. Ett billigt system som inte löser uppdragshantering, förare, tidrapportering och fakturaunderlag kan i praktiken bli dyrt eftersom arbetet ändå behöver göras manuellt vid sidan av.</p>
-            <p>För åkerier, budfirmor och mindre transportföretag är det ofta viktigt med ett pris som går att förstå direkt. Många vill slippa långa säljmöten, dolda avgifter och licenser som växer varje gång en ny förare läggs till. Aurora Transport har därför ett tydligt upplägg: en engångskostnad för setup och onboarding, och därefter ett fast månadspris. Det gör det enklare att budgetera och lättare att avgöra om systemet passar verksamheten.</p>
+            <p>För åkerier, budfirmor och mindre transportföretag är det ofta viktigt med ett pris som går att förstå direkt. Många vill slippa långa säljmöten, dolda avgifter och licenser som växer varje gång en ny förare läggs till. Aurora Transport har därför ett tydligt upplägg: en valfri uppstartshjälp på förfrågan via kontaktformuläret, och därefter ett fast månadspris. Det gör det enklare att budgetera och lättare att avgöra om systemet passar verksamheten.</p>
             <p>Priset ska också sättas i relation till tiden som sparas. Om du i dag lägger timmar varje vecka på att samla tidrapporter, leta upp information i WhatsApp, uppdatera Excel-filer och skapa fakturaunderlag manuellt kan ett transportledningssystem snabbt betala tillbaka sig. Det gäller särskilt när systemet samlar dispatch, uppdrag, förare, digital tidrapportering och fakturaunderlag i samma flöde.</p>
           </div>
         </div>

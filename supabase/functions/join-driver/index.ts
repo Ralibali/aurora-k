@@ -1,3 +1,4 @@
+import { validDriverPassword } from './handler.ts';
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.100.1";
 import { z } from "https://esm.sh/zod@3.23.8";
 import { sitePath } from "../_shared/site-url.ts";
@@ -11,7 +12,7 @@ const corsHeaders = {
 const BodySchema = z.object({
   token: z.string().uuid("Ogiltigt token-format"),
   name: z.string().trim().min(2, "Namnet måste vara minst 2 tecken").max(100, "Namnet får vara max 100 tecken"),
-  password: z.string().min(8, "Lösenordet måste vara minst 8 tecken").max(128, "Lösenordet får vara max 128 tecken"),
+  password: z.string().refine(validDriverPassword, "Lösenordet måste ha minst 10 tecken och högst 72 byte"),
 });
 
 Deno.serve(async (req) => {

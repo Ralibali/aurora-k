@@ -1,3 +1,4 @@
+import { storeProof } from './handler.ts';
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.100.1';
 import { deliverOutbox } from '../_shared/notification-outbox.ts';
 import { DriverRequestError, validateDriverImage, validateDriverMetadata } from './validation.ts';
@@ -11,16 +12,6 @@ function notifyAfterCommit(admin: SupabaseClient, companyId: string) {
   return task;
 }
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-async function signedUpload(admin: SupabaseClient, userId: string, assignmentId: string, operationId: string, file: File, suffix: string) {
-  const path = `${userId}/${assignmentId}/${operationId}-${suffix}`;
-  const { error } = await admin.storage.from('consignment-notes').upload(path, file, { contentType: file.type, upsert: false });
-  // A retry must reuse its first stored evidence, never overwrite it mid-commit.
-  if (error && String(error.statusCode) !== '409') throw error;
-  const { data, error: signedError } = await admin.storage.from('consignment-notes').createSignedUrl(path, 60 * 60 * 24 * 365);
-  if (signedError) throw signedError;
-  return data.signedUrl;
-}
 
 Deno.serve(async request => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: cors });
@@ -63,11 +54,11 @@ Deno.serve(async request => {
     const signature = signaturePart instanceof File ? signaturePart : null;
     validateDriverImage(photo);
     validateDriverImage(signature);
-    const photoUrl = operationType === 'delivery_proof' && photo ? await signedUpload(admin, user.id, assignmentId, operationKey, photo, 'delivery-photo') : null;
-    const signatureUrl = operationType === 'delivery_proof' && signature ? await signedUpload(admin, user.id, assignmentId, operationKey, signature, 'signature.png') : null;
+    const photoPath = operationType === 'delivery_proof' && photo ? await storeProof(admin, user.id, assignmentId, operationKey, photo, 'delivery-photo') : null;
+    const signaturePath = operationType === 'delivery_proof' && signature ? await storeProof(admin, user.id, assignmentId, operationKey, signature, 'signature.png') : null;
     const { data: result, error } = await admin.rpc('sync_driver_operation', {
       p_user_id: user.id, p_operation_id: operationKey, p_assignment_id: assignmentId,
-      p_operation_type: operationType, p_metadata: metadata, p_photo_url: photoUrl, p_signature_url: signatureUrl,
+      p_operation_type: operationType, p_metadata: metadata, p_photo_url: photoPath, p_signature_url: signaturePath,
     });
     if (error) {
       if (error.code === '42501') throw new DriverRequestError(error.message, 403);

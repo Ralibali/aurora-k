@@ -73,7 +73,7 @@ export default function RouteMapGoogle({ assignments, roadPath }: RouteMapProps)
     const path: google.maps.LatLngLiteral[] = [];
 
     assignments.forEach((a, i) => {
-      if (!isValidMapCoordinate(a.geofence_lat, a.geofence_lng)) return;
+      if (typeof a.geofence_lat !== 'number' || typeof a.geofence_lng !== 'number' || !isValidMapCoordinate(a.geofence_lat, a.geofence_lng)) return;
 
       const position = { lat: a.geofence_lat, lng: a.geofence_lng };
       path.push(position);

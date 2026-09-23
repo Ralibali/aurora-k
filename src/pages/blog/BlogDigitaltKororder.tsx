@@ -14,7 +14,7 @@ export default function BlogDigitaltKororder() {
       <p>Det är lätt att skjuta upp digitaliseringen. "Det funkar ju ändå." Men vad kostar det att inte byta?</p>
 
       <h2>Kostnaden av att inte digitalisera</h2>
-      <p>Räkna på det här: om du eller din dispatcher lägger 2 timmar per dag på manuell orderhantering – telefonsamtal, Excel-uppdateringar, SMS till förare – och din tid är värd 400 kr/timme, är det 800 kr/dag. Det blir 200 000 kr/år.</p>
+      <p>Räkna på det här: om du eller din dispatcher lägger 2 timmar per dag på manuell orderhantering – telefonsamtal, Excel-uppdateringar, SMS till förare – och din tid är värd 400 kr exkl. moms/timme, är det 800 kr exkl. moms/dag. Det blir 200 000 kr/år exkl. moms.</p>
       <p>Ett digitalt körordersystem eliminerar inte all administration, men skär ofta bort 50–70% av den manuella hanteringen.</p>
 
       <h2>Konkreta fördelar</h2>

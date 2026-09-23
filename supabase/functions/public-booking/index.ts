@@ -1,3 +1,4 @@
+import { allowBooking, bookingNumber, honeypotBooking } from './handler.ts';
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.100.1';
 import { z } from 'https://esm.sh/zod@3';
 import { deliverOutbox } from '../_shared/notification-outbox.ts';
@@ -37,30 +38,15 @@ function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: jsonHeaders });
 }
 
-async function sha256(value: string) {
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
-  return Array.from(new Uint8Array(digest)).map(byte => byte.toString(16).padStart(2, '0')).join('');
-}
-
-function getClientFingerprint(req: Request) {
-  const ip = req.headers.get('cf-connecting-ip')
-    || req.headers.get('x-real-ip')
-    || req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-    || 'unknown';
-  const userAgent = req.headers.get('user-agent') || 'unknown';
-  return `${ip}|${userAgent.slice(0, 200)}`;
-}
-
-function makeOrderNumber(requestId: string) {
-  return `AT-${requestId.replace(/-/g, '').slice(0, 10).toUpperCase()}`;
-}
-
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
 
   try {
-    const parsed = BookingSchema.safeParse(await req.json().catch(() => ({})));
+    const input = await req.json().catch(() => ({}));
+    const trapped = honeypotBooking(input);
+    if (trapped) return json(trapped, 201);
+    const parsed = BookingSchema.safeParse(input);
     if (!parsed.success) {
       return json({ error: 'Ogiltiga bokningsuppgifter', details: parsed.error.flatten().fieldErrors }, 400);
     }
@@ -80,6 +66,10 @@ Deno.serve(async (req) => {
 
     if (companyError || !company) return json({ error: 'Bokningssidan är inte kopplad till något företag' }, 404);
 
+    const { data: demo, error: demoError } = await admin.rpc('is_demo_company', { company_id: company.id });
+    if (demoError) throw demoError;
+    if (demo) return json({ error: 'Bokningssidan är inte tillgänglig' }, 404);
+
     const { data: existing, error: existingError } = await admin
       .from('booking_requests')
       .select('id, public_order_number, company_id')
@@ -95,25 +85,19 @@ Deno.serve(async (req) => {
       return json({ booking: existing, order_number: existing.public_order_number, duplicate: true }, 200);
     }
 
-    const fingerprint = await sha256(getClientFingerprint(req));
-    const { data: allowed, error: rateLimitError } = await admin.rpc('consume_public_booking_rate_limit', {
-      p_company_id: company.id,
-      p_fingerprint: fingerprint,
-      p_limit: 5,
+    const allowed = await allowBooking(req, company.id, async (key, limit, seconds) => {
+      const { data, error } = await admin.rpc('consume_mail_rate_limit', { p_key: key, p_limit: limit, p_window_seconds: seconds });
+      if (error) throw error;
+      return data === true;
     });
-
-    if (rateLimitError) {
-      console.error('[public-booking] rate limit check failed', rateLimitError);
-      return json({ error: 'Bokningen kunde inte verifieras. Försök igen om en stund.' }, 503);
-    }
-    if (!allowed) return json({ error: 'För många försök. Vänta tio minuter och försök igen.' }, 429);
+    if (!allowed) return json({ error: 'För många bokningsförsök. Försök igen senare.' }, 429);
 
     const attachmentPrefix = `public/${parsed.data.request_id}/`;
     if (parsed.data.attachment_paths.some(path => !path.startsWith(attachmentPrefix) || path.includes('..') || path.slice(attachmentPrefix.length).includes('/'))) {
       return json({ error: 'Ogiltig bilagereferens' }, 400);
     }
 
-    const orderNumber = makeOrderNumber(parsed.data.request_id);
+    const orderNumber = bookingNumber(parsed.data.request_id);
     const description = [
       `Ordernummer: ${orderNumber}`,
       parsed.data.description || '',

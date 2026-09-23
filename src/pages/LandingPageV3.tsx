@@ -598,7 +598,7 @@ const includedCopy = {
     sub: 'Ett enda fast pris ger dig hela plattformen: alla moduler, obegränsat antal förare, kunder och uppdrag, support och uppdateringar. Inga tillval, inga paket, inga överraskningar på fakturan.',
     cta: 'Boka demo',
     sub2: 'Logga in i en demomiljö',
-    note: 'Allt nedan ingår i 449 kr / månad. 30 dagars uppsägning. Inget år, ingen bindningstid.',
+    note: 'Allt nedan ingår i 449 kr / månad exkl. moms. Uppsägning till slutet av betald period. Inget år, ingen bindningstid.',
     groups: [
       {
         title: 'Uppdrag & order',
@@ -707,7 +707,7 @@ const includedCopy = {
     sub: 'One flat price gives you the whole platform: every module, unlimited drivers, customers and jobs, support and updates included. No add-ons, no tiers, no surprises on the invoice.',
     cta: 'Book a demo',
     sub2: 'Try the demo environment',
-    note: 'Everything below is included for 449 SEK / month. 30 days notice. No annual contract.',
+    note: 'Everything below is included for 449 SEK / month exkl. moms. Uppsägning till slutet av betald period. No annual contract.',
     groups: [
       {
         title: 'Jobs & orders',

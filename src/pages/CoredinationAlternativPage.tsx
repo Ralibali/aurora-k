@@ -15,7 +15,7 @@ const fadeUp = {
 export default function CoredinationAlternativPage() {
   usePageMeta({
     title: 'Coredination-alternativ — enklare | Aurora Transport',
-    description: 'Letar du efter alternativ till Coredination? Fast pris 449 kr/mån, obegränsat antal användare och ingen bindningstid.',
+    description: 'Letar du efter alternativ till Coredination? Fast pris 449 kr/mån exkl. moms, obegränsat antal användare och ingen bindningstid.',
     canonical: 'https://auroratransport.se/coredination-alternativ',
   });
 
@@ -45,7 +45,7 @@ export default function CoredinationAlternativPage() {
             applicationCategory: 'BusinessApplication',
             operatingSystem: 'Web',
             description: 'Alternativ till Coredination. Enkelt transportledningssystem med fast pris, obegränsat antal användare och ingen bindningstid.',
-            offers: { '@type': 'Offer', price: '449', priceCurrency: 'SEK' },
+            offers: { '@type': 'Offer', price: '449', priceCurrency: 'SEK', priceSpecification: { '@type': 'UnitPriceSpecification', price: 449, priceCurrency: 'SEK', valueAddedTaxIncluded: false } },
           }),
         }}
       />
@@ -91,7 +91,7 @@ function Hero() {
         </motion.p>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
           <Button size="lg" asChild className="rounded-xl px-8 py-6 text-base font-semibold">
-            <Link to="/kontakt">Testa Aurora Transport — 449 kr/mån</Link>
+            <Link to="/kontakt">Testa Aurora Transport — 449 kr/mån exkl. moms</Link>
           </Button>
         </motion.div>
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="flex justify-center flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground mt-8">
@@ -106,7 +106,7 @@ function Hero() {
 
 function WhySwitch() {
   const cards = [
-    { icon: CreditCard, title: 'Fast pris för hela teamet', desc: 'Aurora Transport kostar 449 kr/mån oavsett antal förare och admins. Hos Coredination väljer man paket och skalar antalet användare efter behov.' },
+    { icon: CreditCard, title: 'Fast pris för hela teamet', desc: 'Aurora Transport kostar 449 kr/mån exkl. moms oavsett antal förare och admins. Hos Coredination väljer man paket och skalar antalet användare efter behov.' },
     { icon: Layers, title: 'Renodlat för transport och bemanning', desc: 'Aurora fokuserar på åkerier, budfirmor och transportbemanning. Coredination byggs bredare för transport, maskinuthyrning och service.' },
     { icon: Users, title: 'Obegränsade användare utan bindningstid', desc: 'Alla förare och admins ingår i priset. Du kan växa, testa och avsluta utan att låsa upp dig i ett långt avtal.' },
   ];
@@ -147,7 +147,7 @@ function ComparisonTable() {
     { feature: 'Ingen bindningstid', aurora: true, core: 'Beror på avtal' },
   ];
   const textRows: { feature: string; aurora: string; core: string }[] = [
-    { feature: 'Pris', aurora: '449 kr/mån', core: 'Paketbaserad prissättning' },
+    { feature: 'Pris', aurora: '449 kr/mån exkl. moms', core: 'Paketbaserad prissättning' },
     { feature: 'Användare', aurora: 'Obegränsat', core: 'Skalas efter paket/användarantal' },
     { feature: 'Inriktning', aurora: 'Transport och bemanning', core: 'Transport, maskinuthyrning och service' },
   ];
@@ -237,7 +237,7 @@ function ForWho() {
 function FaqSection() {
   const faqs = [
     { q: 'Kan jag importera data från Coredination?', a: 'Vi hjälper dig att komma igång snabbt. Kontakta oss på info@auroramedia.se så assisterar vi med migrationen.' },
-    { q: 'Vad kostar det jämfört med Coredination?', a: 'Aurora Transport kostar 449 kr/mån oavsett antal användare. Coredination använder paket och användarantal, så jämför totalkostnaden utifrån hur många förare och admins ni vill ha i systemet.' },
+    { q: 'Vad kostar det jämfört med Coredination?', a: 'Aurora Transport kostar 449 kr/mån exkl. moms oavsett antal användare. Coredination använder paket och användarantal, så jämför totalkostnaden utifrån hur många förare och admins ni vill ha i systemet.' },
     { q: 'Förlorar jag funktioner?', a: 'Vi täcker kärnbehoven: dispatch, tidrapportering, GPS-spårning och export. Om du behöver bredare stöd för maskinuthyrning, service eller avancerade byggflöden kan Coredination passa bättre.' },
     { q: 'Hur snabbt kan jag komma igång?', a: 'Under 5 minuter. Registrera dig, bjud in förare och börja tilldela uppdrag direkt.' },
   ];
@@ -269,7 +269,7 @@ function FinalCta() {
           Redo att byta till enklare och mer förutsägbart?
         </motion.h2>
         <motion.p initial="hidden" whileInView="visible" viewport={{ once: true }} custom={1} variants={fadeUp} className="text-slate-400 mb-8">
-          449 kr/mån. Obegränsat antal användare. Ingen bindningstid.
+          449 kr/mån exkl. moms. Obegränsat antal användare. Ingen bindningstid.
         </motion.p>
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} custom={2} variants={fadeUp}>
           <Button size="lg" asChild className="rounded-xl px-10 py-6 text-base font-semibold bg-white text-[hsl(222,47%,11%)] hover:bg-white/90">

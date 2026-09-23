@@ -1,3 +1,4 @@
+import type { Tables } from '@/integrations/supabase/types';
 import { useState } from 'react';
 import { AdminLayout } from '@/components/AdminLayout';
 import { Card, CardContent } from '@/components/ui/card';
@@ -27,7 +28,7 @@ export default function AdminExternalResources() {
   const [notes, setNotes] = useState('');
 
   const reset = () => { setEditId(null); setName(''); setCompany(''); setEmail(''); setPhone(''); setSpecialty(''); setRate(''); setNotes(''); };
-  const openEdit = (r) => { setEditId(r.id); setName(r.name); setCompany(r.company||''); setEmail(r.email||''); setPhone(r.phone||''); setSpecialty(r.specialty||''); setRate(r.hourly_rate?String(r.hourly_rate):''); setNotes(r.notes||''); setOpen(true); };
+  const openEdit = (r: Tables<'external_resources'>) => { setEditId(r.id); setName(r.name); setCompany(r.company||''); setEmail(r.email||''); setPhone(r.phone||''); setSpecialty(r.specialty||''); setRate(r.hourly_rate?String(r.hourly_rate):''); setNotes(r.notes||''); setOpen(true); };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

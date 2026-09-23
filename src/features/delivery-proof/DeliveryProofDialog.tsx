@@ -1,3 +1,4 @@
+import { useProofUrls } from '@/hooks/useProofUrls';
 import { useState } from 'react';
 import { Camera, CheckCircle2, Loader2, PenLine } from 'lucide-react';
 import { toast } from 'sonner';
@@ -13,11 +14,12 @@ export function DeliveryProofDialog({ open, onOpenChange, assignment, userId, co
   blockedReason?: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  assignment: { id: string; require_photo?: boolean | null; require_signature?: boolean | null; consignment_photo_url?: string | null; signature_url?: string | null };
+  assignment: { proof_photo_path?: string | null; signature_path?: string | null; id: string; require_photo?: boolean | null; require_signature?: boolean | null; consignment_photo_url?: string | null; signature_url?: string | null };
   userId: string;
   companyId?: string | null;
   onComplete: (result: DeliveryProofResult) => Promise<void> | void;
 }) {
+  const proofUrls = useProofUrls(assignment);
   const [photo, setPhoto] = useState<File | null>(null);
   const [signature, setSignature] = useState<Blob | null>(null);
   const [recipientName, setRecipientName] = useState('');
@@ -26,8 +28,8 @@ export function DeliveryProofDialog({ open, onOpenChange, assignment, userId, co
 
   const submit = async () => {
     if (saving || blockedReason) return;
-    if (assignment.require_photo && !photo && !assignment.consignment_photo_url) return toast.error('Foto krävs');
-    if (assignment.require_signature && !signature && !assignment.signature_url) return toast.error('Signatur krävs');
+    if (assignment.require_photo && !photo && !(assignment.proof_photo_path || assignment.consignment_photo_url)) return toast.error('Foto krävs');
+    if (assignment.require_signature && !signature && !(assignment.signature_path || assignment.signature_url)) return toast.error('Signatur krävs');
     if (assignment.require_signature && !recipientName.trim()) return toast.error('Ange mottagarens namn');
     setSaving(true);
     try {
@@ -37,8 +39,8 @@ export function DeliveryProofDialog({ open, onOpenChange, assignment, userId, co
         companyId,
         photo,
         signature,
-        existingPhotoUrl: assignment.consignment_photo_url,
-        existingSignatureUrl: assignment.signature_url,
+        existingPhotoUrl: assignment.proof_photo_path || assignment.consignment_photo_url,
+        existingSignatureUrl: assignment.signature_path || assignment.signature_url,
         recipientName,
         note,
         requirePhoto: assignment.require_photo,
@@ -59,6 +61,9 @@ export function DeliveryProofDialog({ open, onOpenChange, assignment, userId, co
       <DialogContent className="max-h-[92vh] max-w-lg overflow-y-auto">
         <DialogHeader><DialogTitle>Slutför med leveransbevis</DialogTitle><DialogDescription>Bekräfta mottagaren och spara leveransens underlag.</DialogDescription></DialogHeader>
         <div className="space-y-4">
+          {proofUrls.photoUrl && <img src={proofUrls.photoUrl} alt="Sparat leveransfoto" />}
+          {proofUrls.signatureUrl && <img src={proofUrls.signatureUrl} alt="Sparad signatur" />}
+          {proofUrls.error && <p>Det sparade beviset kunde inte visas. Beviset finns kvar; försök igen när du har uppkoppling.</p>}
           <div className="space-y-2"><Label htmlFor="delivery-photo" className="flex gap-2"><Camera className="h-4 w-4" />Foto {assignment.require_photo && '*'}</Label><Input id="delivery-photo" type="file" accept="image/*" capture="environment" onChange={event => setPhoto(event.target.files?.[0] ?? null)} /></div>
           <div className="space-y-2"><Label htmlFor="delivery-recipient">Mottagarens namn {assignment.require_signature && '*'}</Label><Input id="delivery-recipient" value={recipientName} onChange={event => setRecipientName(event.target.value)} /></div>
           <div className="space-y-2"><Label className="flex gap-2"><PenLine className="h-4 w-4" />Signatur {assignment.require_signature && '*'}</Label><SignaturePad onChange={setSignature} /></div>

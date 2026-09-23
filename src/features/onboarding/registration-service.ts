@@ -1,3 +1,5 @@
+import terms from '@/content/legal/terms.json';
+import dpa from '@/content/legal/dpa.json';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -21,7 +23,7 @@ export async function completeCompanyRegistration(session: Session, draft?: Regi
   if (!registration) throw new Error('Fyll i företagsuppgifterna för att slutföra registreringen.');
   const { data, error } = await supabase.functions.invoke('register-company', {
     headers: { Authorization: `Bearer ${session.access_token}` },
-    body: registration,
+    body: { ...registration, termsVersion: terms.version, dpaVersion: dpa.version },
   });
   if (error || !data?.companyId) throw new Error('Företaget kunde inte kopplas till kontot. Dina kontouppgifter finns kvar; försök igen.');
   return data.companyId as string;

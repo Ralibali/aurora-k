@@ -43,8 +43,12 @@ describe('company registration lifecycle', () => {
   it('resumes confirmed registration on another device using account metadata, then refreshes membership', async () => {
     mocks.auth.mockReturnValue({ session, role: null, companyId: null, loading: false, refreshProfile: mocks.refreshProfile });
     renderRegistration('/register?confirmed=1');
+    expect(mocks.invoke).not.toHaveBeenCalled();
+    expect(screen.getByRole('link', { name: 'användarvillkoren' })).toHaveAttribute('href', '/villkor');
+    expect(screen.getByRole('link', { name: 'PUB-avtalet' })).toHaveAttribute('href', '/pub-avtal');
+    fireEvent.click(screen.getByRole('button', { name: 'Starta gratis provperiod' }));
     await screen.findByText('Onboarding ready');
-    expect(mocks.invoke).toHaveBeenCalledWith('register-company', { headers: { Authorization: 'Bearer confirmed-user-token' }, body: draft });
+    expect(mocks.invoke).toHaveBeenCalledWith('register-company', { headers: { Authorization: 'Bearer confirmed-user-token' }, body: { ...draft, termsVersion: '2026-09-23', dpaVersion: '2026-09-23' } });
     expect(mocks.refreshProfile).toHaveBeenCalledOnce();
     expect(mocks.signUp).not.toHaveBeenCalled();
   });
@@ -53,6 +57,10 @@ describe('company registration lifecycle', () => {
     mocks.auth.mockReturnValue({ session, role: null, companyId: null, loading: false, refreshProfile: mocks.refreshProfile });
     mocks.invoke.mockResolvedValueOnce({ data: null, error: new Error('network') });
     renderRegistration('/register?confirmed=1');
+    expect(mocks.invoke).not.toHaveBeenCalled();
+    expect(screen.getByRole('link', { name: 'användarvillkoren' })).toHaveAttribute('href', '/villkor');
+    expect(screen.getByRole('link', { name: 'PUB-avtalet' })).toHaveAttribute('href', '/pub-avtal');
+    fireEvent.click(screen.getByRole('button', { name: 'Starta gratis provperiod' }));
     await screen.findByRole('alert');
     fireEvent.click(screen.getByRole('button', { name: 'Starta gratis provperiod' }));
     await screen.findByText('Onboarding ready');
@@ -64,6 +72,10 @@ describe('company registration lifecycle', () => {
     mocks.auth.mockReturnValue({ session, role: null, companyId: null, loading: false, refreshProfile: mocks.refreshProfile });
     mocks.refreshProfile.mockResolvedValue({ role: null, companyId: null });
     renderRegistration('/register?confirmed=1');
+    expect(mocks.invoke).not.toHaveBeenCalled();
+    expect(screen.getByRole('link', { name: 'användarvillkoren' })).toHaveAttribute('href', '/villkor');
+    expect(screen.getByRole('link', { name: 'PUB-avtalet' })).toHaveAttribute('href', '/pub-avtal');
+    fireEvent.click(screen.getByRole('button', { name: 'Starta gratis provperiod' }));
     await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('Företagskopplingen kunde inte bekräftas'));
     expect(screen.queryByText('Onboarding ready')).not.toBeInTheDocument();
   });

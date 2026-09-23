@@ -15,7 +15,7 @@ const fadeUp = {
 export default function TransportledningssystemPage() {
   usePageMeta({
     title: 'Transportledningssystem för åkerier & transportföretag | Aurora Transport',
-    description: 'Aurora Transport är ett enkelt transportledningssystem för åkerier, budföretag och bemanningsteam. Hantera uppdrag, förare, tidrapporter och fakturaunderlag från 449 kr/mån.',
+    description: 'Aurora Transport är ett enkelt transportledningssystem för åkerier, budföretag och bemanningsteam. Hantera uppdrag, förare, tidrapporter och fakturaunderlag från 449 kr/mån exkl. moms.',
     canonical: 'https://auroratransport.se/transportledningssystem',
   });
 
@@ -47,7 +47,7 @@ export default function TransportledningssystemPage() {
             applicationCategory: 'BusinessApplication',
             operatingSystem: 'Web',
             description: 'Transportledningssystem för små och medelstora företag. Samlar uppdrag, förare och tidrapporter.',
-            offers: { '@type': 'Offer', price: '449', priceCurrency: 'SEK' },
+            offers: { '@type': 'Offer', price: '449', priceCurrency: 'SEK', priceSpecification: { '@type': 'UnitPriceSpecification', price: 449, priceCurrency: 'SEK', valueAddedTaxIncluded: false } },
           }),
         }}
       />
@@ -233,9 +233,9 @@ function ComparisonTable() {
               ))}
               <tr className="border-t border-border">
                 <td className="px-5 py-3 text-foreground font-semibold">Pris per månad</td>
-                <td className="px-5 py-3 text-center bg-primary/5 font-mono font-bold text-primary">449 kr</td>
-                <td className="px-5 py-3 text-center font-mono text-muted-foreground">0 kr*</td>
-                <td className="px-5 py-3 text-center font-mono text-muted-foreground">800–3 000 kr+</td>
+                <td className="px-5 py-3 text-center bg-primary/5 font-mono font-bold text-primary">449 kr exkl. moms</td>
+                <td className="px-5 py-3 text-center font-mono text-muted-foreground">0 kr exkl. moms*</td>
+                <td className="px-5 py-3 text-center font-mono text-muted-foreground">800–3 000 kr exkl. moms+</td>
               </tr>
             </tbody>
           </table>
@@ -314,7 +314,7 @@ function FinalCta() {
           Redo att digitalisera din transportplanering?
         </motion.h2>
         <motion.p initial="hidden" whileInView="visible" viewport={{ once: true }} custom={1} variants={fadeUp} className="text-slate-400 mb-8">
-          449 kr/mån. Fast pris. Ingen bindningstid.
+          449 kr/mån exkl. moms. Fast pris. Ingen bindningstid.
         </motion.p>
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} custom={2} variants={fadeUp}>
           <Button size="lg" asChild className="rounded-xl px-10 py-6 text-base font-semibold bg-white text-[hsl(222,47%,11%)] hover:bg-white/90">

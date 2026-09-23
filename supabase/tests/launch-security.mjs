@@ -12,7 +12,7 @@ create schema auth; create schema storage;
 create type public.app_role as enum('admin','driver');
 create table auth.users(id uuid primary key,email text,email_confirmed_at timestamptz,raw_user_meta_data jsonb default '{}');
 create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
-create table public.companies(id uuid primary key default gen_random_uuid(),name text,org_nr text,subscription_status text default 'pending',stripe_customer_id text,stripe_subscription_id text,trial_ends_at timestamptz);
+create table public.companies(id uuid primary key default gen_random_uuid(),name text,org_nr text,subscription_status text default 'pending',stripe_customer_id text,stripe_subscription_id text,trial_ends_at timestamptz,public_booking_slug text);
 create table public.profiles(id uuid primary key references auth.users,company_id uuid references public.companies,email text,full_name text,phone text,role text default 'driver');
 create table public.user_roles(user_id uuid references auth.users,role public.app_role,company_id uuid references public.companies,unique(user_id,role));
 create table public.platform_admins(user_id uuid primary key);
@@ -35,8 +35,9 @@ create table public.driver_documents(id uuid primary key default gen_random_uuid
 create table public.vehicles(id uuid primary key,company_id uuid);
 create table public.vehicle_maintenance(id uuid primary key default gen_random_uuid(),company_id uuid,vehicle_id uuid,notes text);
 create table storage.objects(id uuid primary key default gen_random_uuid(),bucket_id text,name text);
-create table storage.buckets(id text primary key,public boolean);
-insert into storage.buckets values('booking-attachments',true);
+create table storage.buckets(id text primary key,public boolean,file_size_limit bigint,allowed_mime_types text[]);
+create table public.order_inbox_channels(id uuid primary key default gen_random_uuid(),company_id uuid references companies);
+insert into storage.buckets(id,public) values('booking-attachments',true);
 create function storage.foldername(text) returns text[] language sql immutable as $$ select string_to_array($1,'/') $$;
 grant usage on schema public,auth,storage to anon,authenticated,service_role;
 grant all on all tables in schema public,storage to anon,authenticated,service_role;
@@ -275,6 +276,14 @@ await check('cron verifier returns false after the named secret or Vault table i
  await db.exec('drop table vault.decrypted_secrets');
  assert.equal((await verifyCronSecret(cronSecret)).rows[0].valid,false);
 });
+await db.query('update assignments set consignment_photo_url=$1,signature_url=$2 where id=$3', ['https://fixture.supabase.co/storage/v1/object/sign/consignment-notes/user/photo.jpg?token=expired','https://fixture.supabase.co/storage/v1/object/public/signatures/user/signature.png',emptyJob]);
+await db.exec(await readFile('supabase/migrations/20260923104938_launch_tax_legal_security_proof.sql','utf8'));
+await check('migration backfills signed photos and older public signatures without changing legacy URLs',async()=>{
+ const proof=(await db.query('select proof_photo_path,signature_path,consignment_photo_url from assignments where id=$1',[emptyJob])).rows[0];
+ assert.equal(proof.proof_photo_path,'consignment-notes/user/photo.jpg'); assert.equal(proof.signature_path,'signatures/user/signature.png'); assert.match(proof.consignment_photo_url,/token=expired/);
+});
+const { default: hardeningChecks }=await import('./launch-hardening.mjs');
+checks+=await hardeningChecks(db,actor);
 const { default: driverChecks }=await import('./driver-integration.mjs');
 checks+=await driverChecks(db);
 await db.close();

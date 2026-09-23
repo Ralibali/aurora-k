@@ -1,3 +1,4 @@
+import { acceptsCurrentLegal } from './handler.ts';
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.100.1";
 import { corsHeaders } from "../_shared/cors.ts";
 import { sendResendMail, safeTemplateData } from "../_shared/resend.ts";
@@ -40,13 +41,14 @@ Deno.serve(async (req) => {
       || (body.phone != null && (typeof body.phone !== "string" || body.phone.length > 50))) {
       return json({ error: "Kontrollera företagsnamn, namn, organisationsnummer och telefonnummer." }, 400);
     }
+    if (!acceptsCurrentLegal(body)) return json({ error: 'Läs och godkänn aktuella användarvillkor och PUB-avtal.' }, 400);
     const admin = createClient(supabaseUrl, serviceRoleKey, { auth: { persistSession: false } });
     const { data: previous, error: previousError } = await admin.from("profiles").select("company_id").eq("id", caller.id).maybeSingle();
     if (previousError) throw previousError;
     // This transaction derives identity from auth.uid(), serializes concurrent
     // retries, and atomically creates the company, profile and admin membership.
     const { data: companyId, error: registrationError } = await callerClient.rpc("complete_company_registration", {
-      _name: body.companyName.trim(), _org_nr: body.orgNr?.trim() || null,
+      _terms_version: body.termsVersion, _dpa_version: body.dpaVersion, _name: body.companyName.trim(), _org_nr: body.orgNr?.trim() || null,
       _user_full_name: body.fullName.trim(), _phone: body.phone?.trim() || null,
     });
     if (registrationError || !companyId) {

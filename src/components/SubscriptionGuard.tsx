@@ -95,7 +95,7 @@ export function SubscriptionGuard({ children }: { children: React.ReactNode }) {
   if (rawStatus === 'trialing') {
     const daysLeft = trialDaysLeft(trialEndsAt);
     if (daysLeft <= 0) {
-      return <AccountCard icon={<Lock className="h-7 w-7" />} title="Provperioden har löpt ut" text="Dina 14 gratisdagar är slut. Uppgradera för att fortsätta använda Aurora Transport — all din data finns kvar." action={() => void redirect('create-checkout')} actionLabel="Uppgradera – 449 kr/mån" busy={redirecting} />;
+      return <AccountCard icon={<Lock className="h-7 w-7" />} title="Provperioden har löpt ut" text="Dina 14 gratisdagar är slut. Uppgradera för att fortsätta använda Aurora Transport — all din data finns kvar." action={() => void redirect('create-checkout')} actionLabel="Uppgradera – 449 kr/mån exkl. moms (561,25 kr inkl. moms)" busy={redirecting} />;
     }
     return (
       <>

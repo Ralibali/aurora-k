@@ -1,3 +1,4 @@
+import type { Tables } from '@/integrations/supabase/types';
 import { useMemo, useState } from 'react';
 import { AdminLayout } from '@/components/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -85,7 +86,7 @@ export default function AdminArticles() {
     setEditId(null); setName(''); setDescription(''); setUnit('st'); setPrice(''); setArticleNumber(''); setVatRate('0');
   };
 
-  const openEdit = (a) => {
+  const openEdit = (a: Tables<'articles'>) => {
     setEditId(a.id); setName(a.name); setDescription(a.description || ''); setUnit(a.unit); setPrice(String(a.default_price)); setArticleNumber(a.article_number || ''); setVatRate(String(a.vat_rate)); setDialogOpen(true);
   };
 

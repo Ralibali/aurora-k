@@ -37,7 +37,7 @@ export default function AdsAkeriPage() {
 
   usePageMeta({
     title: 'Åkerisystem — Digital transportledning för åkerier | Aurora Transport',
-    description: 'Komplett åkerisystem med fordonshantering, förarschema, GPS-spårning och fakturering. Digitalisera ditt åkeri idag. 449 kr/mån.',
+    description: 'Komplett åkerisystem med fordonshantering, förarschema, GPS-spårning och fakturering. Digitalisera ditt åkeri idag. 449 kr/mån exkl. moms.',
     canonical: 'https://auroratransport.se/ads/akeri',
     noindex: true,
   });
@@ -108,7 +108,7 @@ export default function AdsAkeriPage() {
 
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.5 }} className="flex flex-col sm:flex-row gap-3 mb-4">
                   <Button size="lg" asChild className="bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white rounded-xl px-8 py-6 text-base font-semibold shadow-2xl shadow-emerald-600/25 hover:shadow-emerald-500/40 transition-all duration-300 border-0">
-                    <Link to="/kontakt">Kom igång — 449 kr/mån<ArrowRight className="h-4 w-4 ml-1" /></Link>
+                    <Link to="/kontakt">Kom igång — 449 kr/mån exkl. moms<ArrowRight className="h-4 w-4 ml-1" /></Link>
                   </Button>
                   <Button variant="outline" size="lg" className="rounded-xl px-6 py-6 text-base gap-2 bg-white/[0.03] border-white/10 text-white/80 hover:bg-white/[0.06] hover:text-white hover:border-white/20 transition-all" onClick={handleDemo} disabled={demoLoading}>
                     {demoLoading ? <span className="flex items-center gap-2"><span className="animate-spin h-4 w-4 border-2 border-emerald-400 border-t-transparent rounded-full" /> Laddar...</span> : <><Play className="h-4 w-4" /> Testa live-demo</>}
@@ -226,8 +226,8 @@ export default function AdsAkeriPage() {
                 <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-8">
                   <div>
                     <span className="inline-block px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-medium text-emerald-400 mb-4">Fast pris</span>
-                    <div className="flex items-baseline gap-1"><span className="text-5xl sm:text-6xl font-extrabold text-white font-mono">449</span><span className="text-lg text-white/30 font-medium">kr/mån</span></div>
-                    <p className="text-sm text-white/25 mt-2">+ 3 500 kr engångsavgift (setup & onboarding)</p>
+                    <div className="flex items-baseline gap-1"><span className="text-5xl sm:text-6xl font-extrabold text-white font-mono">449</span><span className="text-lg text-white/30 font-medium">kr/mån exkl. moms</span></div>
+                    <p className="text-sm text-white/25 mt-2">Ingen startavgift. 14 dagar gratis utan kort.</p>
                   </div>
                   <Button size="lg" asChild className="bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white rounded-xl px-8 py-6 font-semibold shadow-2xl shadow-emerald-600/25 border-0 shrink-0">
                     <Link to="/kontakt">Kom igång nu <ArrowRight className="h-4 w-4 ml-1" /></Link>
@@ -277,7 +277,7 @@ export default function AdsAkeriPage() {
             <motion.h2 initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp} className="text-3xl sm:text-5xl font-extrabold mb-6 leading-tight">
               Redo att digitalisera{' '}<span className="bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">ditt åkeri?</span>
             </motion.h2>
-            <motion.p initial="hidden" whileInView="visible" viewport={{ once: true }} custom={1} variants={fadeUp} className="text-white/30 mb-8 text-lg">449 kr/mån. Fast pris. Alla funktioner. Igång på 5 minuter.</motion.p>
+            <motion.p initial="hidden" whileInView="visible" viewport={{ once: true }} custom={1} variants={fadeUp} className="text-white/30 mb-8 text-lg">449 kr/mån exkl. moms. Fast pris. Alla funktioner. Igång på 5 minuter.</motion.p>
             <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} custom={2} variants={fadeUp}>
               <Button size="lg" asChild className="bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white rounded-xl px-10 py-6 text-lg font-semibold shadow-2xl shadow-emerald-600/25 border-0">
                 <Link to="/kontakt">Kom igång nu<ArrowRight className="h-5 w-5 ml-2" /></Link>
@@ -303,7 +303,7 @@ export default function AdsAkeriPage() {
         '@context': 'https://schema.org', '@type': 'SoftwareApplication', name: 'Aurora Transport',
         applicationCategory: 'BusinessApplication', operatingSystem: 'Web',
         description: 'Åkerisystem med fordonshantering, GPS-spårning och automatisk tidrapportering.',
-        offers: { '@type': 'Offer', price: '449', priceCurrency: 'SEK' },
+        offers: { '@type': 'Offer', price: '449', priceCurrency: 'SEK', priceSpecification: { '@type': 'UnitPriceSpecification', price: 449, priceCurrency: 'SEK', valueAddedTaxIncluded: false } },
       })}} />
     </div>
   );
