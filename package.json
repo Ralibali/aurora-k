@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node scripts/generate-static-pages.mjs && node scripts/generate-sitemap.mjs && node scripts/normalize-product-copy.mjs && node scripts/check-pwa-output.mjs",
-    "build:dev": "vite build --mode development",
+    "build": "vite build && node scripts/generate-static-pages.mjs && node scripts/generate-sitemap.mjs && node scripts/normalize-product-copy.mjs && node scripts/check-pwa-output.mjs && node scripts/check-customer-claims-output.mjs",
+    "build:dev": "vite build --mode development && node scripts/check-customer-claims-output.mjs",
     "typecheck": "tsc -p tsconfig.app.json --noEmit",
     "lint": "eslint .",
     "preview": "vite preview",
@@ -15,7 +15,7 @@
     "test:watch": "vitest",
     "validate": "npm run typecheck && npm run lint && npm test && npm run test:db && npm run build",
     "build:ios": "npm run build && npx cap sync ios",
-    "editorial:check": "node scripts/editorial-check.mjs",
+    "editorial:check": "node --test scripts/customer-claims.test.mjs && node scripts/editorial-check.mjs",
     "prebuild": "npm run editorial:check",
     "test:db": "node supabase/tests/launch-security.mjs && node supabase/tests/fortnox-integration.mjs"
   },

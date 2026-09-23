@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import {
   Truck, Clock, MapPin, Smartphone, Zap, FileText,
   Check, Play, ArrowRight, BarChart3, Users, Globe,
-  Star, ChevronRight, CalendarDays, Route,
+  ChevronRight, CalendarDays, Route,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
@@ -248,29 +248,6 @@ export default function AdsTransportPage() {
                 </div>
               </div>
             </motion.div>
-          </div>
-        </section>
-
-        {/* TESTIMONIALS */}
-        <section className="py-24">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6">
-            <motion.h2 initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp} className="text-2xl sm:text-3xl font-bold text-center mb-12">
-              <Star className="h-5 w-5 text-amber-400 inline-block mr-2 -mt-1" />Vad våra kunder säger
-            </motion.h2>
-            <div className="grid sm:grid-cols-2 gap-6">
-              {[
-                { text: 'Vi testade Coredination och andra — Aurora Transport var det enda som faktiskt passade ett litet transportbolag.', name: 'Anders P.', role: 'VD', initials: 'AP' },
-                { text: 'Kundportalen gör att kunderna slutat ringa och fråga var leveransen är. Bara det är värt pengarna.', name: 'Linda M.', role: 'Transportledare', initials: 'LM' },
-              ].map((q, i) => (
-                <motion.div key={i} custom={i + 1} variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="bg-white/[0.02] border border-white/[0.05] rounded-2xl p-7 hover:border-white/[0.08] transition-colors">
-                  <p className="text-white/50 mb-5 leading-relaxed italic">"{q.text}"</p>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-600/30 to-violet-400/10 flex items-center justify-center text-violet-400 font-bold text-sm border border-violet-500/20">{q.initials}</div>
-                    <div><p className="font-semibold text-white/70 text-sm">{q.name}</p><p className="text-xs text-white/25">{q.role}</p></div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
           </div>
         </section>
 

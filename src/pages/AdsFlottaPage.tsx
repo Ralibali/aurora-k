@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import {
   Truck, Clock, MapPin, Smartphone, Zap, FileText,
   Check, Play, ArrowRight, Car, Users, Fuel,
-  Star, Gauge, Shield, BarChart3,
+  Gauge, Shield, BarChart3,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
@@ -246,29 +246,6 @@ export default function AdsFlottaPage() {
                 </div>
               </div>
             </motion.div>
-          </div>
-        </section>
-
-        {/* TESTIMONIALS */}
-        <section className="py-24">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6">
-            <motion.h2 initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp} className="text-2xl sm:text-3xl font-bold text-center mb-12">
-              <Star className="h-5 w-5 text-amber-400 inline-block mr-2 -mt-1" />Vad våra kunder säger
-            </motion.h2>
-            <div className="grid sm:grid-cols-2 gap-6">
-              {[
-                { text: 'Äntligen slipper vi ringa och fråga förarna var de är. Live-kartan ger oss full kontroll.', name: 'Niklas H.', role: 'Flottachef', initials: 'NH' },
-                { text: 'Vi märkte direkt att vi missade serviceintervall på flera bilar. Nu har vi koll på allt.', name: 'Maria E.', role: 'Driftansvarig', initials: 'ME' },
-              ].map((q, i) => (
-                <motion.div key={i} custom={i + 1} variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="bg-white/[0.02] border border-white/[0.05] rounded-2xl p-7 hover:border-white/[0.08] transition-colors">
-                  <p className="text-white/50 mb-5 leading-relaxed italic">"{q.text}"</p>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-600/30 to-amber-400/10 flex items-center justify-center text-amber-400 font-bold text-sm border border-amber-500/20">{q.initials}</div>
-                    <div><p className="font-semibold text-white/70 text-sm">{q.name}</p><p className="text-xs text-white/25">{q.role}</p></div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
           </div>
         </section>
 

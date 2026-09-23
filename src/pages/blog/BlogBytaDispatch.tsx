@@ -30,7 +30,7 @@ export default function BlogBytaDispatch() {
       <p>Säg upp abonnemanget. Du är klar.</p>
 
       <h2>Hur lång tid tar ett byte till Aurora Transport?</h2>
-      <p>Med Aurora Transports självbetjäningsonboarding kan du ha systemet uppsatt samma dag du bestämmer dig. Förare är onboardade på en timme. De flesta av våra kunder är fullt operativa inom 48 timmar.</p>
+      <p>Med Aurora Transports självbetjäning kan du vara igång samma dag. Registrera företaget, bjud in förare och börja skapa uppdrag.</p>
 
       <BlogCta text="Boka ett kostnadsfritt genomgångsmöte med Aurora Transport" />
     </BlogLayout>
