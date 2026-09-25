@@ -8,7 +8,7 @@ export default function BlogBastaDispatch() {
       slug="basta-dispatchsystemet-for-akeri-2026"
       title="Bästa dispatchsystemet för åkeri 2026 – så väljer du rätt"
       seoTitle="Bästa dispatchsystemet för åkeri 2026 – Jämförelse & Guide"
-      metaDescription="Letar du efter det bästa dispatchsystemet för ditt åkeri 2026? Vi jämför funktioner, pris och användarvänlighet – och varför allt fler väljer Aurora Transport."
+      metaDescription="Letar du efter det bästa dispatchsystemet för ditt åkeri 2026? Vi jämför funktioner, pris och användarvänlighet – och vad Aurora Transport erbjuder."
       publishDate="2026-04-01"
       readTime="5 min"
     >
