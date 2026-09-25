@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "status": "draft",
+  "writtenAt": "2026-09-25T10:06:46.303229+00:00",
+  "repository": "Ralibali/aurora-k",
+  "publicationGate": "Earliest 2026-09-27, and only after a fresh previous-publication reader check, current main, complete published inventory and current primary-source review. Keep unpublished until all checks pass; assign actual publication dates at release.",
+  "sourceReview": {
+    "checkedAt": "2026-09-25T10:06:46.303229+00:00",
+    "publishedInventoryReviewed": 15,
+    "distinctIntent": "Dokumentera källor och mängduppgifter om returemballage inför avstämning; skilt från fakturakontroll och uppdragsändringar utan att avgöra avtalsansvar.",
+    "note": "Owned product entry reviewed; article is an original procedural template. No invented outcomes, prices or automatic product features. Fresh source review required before publication."
+  },
+  "article": {
+    "slug": "avstamning-returemballage-underlag",
+    "title": "Samla underlaget när returemballage ska stämmas av",
+    "metaDescription": "Samla antal, underlag och öppna frågor när returemballage ska stämmas av. En praktisk dokumentationsmall för transportledningens uppföljning.",
+    "intro": "När pallar, burar eller annat returemballage behöver följas upp kan uppgifterna finnas på flera ställen. En anteckning från ett stopp, ett kvitto och ett senare besked beskriver inte alltid samma sak. Ett gemensamt avstämningsunderlag hjälper transportledningen att se vilka uppgifter som finns och vilka frågor som återstår.\n",
+    "sections": [
+      {
+        "heading": "Bestäm vad avstämningen omfattar",
+        "content": "Ange vilket uppdrag, stopp eller vilken period underlaget gäller. Använd verksamhetens egna benämningar på emballaget och be ansvarig reda ut oklara beteckningar. Blanda inte olika emballageslag i samma totalsiffra utan att det framgår hur uppgifterna hänger ihop.\n\nKontrollera med ansvarig vilka överenskommelser och dokument som ska ligga till grund för avstämningen. Den här mallen bestämmer inte betalningsansvar, ägande eller andra villkor. Den hjälper er att hålla samman de uppgifter som den ordinarie bedömningen behöver."
+      },
+      {
+        "heading": "Håll händelse och underlag åtskilda",
+        "content": "Skriv vad som uppges ha hänt och hänvisa sedan till underlaget för uppgiften. Ett dokument kan gälla vad som planerades, vad som lämnades eller vad som senare kvitterades. Märk vilken typ av information raden innehåller så att olika uppgifter inte får samma betydelse av misstag.\n\nSpara dokumentets egen referens och datum. Om en uppgift kommer från ett samtal, anteckna vem som lämnade den och när. Skriv uttryckligen att en bekräftelse saknas när den ännu inte finns, i stället för att behandla ett muntligt antagande som ett avslutat ärende."
+      },
+      {
+        "heading": "Gör en rad som går att följa tillbaka",
+        "content": "Använd exempelvis dessa fält:\n\n- Uppdragsreferens, plats och händelsedatum.\n- Emballageslag enligt det aktuella underlaget.\n- Uppgiven mängd och vad mängden avser.\n- Dokumentreferens eller annan källa.\n- Motstridig uppgift eller saknad bekräftelse.\n- Ansvarig för att reda ut frågan.\n- Nästa steg och datum för uppföljning.\n\nLåt samma referens följa med när någon kompletterar raden. Då kan den som tar över arbetet hitta originalet och förstå vilken fråga kompletteringen besvarar, även om flera personer har deltagit i kontakten."
+      },
+      {
+        "heading": "Utred skillnader utan att skriva över dem",
+        "content": "Om två underlag anger olika mängder, bevara båda hänvisningarna och beskriv skillnaden. Be rätt person undersöka om de gäller samma händelse, samma emballageslag och samma del av uppdraget. En olikhet är en fråga att reda ut, inte i sig ett besked om vilket dokument som är korrekt.\n\nAnteckna det slutliga beskedet med källa och datum. Om avvikelsen påverkar andra delar av uppdraget, hänvisa till [ändringsloggen för transportuppdrag](/blogg/andringslogg-transportuppdrag) så att beskedet kan följas i sitt sammanhang."
+      },
+      {
+        "heading": "Avsluta med ett tydligt nästa steg",
+        "content": "Markera om underlaget är avstämt, väntar på komplettering eller har lämnats till en annan ansvarig. Spara vem som tog emot frågan och vilket besked som behövs. Ett ärende ska inte se avslutat ut bara för att en påminnelse har skickats.\n\nTa med relevanta hänvisningar i [avstämningen före fakturering](/blogg/stam-av-transportunderlag-fore-fakturering). Läs om [Aurora Transports tjänster](/tjanster) när ni diskuterar ert stöd för uppdragshantering. AI-assisterad originalguide; avstämningsmallen är ett eget arbetsunderlag och beskriver ingen särskild emballagefunktion i produkten."
+      }
+    ],
+    "editorial": {
+      "createdWith": "ChatGPT",
+      "aiAssisted": true,
+      "searchIntent": "Dokumentera källor och mängduppgifter om returemballage inför avstämning; skilt från fakturakontroll och uppdragsändringar utan att avgöra avtalsansvar.",
+      "sourceUrls": [
+        "https://auroratransport.se/tjanster"
+      ],
+      "sourceCheckedAt": "2026-09-25T10:06:46.303229+00:00"
+    },
+    "seoTitle": "Samla underlaget när returemballage ska stämmas av",
+    "readTime": "4 min",
+    "excerpt": "Samla antal, underlag och öppna frågor när returemballage ska stämmas av. En praktisk dokumentationsmall för transportledningens uppföljning.",
+    "tags": [
+      "transportledning",
+      "arbetsrutiner"
+    ],
+    "links": [
+      {
+        "href": "/tjanster",
+        "label": "Se Aurora Transports tjänster"
+      }
+    ]
+  }
+}
