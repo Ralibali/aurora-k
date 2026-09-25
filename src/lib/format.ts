@@ -1,15 +1,18 @@
 import { format, formatDuration, intervalToDuration } from 'date-fns';
 import { sv } from 'date-fns/locale';
 
-export function formatSwedishDateTime(dateStr: string): string {
+export function formatSwedishDateTime(dateStr: string | null | undefined): string {
+  if (!dateStr) return '—';
   return format(new Date(dateStr), "EEE d MMM, HH:mm", { locale: sv });
 }
 
-export function formatSwedishDate(dateStr: string): string {
+export function formatSwedishDate(dateStr: string | null | undefined): string {
+  if (!dateStr) return '—';
   return format(new Date(dateStr), "d MMM yyyy", { locale: sv });
 }
 
-export function formatSwedishTime(dateStr: string): string {
+export function formatSwedishTime(dateStr: string | null | undefined): string {
+  if (!dateStr) return '—';
   return format(new Date(dateStr), "HH:mm", { locale: sv });
 }
 

@@ -34,6 +34,8 @@ const TODAY = new Date().toISOString().slice(0, 10);
  * assertRoutesInSync() nedan larmar om de glider isär.
  */
 const STATIC_ROUTES = [
+  { path: "/villkor", priority: "0.3", changefreq: "yearly" },
+  { path: "/pub-avtal", priority: "0.3", changefreq: "yearly" },
   { path: "/", priority: "1.0", changefreq: "weekly" },
   { path: "/en", priority: "0.7", changefreq: "monthly" },
   { path: "/boka", priority: "0.9", changefreq: "monthly" },

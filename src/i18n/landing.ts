@@ -135,7 +135,7 @@ const SV: LandingCopy = {
     // OBS: inga mjuka bindestreck här – de hamnar i sökresultatens titlar.
     title: 'Transportledningssystem för åkerier | Aurora Transport',
     description:
-      'Svenskt transportledningssystem för åkerier, budfirmor och bemanning. Uppdrag, förare, tidrapportering och fakturaunderlag – 449 kr/mån.',
+      'Svenskt transportledningssystem för åkerier, budfirmor och bemanning. Uppdrag, förare, tidrapportering och fakturaunderlag – 449 kr/mån exkl. moms.',
   },
   nav: {
     features: 'Funktioner',
@@ -159,7 +159,7 @@ const SV: LandingCopy = {
     ctaSecondaryLoading: 'Loggar in...',
     ctaRegister: 'Kom igång – skapa konto',
     trustPoints: [
-      'Fast pris: 449 kr per månad',
+      'Fast pris: 449 kr per månad exkl. moms',
       'Ingen bindningstid',
       'Support på svenska',
       'Kom igång samma dag',
@@ -247,11 +247,11 @@ const SV: LandingCopy = {
     eyebrow: 'Pris',
     h2: 'Ett prisvärt transport­lednings­system utan krångel',
     sub: 'För transportföretag som vill komma igång snabbt utan bindningstid, dolda avgifter eller dyra licenser per användare.',
-    setupLabel: 'Setup',
-    setupPrice: '3 500 kr',
-    setupText: 'Engångskostnad för uppstart, konfiguration och onboarding.',
+    setupLabel: 'Provperiod',
+    setupPrice: '14 dagar',
+    setupText: 'Gratis utan kort. Ingen startavgift.',
     monthlyLabel: 'Löpande',
-    monthlyPrice: '449 kr',
+    monthlyPrice: '449 kr exkl. moms',
     monthlyUnit: 'per månad',
     monthlyText: 'Obegränsat antal förare, admins och uppdrag. Support på svenska ingår.',
     monthlyBenefits: ['14 dagars gratis provperiod', 'Ingen bindningstid', 'Support på svenska', 'Obegränsat antal förare', 'Fakturaunderlag ingår'],
@@ -305,7 +305,7 @@ const SV: LandingCopy = {
     items: [
       { q: 'Vad är ett transport­lednings­system?', a: 'Ett transport­lednings­system hjälper transportföretag att planera uppdrag, tilldela förare, följa status, samla tidrapporter och skapa fakturaunderlag i ett gemensamt system.' },
       { q: 'Kan jag testa innan jag betalar?', a: 'Ja. Du får 14 dagars gratis provperiod med full tillgång – inget betalkort krävs. Först när provperioden tar slut väljer du om du vill fortsätta.' },
-      { q: 'Vad kostar Aurora Transport?', a: 'Aurora Transport kostar 449 kr per månad. Setup och onboarding kostar 3 500 kr som engångskostnad.' },
+      { q: 'Vad kostar Aurora Transport?', a: 'Aurora Transport kostar 449 kr per månad exkl. moms. Ingen startavgift. Valfri uppstartshjälp: 3 500 kr exkl. moms på förfrågan via kontaktformuläret.' },
       { q: 'Kan Aurora Transport användas som dispatchsystem?', a: 'Ja. Aurora Transport fungerar som ett enkelt dispatchsystem där du kan skapa uppdrag, tilldela förare och följa status i realtid.' },
       { q: 'Finns det bindningstid?', a: 'Nej. Du kan säga upp när du vill. Målet är att systemet ska vara enkelt att börja med och enkelt att stanna kvar i.' },
       { q: 'Passar Aurora Transport små åkerier?', a: 'Ja. Aurora Transport är byggt för mindre åkerier och transportföretag som vill bort från Excel, WhatsApp och manuell administration.' },
@@ -342,7 +342,7 @@ const EN: LandingCopy = {
   meta: {
     title: 'Transport management system for hauliers | Aurora Transport',
     description:
-      'Swedish TMS for hauliers, couriers and transport staffing. Jobs, drivers, time reporting and invoice drafts from 449 SEK/month.',
+      'Swedish TMS for hauliers, couriers and transport staffing. Jobs, drivers, time reporting and invoice drafts from 449 SEK/month exkl. moms.',
   },
   nav: {
     features: 'Features',
@@ -364,7 +364,7 @@ const EN: LandingCopy = {
     ctaSecondaryLoading: 'Signing in...',
     ctaRegister: 'Get started',
     trustPoints: [
-      'Flat price: 449 SEK per month',
+      'Flat price: 449 SEK per month exkl. moms',
       'No lock-in',
       'Human support',
       'Up and running the same day',
@@ -452,11 +452,11 @@ const EN: LandingCopy = {
     eyebrow: 'Pricing',
     h2: 'A cost-effective transport management system without the hassle',
     sub: 'For transport companies that want to get started quickly — no lock-in, no hidden fees and no expensive per-user licences.',
-    setupLabel: 'Setup',
-    setupPrice: '3,500 SEK',
-    setupText: 'One-time fee for setup, configuration and onboarding.',
+    setupLabel: 'Provperiod',
+    setupPrice: '14 dagar',
+    setupText: 'Gratis utan kort. Ingen startavgift.',
     monthlyLabel: 'Monthly',
-    monthlyPrice: '449 SEK',
+    monthlyPrice: '449 SEK exkl. moms',
     monthlyUnit: 'per month',
     monthlyText: 'Unlimited drivers, admins and jobs. Human support included.',
     monthlyBenefits: ['14-day free trial', 'No lock-in', 'Human support', 'Unlimited drivers', 'Invoice drafts included'],
@@ -510,7 +510,7 @@ const EN: LandingCopy = {
     items: [
       { q: 'What is a transport management system?', a: 'A transport management system helps transport companies plan jobs, assign drivers, follow status, collect time reports and create invoice drafts in one shared system.' },
       { q: 'Can I try before I pay?', a: 'Yes. You get a 14-day free trial with full access – no credit card required. You only decide whether to continue when the trial ends.' },
-      { q: 'What does Aurora Transport cost?', a: 'Aurora Transport is 449 SEK per month. Setup and onboarding is a one-time fee of 3,500 SEK.' },
+      { q: 'What does Aurora Transport cost?', a: 'Aurora Transport is 449 SEK per month exkl. moms. Ingen startavgift. Valfri uppstartshjälp: 3 500 kr exkl. moms på förfrågan via kontaktformuläret.' },
       { q: 'Can Aurora Transport be used as a dispatch system?', a: 'Yes. Aurora Transport works as a simple dispatch system where you can create jobs, assign drivers and follow status in real time.' },
       { q: 'Is there a lock-in period?', a: 'No. You can cancel whenever you want. We want the system to be easy to start with and easy to stay with.' },
       { q: 'Does Aurora Transport suit small hauliers?', a: 'Yes. Aurora Transport is built for small transport companies that want to move away from Excel, WhatsApp and manual admin.' },

@@ -80,7 +80,7 @@ export default function JoinPage() {
     const e: Record<string, string> = {};
     if (!name.trim()) e.name = 'Namn krävs';
     if (!password) e.password = 'Lösenord krävs';
-    else if (password.length < 8) e.password = 'Minst 8 tecken';
+    else if (password.length < 10 || new TextEncoder().encode(password).length > 72) e.password = 'Minst 10 tecken, högst 72 byte';
     if (password !== confirmPassword) e.confirmPassword = 'Lösenorden matchar inte';
     setFormErrors(e);
     return Object.keys(e).length === 0;
@@ -179,7 +179,7 @@ export default function JoinPage() {
               <Label className="text-sm font-medium">Lösenord</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
-                <Input type={showPassword ? 'text' : 'password'} placeholder="Minst 8 tecken" value={password} onChange={e => setPassword(e.target.value)} className="pl-10 pr-10 h-11" />
+                <Input type={showPassword ? 'text' : 'password'} placeholder="Minst 10 tecken, högst 72 byte" value={password} onChange={e => setPassword(e.target.value)} className="pl-10 pr-10 h-11" />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-muted-foreground">
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>

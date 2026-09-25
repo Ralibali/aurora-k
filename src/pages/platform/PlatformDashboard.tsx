@@ -94,7 +94,7 @@ export default function PlatformDashboard() {
               <div>
                 <p className="text-sm font-medium text-foreground">{c.name}</p>
                 <p className="text-xs text-muted-foreground">
-                  Registrerat {new Date(c.created_at).toLocaleDateString('sv-SE')}
+                  Registrerat {(c.created_at ? new Date(c.created_at).toLocaleDateString('sv-SE') : '—')}
                 </p>
               </div>
               {statusBadge(c.subscription_status)}
@@ -107,7 +107,7 @@ export default function PlatformDashboard() {
   );
 }
 
-type StatusItem = { id: string; name: string; created_at: string; stripe_customer_id?: string | null };
+type StatusItem = { id: string; name: string; created_at: string | null; stripe_customer_id?: string | null };
 function StatusColumn({ title, items, icon: Icon, showStripe }: { title: string; items: StatusItem[]; icon: LucideIcon; showStripe?: boolean }) {
   return (
     <Card className="p-4">
@@ -126,7 +126,7 @@ function StatusColumn({ title, items, icon: Icon, showStripe }: { title: string;
             <div key={c.id} className="flex items-center justify-between text-sm">
               <div>
                 <p className="font-medium text-foreground">{c.name}</p>
-                <p className="text-xs text-muted-foreground">{new Date(c.created_at).toLocaleDateString('sv-SE')}</p>
+                <p className="text-xs text-muted-foreground">{(c.created_at ? new Date(c.created_at).toLocaleDateString('sv-SE') : '—')}</p>
               </div>
               {(showStripe || c.stripe_customer_id) && (
                 <Button

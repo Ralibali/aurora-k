@@ -4,10 +4,10 @@ import { currentSubscription, shouldApplyBillingEvent } from '../../supabase/fun
 
 const stripe = {
   customers: { create: vi.fn() }, subscriptions: { list: vi.fn() },
-  checkout: { sessions: { list: vi.fn(), create: vi.fn() } },
-  invoices: { list: vi.fn() }, billingPortal: { sessions: { create: vi.fn() } },
+  checkout: { sessions: { list: vi.fn(), create: vi.fn(), expire: vi.fn() } },
+  billingPortal: { sessions: { create: vi.fn() } },
 };
-const input = () => ({ stripe, company: { id: 'company-1', name: 'Pilot', stripe_customer_id: 'cus_1', stripe_subscription_id: null }, email: 'admin@example.com', userId: 'admin-1', origin: 'https://auroratransport.se', monthlyPriceId: 'price_month', setupPriceId: 'price_setup', saveCustomer: vi.fn().mockResolvedValue(undefined) });
+const input = () => ({ stripe, demoCompany: false, company: { id: 'company-1', name: 'Pilot', stripe_customer_id: 'cus_1' as string | null, stripe_subscription_id: null }, email: 'admin@example.com', userId: 'admin-1', origin: 'https://auroratransport.se', monthlyPriceId: 'price_month', saveCustomer: vi.fn().mockResolvedValue(undefined) });
 beforeEach(() => {
   vi.clearAllMocks();
   stripe.customers.create.mockResolvedValue({ id: 'cus_1' });
@@ -15,12 +15,28 @@ beforeEach(() => {
   stripe.checkout.sessions.list.mockResolvedValue({ data: [], has_more: false });
   stripe.checkout.sessions.create.mockResolvedValue({ url: 'https://checkout.stripe.com/session' });
   stripe.billingPortal.sessions.create.mockResolvedValue({ url: 'https://billing.stripe.com/portal' });
-  stripe.invoices.list.mockResolvedValue({ data: [] });
+  stripe.checkout.sessions.expire.mockResolvedValue({});
 });
 
 describe('checkout lifecycle', () => {
+  it('sends company name, admin email and all tax settings without a setup item', async () => {
+    const values = input(); values.company.stripe_customer_id = null;
+    await prepareCompanyCheckout(values);
+    expect(stripe.customers.create).toHaveBeenCalledWith({ name: 'Pilot', email: values.email, metadata: { company_id: 'company-1' } }, { idempotencyKey: 'aurora-company-customer-company-1' });
+    expect(stripe.checkout.sessions.create.mock.calls[0][0]).toMatchObject({ automatic_tax: { enabled: true }, billing_address_collection: 'required', customer_update: { name: 'auto', address: 'auto' }, tax_id_collection: { enabled: true }, line_items: [{ price: 'price_month', quantity: 1 }] });
+  });
+  it('blocks demo checkout before touching Stripe', async () => {
+    await expect(prepareCompanyCheckout({ ...input(), demoCompany: true })).rejects.toThrow('demoföretag');
+    expect(stripe.subscriptions.list).not.toHaveBeenCalled();
+  });
+  it('expires legacy open sessions before creating a tax-enabled link', async () => {
+    stripe.checkout.sessions.list.mockResolvedValue({ data: [{ id: 'legacy', mode: 'subscription', metadata: { company_id: 'company-1' }, status: 'open', url: 'https://old', created: 1 }], has_more: false });
+    await prepareCompanyCheckout(input());
+    expect(stripe.checkout.sessions.expire).toHaveBeenCalledWith('legacy');
+    expect(stripe.checkout.sessions.create).toHaveBeenCalledOnce();
+  });
   it('reuses unfinished checkout instead of creating another payable session', async () => {
-    stripe.checkout.sessions.list.mockResolvedValue({ data: [{ id: 'cs_open', mode: 'subscription', metadata: { company_id: 'company-1' }, status: 'open', url: 'https://checkout.stripe.com/existing', created: 1 }], has_more: false });
+    stripe.checkout.sessions.list.mockResolvedValue({ data: [{ id: 'cs_open', mode: 'subscription', metadata: { company_id: 'company-1', pricing_version: '449-ex-vat-no-setup-v1' }, status: 'open', url: 'https://checkout.stripe.com/existing', created: 1 }], has_more: false });
     expect(await prepareCompanyCheckout(input())).toEqual({ url: 'https://checkout.stripe.com/existing' });
     expect(stripe.checkout.sessions.create).not.toHaveBeenCalled();
   });
@@ -34,9 +50,8 @@ describe('checkout lifecycle', () => {
     expect(stripe.checkout.sessions.create.mock.calls[0]).toEqual(stripe.checkout.sessions.create.mock.calls[1]);
     expect(stripe.checkout.sessions.create.mock.calls[0][1].idempotencyKey).toContain('company-1');
   });
-  it('does not collect the one-time setup fee again when reactivating a paying company', async () => {
+  it('charges only the monthly price when reactivating a company', async () => {
     stripe.subscriptions.list.mockResolvedValue({ data: [{ id: 'sub_old', status: 'canceled', created: 1 }], has_more: false });
-    stripe.invoices.list.mockResolvedValue({ data: [{ id: 'in_paid' }] });
     await prepareCompanyCheckout(input());
     expect(stripe.checkout.sessions.create.mock.calls[0][0].line_items).toEqual([{ price: 'price_month', quantity: 1 }]);
   });

@@ -42,22 +42,22 @@ export default async function driverIntegration(db) {
   });
   await check('saved proof requirements defeat client flags and fake URLs', async () => {
     await assert.rejects(operation(4, 'delivery_proof', { completedAt: stop, requirePhoto: false, requireSignature: false, existingPhotoUrl: 'https://fake.invalid/photo' }), /Foto krävs/);
-    await assert.rejects(operation(5, 'delivery_proof', { completedAt: stop }, 'https://fixture.invalid/photo'), /Signatur och mottagarens namn/);
+    await assert.rejects(operation(5, 'delivery_proof', { completedAt: stop }, `consignment-notes/${driver}/${assignment}/photo.jpg`), /Signatur och mottagarens namn/);
     assert.equal(await count('assignment_protocols'), 0);
     assert.equal(await count('driver_sync_operations'), 2);
     assert.equal((await db.query('select status,actual_stop from assignments where id=$1', [assignment])).rows[0].actual_stop, null);
   });
   await check('a completion before its offline start is rejected', async () => {
-    await assert.rejects(operation(6, 'delivery_proof', { completedAt: new Date(Date.parse(start) - 1000).toISOString(), recipientName: 'Anna' }, 'https://fixture.invalid/photo', 'https://fixture.invalid/signature'), /Ogiltig sluttid/);
+    await assert.rejects(operation(6, 'delivery_proof', { completedAt: new Date(Date.parse(start) - 1000).toISOString(), recipientName: 'Anna' }, `consignment-notes/${driver}/${assignment}/photo.jpg`, `signatures/${driver}/${assignment}/signature.png`), /Ogiltig sluttid/);
   });
   await check('started delayed delivery commits proof, status and receipt once', async () => {
     await db.query("update assignments set status='delayed' where id=$1", [assignment]);
-    assert.equal((await operation(7, 'delivery_proof', { completedAt: stop, recipientName: 'Anna', note: 'Paket levererat' }, 'https://fixture.invalid/photo', 'https://fixture.invalid/signature')).status, 'completed');
+    assert.equal((await operation(7, 'delivery_proof', { completedAt: stop, recipientName: 'Anna', note: 'Paket levererat' }, `consignment-notes/${driver}/${assignment}/photo.jpg`, `signatures/${driver}/${assignment}/signature.png`)).status, 'completed');
     assert.equal((await operation(7, 'delivery_proof', { completedAt: stop })).duplicate, true);
     assert.equal(await count('assignment_protocols'), 1);
     assert.equal(await count('driver_sync_operations'), 3);
-    const saved = (await db.query('select status,consignment_photo_url,signature_url from assignments where id=$1', [assignment])).rows[0];
-    assert.deepEqual(saved, { status: 'completed', consignment_photo_url: 'https://fixture.invalid/photo', signature_url: 'https://fixture.invalid/signature' });
+    const saved = (await db.query('select status,proof_photo_path,signature_path,consignment_photo_url,signature_url from assignments where id=$1', [assignment])).rows[0];
+    assert.deepEqual(saved, { status: 'completed', proof_photo_path: `consignment-notes/${driver}/${assignment}/photo.jpg`, signature_path: `signatures/${driver}/${assignment}/signature.png`, consignment_photo_url: null, signature_url: null });
   });
   await check('database transitions create exactly one customer event per lifecycle', async () => {
     const { rows } = await db.query("select type,count(*)::int count from notification_outbox where company_id=$1 and type in ('tracking-started','delivery-completed') group by type order by type", [company]);

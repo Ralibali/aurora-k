@@ -1,3 +1,4 @@
+import type { Tables } from '@/integrations/supabase/types';
 import { useState } from 'react';
 import { AdminLayout } from '@/components/AdminLayout';
 import { Card, CardContent } from '@/components/ui/card';
@@ -55,7 +56,7 @@ export default function AdminVehicles() {
     setEditId(null); setName(''); setRegNr(''); setType('vehicle'); setMake(''); setModel(''); setYear(''); setNotes(''); setRouteCapacity('100'); setTrackingDeviceId('');
   };
 
-  const openEdit = (v) => {
+  const openEdit = (v: Tables<'vehicles'>) => {
     const routeVehicle = v as typeof v & { route_capacity?: number; external_tracking_device_id?: string | null };
     setEditId(v.id); setName(v.name); setRegNr(v.registration_number || ''); setType(v.type); setMake(v.make || ''); setModel(v.model || ''); setYear(v.year ? String(v.year) : ''); setNotes(v.notes || ''); setRouteCapacity(String(routeVehicle.route_capacity ?? 100)); setTrackingDeviceId(routeVehicle.external_tracking_device_id || ''); setDialogOpen(true);
   };

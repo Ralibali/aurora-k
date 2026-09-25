@@ -16,6 +16,8 @@ export type DispatchAssignment = {
   driver?: { full_name?: string | null } | null;
   require_photo?: boolean | null;
   require_signature?: boolean | null;
+  proof_photo_path?: string | null;
+  signature_path?: string | null;
   consignment_photo_url?: string | null;
   signature_url?: string | null;
 };
@@ -87,8 +89,8 @@ export function matchesDispatchFilter(assignment: DispatchAssignment, filter: st
       return isOverdueAssignment(assignment, now);
     case 'proof':
       return assignment.status === 'completed' && Boolean(
-        (assignment.require_photo && !assignment.consignment_photo_url)
-        || (assignment.require_signature && !assignment.signature_url),
+        (assignment.require_photo && !(assignment.proof_photo_path || assignment.consignment_photo_url))
+        || (assignment.require_signature && !(assignment.signature_path || assignment.signature_url)),
       );
     default:
       return true;

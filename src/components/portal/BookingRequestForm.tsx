@@ -154,7 +154,7 @@ export function BookingRequestForm({ token, bookings, onCreated }: BookingReques
                     <TableCell>{b.preferred_date || '—'}</TableCell>
                     <TableCell>
                       <Badge variant={b.status === 'accepted' ? 'secondary' : b.status === 'rejected' ? 'destructive' : 'outline'}>
-                        {statusLabels[b.status] || b.status}
+                        {statusLabels[b.status ?? 'pending'] || b.status}
                       </Badge>
                     </TableCell>
                   </TableRow>

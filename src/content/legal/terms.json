@@ -1,0 +1,55 @@
+{
+  "version": "2026-09-23",
+  "date": "2026-09-23",
+  "title": "Användarvillkor",
+  "sections": [
+    {
+      "heading": "1. Parter och tjänst",
+      "paragraphs": [
+        "Dessa villkor gäller mellan Aurora Media AB, organisationsnummer 559272-0220, och det företag som registrerar sig för Aurora Transport. Den som skapar kontot ska ha rätt att företräda företaget. Kontakt: info@auroramedia.se. Tjänsten är avsedd för företag."
+      ]
+    },
+    {
+      "heading": "2. Pris och provperiod",
+      "paragraphs": [
+        "Priset är 449 kr/mån exkl. moms. Vid svensk moms om 25 procent är priset 561,25 kr inkl. moms. Ingen startavgift tillkommer. Provperioden är 14 dagar och kräver inget betalkort. Den börjar när företagets registrering slutförs. Betald prenumeration kräver att kunden aktivt genomför betalningen."
+      ]
+    },
+    {
+      "heading": "3. Avtalstid och uppsägning",
+      "paragraphs": [
+        "Ingen bindningstid gäller. Kunden kan säga upp prenumerationen via betalningsportalen i kontots prenumerationsinställningar. Uppsägning gäller till slutet av den betalda perioden; redan betalda avgifter återbetalas normalt inte för återstående tid. Kunden kan också kontakta support för hjälp."
+      ]
+    },
+    {
+      "heading": "4. Kundens ansvar",
+      "paragraphs": [
+        "Kunden ansvarar för sina användare, behörigheter, inloggningsuppgifter och de uppgifter som läggs in. Kunden ansvarar för laglig grund, information till registrerade och att inte registrera fler personuppgifter än verksamheten behöver. Kunden ska kontrollera automatiskt tolkade order, tider, löneunderlag och fakturaunderlag innan de används."
+      ]
+    },
+    {
+      "heading": "5. Tillgänglighet och dataexport",
+      "paragraphs": [
+        "Ingen garanterad SLA eller viss tillgänglighetsnivå lämnas. Avbrott och fel kan förekomma. Kunden kan exportera data med de exportfunktioner som finns i tjänsten, exempelvis faktura-PDF och löneunderlag. Detta innebär inte att det finns en fullständig export av alla tabeller eller filer. Kontakta support om befintliga exportfunktioner inte räcker."
+      ]
+    },
+    {
+      "heading": "6. Personuppgifter och avslut",
+      "paragraphs": [
+        "PUB-avtalet gäller när Aurora behandlar personuppgifter för kundens räkning. Avslutad prenumeration startar inget automatiskt raderingsjobb. Data raderas på begäran; kontakta info@auroramedia.se för instruktion om återlämnande eller radering och hantering av eventuella lagstadgade bevarandekrav. Exportera nödvändigt underlag innan åtkomsten upphör. Ingen automatisk radering efter 30 dagar utlovas."
+      ]
+    },
+    {
+      "heading": "7. Ansvar",
+      "paragraphs": [
+        "Aurora ansvarar inte för indirekta skador såsom utebliven vinst. Auroras sammanlagda ansvar enligt dessa användarvillkor begränsas till de avgifter kunden betalat under de senaste tolv månaderna. Begränsningen gäller inte i den mån tvingande lag, uppsåt eller grov vårdslöshet hindrar det. Den inskränker inte registrerades rättigheter eller skyldigheter enligt GDPR och PUB-avtalets standardklausuler."
+      ]
+    },
+    {
+      "heading": "8. Ändrade villkor och lagval",
+      "paragraphs": [
+        "Ändringar av villkoren meddelas kunden med minst 30 dagars varsel innan de träder i kraft. Kunden kan säga upp avtalet före ändringen. Svensk lag gäller. Tvister prövas av svensk allmän domstol."
+      ]
+    }
+  ]
+}

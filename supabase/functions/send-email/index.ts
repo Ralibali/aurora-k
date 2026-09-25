@@ -1,3 +1,4 @@
+import { clientIp } from '../_shared/client-ip.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.100.1';
 import { corsHeaders } from '../_shared/cors.ts';
 import { driverWelcomeEmail, driverInviteEmail, newLeadNotificationEmail } from '../_shared/email-templates.ts';
@@ -49,7 +50,7 @@ Deno.serve(async req => {
     let eventKey='';
     if(isPublic) {
       if(!validEmail(data.email) || typeof data.name!=='string' && typeof data.companyName!=='string' && typeof data.firstName!=='string') return json({error:'Kontrollera namn och e-postadress.'},400);
-      const ip=req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+      const ip=clientIp(req);
       for(const [key,limit] of [[`public-ip/${await digest(ip)}`,20],[`public-email/${await digest(data.email.toLowerCase())}`,4]] as const) {
         const {data:allowed,error}=await admin.rpc('consume_mail_rate_limit',{p_key:key,p_limit:limit,p_window_seconds:3600});
         if(error) throw error;

@@ -54,10 +54,11 @@ export default function PlatformAnnouncements() {
 
   const createMutation = useMutation({
     mutationFn: async () => {
+      if (!user) throw new Error('Logga in igen.');
       const finalTarget = target === 'company' ? targetCompany : target;
       const { error } = await supabase
         .from('platform_announcements')
-        .insert({ title, message, type, created_by: user?.id, target: finalTarget });
+        .insert({ title, message, type, created_by: user.id, target: finalTarget });
       if (error) throw error;
     },
     onSuccess: () => {

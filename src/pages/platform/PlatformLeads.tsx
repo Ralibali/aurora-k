@@ -140,7 +140,7 @@ export default function PlatformLeads() {
       'Datum', 'Företag', 'Kontaktperson', 'E-post', 'Telefon', 'Org.nr',
       'Flottstorlek', 'Poäng', 'Status', 'UTM Källa', 'UTM Medium', 'UTM Kampanj', 'Meddelande', 'Anteckningar'
     ];
-    const escape = (v) => {
+    const escape = (v: unknown) => {
       const s = v == null ? '' : String(v);
       return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     };

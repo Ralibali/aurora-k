@@ -13,7 +13,7 @@ import { ArrowLeft, CheckCircle2, Loader2, Package, Route, Send, Truck, UploadCl
 const serviceTypes = ['Kranbil', 'Budbil', 'Tippbil', 'Krokbil', 'TMA-skydd', 'Byggsäck', 'Maskintransport', 'Annat uppdrag'];
 const MAX_FILES = 5;
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
-const ALLOWED_FILE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'application/pdf']);
+const ALLOWED_FILE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'application/pdf']);
 
 const brandedPages: Record<string, { name: string; description: string }> = {
   kranbilsakarna: { name: 'Kranbilsåkarna', description: 'Skicka in komplett underlag för kranbil, bygglogistik och transport.' },
@@ -117,7 +117,7 @@ export default function PublicBookingPage() {
 
     setIsSubmitting(true);
     try {
-      const attachmentPaths = await uploadFiles();
+      const attachmentPaths = website ? [] : await uploadFiles();
       const title = `${form.serviceType} - ${form.pickupAddress}`;
       const description = buildDescription(form, attachmentPaths, brand.name);
       const preferredDate = `${form.preferredDate}${form.preferredTime ? ` ${form.preferredTime}` : ''}`;
@@ -223,8 +223,8 @@ export default function PublicBookingPage() {
             <div className="space-y-2"><Label>Telefon *</Label><Input value={form.phone} onChange={e => update('phone', e.target.value)} /></div>
             <div className="space-y-2"><Label>E-post *</Label><Input type="email" value={form.email} onChange={e => update('email', e.target.value)} /></div>
             <div className="space-y-2"><Label>Organisationsnummer</Label><Input value={form.orgNumber} onChange={e => update('orgNumber', e.target.value)} /></div>
-            <div className="space-y-2"><Label>Bilagor</Label><Input type="file" accept="image/jpeg,image/png,image/webp,application/pdf" multiple onChange={e => handleFiles(Array.from(e.target.files || []))} /></div>
-            <p className="text-xs text-muted-foreground md:col-span-2">Högst 5 filer och 10 MB per fil. JPG, PNG, WebP eller PDF.</p>
+            <div className="space-y-2"><Label>Bilagor</Label><Input type="file" accept="image/jpeg,image/png,image/webp,image/heic,application/pdf" multiple onChange={e => handleFiles(Array.from(e.target.files || []))} /></div>
+            <p className="text-xs text-muted-foreground md:col-span-2">Högst 5 filer och 10 MB per fil. JPG, PNG, WebP, HEIC eller PDF.</p>
             <div className="space-y-2 md:col-span-2"><Label>Övrigt</Label><Textarea value={form.notes} onChange={e => update('notes', e.target.value)} /></div>
             {files.length > 0 && <div className="md:col-span-2 rounded-xl bg-slate-50 p-3 text-sm"><UploadCloud className="mr-2 inline h-4 w-4" /> {files.length} fil(er) valda</div>}
           </CardContent>

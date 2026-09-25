@@ -1,3 +1,4 @@
+import type { Tables } from '@/integrations/supabase/types';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AdminLayout } from '@/components/AdminLayout';
@@ -35,7 +36,7 @@ export default function AdminBookingRequests() {
   const [statusFilter, setStatusFilter] = useState('all');
 
   const filtered = useMemo(() => {
-    return (requests ?? []).filter((r) => {
+    return (requests ?? []).filter((r: Tables<'booking_requests'>) => {
       const haystack = `${r.customer_name} ${r.title} ${r.customer_email} ${r.customer_phone} ${r.description}`.toLowerCase();
       const matchesSearch = haystack.includes(search.toLowerCase());
       const matchesStatus = statusFilter === 'all' || r.status === statusFilter;
@@ -43,11 +44,11 @@ export default function AdminBookingRequests() {
     });
   }, [requests, search, statusFilter]);
 
-  const pending = (requests ?? []).filter((r) => r.status === 'pending').length;
-  const urgent = (requests ?? []).filter((r) => isUrgent(r.description)).length;
-  const accepted = (requests ?? []).filter((r) => r.status === 'accepted').length;
+  const pending = (requests ?? []).filter((r: Tables<'booking_requests'>) => r.status === 'pending').length;
+  const urgent = (requests ?? []).filter((r: Tables<'booking_requests'>) => isUrgent(r.description)).length;
+  const accepted = (requests ?? []).filter((r: Tables<'booking_requests'>) => r.status === 'accepted').length;
 
-  const createAssignmentFromRequest = (r) => {
+  const createAssignmentFromRequest = (r: Tables<'booking_requests'>) => {
     navigate('/admin/assignments/new', {
       state: {
         copy: {
@@ -134,7 +135,7 @@ export default function AdminBookingRequests() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filtered.map((r) => {
+                  {filtered.map((r: Tables<'booking_requests'>) => {
                     const urgentRequest = isUrgent(r.description);
                     return (
                       <TableRow key={r.id} className={r.status === 'pending' ? 'bg-blue-50/40' : undefined}>

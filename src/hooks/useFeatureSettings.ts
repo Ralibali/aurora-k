@@ -57,6 +57,7 @@ export function useFeatureSettings() {
   return useQuery({
     queryKey: ['feature_settings', companyId],
     queryFn: async () => {
+      if (!companyId) return mergeFeatureSettings([]);
       const { data, error } = await supabase
         .from('feature_settings')
         .select('*')

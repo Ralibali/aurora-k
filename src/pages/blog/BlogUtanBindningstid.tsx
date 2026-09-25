@@ -27,7 +27,7 @@ export default function BlogUtanBindningstid() {
       <p>Moderna SaaS-företag inom transport erbjuder månadsabonnemang utan bindningstid. Det innebär att leverantören måste förtjäna din lojalitet varje månad – och det skapar ett helt annat incitament att faktiskt hålla systemet bra och supporten responsiv.</p>
 
       <h2>Aurora Transport – ingen bindningstid</h2>
-      <p>Aurora Transport erbjuder månadsbetalning och ingen bindningstid. Du betalar 449 kr/månad och kan avsluta när du vill. Det är vår övertygelse om att systemet ska hålla dig kvar av kvalitet – inte av kontrakt.</p>
+      <p>Aurora Transport erbjuder månadsbetalning och ingen bindningstid. Du betalar 449 kr/månad exkl. moms och kan avsluta när du vill. Det är vår övertygelse om att systemet ska hålla dig kvar av kvalitet – inte av kontrakt.</p>
 
       <BlogCta text="Starta utan risk – prova Aurora Transport" />
     </BlogLayout>

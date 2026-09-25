@@ -44,7 +44,7 @@ export default function AdsBudtjanstPage() {
 
   usePageMeta({
     title: 'Budtjänst-app — Dispatch & realtidsspårning | Aurora Transport',
-    description: 'Hantera bud, leveranser och förare digitalt. Realtidsspårning, kvittens med foto & signatur, och automatisk tidrapportering. 449 kr/mån.',
+    description: 'Hantera bud, leveranser och förare digitalt. Realtidsspårning, kvittens med foto & signatur, och automatisk tidrapportering. 449 kr/mån exkl. moms.',
     canonical: 'https://auroratransport.se/ads/budtjanst',
     noindex: true,
   });
@@ -105,7 +105,7 @@ export default function AdsBudtjanstPage() {
         applicationCategory: 'BusinessApplication',
         operatingSystem: 'Web',
         description: 'Budtjänst-app med realtidsspårning, leveranskvittens och tidrapportering.',
-        offers: { '@type': 'Offer', price: '449', priceCurrency: 'SEK' },
+        offers: { '@type': 'Offer', price: '449', priceCurrency: 'SEK', priceSpecification: { '@type': 'UnitPriceSpecification', price: 449, priceCurrency: 'SEK', valueAddedTaxIncluded: false } },
       })}} />
     </div>
   );
@@ -195,7 +195,7 @@ function HeroSection({ onDemo, demoLoading }: { onDemo: () => void; demoLoading:
             >
               <Button size="lg" asChild className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-xl px-8 py-6 text-base font-semibold shadow-2xl shadow-blue-600/25 hover:shadow-blue-500/40 transition-all duration-300 border-0">
                 <Link to="/kontakt">
-                  Kom igång — 449 kr/mån
+                  Kom igång — 449 kr/mån exkl. moms
                   <ArrowRight className="h-4 w-4 ml-1" />
                 </Link>
               </Button>
@@ -541,9 +541,9 @@ function Pricing({ onDemo, demoLoading }: { onDemo: () => void; demoLoading: boo
                 </span>
                 <div className="flex items-baseline gap-1">
                   <span className="text-5xl sm:text-6xl font-extrabold text-white font-mono">449</span>
-                  <span className="text-lg text-white/30 font-medium">kr/mån</span>
+                  <span className="text-lg text-white/30 font-medium">kr/mån exkl. moms</span>
                 </div>
-                <p className="text-sm text-white/25 mt-2">+ 3 500 kr engångsavgift (setup & onboarding)</p>
+                <p className="text-sm text-white/25 mt-2">Ingen startavgift. 14 dagar gratis utan kort.</p>
               </div>
               <Button size="lg" asChild className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-xl px-8 py-6 font-semibold shadow-2xl shadow-blue-600/25 border-0 shrink-0">
                 <Link to="/kontakt">Kom igång nu <ArrowRight className="h-4 w-4 ml-1" /></Link>
@@ -657,7 +657,7 @@ function FinalCta() {
           initial="hidden" whileInView="visible" viewport={{ once: true }} custom={1} variants={fadeUp}
           className="text-white/30 mb-8 text-lg"
         >
-          449 kr/mån. Fast pris. Alla funktioner. Igång på 5 minuter.
+          449 kr/mån exkl. moms. Fast pris. Alla funktioner. Igång på 5 minuter.
         </motion.p>
         <motion.div
           initial="hidden" whileInView="visible" viewport={{ once: true }} custom={2} variants={fadeUp}

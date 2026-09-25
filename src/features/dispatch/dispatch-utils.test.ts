@@ -103,6 +103,7 @@ describe('operational dispatch filters', () => {
     expect(matchesDispatchFilter(assignment({ status: 'completed', require_signature: true }), 'proof', now)).toBe(true);
     expect(matchesDispatchFilter(assignment({ status: 'pending', require_photo: true }), 'proof', now)).toBe(false);
     expect(matchesDispatchFilter(assignment({ status: 'completed', require_photo: true, consignment_photo_url: '/photo.jpg' }), 'proof', now)).toBe(false);
+    expect(matchesDispatchFilter(assignment({ status: 'completed', require_photo: true, proof_photo_path: 'consignment-notes/user/photo.jpg', require_signature: true, signature_path: 'signatures/user/signature.png' }), 'proof', now)).toBe(false);
     expect(matchesDispatchFilter(assignment({ status: 'completed', require_photo: true, consignment_photo_url: '/photo.jpg', require_signature: true }), 'proof', now)).toBe(true);
     expect(matchesDispatchFilter(assignment({ status: 'completed' }), 'proof', now)).toBe(false);
   });

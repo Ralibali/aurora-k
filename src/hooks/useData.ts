@@ -277,7 +277,7 @@ export function useDriverUpdateAssignment() {
   return useMutation({
     mutationFn: async (params: { id: string; driver_comment?: string | null }) => {
       const { error } = await supabase.rpc('driver_update_assignment', {
-        _id: params.id, _driver_comment: params.driver_comment ?? null,
+        _id: params.id, _driver_comment: params.driver_comment ?? undefined,
       });
       if (error) throw error;
     },

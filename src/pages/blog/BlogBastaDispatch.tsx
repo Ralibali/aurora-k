@@ -38,7 +38,7 @@ export default function BlogBastaDispatch() {
         <li>Komma åt allt från mobil, surfplatta eller dator</li>
       </ul>
 
-      <p>Priset är fast och transparent: 3 500 kr i setup och 449 kr/månad – oavsett hur många körordrar du kör. Inga överraskningar på fakturan.</p>
+      <p>Priset är fast och transparent: 449 kr/månad exkl. moms utan startavgift – oavsett hur många körordrar du kör. Inga överraskningar på fakturan.</p>
 
       <h2>Jämförelse: Aurora Transport vs traditionella TMS</h2>
 

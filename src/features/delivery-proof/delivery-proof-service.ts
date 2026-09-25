@@ -1,8 +1,8 @@
 import { syncOrQueueDriverOperation } from '@/lib/driver-offline-queue';
 
 export type DeliveryProofResult = {
-  photoUrl: string | null;
-  signatureUrl: string | null;
+  photoPath: string | null;
+  signaturePath: string | null;
   recipientName: string;
   note: string;
   latitude: number | null;
@@ -49,8 +49,8 @@ export async function saveDeliveryProof(input: {
   });
   const serverResult = operation.result ?? {};
   return {
-    photoUrl: typeof serverResult.photoUrl === 'string' ? serverResult.photoUrl : input.existingPhotoUrl ?? null,
-    signatureUrl: typeof serverResult.signatureUrl === 'string' ? serverResult.signatureUrl : input.existingSignatureUrl ?? null,
+    photoPath: typeof serverResult.photoPath === 'string' ? serverResult.photoPath : null,
+    signaturePath: typeof serverResult.signaturePath === 'string' ? serverResult.signaturePath : null,
     recipientName: input.recipientName.trim(),
     note: input.note.trim(),
     ...location,

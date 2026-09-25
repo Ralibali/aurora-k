@@ -22,7 +22,8 @@ type TrackingData = {
     deliveryAddress: string | null;
     customerName: string | null;
   };
-  driver: { firstName: string; phone: string | null } | null;
+  companyPhone: string | null;
+  driver: { firstName: string } | null;
   location: { latitude: number; longitude: number; heading: number | null; speed: number | null; updatedAt: string } | null;
 };
 
@@ -87,7 +88,7 @@ export default function PublicTrackingPage() {
   if (loading || loadedToken !== token) return <div className="min-h-screen bg-slate-50 p-5"><div className="mx-auto max-w-xl space-y-4 pt-12"><Skeleton className="h-16 w-full" /><Skeleton className="h-72 w-full" /></div></div>;
   if (error || !data) return <div className="flex min-h-screen items-center justify-center bg-slate-50 p-5"><Card className="max-w-md"><CardContent className="p-8 text-center"><MapPin className="mx-auto mb-3 h-10 w-10 text-slate-300" /><h1 className="font-bold">Spårningen är inte tillgänglig</h1><p className="mt-2 text-sm text-muted-foreground">{error}</p><Button className="mt-4" variant="outline" disabled={refreshing} onClick={() => void load(true)}>{refreshing ? 'Laddar…' : 'Försök igen'}</Button></CardContent></Card></div>;
 
-  const { assignment, driver, location } = data;
+  const { assignment, driver, location, companyPhone } = data;
   const active = assignment.status === 'active' || assignment.status === 'delayed';
   const completed = assignment.status === 'completed';
   const hasPosition = location && isValidMapCoordinate(location.latitude, location.longitude);
@@ -103,7 +104,7 @@ export default function PublicTrackingPage() {
           <div><Step title="Transport planerad" done={active || completed} active={!active && !completed} time={assignment.scheduledStart} /><Step title="Chauffören är på väg" done={completed} active={active} time={assignment.actualStart} /><Step title="Ankomst registrerad" done={Boolean(assignment.arrivedAt) || completed} active={active && !assignment.arrivedAt} time={assignment.arrivedAt || assignment.etaAt} /><Step title="Levererad" done={completed} active={false} time={assignment.actualStop} /></div>
         </CardContent></Card>
 
-        {active && <Card className="border-blue-200 bg-blue-50"><CardContent className="space-y-3 p-5"><div className="flex items-center justify-between"><div><p className="font-semibold text-blue-950">{driver?.firstName || 'Chauffören'} är på väg</p>{assignment.etaAt && <p className="text-sm font-semibold text-blue-900">Beräknad ankomst {formatDate(assignment.etaAt)}</p>}<p className="text-sm text-blue-800">Senast uppdaterad {location ? new Date(location.updatedAt).toLocaleTimeString('sv-SE', { timeZone: 'Europe/Stockholm', hour: '2-digit', minute: '2-digit' }) : 'position saknas'}</p></div><RefreshCw className={`h-5 w-5 text-blue-700 ${refreshing ? 'animate-spin' : ''}`} /></div>{hasPosition && <Button asChild className="w-full"><a href={mapsUrl} target="_blank" rel="noreferrer"><MapPin className="mr-2 h-4 w-4" />Visa senaste position</a></Button>}{driver?.phone && <Button asChild variant="outline" className="w-full bg-white"><a href={`tel:${driver.phone}`}><Phone className="mr-2 h-4 w-4" />Ring {driver.firstName}</a></Button>}</CardContent></Card>}
+        {active && <Card className="border-blue-200 bg-blue-50"><CardContent className="space-y-3 p-5"><div className="flex items-center justify-between"><div><p className="font-semibold text-blue-950">{driver?.firstName || 'Chauffören'} är på väg</p>{assignment.etaAt && <p className="text-sm font-semibold text-blue-900">Beräknad ankomst {formatDate(assignment.etaAt)}</p>}<p className="text-sm text-blue-800">Senast uppdaterad {location ? new Date(location.updatedAt).toLocaleTimeString('sv-SE', { timeZone: 'Europe/Stockholm', hour: '2-digit', minute: '2-digit' }) : 'position saknas'}</p></div><RefreshCw className={`h-5 w-5 text-blue-700 ${refreshing ? 'animate-spin' : ''}`} /></div>{hasPosition && <Button asChild className="w-full"><a href={mapsUrl} target="_blank" rel="noreferrer"><MapPin className="mr-2 h-4 w-4" />Visa senaste position</a></Button>}{companyPhone && <Button asChild variant="outline" className="w-full bg-white"><a href={`tel:${companyPhone}`}><Phone className="mr-2 h-4 w-4" />Ring transportföretaget</a></Button>}</CardContent></Card>}
         <Button variant="ghost" className="w-full" disabled={refreshing} onClick={() => void load(true)}><RefreshCw className={`mr-2 h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />Uppdatera status</Button>
         <p className="pb-6 text-center text-xs text-slate-400">Position visas endast under ett aktivt uppdrag och uppdateras automatiskt.</p>
       </main>

@@ -1,3 +1,6 @@
+import { AppServiceWorker } from './components/AppServiceWorker';
+import LegalPage from './pages/LegalPage';
+import { PublicLegalFooter } from './components/PublicLegalFooter';
 import { lazy, Suspense, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
@@ -148,9 +151,12 @@ const App = () => (
           <AuthProvider>
             <ErrorBoundary>
               <ScrollToTop />
+              <AppServiceWorker />
               <DriverPushNotifications />
               <Suspense fallback={<PageLoader />}>
                 <Routes>
+                  <Route path="/villkor" element={<LegalPage document="terms" />} />
+                  <Route path="/pub-avtal" element={<LegalPage document="dpa" />} />
                   <Route path="/" element={<LandingPage />} />
                   <Route path="/boka" element={<PublicBookingPage />} />
                   <Route path="/boka/:slug" element={<PublicBookingPage />} />
@@ -263,6 +269,7 @@ const App = () => (
                   </Route>
                   <Route path="*" element={<NotFound />} />
                 </Routes>
+                <PublicLegalFooter />
               </Suspense>
             </ErrorBoundary>
           </AuthProvider>
