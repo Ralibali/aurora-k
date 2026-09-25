@@ -1,5 +1,61 @@
 [
   {
+    "slug": "platsunderlag-aterkommande-lastplatser",
+    "title": "Samla återkommande lastplatser i ett tydligt platsunderlag",
+    "metaDescription": "Samla kontrollerade platsuppgifter, källor och öppna frågor för återkommande transportuppdrag. En arbetsmall för tydligare underlag i transportledningen.",
+    "intro": "En adress räcker inte alltid för att förstå vilken plats ett transportuppdrag gäller. Samma fastighet kan ha flera infarter, mottagningar eller kontaktvägar. Ett gemensamt platsunderlag hjälper transportledningen att hålla bekräftade uppgifter samlade och att se vad som fortfarande behöver kontrolleras inför ett uppdrag.\n",
+    "sections": [
+      {
+        "heading": "Skilj platsens namn från uppdragets instruktion",
+        "content": "Ge varje återkommande plats en tydlig intern benämning och behåll den officiella adressuppgiften separat. ”Lagret” kan betyda olika saker för olika personer. Ett platsnamn som också anger ort eller verksamhet blir lättare att skilja från en annan adress med ett liknande namn.\n\nPlatsunderlaget ska beskriva den information ni har om platsen. Det aktuella uppdragets instruktioner behöver fortfarande kontrolleras. En tidigare uppgift om mottagning eller tid får inte automatiskt bli ett bekräftat besked för nästa leverans. Hänvisa till uppdraget när instruktionen bara gäller ett visst tillfälle."
+      },
+      {
+        "heading": "Ange varifrån varje uppgift kommer",
+        "content": "Spara källan när någon bekräftar en uppgift. Det kan vara en hänvisning till kundens skriftliga instruktion eller ett dokumenterat besked via er vanliga kontaktväg. Anteckna också när uppgiften kontrollerades och vem som gjorde kontrollen.\n\nSkilj mellan adress, kontaktväg och praktisk ankomstinformation. De kan ha olika källor och ändras vid olika tidpunkter. Ett bekräftat gatunamn innebär exempelvis inte att uppgiften om mottagningens öppettid samtidigt har kontrollerats. Märk saknade uppgifter som öppna frågor."
+      },
+      {
+        "heading": "Skapa ett enkelt platskort",
+        "content": "Börja med följande fält och ta bara med information som behövs i arbetet:\n\n- Platsreferens och tydlig benämning.\n- Adress enligt kontrollerat underlag.\n- Relevant mottagning eller funktion på platsen.\n- Källa och datum för senaste bekräftelse.\n- Kontaktväg enligt era ordinarie rutiner.\n- Uppgifter som bara gäller ett visst uppdrag.\n- Öppen fråga och person som följer upp den.\n\nPlatskortet är en mall för information. Det är ingen bedömning av framkomlighet eller lämplig körväg. Sådana förutsättningar behöver bedömas i den ordinarie transportplaneringen utifrån det aktuella uppdraget och fordonet."
+      },
+      {
+        "heading": "Markera förändringar utan att sprida gamla besked",
+        "content": "När en uppgift ändras, skriv vilket besked som ersätts och från när det nya gäller enligt källan. Om ändringen ännu inte är bekräftad ska den inte presenteras som en säker instruktion. Behåll frågan öppen tills ansvarig person har fått ett tydligt svar.\n\nKontrollera vilka pågående uppdrag som berörs. Använd [ändringsloggen för transportuppdrag](/blogg/andringslogg-transportuppdrag) för uppdragets beslut och hänvisa till platskortet för den gemensamma informationen. På så sätt slipper samma ändring få olika formuleringar i flera fristående anteckningar."
+      },
+      {
+        "heading": "Gör kortet användbart vid passbyte",
+        "content": "Be en kollega som inte tog emot det ursprungliga beskedet läsa kortet. Kan personen skilja den bekräftade adressen från en öppen fråga? Går det att hitta underlaget som instruktionen bygger på? Otydliga förkortningar märks ofta först när någon annan försöker använda informationen.\n\nTa med relevanta öppna frågor i [överlämningen mellan transportledare](/blogg/overlamning-transportledning-checklista). Ange vem som följer upp dem. Ett platskort behöver inte bli långt; det viktiga är att nästa person kan förstå vad som gäller och hur osäkra uppgifter ska kontrolleras."
+      },
+      {
+        "heading": "Börja med en plats ni använder ofta",
+        "content": "Välj en återkommande plats och pröva mallen i ert befintliga arbetssätt. Justera fälten utifrån de frågor som faktiskt uppstår. Lägg inte till ett stort register innan ni vet vem som håller informationen aktuell och hur gamla instruktioner hanteras.\n\nLäs om [Aurora Transports tjänster](/tjanster) när ni går igenom ert stöd för transportledning. Ta med platskortet som exempel i dialogen om behovet. AI-assisterad originalguide med en redaktionell arbetsmall."
+      }
+    ],
+    "editorial": {
+      "createdWith": "ChatGPT",
+      "aiAssisted": true,
+      "searchIntent": "Underhålla kontrollerad information om återkommande lastplatser och skilja den från uppdragsspecifika instruktioner. Skilt från ändringslogg, fakturering och passbyte.",
+      "sourceUrls": [
+        "https://auroratransport.se/tjanster"
+      ],
+      "sourceCheckedAt": "2026-09-25T08:27:21.467864+00:00",
+      "publishedAt": "2026-09-25T08:27:21.467864+00:00"
+    },
+    "seoTitle": "Samla återkommande lastplatser i ett tydligt platsunderlag",
+    "readTime": "4 min",
+    "excerpt": "Samla kontrollerade platsuppgifter, källor och öppna frågor för återkommande transportuppdrag. En arbetsmall för tydligare underlag i transportledningen.",
+    "tags": [
+      "transportledning",
+      "arbetsrutiner"
+    ],
+    "links": [
+      {
+        "href": "/tjanster",
+        "label": "Se Aurora Transports tjänster"
+      }
+    ],
+    "publishDate": "2026-09-25"
+  },
+  {
     "slug": "andringslogg-transportuppdrag",
     "title": "Ändringar i transportuppdrag: håll besked och ansvar samlade",
     "metaDescription": "Skriv en tydlig ändringsrad när ett transportuppdrag får nya förutsättningar. En mall för att skilja önskemål, bekräftade besked och nästa ansvariga person.",
