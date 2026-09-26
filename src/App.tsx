@@ -56,6 +56,7 @@ const AdminLiveMap = lazy(() => import("./pages/admin/AdminLiveMap"));
 const AdminCalendar = lazy(() => import("./pages/admin/AdminCalendar"));
 const AdminArticles = lazy(() => import("./pages/admin/AdminArticles"));
 const AdminVehicles = lazy(() => import("./pages/admin/AdminVehicles"));
+const AdminTelematics = lazy(() => import("./pages/admin/AdminTelematics"));
 const AdminOrders = lazy(() => import("./pages/admin/AdminOrders"));
 const AdminOrderTemplates = lazy(() => import("./pages/admin/AdminOrderTemplates"));
 const AdminAbsences = lazy(() => import("./pages/admin/AdminAbsences"));
@@ -225,6 +226,7 @@ const App = () => (
                     <Route path="calendar" element={<AdminCalendar />} />
                     <Route path="articles" element={<AdminArticles />} />
                     <Route path="vehicles" element={<AdminVehicles />} />
+                    <Route path="telematics" element={<AdminTelematics />} />
                     <Route path="orders" element={<AdminOrders />} />
                     <Route path="order-templates" element={<AdminOrderTemplates />} />
                     <Route path="absences" element={<AdminAbsences />} />
