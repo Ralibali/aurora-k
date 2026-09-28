@@ -8,7 +8,6 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { LeadFormModal } from '@/components/LeadFormModal';
 import { DemoBookingModal } from '@/components/DemoBookingModal';
 import { RoiCalculator } from '@/components/RoiCalculator';
-import { SocialProof } from '@/components/SocialProof';
 import { useAuth } from '@/hooks/useAuth';
 import { useBreadcrumbJsonLd } from '@/lib/breadcrumb-jsonld';
 import { useJsonLd } from '@/lib/use-json-ld';
@@ -253,10 +252,6 @@ export default function LandingPageV3() {
               })}
             </div>
           </div>
-        </section>
-
-        <section className="bg-[#0a0a1a] py-20 sm:py-24">
-          <SocialProof t={t.social} />
         </section>
 
         <IncludedSection lang={lang} onDemo={() => setDemoModalOpen(true)} />

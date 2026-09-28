@@ -2,7 +2,7 @@ import {
   LayoutDashboard, Briefcase, Calendar, Map, Navigation,
   Users, UserX, CheckSquare, Building, ShoppingCart, Inbox, ShieldCheck,
   Star, FileText, Package, Leaf, BarChart, TrendingUp,
-  Bell, Globe, Code, Settings, Car,
+  Bell, Globe, Code, Settings, Car, Satellite,
   ClipboardList, FileImage, Smartphone, Shield, Repeat,
 } from 'lucide-react';
 
@@ -59,6 +59,7 @@ export const secondarySections = [
     items: [
       { title: 'Ruttoptimering', url: '/admin/routes', icon: Navigation },
       { title: 'Fordon', url: '/admin/vehicles', icon: Car },
+      { title: 'Telematik & körjournal', url: '/admin/telematics', icon: Satellite },
       { title: 'Återkommande uppdrag', url: '/admin/recurring-series', icon: Repeat },
     ],
   },

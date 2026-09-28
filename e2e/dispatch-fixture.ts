@@ -85,12 +85,15 @@ export type DispatchApi = {
   failNextMail: boolean;
   driverSettings: Record<string, unknown>;
   settingsWrites: Record<string, unknown>[];
+  missingDriverSettings?: boolean;
+  settingsReadError?: boolean;
+  assignmentCreates: Record<string, unknown>[][];
 };
 
 /** All auth/data traffic stays inside the browser fixture. No real credentials are read. */
 export async function installDispatchFixture(context: BrowserContext): Promise<DispatchApi> {
   const state: DispatchApi = {
-    assignments: createAssignments(), writes: [], failNextMutation: false, partialNextMutation: false, unexpectedRequests: [], notificationRequests: 0, failNotifications: false, mailRequests: [], failNextMail: false, settingsWrites: [], driverSettings: { id: 'settings-id', company_id: COMPANY_ID, require_signature: true, require_photo: true, show_time_report: true, show_availability_toggle: true, show_total_hours: true },
+    assignments: createAssignments(), assignmentCreates: [], writes: [], failNextMutation: false, partialNextMutation: false, unexpectedRequests: [], notificationRequests: 0, failNotifications: false, mailRequests: [], failNextMail: false, settingsWrites: [], driverSettings: { id: 'settings-id', company_id: COMPANY_ID, require_signature: true, require_photo: true, show_time_report: true, show_availability_toggle: true, show_total_hours: true },
   };
   const user = {
     id: ADMIN_ID, aud: 'authenticated', role: 'authenticated', email: 'admin@example.test',
@@ -142,12 +145,15 @@ export async function installDispatchFixture(context: BrowserContext): Promise<D
     if (url.pathname.startsWith('/auth/')) return json(url.pathname.endsWith('/user') ? user : session);
     if (url.pathname === '/rest/v1/rpc/is_platform_admin') return json(false);
     if (url.pathname === '/functions/v1/maps-config' && request.method() === 'POST') return json({ configured: false });
+    if (url.pathname === '/functions/v1/send-push' && request.method() === 'POST') return json({ sent: 1 });
     if (url.pathname === '/functions/v1/share-assignment') {
       state.mailRequests.push(request.postDataJSON());
       if (state.failNextMail) { state.failNextMail = false; return json({ error: 'E-posttjänsten är tillfälligt otillgänglig.' }, 502); }
       return json({ success: true, id: 'fixture-mail', recipient: 'customer@example.test' });
     }
     if (url.pathname === '/rest/v1/driver_settings') {
+      if (state.settingsReadError) return json({ code: '42501', message: 'Settings access denied' }, 403);
+      if (state.missingDriverSettings) return json([]);
       if (request.method() === 'PATCH') {
         const update = request.postDataJSON();
         state.settingsWrites.push(update);
@@ -158,7 +164,19 @@ export async function installDispatchFixture(context: BrowserContext): Promise<D
     if (url.pathname === '/rest/v1/user_roles') return json([{ role: 'admin', company_id: COMPANY_ID }]);
     if (url.pathname === '/rest/v1/companies') return json({ id: COMPANY_ID, name: 'Nordic Transport', subscription_status: 'active', trial_ends_at: null });
     if (url.pathname === '/rest/v1/profiles') return json(url.searchParams.has('role') ? drivers : { id: ADMIN_ID, company_id: COMPANY_ID, role: 'admin' });
+    if (url.pathname === '/rest/v1/customers') return json([{ id: '40000000-0000-4000-8000-000000000001', company_id: COMPANY_ID, name: 'Nordic Distribution' }]);
     if (url.pathname === '/rest/v1/assignments') {
+      if (request.method() === 'POST') {
+        const body = request.postDataJSON() as Record<string, unknown>[];
+        state.assignmentCreates.push(body);
+        if (state.failNextMutation) {
+          state.failNextMutation = false;
+          return json({ code: '23503', message: 'Foreign key violation' }, 409);
+        }
+        const created = body.map((row, index) => assignment(state.assignments.length + index + 1, String(row.title), row));
+        state.assignments.push(...created);
+        return json(created);
+      }
       if (request.method() === 'PATCH') {
         const idFilter = url.searchParams.get('id') ?? '';
         const ids = idFilter.startsWith('in.(')

@@ -161,7 +161,7 @@ export default function AboutPage() {
                 Vår vision är att varje transportföretag i Norden – oavsett storlek – ska ha tillgång till ett modernt, intuitivt och prisvärt transportledningssystem. Ett system som sparar tid, minskar fel och ger full kontroll över verksamheten från dag ett.
               </p>
               <p>
-                Vi utvecklar Aurora Transport i nära samarbete med våra kunder. Varje funktion vi bygger löser ett verkligt problem som åkeriägare, trafikledare och förare möter i sin vardag. Det är så vi skiljer oss från generella projektverktyg och dyra enterprise-lösningar.
+                Vi bygger Aurora Transport för små svenska åkerier och bemanningsföretag. Varje funktion vi bygger löser ett verkligt problem som åkeriägare, trafikledare och förare möter i sin vardag. Det är så vi skiljer oss från generella projektverktyg och dyra enterprise-lösningar.
               </p>
             </div>
           </motion.div>

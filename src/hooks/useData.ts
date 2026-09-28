@@ -241,6 +241,7 @@ export function useCreateAssignment() {
       geofence_lat?: number | null;
       geofence_lng?: number | null;
     }) => {
+      if (!companyId) throw new Error('Företaget kunde inte läsas. Logga in igen och försök på nytt.');
       const { data, error } = await supabase.from('assignments').insert({ ...assignment, company_id: companyId }).select().single();
       if (error) throw error;
       return data;
@@ -251,6 +252,27 @@ export function useCreateAssignment() {
       deliverAssignmentNotifications();
     },
     onError: (e: Error) => toast.error('Kunde inte skapa uppdrag: ' + e.message),
+  });
+}
+
+// One INSERT makes a recurring series atomic: a failed row rolls back the series.
+// The form owns feedback so a retry never displays both success and failure.
+export function useCreateAssignments() {
+  const qc = useQueryClient();
+  const { companyId } = useAuth();
+  return useMutation({
+    mutationFn: async (assignments: TablesInsert<'assignments'>[]) => {
+      if (!companyId) throw new Error('Företaget kunde inte läsas. Logga in igen och försök på nytt.');
+      if (!assignments.length || assignments.length > 200) throw new Error('Välj mellan 1 och 200 uppdrag.');
+      const { data, error } = await supabase.from('assignments')
+        .insert(assignments.map(assignment => ({ ...assignment, company_id: companyId }))).select();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['assignments'] });
+      deliverAssignmentNotifications();
+    },
   });
 }
 

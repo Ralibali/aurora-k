@@ -1,5 +1,113 @@
 [
   {
+    "slug": "avstamning-returemballage-underlag",
+    "title": "Samla underlaget när returemballage ska stämmas av",
+    "metaDescription": "Samla antal, underlag och öppna frågor när returemballage ska stämmas av. En praktisk dokumentationsmall för transportledningens uppföljning.",
+    "intro": "När pallar, burar eller annat returemballage behöver följas upp kan uppgifterna finnas på flera ställen. En anteckning från ett stopp, ett kvitto och ett senare besked beskriver inte alltid samma sak. Ett gemensamt avstämningsunderlag hjälper transportledningen att se vilka uppgifter som finns och vilka frågor som återstår.\n",
+    "sections": [
+      {
+        "heading": "Bestäm vad avstämningen omfattar",
+        "content": "Ange vilket uppdrag, stopp eller vilken period underlaget gäller. Använd verksamhetens egna benämningar på emballaget och be ansvarig reda ut oklara beteckningar. Blanda inte olika emballageslag i samma totalsiffra utan att det framgår hur uppgifterna hänger ihop.\n\nKontrollera med ansvarig vilka överenskommelser och dokument som ska ligga till grund för avstämningen. Den här mallen bestämmer inte betalningsansvar, ägande eller andra villkor. Den hjälper er att hålla samman de uppgifter som den ordinarie bedömningen behöver."
+      },
+      {
+        "heading": "Håll händelse och underlag åtskilda",
+        "content": "Skriv vad som uppges ha hänt och hänvisa sedan till underlaget för uppgiften. Ett dokument kan gälla vad som planerades, vad som lämnades eller vad som senare kvitterades. Märk vilken typ av information raden innehåller så att olika uppgifter inte får samma betydelse av misstag.\n\nSpara dokumentets egen referens och datum. Om en uppgift kommer från ett samtal, anteckna vem som lämnade den och när. Skriv uttryckligen att en bekräftelse saknas när den ännu inte finns, i stället för att behandla ett muntligt antagande som ett avslutat ärende."
+      },
+      {
+        "heading": "Gör en rad som går att följa tillbaka",
+        "content": "Använd exempelvis dessa fält:\n\n- Uppdragsreferens, plats och händelsedatum.\n- Emballageslag enligt det aktuella underlaget.\n- Uppgiven mängd och vad mängden avser.\n- Dokumentreferens eller annan källa.\n- Motstridig uppgift eller saknad bekräftelse.\n- Ansvarig för att reda ut frågan.\n- Nästa steg och datum för uppföljning.\n\nLåt samma referens följa med när någon kompletterar raden. Då kan den som tar över arbetet hitta originalet och förstå vilken fråga kompletteringen besvarar, även om flera personer har deltagit i kontakten."
+      },
+      {
+        "heading": "Utred skillnader utan att skriva över dem",
+        "content": "Om två underlag anger olika mängder, bevara båda hänvisningarna och beskriv skillnaden. Be rätt person undersöka om de gäller samma händelse, samma emballageslag och samma del av uppdraget. En olikhet är en fråga att reda ut, inte i sig ett besked om vilket dokument som är korrekt.\n\nAnteckna det slutliga beskedet med källa och datum. Om avvikelsen påverkar andra delar av uppdraget, hänvisa till [ändringsloggen för transportuppdrag](/blogg/andringslogg-transportuppdrag) så att beskedet kan följas i sitt sammanhang."
+      },
+      {
+        "heading": "Avsluta med ett tydligt nästa steg",
+        "content": "Markera om underlaget är avstämt, väntar på komplettering eller har lämnats till en annan ansvarig. Spara vem som tog emot frågan och vilket besked som behövs. Ett ärende ska inte se avslutat ut bara för att en påminnelse har skickats.\n\nTa med relevanta hänvisningar i [avstämningen före fakturering](/blogg/stam-av-transportunderlag-fore-fakturering). Läs om [Aurora Transports tjänster](/tjanster) när ni diskuterar ert stöd för uppdragshantering. AI-assisterad originalguide; avstämningsmallen är ett eget arbetsunderlag och beskriver ingen särskild emballagefunktion i produkten."
+      }
+    ],
+    "editorial": {
+      "createdWith": "ChatGPT",
+      "aiAssisted": true,
+      "searchIntent": "Dokumentera källor och mängduppgifter om returemballage inför avstämning; skilt från fakturakontroll och uppdragsändringar utan att avgöra avtalsansvar.",
+      "sourceUrls": [
+        "https://auroratransport.se/tjanster"
+      ],
+      "sourceCheckedAt": "2026-09-27T07:45:44.373661+00:00",
+      "publishedAt": "2026-09-27T07:45:44.373661+00:00"
+    },
+    "seoTitle": "Samla underlaget när returemballage ska stämmas av",
+    "readTime": "4 min",
+    "excerpt": "Samla antal, underlag och öppna frågor när returemballage ska stämmas av. En praktisk dokumentationsmall för transportledningens uppföljning.",
+    "tags": [
+      "transportledning",
+      "arbetsrutiner"
+    ],
+    "links": [
+      {
+        "href": "/tjanster",
+        "label": "Se Aurora Transports tjänster"
+      }
+    ],
+    "publishDate": "2026-09-27"
+  },
+  {
+    "slug": "platsunderlag-aterkommande-lastplatser",
+    "title": "Samla återkommande lastplatser i ett tydligt platsunderlag",
+    "metaDescription": "Samla kontrollerade platsuppgifter, källor och öppna frågor för återkommande transportuppdrag. En arbetsmall för tydligare underlag i transportledningen.",
+    "intro": "En adress räcker inte alltid för att förstå vilken plats ett transportuppdrag gäller. Samma fastighet kan ha flera infarter, mottagningar eller kontaktvägar. Ett gemensamt platsunderlag hjälper transportledningen att hålla bekräftade uppgifter samlade och att se vad som fortfarande behöver kontrolleras inför ett uppdrag.\n",
+    "sections": [
+      {
+        "heading": "Skilj platsens namn från uppdragets instruktion",
+        "content": "Ge varje återkommande plats en tydlig intern benämning och behåll den officiella adressuppgiften separat. ”Lagret” kan betyda olika saker för olika personer. Ett platsnamn som också anger ort eller verksamhet blir lättare att skilja från en annan adress med ett liknande namn.\n\nPlatsunderlaget ska beskriva den information ni har om platsen. Det aktuella uppdragets instruktioner behöver fortfarande kontrolleras. En tidigare uppgift om mottagning eller tid får inte automatiskt bli ett bekräftat besked för nästa leverans. Hänvisa till uppdraget när instruktionen bara gäller ett visst tillfälle."
+      },
+      {
+        "heading": "Ange varifrån varje uppgift kommer",
+        "content": "Spara källan när någon bekräftar en uppgift. Det kan vara en hänvisning till kundens skriftliga instruktion eller ett dokumenterat besked via er vanliga kontaktväg. Anteckna också när uppgiften kontrollerades och vem som gjorde kontrollen.\n\nSkilj mellan adress, kontaktväg och praktisk ankomstinformation. De kan ha olika källor och ändras vid olika tidpunkter. Ett bekräftat gatunamn innebär exempelvis inte att uppgiften om mottagningens öppettid samtidigt har kontrollerats. Märk saknade uppgifter som öppna frågor."
+      },
+      {
+        "heading": "Skapa ett enkelt platskort",
+        "content": "Börja med följande fält och ta bara med information som behövs i arbetet:\n\n- Platsreferens och tydlig benämning.\n- Adress enligt kontrollerat underlag.\n- Relevant mottagning eller funktion på platsen.\n- Källa och datum för senaste bekräftelse.\n- Kontaktväg enligt era ordinarie rutiner.\n- Uppgifter som bara gäller ett visst uppdrag.\n- Öppen fråga och person som följer upp den.\n\nPlatskortet är en mall för information. Det är ingen bedömning av framkomlighet eller lämplig körväg. Sådana förutsättningar behöver bedömas i den ordinarie transportplaneringen utifrån det aktuella uppdraget och fordonet."
+      },
+      {
+        "heading": "Markera förändringar utan att sprida gamla besked",
+        "content": "När en uppgift ändras, skriv vilket besked som ersätts och från när det nya gäller enligt källan. Om ändringen ännu inte är bekräftad ska den inte presenteras som en säker instruktion. Behåll frågan öppen tills ansvarig person har fått ett tydligt svar.\n\nKontrollera vilka pågående uppdrag som berörs. Använd [ändringsloggen för transportuppdrag](/blogg/andringslogg-transportuppdrag) för uppdragets beslut och hänvisa till platskortet för den gemensamma informationen. På så sätt slipper samma ändring få olika formuleringar i flera fristående anteckningar."
+      },
+      {
+        "heading": "Gör kortet användbart vid passbyte",
+        "content": "Be en kollega som inte tog emot det ursprungliga beskedet läsa kortet. Kan personen skilja den bekräftade adressen från en öppen fråga? Går det att hitta underlaget som instruktionen bygger på? Otydliga förkortningar märks ofta först när någon annan försöker använda informationen.\n\nTa med relevanta öppna frågor i [överlämningen mellan transportledare](/blogg/overlamning-transportledning-checklista). Ange vem som följer upp dem. Ett platskort behöver inte bli långt; det viktiga är att nästa person kan förstå vad som gäller och hur osäkra uppgifter ska kontrolleras."
+      },
+      {
+        "heading": "Börja med en plats ni använder ofta",
+        "content": "Välj en återkommande plats och pröva mallen i ert befintliga arbetssätt. Justera fälten utifrån de frågor som faktiskt uppstår. Lägg inte till ett stort register innan ni vet vem som håller informationen aktuell och hur gamla instruktioner hanteras.\n\nLäs om [Aurora Transports tjänster](/tjanster) när ni går igenom ert stöd för transportledning. Ta med platskortet som exempel i dialogen om behovet. AI-assisterad originalguide med en redaktionell arbetsmall."
+      }
+    ],
+    "editorial": {
+      "createdWith": "ChatGPT",
+      "aiAssisted": true,
+      "searchIntent": "Underhålla kontrollerad information om återkommande lastplatser och skilja den från uppdragsspecifika instruktioner. Skilt från ändringslogg, fakturering och passbyte.",
+      "sourceUrls": [
+        "https://auroratransport.se/tjanster"
+      ],
+      "sourceCheckedAt": "2026-09-25T08:27:21.467864+00:00",
+      "publishedAt": "2026-09-25T08:27:21.467864+00:00"
+    },
+    "seoTitle": "Samla återkommande lastplatser i ett tydligt platsunderlag",
+    "readTime": "4 min",
+    "excerpt": "Samla kontrollerade platsuppgifter, källor och öppna frågor för återkommande transportuppdrag. En arbetsmall för tydligare underlag i transportledningen.",
+    "tags": [
+      "transportledning",
+      "arbetsrutiner"
+    ],
+    "links": [
+      {
+        "href": "/tjanster",
+        "label": "Se Aurora Transports tjänster"
+      }
+    ],
+    "publishDate": "2026-09-25"
+  },
+  {
     "slug": "andringslogg-transportuppdrag",
     "title": "Ändringar i transportuppdrag: håll besked och ansvar samlade",
     "metaDescription": "Skriv en tydlig ändringsrad när ett transportuppdrag får nya förutsättningar. En mall för att skilja önskemål, bekräftade besked och nästa ansvariga person.",

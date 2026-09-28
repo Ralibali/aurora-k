@@ -230,7 +230,7 @@ export default function AdminAssignmentDetail() {
             {assignment.actual_start && <InfoItem label="Faktisk start" value={<span className="font-mono">{formatSwedishDateTime(assignment.actual_start)}</span>} icon={Clock} />}
             {assignment.actual_stop && <InfoItem label="Faktiskt stopp" value={<span className="font-mono">{formatSwedishDateTime(assignment.actual_stop)}</span>} icon={Clock} />}
             {assignment.actual_start && assignment.actual_stop && <InfoItem label="Varaktighet" value={<span className="font-mono">{calculateDuration(assignment.actual_start, assignment.actual_stop)}</span>} icon={CheckCircle2} />}
-            {assignment.instructions && <InfoItem label="Instruktioner" value={assignment.instructions} />}
+            {assignment.instructions && <InfoItem label="Instruktioner" value={<span className="whitespace-pre-wrap break-words">{assignment.instructions}</span>} />}
           </div>
 
           <div>

@@ -31,17 +31,12 @@ export type DayRoutePlan = {
 export async function optimizeDayRoutes(
   planDate: string,
 ): Promise<DayRoutePlan> {
-  const dayStart = new Date(`${planDate}T00:00:00`);
-  const dayEnd = new Date(dayStart);
-  dayEnd.setDate(dayEnd.getDate() + 1);
   const { data, error } = await supabase.functions.invoke("optimize-routes", {
     body: {
       planDate,
-      dayStart: dayStart.toISOString(),
-      dayEnd: dayEnd.toISOString(),
     },
   });
-  if (error) throw error;
+  if (error) throw new Error(error.message);
   if (data?.error) throw new Error(data.error);
   return data as DayRoutePlan;
 }
@@ -51,6 +46,6 @@ export async function approveDayRoutePlan(planId: string) {
     "approve_route_plan" as never,
     { _plan_id: planId } as never,
   );
-  if (error) throw error;
+  if (error) throw new Error(error.message);
   return data;
 }
