@@ -47,45 +47,23 @@ jobs:
         if: steps.credentials.outputs.ready == 'true'
         run: npx --yes supabase@latest db push --linked --yes
 
-      - name: Deploy authenticated functions
+      - name: Deploy all Edge Functions
         if: steps.credentials.outputs.ready == 'true'
         shell: bash
         run: |
-          for function_name in \
-            parse-order-document \
-            order-inbox-api \
-            driver-sync \
-            register-company \
-            create-checkout \
-            stripe-portal \
-            demo-login \
-            create-driver \
-            create-onboarding-link \
-            optimize-routes \
-            update-password \
-            send-push \
-            share-assignment \
-            generate-recurring-assignments
-          do
+          set -euo pipefail
+          shopt -s nullglob dotglob
+          function_count=0
+          # Discover directories so new functions cannot be omitted from a manual list.
+          for function_dir in supabase/functions/*/; do
+            function_name="${function_dir%/}"
+            function_name="${function_name##*/}"
+            [[ "$function_name" == _* ]] && continue
+            # Supabase reads verify_jwt from config.toml (default: true).
             npx --yes supabase@latest functions deploy "$function_name" --project-ref "$SUPABASE_PROJECT_REF" --use-api
+            function_count=$((function_count + 1))
           done
-
-      - name: Deploy verified public callbacks
-        if: steps.credentials.outputs.ready == 'true'
-        shell: bash
-        run: |
-          for function_name in \
-            resend-inbound-order \
-            stripe-webhook \
-            track-assignment \
-            fleet-provider-webhook \
-            customer-portal \
-            public-booking \
-            notify-admin \
-            join-driver \
-            auth-email \
-            send-email \
-            dispatch-notifications
-          do
-            npx --yes supabase@latest functions deploy "$function_name" --project-ref "$SUPABASE_PROJECT_REF" --use-api --no-verify-jwt
-          done
+          if (( function_count == 0 )); then
+            echo "::error::No Edge Function directories found."
+            exit 1
+          fi
