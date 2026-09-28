@@ -1,40 +1,11 @@
+import { point, routeDistance, fallbackPlan, vroomPlan, type Assignment, type Driver } from "./engine.ts";
+import { stockholmDayBounds } from "./day.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.100.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
-};
-
-type Point = { lat: number; lng: number };
-type Assignment = {
-  id: string;
-  title: string;
-  scheduled_start: string;
-  scheduled_end: string | null;
-  assigned_driver_id: string | null;
-  vehicle_id: string | null;
-  geofence_lat: number | null;
-  geofence_lng: number | null;
-  route_demand: number;
-  route_skills: string[];
-};
-type Driver = {
-  id: string;
-  full_name: string;
-  route_capacity: number;
-  route_skills: string[];
-};
-type PlannedStop = {
-  assignmentId: string;
-  driverId: string;
-  vehicleId: string | null;
-  sequence: number;
-  arrivalAt: string | null;
-  departureAt: string | null;
-  distanceM: number;
-  durationS: number;
-  reason: string;
 };
 
 function json(body: unknown, status = 200) {
@@ -46,216 +17,6 @@ function json(body: unknown, status = 200) {
       "Cache-Control": "no-store",
     },
   });
-}
-
-function distance(a?: Point | null, b?: Point | null) {
-  if (!a || !b) return 0;
-  const toRad = (value: number) => (value * Math.PI) / 180;
-  const radius = 6_371_000;
-  const dLat = toRad(b.lat - a.lat);
-  const dLng = toRad(b.lng - a.lng);
-  const value =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng / 2) ** 2;
-  return Math.round(
-    radius * 2 * Math.atan2(Math.sqrt(value), Math.sqrt(1 - value)),
-  );
-}
-
-function point(item?: Assignment | null): Point | null {
-  return !item || item.geofence_lat == null || item.geofence_lng == null
-    ? null
-    : { lat: item.geofence_lat, lng: item.geofence_lng };
-}
-
-function routeDistance(groups: Map<string, Assignment[]>, depot: Point | null) {
-  let total = 0;
-  for (const jobs of groups.values()) {
-    let previous = depot;
-    for (const job of jobs) {
-      total += distance(previous, point(job));
-      previous = point(job) ?? previous;
-    }
-  }
-  return total;
-}
-
-function fallbackPlan(
-  assignments: Assignment[],
-  drivers: Driver[],
-  depot: Point | null,
-  dayStart: string,
-) {
-  const remaining = [...assignments];
-  const routes = new Map(
-    drivers.map((driver) => [driver.id, [] as Assignment[]]),
-  );
-  const usedCapacity = new Map(drivers.map((driver) => [driver.id, 0]));
-
-  while (remaining.length) {
-    let best: { driver: Driver; job: Assignment; score: number } | null = null;
-    for (const driver of drivers) {
-      const current = routes.get(driver.id)!;
-      const last = current.at(-1);
-      const origin = last ? point(last) : depot;
-      for (const job of remaining) {
-        const hasSkills = (job.route_skills ?? []).every((skill) =>
-          (driver.route_skills ?? []).includes(skill),
-        );
-        if (
-          !hasSkills ||
-          (usedCapacity.get(driver.id) ?? 0) + job.route_demand >
-            driver.route_capacity
-        )
-          continue;
-        const score = distance(origin, point(job)) + current.length * 250;
-        if (!best || score < best.score) best = { driver, job, score };
-      }
-    }
-    if (!best) break;
-    routes.get(best.driver.id)!.push(best.job);
-    usedCapacity.set(
-      best.driver.id,
-      (usedCapacity.get(best.driver.id) ?? 0) + best.job.route_demand,
-    );
-    remaining.splice(
-      remaining.findIndex((job) => job.id === best!.job.id),
-      1,
-    );
-  }
-
-  const stops: PlannedStop[] = [];
-  for (const [driverId, jobs] of routes) {
-    let previous = depot;
-    let cursor = new Date(dayStart).getTime();
-    jobs.forEach((job, index) => {
-      const leg = distance(previous, point(job));
-      const duration = Math.round(leg / 13.9);
-      cursor = Math.max(
-        cursor + duration * 1_000,
-        new Date(job.scheduled_start).getTime(),
-      );
-      stops.push({
-        assignmentId: job.id,
-        driverId,
-        vehicleId: job.vehicle_id,
-        sequence: index + 1,
-        arrivalAt: new Date(cursor).toISOString(),
-        departureAt: new Date(cursor + 15 * 60_000).toISOString(),
-        distanceM: leg,
-        durationS: duration,
-        reason: point(job)
-          ? "Närmaste lämpliga stopp med kapacitet och kompetens."
-          : "Saknar koordinat; placerad efter tidsfönster.",
-      });
-      cursor += 15 * 60_000;
-      previous = point(job) ?? previous;
-    });
-  }
-  return { stops, unassignedIds: remaining.map((job) => job.id), routes };
-}
-
-async function vroomPlan(
-  assignments: Assignment[],
-  drivers: Driver[],
-  depot: Point,
-  dayStart: string,
-  endpoint: string,
-) {
-  const skillNames = [
-    ...new Set(
-      assignments
-        .flatMap((job) => job.route_skills ?? [])
-        .concat(drivers.flatMap((driver) => driver.route_skills ?? [])),
-    ),
-  ];
-  const skillId = new Map(skillNames.map((name, index) => [name, index + 1]));
-  const jobByIndex = new Map(assignments.map((job, index) => [index + 1, job]));
-  const driverByIndex = new Map(
-    drivers.map((driver, index) => [index + 1, driver]),
-  );
-  const startSeconds = Math.floor(new Date(dayStart).getTime() / 1_000);
-  const payload = {
-    jobs: assignments
-      .filter((job) => point(job))
-      .map((job, index) => ({
-        id: index + 1,
-        location: [job.geofence_lng, job.geofence_lat],
-        delivery: [job.route_demand],
-        skills: (job.route_skills ?? []).map((skill) => skillId.get(skill)),
-        service: 900,
-        time_windows: [
-          [
-            Math.floor(new Date(job.scheduled_start).getTime() / 1_000),
-            Math.floor(
-              new Date(job.scheduled_end ?? job.scheduled_start).getTime() /
-                1_000,
-            ) + 3_600,
-          ],
-        ],
-      })),
-    vehicles: drivers.map((driver, index) => ({
-      id: index + 1,
-      start: [depot.lng, depot.lat],
-      end: [depot.lng, depot.lat],
-      capacity: [driver.route_capacity],
-      skills: (driver.route_skills ?? []).map((skill) => skillId.get(skill)),
-      time_window: [startSeconds, startSeconds + 18 * 3_600],
-    })),
-  };
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-  };
-  const apiToken = Deno.env.get("VROOM_API_TOKEN");
-  if (apiToken) headers.Authorization = `Bearer ${apiToken}`;
-  const result = await fetch(endpoint.replace(/\/$/, "") + "/", {
-    method: "POST",
-    headers,
-    body: JSON.stringify(payload),
-  });
-  if (!result.ok) throw new Error(`VROOM svarade ${result.status}`);
-  const body = await result.json();
-  if (body.code !== 0)
-    throw new Error(body.error ?? "VROOM kunde inte optimera rutten");
-
-  const stops: PlannedStop[] = [];
-  for (const route of body.routes ?? []) {
-    const driver = driverByIndex.get(route.vehicle);
-    if (!driver) continue;
-    let sequence = 0;
-    for (const step of route.steps ?? []) {
-      if (step.type !== "job") continue;
-      const job = jobByIndex.get(step.id);
-      if (!job) continue;
-      sequence += 1;
-      stops.push({
-        assignmentId: job.id,
-        driverId: driver.id,
-        vehicleId: job.vehicle_id,
-        sequence,
-        arrivalAt: step.arrival
-          ? new Date(step.arrival * 1_000).toISOString()
-          : null,
-        departureAt: step.arrival
-          ? new Date(
-              (step.arrival + (step.service ?? 900)) * 1_000,
-            ).toISOString()
-          : null,
-        distanceM: step.distance ?? 0,
-        durationS: step.duration ?? 0,
-        reason: "Optimerad av VROOM med kapacitet, kompetens och tidsfönster.",
-      });
-    }
-  }
-  const assignedIds = new Set(stops.map((stop) => stop.assignmentId));
-  return {
-    stops,
-    unassignedIds: assignments
-      .filter((job) => !assignedIds.has(job.id))
-      .map((job) => job.id),
-    distanceM: body.summary?.distance ?? null,
-    durationS: body.summary?.duration ?? null,
-  };
 }
 
 Deno.serve(async (request) => {
@@ -288,25 +49,25 @@ Deno.serve(async (request) => {
 
     const input = await request.json();
     const planDate = String(input.planDate ?? "");
-    const dayStart = String(input.dayStart ?? "");
-    const dayEnd = String(input.dayEnd ?? "");
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(planDate) || !dayStart || !dayEnd)
-      return json({ error: "Ogiltigt datum." }, 400);
+    let bounds;
+    try { bounds = stockholmDayBounds(planDate); } catch { return json({ error: "Ogiltigt datum." }, 400); }
+    const { dayStart, dayEnd } = bounds;
 
     const [
       { data: assignments, error: assignmentError },
       { data: drivers, error: driverError },
       { data: company },
+      { data: busyJobs, error: busyError },
     ] = await Promise.all([
       service
         .from("assignments")
         .select(
-          "id,title,scheduled_start,scheduled_end,assigned_driver_id,vehicle_id,geofence_lat,geofence_lng,route_demand,route_skills",
+          "id,title,scheduled_start,scheduled_end,assigned_driver_id,vehicle_id,geofence_lat,geofence_lng,route_demand,route_skills,updated_at",
         )
         .eq("company_id", role.company_id)
         .gte("scheduled_start", dayStart)
         .lt("scheduled_start", dayEnd)
-        .in("status", ["pending", "unassigned", "active", "delayed"]),
+        .in("status", ["pending", "unassigned"]),
       service
         .from("profiles")
         .select("id,full_name,route_capacity,route_skills")
@@ -318,20 +79,26 @@ Deno.serve(async (request) => {
         .select("depot_lat,depot_lng")
         .eq("id", role.company_id)
         .single(),
+      service.from("assignments").select("assigned_driver_id").eq("company_id", role.company_id).in("status", ["active", "delayed"]),
     ]);
     if (assignmentError) throw assignmentError;
     if (driverError) throw driverError;
+    if (busyError) throw busyError;
     if (!assignments?.length)
       return json({ error: "Inga öppna uppdrag finns för dagen." }, 400);
     if (!drivers?.length)
       return json({ error: "Inga tillgängliga chaufförer finns." }, 400);
 
+    if (assignments.length > 200 || drivers.length > 50) return json({ error: "Dagsoptimeringen stödjer högst 200 uppdrag och 50 chaufförer per körning." }, 400);
     const jobs = assignments as Assignment[];
-    const availableDrivers = drivers as Driver[];
+    const busyDriverIds = new Set((busyJobs ?? []).map(job => job.assigned_driver_id));
+    const availableDrivers = (drivers as Driver[]).filter(driver => !busyDriverIds.has(driver.id));
+    if (!availableDrivers.length) return json({ error: "Alla tillgängliga chaufförer har pågående eller försenade uppdrag." }, 400);
+    const comparableBaseline = jobs.every(job => job.assigned_driver_id && availableDrivers.some(driver => driver.id === job.assigned_driver_id) && point(job));
     const depot =
       company?.depot_lat != null && company?.depot_lng != null
-        ? { lat: Number(company.depot_lat), lng: Number(company.depot_lng) }
-        : point(jobs.find((job) => point(job))!);
+        ? point({ geofence_lat: Number(company.depot_lat), geofence_lng: Number(company.depot_lng) } as Assignment)
+        : null;
     const beforeGroups = new Map<string, Assignment[]>();
     for (const job of jobs) {
       const key = job.assigned_driver_id ?? "unassigned";
@@ -342,7 +109,7 @@ Deno.serve(async (request) => {
     const beforeDistance = routeDistance(beforeGroups, depot);
 
     let provider = "aurora";
-    let warning: string | null = null;
+    let warning: string | null = "Reservmotorn använder fågelväg och uppskattad hastighet, inte vägnät eller trafik. Kontrollera verkliga körtider före godkännande.";
     let result;
     const vroomUrl = Deno.env.get("VROOM_BASE_URL");
     if (vroomUrl && depot && jobs.every((job) => point(job))) {
@@ -353,12 +120,14 @@ Deno.serve(async (request) => {
           depot,
           dayStart,
           vroomUrl,
+          Deno.env.get("VROOM_API_TOKEN"),
         );
         provider = "vroom";
+        warning = "Vägavstånd visas från VROOM. Jämförbar baslinje saknas; ingen procentuell besparing beräknas.";
       } catch (error) {
         console.warn("[optimize-routes] VROOM fallback", error);
         warning =
-          "VROOM var inte tillgängligt. Aurora-förslaget visas istället.";
+          "VROOM gav inget användbart svar. Reservmotorn använder fågelväg, 50 km/h och 15 min stopp; kontrollera verkliga körtider.";
       }
     }
     const fallback = !result
@@ -380,7 +149,7 @@ Deno.serve(async (request) => {
     if (!depot)
       warning = [
         warning,
-        "Ingen depå eller uppdragskoordinat finns; avstånd kan inte beräknas.",
+        "Giltiga depåkoordinater saknas. Ange företagets depå innan du optimerar dagen.",
       ]
         .filter(Boolean)
         .join(" ");
@@ -391,11 +160,13 @@ Deno.serve(async (request) => {
         company_id: role.company_id,
         plan_date: planDate,
         optimizer_provider: provider,
-        distance_before_m: beforeDistance,
-        distance_after_m: afterDistance,
-        duration_before_s: Math.round(beforeDistance / 13.9),
-        duration_after_s: durationAfter,
+        distance_before_m: !depot || !comparableBaseline || provider === "vroom" || unassignedIds.length > 0 ? null : beforeDistance,
+        distance_after_m: depot ? afterDistance : null,
+        duration_before_s: !depot || !comparableBaseline || provider === "vroom" || unassignedIds.length > 0 ? null : Math.round(beforeDistance / 13.9),
+        duration_after_s: depot ? durationAfter : null,
         input_snapshot: {
+          assignments: jobs,
+          drivers: availableDrivers,
           assignmentIds: jobs.map((job) => job.id),
           driverIds: availableDrivers.map((driver) => driver.id),
           dayStart,
@@ -408,7 +179,7 @@ Deno.serve(async (request) => {
       .select("*")
       .single();
     if (planError) throw planError;
-    const { error: stopError } = await service.from("route_plan_stops").insert(
+    const { error: stopError } = stops.length ? await service.from("route_plan_stops").insert(
       stops.map((stop) => ({
         company_id: role.company_id,
         route_plan_id: plan.id,
@@ -422,7 +193,7 @@ Deno.serve(async (request) => {
         duration_from_previous_s: stop.durationS,
         optimization_reason: stop.reason,
       })),
-    );
+    ) : { error: null };
     if (stopError) {
       await service.from("route_plans").delete().eq("id", plan.id);
       throw stopError;

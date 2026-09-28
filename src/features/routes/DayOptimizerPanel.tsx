@@ -13,7 +13,6 @@ import { toast } from "sonner";
 import { useAssignments, useDrivers } from "@/hooks/useData";
 import {
   getStockholmDateKey,
-  isOpenAssignment,
 } from "@/features/dispatch/dispatch-utils";
 import {
   approveDayRoutePlan,
@@ -42,7 +41,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 const kilometers = (meters: number | null) =>
-  `${((meters ?? 0) / 1_000).toLocaleString("sv-SE", { maximumFractionDigits: 1 })} km`;
+  meters == null ? "Ej mätt" : `${(meters / 1_000).toLocaleString("sv-SE", { maximumFractionDigits: 1 })} km`;
 
 const duration = (seconds: number) => {
   if (seconds <= 0) return "0 min";
@@ -67,7 +66,7 @@ export function DayOptimizerPanel() {
       (assignments ?? []).filter(
         (item) =>
           getStockholmDateKey(item.scheduled_start) === selectedDate &&
-          isOpenAssignment(item),
+          ["pending", "unassigned"].includes(item.status),
       ),
     [assignments, selectedDate],
   );
@@ -157,7 +156,7 @@ export function DayOptimizerPanel() {
             <Sparkles className="h-5 w-5 text-primary" /> Optimera hela dagen
           </CardTitle>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Fördela öppna jobb mellan tillgängliga chaufförer utifrån
+            Fördela ej påbörjade jobb mellan tillgängliga chaufförer utifrån
             koordinater, kapacitet, kompetens och tidsfönster. Ruttoptimeringen
             är en ordinarie del av Aurora Transport och inget ändras innan du
             godkänner förslaget.
@@ -169,6 +168,7 @@ export function DayOptimizerPanel() {
             <input
               type="date"
               value={selectedDate}
+              disabled={optimizing || approving}
               onChange={(event) => {
                 setSelectedDate(event.target.value);
                 setResult(null);
@@ -179,7 +179,7 @@ export function DayOptimizerPanel() {
           <Button
             onClick={optimize}
             disabled={
-              optimizing ||
+              optimizing || approving ||
               dayAssignments.length === 0 ||
               availableDrivers.length === 0
             }
@@ -213,7 +213,7 @@ export function DayOptimizerPanel() {
             {result.plan.warning && (
               <Alert>
                 <AlertTriangle className="h-4 w-4" />
-                <AlertTitle>Reservmotor användes</AlertTitle>
+                <AlertTitle>Beräkningsunderlag</AlertTitle>
                 <AlertDescription>{result.plan.warning}</AlertDescription>
               </Alert>
             )}
@@ -247,16 +247,16 @@ export function DayOptimizerPanel() {
                   Minskad körsträcka
                 </p>
                 <p className="flex items-center gap-2 text-xl font-bold text-primary">
-                  <Gauge className="h-5 w-5" /> {distanceSavings}%
+                  <Gauge className="h-5 w-5" /> {result.plan.distance_before_m == null ? "Ej jämförbart" : `${distanceSavings}%`}
                 </p>
               </div>
               <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
                 <p className="text-xs text-muted-foreground">Beräknad tidsvinst</p>
                 <p className="flex items-center gap-2 text-xl font-bold text-primary">
-                  <Clock className="h-5 w-5" /> {duration(timeSaved)}
+                  <Clock className="h-5 w-5" /> {result.plan.duration_before_s == null ? "Ej jämförbart" : duration(timeSaved)}
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {timeSavings > 0 ? `${timeSavings}% kortare beräknad körtid` : "Ingen beräknad tidsvinst"}
+                  {result.plan.duration_before_s == null ? "Jämförbar baslinje saknas" : timeSavings > 0 ? `${timeSavings}% kortare beräknad körtid` : "Ingen beräknad tidsvinst"}
                 </p>
               </div>
             </div>
@@ -316,7 +316,7 @@ export function DayOptimizerPanel() {
               ) : (
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button disabled={approving || result.stops.length === 0}>
+                    <Button disabled={optimizing || approving || result.stops.length === 0}>
                       <Check className="mr-1 h-4 w-4" /> Godkänn och skicka
                     </Button>
                   </AlertDialogTrigger>

@@ -24,6 +24,17 @@ export interface DriverSettingsOverride {
   updated_at: string;
 }
 
+// Match the database defaults even for companies created without a settings row.
+// A failed request must not be mistaken for an absent row.
+export const DEFAULT_DRIVER_PREFERENCES = {
+  require_signature: true,
+  require_photo: true,
+  show_time_report: true,
+  show_availability_toggle: true,
+  show_total_hours: true,
+};
+type DriverPreferences = typeof DEFAULT_DRIVER_PREFERENCES;
+
 // Global defaults
 export function useDriverSettings() {
   const { companyId } = useAuth();
@@ -78,12 +89,13 @@ export function useAllDriverSettingsOverrides() {
 export function useEffectiveDriverSettings(driverId: string | undefined) {
   const globalQuery = useDriverSettings();
   const overrideQuery = useDriverSettingsOverride(driverId);
-  const global = globalQuery.data;
+  const usingDefaults = globalQuery.isSuccess && globalQuery.data === null;
+  const global = usingDefaults ? DEFAULT_DRIVER_PREFERENCES : globalQuery.data;
   const override = overrideQuery.data;
-  const state = { isLoading: globalQuery.isLoading || overrideQuery.isLoading, isError: globalQuery.isError || overrideQuery.isError };
+  const state = { isLoading: globalQuery.isLoading || overrideQuery.isLoading, isError: globalQuery.isError || overrideQuery.isError, usingDefaults };
   if (!global) return { data: null, ...state };
 
-  const effective: DriverSettings = {
+  const effective: DriverPreferences = {
     ...global,
     require_signature: override?.require_signature ?? global.require_signature,
     require_photo: override?.require_photo ?? global.require_photo,

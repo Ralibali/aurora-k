@@ -30,7 +30,6 @@ export default function BlogBemanningsbolag() {
 
       <h2>Aurora Transport för bemanningsbolag</h2>
       <p>Aurora Transport är faktiskt byggt med bemanningsperspektivet i fokus. Systemet hanterar förarpool, tillgänglighet och uppdragsflöde i ett och samma gränssnitt – utan att kräva att varje kund har tillgång till ditt system.</p>
-      <p>CJ Bemanning är ett av de bemanningsbolag som redan kör Aurora Transport som sin dagliga plattform.</p>
 
       <BlogCta text="Kontakta oss och se hur Aurora Transport kan anpassas för ditt bemanningsbolag" />
     </BlogLayout>
