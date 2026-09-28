@@ -91,7 +91,7 @@ export default function TransportplaneringPage() {
         <Accordion type="single" collapsible className="mt-8 max-w-3xl">
           {[
             { q: 'Kan vi importera befintliga uppdrag?', a: 'Ja, du kan importera kunder och pågående uppdrag från Excel — vi hjälper till vid uppstart.' },
-            { q: 'Hur snabbt kan vi komma igång?', a: 'De flesta kunder är igång samma dag. Onboarding-samtalet räcker ofta.' },
+            { q: 'Hur snabbt kan vi komma igång?', a: 'Med självbetjäningen kan du vara igång samma dag. Registrera företaget och bjud in dina förare.' },
             { q: 'Vad krävs av förarna?', a: 'Bara förar-appen på sin mobil (iOS/Android). Inloggning sker via SMS.' },
             { q: 'Funkar det för bemanningsbolag?', a: 'Ja, du kan hantera flera kunder, separata prislistor och fakturera per kund.' },
           ].map((f, i) => (
