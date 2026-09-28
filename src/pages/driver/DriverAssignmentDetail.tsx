@@ -149,7 +149,7 @@ export default function DriverAssignmentDetail() {
                 <Route className="mr-2 h-4 w-4" /> Öppna rutt i karta
               </Button>
             </div>
-            {assignment.instructions && <InfoRow icon={FileText} label="Instruktioner">{assignment.instructions}</InfoRow>}
+            {assignment.instructions && <InfoRow icon={FileText} label="Instruktioner"><span className="whitespace-pre-wrap break-words">{assignment.instructions}</span></InfoRow>}
             {(a.vehicle || a.vehicle_id) && <InfoRow icon={Package} label="Fordon">{[a.vehicle?.name, a.vehicle?.registration_number].filter(Boolean).join(' · ') || a.vehicle_id}</InfoRow>}
             {assignment.actual_start && <InfoRow icon={Clock} label="Startad">{formatSwedishDateTime(assignment.actual_start)}</InfoRow>}
             {assignment.actual_start && assignment.actual_stop && <InfoRow icon={CheckCircle2} label="Varaktighet">{calculateDuration(assignment.actual_start, assignment.actual_stop)}</InfoRow>}
