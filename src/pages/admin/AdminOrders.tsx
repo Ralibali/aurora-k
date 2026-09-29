@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SmartOrderImportDialog } from '@/features/order-inbox/SmartOrderImportDialog';
 import { PdfOrderImportDialog } from '@/features/order-inbox/PdfOrderImportDialog';
+import { DocumentInboxPanel } from '@/features/order-inbox/DocumentInboxPanel';
 import { OrderEmailQueue } from '@/features/order-inbox/OrderEmailQueue';
 import { OrderQueuePanel } from '@/features/order-inbox/OrderQueuePanel';
 
@@ -67,6 +68,8 @@ export default function AdminOrders() {
         </Card>
 
         <div className="grid gap-4 lg:grid-cols-2"><OrderEmailQueue /><OrderQueuePanel /></div>
+
+        <DocumentInboxPanel />
 
         <div className="flex items-center justify-between gap-3">
           <p className="text-sm text-muted-foreground">Beställningar grupperar flera transportuppdrag.</p>
