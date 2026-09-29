@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCustomers } from '@/hooks/useData';
+import { DocumentInboxPanel } from './DocumentInboxPanel';
 import { parseTransportCsv, parseTransportOrder, type ParsedTransportOrder } from '@/lib/order-parser';
 
 const example = `Uppdrag: Expressleverans till byggarbetsplats
@@ -156,6 +157,7 @@ export default function OrderInboxPage() {
             </CardContent>
           </Card>
         </div>
+        <DocumentInboxPanel />
       </div>
     </AdminLayout>
   );
