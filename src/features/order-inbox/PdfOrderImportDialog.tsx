@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { useCustomers } from '@/hooks/useData';
 import { supabase } from '@/integrations/supabase/client';
 import type { ParsedTransportOrder } from '@/lib/order-parser';
+import { documentTypeLabels, requiresManualReview, validateDocumentFile, type TransportDocumentType } from './document-inbox';
 
 function normalize(value: Record<string, unknown>): ParsedTransportOrder {
   return {
@@ -27,6 +28,7 @@ export function PdfOrderImportDialog() {
   const { data: customers } = useCustomers();
   const [order, setOrder] = useState<ParsedTransportOrder | null>(null);
   const [loading, setLoading] = useState(false);
+  const [meta, setMeta] = useState<{ type: TransportDocumentType; signature: boolean } | null>(null);
   const customerId = useMemo(() => {
     const wanted = order?.customerName.toLowerCase().trim();
     return wanted ? (customers ?? []).find(customer => customer.name.toLowerCase().trim() === wanted)?.id ?? '' : '';
@@ -34,18 +36,23 @@ export function PdfOrderImportDialog() {
 
   const readPdf = async (file?: File) => {
     if (!file) return;
+    const invalid = validateDocumentFile(file);
+    if (invalid) return toast.error(invalid);
     setLoading(true);
     try {
       const body = new FormData();
       body.append('file', file);
+      body.append('persist', 'true');
       const { data, error } = await supabase.functions.invoke('parse-order-document', { body });
       if (error) throw error;
-      const parsed = (data as { parsed?: Record<string, unknown> } | null)?.parsed;
-      if (!parsed) throw new Error('PDF-filen gav inget orderunderlag');
-      setOrder(normalize(parsed));
-      toast.success('PDF-dokumentet är tolkat');
+      const result = data as { parsed?: Record<string, unknown>; documentType?: TransportDocumentType; confidence?: number; signatureDetected?: boolean } | null;
+      const parsed = result?.parsed;
+      if (!parsed) throw new Error('Dokumentet gav inget underlag. Det finns sparat i dokumentinkorgen.');
+      setOrder({ ...normalize(parsed), confidence: Math.round(Number(result?.confidence ?? parsed.confidence ?? 0)) });
+      setMeta({ type: result?.documentType ?? 'unknown', signature: !!result?.signatureDetected });
+      toast.success('Dokumentet är tolkat och sparat i dokumentinkorgen');
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : 'PDF-filen kunde inte tolkas');
+      toast.error(error instanceof Error ? error.message : 'Dokumentet kunde inte tolkas. Om filen hann sparas finns den i dokumentinkorgen.');
     } finally {
       setLoading(false);
     }
@@ -62,11 +69,13 @@ export function PdfOrderImportDialog() {
   };
 
   return <Dialog>
-    <DialogTrigger asChild><Button variant="outline"><FileText className="mr-2 h-4 w-4" /> Tolka PDF</Button></DialogTrigger>
+    <DialogTrigger asChild><Button variant="outline"><FileText className="mr-2 h-4 w-4" /> Tolka dokument</Button></DialogTrigger>
     <DialogContent className="max-w-xl">
-      <DialogHeader><DialogTitle>Skapa uppdrag från PDF</DialogTitle></DialogHeader>
-      {!order ? <div className="rounded-xl border border-dashed p-10 text-center"><FileText className="mx-auto mb-3 h-10 w-10 text-muted-foreground" /><p className="font-semibold">Ladda upp transportorder eller körorder</p><p className="mt-1 text-sm text-muted-foreground">Maskinläsbar PDF, högst 20 MB.</p><Button className="mt-5" disabled={loading} onClick={() => input.current?.click()}>{loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}Välj PDF</Button><input ref={input} hidden type="file" accept="application/pdf,.pdf" onChange={event => void readPdf(event.target.files?.[0])} /></div> : <div className="space-y-3">
+      <DialogHeader><DialogTitle>Skapa uppdrag från dokument</DialogTitle></DialogHeader>
+      {!order ? <div className="rounded-xl border border-dashed p-10 text-center"><FileText className="mx-auto mb-3 h-10 w-10 text-muted-foreground" /><p className="font-semibold">Ladda upp transportorder eller körorder</p><p className="mt-1 text-sm text-muted-foreground">PDF eller foto (JPG, PNG, WebP), högst 20 MB.</p><Button className="mt-5" disabled={loading} onClick={() => input.current?.click()}>{loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}Välj fil</Button><input ref={input} hidden type="file" accept="application/pdf,.pdf,image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" onChange={event => void readPdf(event.target.files?.[0])} /></div> : <div className="space-y-3">
         <div className="flex justify-between"><p className="font-semibold">Granska tolkningen</p><Badge>{order.confidence}% säkerhet</Badge></div>
+        {meta && <div className="flex flex-wrap gap-2"><Badge variant="outline">{documentTypeLabels[meta.type]}</Badge><Badge variant="secondary">{meta.signature ? 'Signatur verkar finnas' : 'Ingen signatur hittad'}</Badge></div>}
+        {meta && requiresManualReview(order.confidence, meta.type) && <p className="rounded-lg border border-warning/40 bg-warning/10 p-3 text-sm">Låg säkerhet eller okänd typ. Granska alla fält manuellt.</p>}
         <div className="space-y-1"><Label>Titel</Label><Input value={order.title} onChange={event => update('title', event.target.value)} /></div>
         <div className="space-y-1"><Label>Kund</Label><Input value={order.customerName} onChange={event => update('customerName', event.target.value)} /></div>
         <div className="space-y-1"><Label>Hämtning</Label><Input value={order.pickupAddress} onChange={event => update('pickupAddress', event.target.value)} /></div>
