@@ -15,7 +15,8 @@ export function ExitIntentPopup() {
   const [submitted, setSubmitted] = useState(false);
 
   const handleMouseLeave = useCallback((e: MouseEvent) => {
-    if (e.clientY <= 0 && !submitted && !sessionStorage.getItem('exit_popup_shown')) {
+    // Only a real exit: pointer leaves the window through the top edge, after the visitor has had time to read.
+    if (e.relatedTarget === null && e.clientY <= 0 && performance.now() > 8000 && !submitted && !sessionStorage.getItem('exit_popup_shown')) {
       setOpen(true);
       sessionStorage.setItem('exit_popup_shown', '1');
     }
@@ -91,7 +92,7 @@ export function ExitIntentPopup() {
 
         {submitted ? (
           <div className="text-center py-6">
-            <p className="text-lg font-semibold text-primary">🎉 Tack!</p>
+            <p className="text-lg font-semibold text-primary">Tack!</p>
             <p className="text-muted-foreground">Vi kontaktar dig inom kort med dina inloggningsuppgifter.</p>
           </div>
         ) : (
