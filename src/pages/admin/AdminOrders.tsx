@@ -62,7 +62,7 @@ export default function AdminOrders() {
       <div className="space-y-5">
         <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-card to-card">
           <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
-            <div><div className="flex items-center gap-2 font-semibold"><Sparkles className="h-4 w-4 text-primary" /> Gör orderunderlag till uppdrag</div><p className="mt-1 text-sm text-muted-foreground">Ta emot order automatiskt eller tolka PDF, mejltext och CSV.</p></div>
+            <div><div className="flex items-center gap-2 font-semibold"><Sparkles className="h-4 w-4 text-primary" /> Gör orderunderlag till uppdrag</div><p className="mt-1 text-sm text-muted-foreground">Ta emot order automatiskt eller tolka PDF, foton, mejltext och CSV.</p></div>
             <div className="flex flex-wrap gap-2"><SmartOrderImportDialog /><PdfOrderImportDialog /></div>
           </CardContent>
         </Card>

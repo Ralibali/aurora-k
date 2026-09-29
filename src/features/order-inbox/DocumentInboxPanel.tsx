@@ -101,7 +101,7 @@ export function DocumentInboxPanel() {
       <CardContent>
         {isLoading && <div className="py-8 text-center"><Loader2 className="mx-auto h-5 w-5 animate-spin text-muted-foreground" /></div>}
         {error && <p className="text-sm text-destructive">Dokumenten kunde inte hämtas.</p>}
-        {!isLoading && !error && !filtered.length && <p className="py-8 text-center text-sm text-muted-foreground">Inga dokument ännu. Använd "Tolka dokument" under Order för att ladda upp PDF eller foto.</p>}
+        {!isLoading && !error && !filtered.length && <p className="py-8 text-center text-sm text-muted-foreground">Inga dokument ännu. Använd "Tolka dokument" ovan för att ladda upp en PDF eller ett foto.</p>}
         <div className="divide-y">
           {filtered.map(doc => (
             <button key={doc.id} type="button" onClick={() => openReview(doc)} className="flex w-full items-center justify-between gap-3 py-3 text-left hover:bg-muted/40">
