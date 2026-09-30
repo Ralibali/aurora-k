@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { z } from 'zod';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,7 @@ import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { Lang } from '@/i18n/landing';
+import { upcomingDemoDays } from '@/lib/demoDays';
 
 interface DemoBookingModalProps {
   open: boolean;
@@ -114,28 +115,16 @@ const schema = z.object({
 
 function buildDayOptions(lang: Lang): { value: string; label: string }[] {
   const copy = t[lang];
-  const days: { value: string; label: string }[] = [];
-  const today = new Date();
-  for (let i = 0; i < 14; i++) {
-    const d = new Date(today);
-    d.setDate(today.getDate() + i);
-    const wd = d.getDay();
-    if (wd === 0 || wd === 6) continue; // skip weekends
-    const dateStr = d.toISOString().slice(0, 10);
-    let label: string;
-    if (i === 0) label = copy.today;
-    else if (i === 1) label = copy.tomorrow;
-    else label = `${copy.weekdays[wd]} ${d.getDate()}/${d.getMonth() + 1}`;
-    days.push({ value: dateStr, label });
-    if (days.length >= 7) break;
-  }
-  return days;
+  return upcomingDemoDays().map(({ value, offset, weekday, day, month }) => ({
+    value,
+    label: offset === 0 ? copy.today : offset === 1 ? copy.tomorrow : `${copy.weekdays[weekday]} ${day}/${month}`,
+  }));
 }
 
 export function DemoBookingModal({ open, onOpenChange, lang = 'sv' }: DemoBookingModalProps) {
   const copy = t[lang];
   const slots = slotsCopy[lang];
-  const dayOptions = useMemo(() => buildDayOptions(lang), [lang]);
+  const dayOptions = buildDayOptions(lang);
 
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
