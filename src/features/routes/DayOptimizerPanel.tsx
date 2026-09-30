@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertTriangle,
@@ -16,9 +16,12 @@ import {
 } from "@/features/dispatch/dispatch-utils";
 import {
   approveDayRoutePlan,
+  listRecentRoutePlans,
   optimizeDayRoutes,
   type DayRoutePlan,
+  type RoutePlanHistoryItem,
 } from "./day-route-api";
+import { aggregateRoutePlanRoi, routePlanSavings } from "./route-roi";
 import {
   savedDistancePercent,
   savedDurationPercent,
@@ -60,6 +63,27 @@ export function DayOptimizerPanel() {
   const [result, setResult] = useState<DayRoutePlan | null>(null);
   const [optimizing, setOptimizing] = useState(false);
   const [approving, setApproving] = useState(false);
+  const [history, setHistory] = useState<RoutePlanHistoryItem[]>([]);
+  const [historyError, setHistoryError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    void listRecentRoutePlans()
+      .then((rows) => {
+        if (!active) return;
+        setHistory(rows);
+        setHistoryError("");
+      })
+      .catch((error: unknown) => {
+        if (!active) return;
+        setHistoryError(
+          error instanceof Error ? error.message : "Historiken kunde inte hämtas.",
+        );
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const dayAssignments = useMemo(
     () =>
@@ -109,6 +133,7 @@ export function DayOptimizerPanel() {
       await approveDayRoutePlan(result.plan.id);
       setResult({ ...result, plan: { ...result.plan, status: "approved" } });
       await queryClient.invalidateQueries({ queryKey: ["assignments"] });
+      setHistory(await listRecentRoutePlans());
       toast.success(
         "Rutterna är godkända och skickade till chaufförernas körordning.",
       );
@@ -122,6 +147,8 @@ export function DayOptimizerPanel() {
       setApproving(false);
     }
   };
+
+  const historyRoi = useMemo(() => aggregateRoutePlanRoi(history), [history]);
 
   const distanceSavings = result
     ? savedDistancePercent(
@@ -206,6 +233,81 @@ export function DayOptimizerPanel() {
               {availableDrivers.length}
             </p>
           </div>
+        </div>
+
+        <div className="rounded-xl border bg-background/70 p-4">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                SmartPlan · bevisad effekt
+              </p>
+              <h3 className="mt-1 font-semibold">Senaste godkända planerna</h3>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Besparing räknas bara när både före- och eftervärden är jämförbara. VROOM-planer utan
+                jämförbar baslinje visas i historiken men får ingen påhittad procentsiffra.
+              </p>
+            </div>
+            <Badge variant="outline">{historyRoi.acceptedPlans} accepterade</Badge>
+          </div>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="rounded-lg border p-3">
+              <p className="text-xs text-muted-foreground">Jämförbara planer</p>
+              <p className="mt-1 text-xl font-bold">{historyRoi.comparablePlans}</p>
+            </div>
+            <div className="rounded-lg border p-3">
+              <p className="text-xs text-muted-foreground">Summerad sparad sträcka</p>
+              <p className="mt-1 text-xl font-bold">{kilometers(historyRoi.totalDistanceSavedM)}</p>
+            </div>
+            <div className="rounded-lg border p-3">
+              <p className="text-xs text-muted-foreground">Summerad beräknad tidsvinst</p>
+              <p className="mt-1 text-xl font-bold">{duration(historyRoi.totalDurationSavedS)}</p>
+            </div>
+            <div className="rounded-lg border p-3">
+              <p className="text-xs text-muted-foreground">Accepterade VROOM-planer</p>
+              <p className="mt-1 text-xl font-bold">{historyRoi.vroomPlans}</p>
+            </div>
+          </div>
+
+          {historyError ? (
+            <p role="alert" className="mt-3 text-xs text-destructive">{historyError}</p>
+          ) : history.length > 0 ? (
+            <div className="mt-4 overflow-x-auto">
+              <table className="w-full min-w-[620px] text-left text-xs">
+                <thead className="text-muted-foreground">
+                  <tr>
+                    <th className="pb-2 pr-3 font-medium">Datum</th>
+                    <th className="pb-2 pr-3 font-medium">Motor</th>
+                    <th className="pb-2 pr-3 font-medium">Status</th>
+                    <th className="pb-2 pr-3 font-medium">Sparad sträcka</th>
+                    <th className="pb-2 font-medium">Tidsvinst</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {history.slice(0, 8).map((plan) => {
+                    const savings = routePlanSavings(plan);
+                    return (
+                      <tr key={plan.id} className="border-t">
+                        <td className="py-2 pr-3">{plan.plan_date}</td>
+                        <td className="py-2 pr-3">{plan.optimizer_provider === "vroom" ? "VROOM" : "Aurora"}</td>
+                        <td className="py-2 pr-3">{plan.status}</td>
+                        <td className="py-2 pr-3">
+                          {savings.comparableDistance ? kilometers(savings.distanceSavedM) : "Ej jämförbar"}
+                        </td>
+                        <td className="py-2">
+                          {savings.comparableDuration ? duration(savings.durationSavedS) : "Ej jämförbar"}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="mt-3 text-xs text-muted-foreground">
+              Ingen ruttplanhistorik ännu. Optimera och godkänn en dag för att börja mäta effekten.
+            </p>
+          )}
         </div>
 
         {result && (
