@@ -55,6 +55,10 @@ serve(async (req) => {
       .single();
     if (companyError || !company) return json({ error: "Company not found" }, 404);
 
+    const { data: demo, error: demoError } = await admin.rpc('is_demo_company', { company_id: company.id });
+    if (demoError) throw demoError;
+    if (demo) return json({ error: 'Betalning är inte tillgänglig för demoföretag.' }, 403);
+
     const monthlyPriceId = Deno.env.get("STRIPE_MONTHLY_PRICE_ID");
     if (!monthlyPriceId) throw new Error("STRIPE_MONTHLY_PRICE_ID is not configured");
 
@@ -63,8 +67,8 @@ serve(async (req) => {
     });
 
     const result = await prepareCompanyCheckout({
-      stripe, company, email: user.email, userId: user.id, origin: safeOrigin(req),
-      monthlyPriceId, setupPriceId: Deno.env.get("STRIPE_SETUP_PRICE_ID"),
+      stripe, company, demoCompany: Boolean(demo), email: user.email, userId: user.id, origin: safeOrigin(req),
+      monthlyPriceId,
       saveCustomer: async (customerId) => {
         const { data, error } = await admin.from("companies").update({ stripe_customer_id: customerId }).eq("id", company.id).is("stripe_customer_id", null).select("stripe_customer_id").maybeSingle();
         if (error) throw error;

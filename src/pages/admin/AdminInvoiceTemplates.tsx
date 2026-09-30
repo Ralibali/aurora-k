@@ -1,3 +1,4 @@
+import type { Tables } from '@/integrations/supabase/types';
 import { useState } from 'react';
 import { AdminLayout } from '@/components/AdminLayout';
 import { Card, CardContent } from '@/components/ui/card';
@@ -30,11 +31,11 @@ export default function AdminInvoiceTemplates() {
   const [showBank, setShowBank] = useState(true);
 
   const reset = () => { setEditId(null); setName(''); setHeaderHtml(''); setFooterHtml(''); setColor('#1a1a2e'); setShowLogo(true); setShowBank(true); };
-  const openEdit = (t) => { setEditId(t.id); setName(t.name); setHeaderHtml(t.header_html || ''); setFooterHtml(t.footer_html || ''); setColor(t.primary_color); setShowLogo(t.show_logo); setShowBank(t.show_bank_details); setOpen(true); };
+  const openEdit = (t: Tables<'invoice_templates'>) => { setEditId(t.id); setName(t.name); setHeaderHtml(t.header_html || ''); setFooterHtml(t.footer_html || ''); setColor(t.primary_color); setShowLogo(t.show_logo); setShowBank(t.show_bank_details); setOpen(true); };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const payload = { name, header_html: headerHtml || null, footer_html: footerHtml || null, primary_color: color, show_logo: showLogo, show_bank_details: showBank };
+    const payload = { name, header_html: headerHtml || undefined, footer_html: footerHtml || undefined, primary_color: color, show_logo: showLogo, show_bank_details: showBank };
     if (editId) update.mutate({ id: editId, ...payload }, { onSuccess: () => { setOpen(false); reset(); } });
     else create.mutate(payload, { onSuccess: () => { setOpen(false); reset(); } });
   };

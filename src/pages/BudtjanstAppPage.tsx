@@ -15,7 +15,7 @@ const fadeUp = {
 export default function BudtjanstAppPage() {
   usePageMeta({
     title: 'Budtjänst-app — hantera uppdrag digitalt | Aurora Transport',
-    description: 'Perfekt app för budbilar och budföretag. Tilldela uppdrag, spåra förare och få signerade leveranskvitton. 449 kr/mån.',
+    description: 'Perfekt app för budbilar och budföretag. Tilldela uppdrag, spåra förare och få signerade leveranskvitton. 449 kr/mån exkl. moms.',
     canonical: 'https://auroratransport.se/budtjanst-app',
   });
 
@@ -45,7 +45,7 @@ export default function BudtjanstAppPage() {
             applicationCategory: 'BusinessApplication',
             operatingSystem: 'Web',
             description: 'App för budtjänst och budföretag. Tilldela uppdrag, spåra förare i realtid och få signerade leveranskvitton digitalt.',
-            offers: { '@type': 'Offer', price: '449', priceCurrency: 'SEK' },
+            offers: { '@type': 'Offer', price: '449', priceCurrency: 'SEK', priceSpecification: { '@type': 'UnitPriceSpecification', price: 449, priceCurrency: 'SEK', valueAddedTaxIncluded: false } },
           }),
         }}
       />
@@ -87,7 +87,7 @@ function Hero() {
         </motion.p>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
           <Button size="lg" asChild className="rounded-xl px-8 py-6 text-base font-semibold">
-            <Link to="/kontakt">Kom igång idag — 449 kr/mån</Link>
+            <Link to="/kontakt">Kom igång idag — 449 kr/mån exkl. moms</Link>
           </Button>
         </motion.div>
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="flex justify-center flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground mt-8">
@@ -206,7 +206,7 @@ const faqs = [
   { q: 'Fungerar appen utan installation?', a: 'Ja. Aurora Transport är en PWA som fungerar direkt i webbläsaren. Föraren lägger till den på hemskärmen — fungerar som en vanlig app.' },
   { q: 'Kan mottagaren signera digitalt?', a: 'Ja. Mottagaren signerar direkt på förarens mobilskärm. Signaturen sparas på uppdraget.' },
   { q: 'Kan jag se var mina budbilar är just nu?', a: 'Ja. Live-kartan visar alla förare med position, hastighet och riktning i realtid.' },
-  { q: 'Vad kostar det?', a: '449 kr/mån fast pris. Obegränsat antal förare, bilar och uppdrag. Ingen bindningstid.' },
+  { q: 'Vad kostar det?', a: '449 kr/mån exkl. moms fast pris. Obegränsat antal förare, bilar och uppdrag. Ingen bindningstid.' },
   { q: 'Kan jag generera fakturor direkt?', a: 'Ja. Skapa fakturor från slutförda uppdrag med ett klick. Stöd för kundspecifika priser och PDF-export.' },
 ];
 
@@ -252,7 +252,7 @@ function FinalCta() {
           Redo att digitalisera dina leveranser?
         </motion.h2>
         <motion.p initial="hidden" whileInView="visible" viewport={{ once: true }} custom={1} variants={fadeUp} className="text-slate-400 mb-8">
-          449 kr/mån. Fotobevis. Digital signatur. Ingen bindningstid.
+          449 kr/mån exkl. moms. Fotobevis. Digital signatur. Ingen bindningstid.
         </motion.p>
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} custom={2} variants={fadeUp}>
           <Button size="lg" asChild className="rounded-xl px-10 py-6 text-base font-semibold bg-white text-[hsl(222,47%,11%)] hover:bg-white/90">

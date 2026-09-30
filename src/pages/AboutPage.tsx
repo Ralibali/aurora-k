@@ -23,7 +23,7 @@ const fadeUp = {
 const values = [
   { icon: Truck, title: 'Branschfokus', desc: 'Vi bygger enbart för transportbranschen – varje funktion är skräddarsydd för åkerier, budföretag och logistikföretag.' },
   { icon: Shield, title: 'Trygghet & säkerhet', desc: 'All data lagras säkert inom EU med kryptering, automatisk backup och fullständig GDPR-efterlevnad.' },
-  { icon: Heart, title: 'Enkel prissättning', desc: 'Fast pris på 449 kr/mån – inga dolda avgifter, inga per-användare-kostnader, obegränsat antal förare och admins.' },
+  { icon: Heart, title: 'Enkel prissättning', desc: 'Fast pris på 449 kr/mån exkl. moms – inga dolda avgifter, inga per-användare-kostnader, obegränsat antal förare och admins.' },
   { icon: Users, title: 'Personlig support', desc: 'Vi är ett litet team som bryr oss. Du får alltid snabb och personlig hjälp – ingen telefonkö eller ärendenummer.' },
 ];
 
@@ -69,7 +69,7 @@ export default function AboutPage() {
         "contactType": "customer service"
       },
       "taxID": "559272-0220",
-      "priceRange": "449 kr/mån"
+      "priceRange": "449 kr/mån exkl. moms"
     };
 
     const script = document.createElement('script');
@@ -138,7 +138,7 @@ export default function AboutPage() {
                 Vår flaggskeppsprodukt, <strong>Aurora Transport</strong>, är ett komplett transportledningssystem (TMS) som samlar uppdragshantering, förarapp, GPS-spårning, tidrapportering, kundhantering och fakturering i en enda plattform. Systemet är byggt som en progressiv webbapp (PWA) som fungerar direkt i mobilen utan nedladdning – perfekt för förare på fältet.
               </p>
               <p>
-                Vi tror på transparens och enkelhet. Därför erbjuder vi en <strong>fast månadsavgift på 449 kr</strong> – oavsett hur många förare, administratörer eller kunder du har. Inga dolda avgifter, inga per-användare-kostnader, inga bindningstider utöver 30 dagars uppsägningstid.
+                Vi tror på transparens och enkelhet. Därför erbjuder vi en <strong>fast månadsavgift på 449 kr exkl. moms</strong> – oavsett hur många förare, administratörer eller kunder du har. Inga dolda avgifter, inga per-användare-kostnader, ingen bindningstid, uppsägning till slutet av betald period.
               </p>
             </div>
           </motion.div>

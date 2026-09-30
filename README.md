@@ -8,7 +8,7 @@ tidrapportering, GPS-spårning och fakturaunderlag i ett enkelt SaaS-verktyg.
 - **Ägare:** Aurora Media AB (org.nr 559272-0220)
 - **Stack:** React 18, Vite, TypeScript, Tailwind och Supabase (Lovable Cloud)
 - **Mobil:** PWA samt Capacitor-byggen för iOS och Android
-- **Pris:** 449 kr/mån, 3 500 kr i setup/onboarding, obegränsat antal förare och ingen bindningstid
+- **Pris:** 449 kr/mån exkl. moms, ingen startavgift, obegränsat antal förare och ingen bindningstid
 
 ## Utveckling
 

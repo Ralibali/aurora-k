@@ -1,3 +1,4 @@
+import { useProofUrls } from '@/hooks/useProofUrls';
 import AssignmentDeviations from '@/components/AssignmentDeviations';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -76,6 +77,7 @@ export default function DriverAssignmentDetail() {
   const { companyId } = useAuth();
   const location = useLocation();
   const { data: assignment, isLoading } = useAssignment(id);
+  const proofUrls = useProofUrls(assignment);
   const updateAssignment = useDriverUpdateAssignment();
   const [driverComment, setDriverComment] = useState('');
   useEffect(() => {
@@ -181,7 +183,7 @@ export default function DriverAssignmentDetail() {
         <DriverExtraWorkCard assignmentId={assignment.id} companyId={companyId} customerId={assignment.customer_id} readOnly={isClosed} />
 
         {isCompleted && (
-          <Card className="border-green-200 bg-green-50"><CardContent className="space-y-3 p-5 text-center"><CheckCircle2 className="mx-auto h-12 w-12 text-green-600" /><p className="text-lg font-bold text-green-900">Uppdraget är slutfört</p>{assignment.actual_start && assignment.actual_stop && <p className="text-sm text-green-800">Tid: {calculateDuration(assignment.actual_start, assignment.actual_stop)}</p>}{a.consignment_photo_url && <img src={a.consignment_photo_url} alt="Fraktsedel" className="mx-auto mt-3 max-w-xs rounded-xl border bg-white" />}{a.signature_url && <img src={a.signature_url} alt="Mottagarsignatur" className="mx-auto mt-3 max-w-xs rounded-xl border bg-white p-3" />}</CardContent></Card>
+          <Card className="border-green-200 bg-green-50"><CardContent className="space-y-3 p-5 text-center"><CheckCircle2 className="mx-auto h-12 w-12 text-green-600" /><p className="text-lg font-bold text-green-900">Uppdraget är slutfört</p>{assignment.actual_start && assignment.actual_stop && <p className="text-sm text-green-800">Tid: {calculateDuration(assignment.actual_start, assignment.actual_stop)}</p>}{proofUrls.error && <p className="text-sm text-destructive">Leveransbeviset kunde inte hämtas. Kontrollera anslutningen och försök igen.</p>}{proofUrls.photoUrl && <img src={proofUrls.photoUrl} alt="Fraktsedel" className="mx-auto mt-3 max-w-xs rounded-xl border bg-white" />}{proofUrls.signatureUrl && <img src={proofUrls.signatureUrl} alt="Mottagarsignatur" className="mx-auto mt-3 max-w-xs rounded-xl border bg-white p-3" />}</CardContent></Card>
         )}
       </main>
     </div>

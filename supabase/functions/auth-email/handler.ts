@@ -1,3 +1,4 @@
+import { clientIp } from '../_shared/client-ip.ts';
 import { corsHeaders } from '../_shared/cors.ts';
 type Mail = { to: string; subject: string; html: string };
 const escapeEmail = (value: string) => value.replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]!);
@@ -50,8 +51,7 @@ export async function handleAuthEmail(request: Request, deps: AuthEmailDependenc
   }
   // Use the last proxy-added address, never the caller-controlled first XFF
   // entry. Missing/invalid gateway headers share one fail-closed bucket.
-  const forwarded = request.headers.get('x-forwarded-for')?.split(',').pop()?.trim() ?? '';
-  const ip = /^[0-9a-f.:]{3,64}$/i.test(forwarded) ? forwarded.toLowerCase() : 'unknown';
+  const ip = clientIp(request);
   try {
     if (!await deps.rateLimit(`auth-email:ip:${await digest(ip)}`, 20, 3600)) return json({ error: 'För många försök. Vänta en stund och försök igen.' }, 429);
     if (!await deps.rateLimit(`auth-email:email:${await digest(email)}`, 4, 3600)) return accepted();

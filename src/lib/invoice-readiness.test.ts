@@ -11,3 +11,5 @@ describe('invoice readiness',()=>{
 describe('CSV text',()=>{
  it('quotes cells, escapes quotes and neutralizes spreadsheet formulas',()=>{expect(csvCell('A;B "C"')).toBe('"A;B ""C"""');for(const value of ['=HYPERLINK("evil")',' +1','\t@SUM(A1)','-1+2'])expect(csvCell(value)).toMatch(/^"'/);expect(csvCell(1250)).toBe('"1250"');});
 });
+
+it('accepts durable storage paths as proof without legacy URLs',()=>{expect(invoiceReadiness({...base,require_photo:true,proof_photo_path:'consignment-notes/user/photo.jpg',require_signature:true,signature_path:'signatures/user/sign.png'}).ready).toBe(true);});

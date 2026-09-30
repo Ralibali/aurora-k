@@ -20,7 +20,7 @@ export default function TransportbemanningPage() {
 
   usePageMeta({
     title: 'System för transportbemanning — förare, uppdrag & tidrapporter | Aurora Transport',
-    description: 'Bemanningsbolag inom transport: tilldela förare på sekunder, få färdiga tidrapporter med OB och traktamente och ge kunderna egen portal. 449 kr/mån.',
+    description: 'Bemanningsbolag inom transport: tilldela förare på sekunder, få färdiga tidrapporter med OB och traktamente och ge kunderna egen portal. 449 kr/mån exkl. moms.',
     canonical: 'https://auroratransport.se/transportbemanning',
   });
   useBreadcrumbJsonLd(useMemo(() => [
@@ -63,7 +63,7 @@ export default function TransportbemanningPage() {
             <Button size="lg" variant="outline" asChild className="h-12 px-6"><Link to="/">Se hela produkten</Link></Button>
           </div>
           <ul className="mt-7 grid grid-cols-2 gap-y-2 gap-x-6 text-sm text-muted-foreground max-w-lg">
-            {['Förarapp & kundportal ingår', 'Automatiskt löneunderlag', 'OB och traktamente', '449 kr/mån, ingen bindningstid'].map(t => (
+            {['Förarapp & kundportal ingår', 'Automatiskt löneunderlag', 'OB och traktamente', '449 kr/mån exkl. moms, ingen bindningstid'].map(t => (
               <li key={t} className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" />{t}</li>
             ))}
           </ul>
@@ -93,7 +93,7 @@ export default function TransportbemanningPage() {
             { q: 'Passar det för bemanning och inte bara åkerier?', a: 'Ja. Aurora Transport hanterar både egna uppdrag och uthyrda förare — förarpool, tillgänglighet, tidrapporter och kundportal är byggda för bemanningsflödet.' },
             { q: 'Hur fungerar löneunderlaget?', a: 'Förarens tidrapporter räknas automatiskt om med OB-tillägg och traktamente enligt era regler. Du exporterar färdigt underlag per period och förare.' },
             { q: 'Kan våra kunder boka förare själva?', a: 'Ja, i kundportalen lägger uppdragsgivaren in bokningsförfrågningar som du bekräftar. De följer uppdraget och hämtar underlag själva.' },
-            { q: 'Vad kostar det?', a: '449 kr per månad för hela bolaget — obegränsat antal förare och kunder. Ingen bindningstid, igång samma dag.' },
+            { q: 'Vad kostar det?', a: '449 kr per månad exkl. moms för hela bolaget — obegränsat antal förare och kunder. Ingen bindningstid, igång samma dag.' },
           ].map((f, i) => (
             <AccordionItem key={i} value={`q${i}`}>
               <AccordionTrigger className="text-left">{f.q}</AccordionTrigger>

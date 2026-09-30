@@ -1,0 +1,145 @@
+{
+  "version": "2026-09-23",
+  "date": "2026-09-23",
+  "title": "Personuppgiftsbiträdesavtal (PUB-avtal)",
+  "source": "https://eur-lex.europa.eu/eli/dec_impl/2021/915/oj/swe",
+  "sections": [
+    {
+      "heading": "Standardavtalsklausuler och val",
+      "paragraphs": [
+        "Parterna införlivar EU-kommissionens standardavtalsklausuler i bilagan till genomförandebeslut (EU) 2021/915, antagna enligt artikel 28.7 GDPR, genom hänvisning. Den officiella klausultexten gäller oförändrad och har företräde vid konflikt med dessa bilagor eller användarvillkoren. Dokumentet ska läsas tillsammans med den länkade fullständiga klausultexten.",
+        "Parterna omfattas av förordning (EU) 2016/679 (GDPR), inte förordning (EU) 2018/1725; hänvisningar och alternativ väljs därefter, inklusive alternativ 1 i klausul 8(c)(4). Klausul 5 om anslutning används inte. För underbiträden gäller klausul 7.7 alternativ 2: allmänt skriftligt tillstånd för nedan angivna leverantörer. Planerade tillägg eller byten ska meddelas minst 30 dagar i förväg så att kunden kan invända innan förändringen. Parterna ska då hantera invändningen innan berörd behandling fortsätter.",
+        "Klausulerna reglerar bland annat dokumenterade instruktioner, konfidentialitet, säkerhet, bistånd, incidentunderrättelse utan onödigt dröjsmål, kontroll och avslut. Klausulerna enligt 2021/915 är inte i sig en överföringsmekanism enligt kapitel V GDPR. Uppgifter markerade [ATT FYLLA I] måste kontrolleras och fyllas i före driftsättning av avtalet."
+      ]
+    },
+    {
+      "heading": "Bilaga I – Parter",
+      "paragraphs": [
+        "Personuppgiftsansvarig: kundföretaget, med företagsnamn och organisationsnummer från registreringen. Kontaktperson: registrerande administratör och den e-post/telefon som anges vid registreringen. Godkännande sker vid registreringen och version/tidpunkt sparas på företaget.",
+        "Personuppgiftsbiträde: Aurora Media AB, 559272-0220. Kontakt: info@auroramedia.se. Postadress och ansvarig kontaktperson: [ATT FYLLA I]."
+      ]
+    },
+    {
+      "heading": "Bilaga II – Behandlingen",
+      "paragraphs": [
+        "Registrerade: kundens förare och anställda, administratörer, kundens kunder och mottagare av transporter.",
+        "Uppgifter: namn, e-post, telefonnummer, adresser, GPS-position under uppdrag, tidrapporter, löneunderlag inklusive PAXml, signaturer och leveransfoton. Även företagsuppgifter, kontoreferenser, enhetstoken, order-, meddelande- och fakturaunderlag behandlas i de funktioner kunden använder. Känsliga personuppgifter är inte avsedda att läggas in. Kunden ska undvika sådana uppgifter i fritext och foton.",
+        "Ändamål och art: lagring, läsning, uppdatering, överföring och export för planering, förartilldelning, transportuppföljning, leveransbevis, tidrapportering, löne- och fakturaunderlag, kommunikation och support på kundens instruktion. Behandling sker löpande under användningen.",
+        "Lagringstid: under avtalet och därefter i avvaktan på kundens instruktion om återlämnande eller radering enligt klausul 10. Data raderas på begäran. Något automatiskt raderingsjobb för avslutade konton finns inte. Kunden väljer återlämnande eller radering när uppdraget upphör; leverantören hanterar instruktionen manuellt och bekräftar genomförandet. Lagstadgade bevarandekrav kan medföra fortsatt, begränsad lagring. Tider för säkerhetskopior och leverantörers radering: [ATT FYLLA I]."
+      ]
+    },
+    {
+      "heading": "Bilaga III – Tekniska och organisatoriska säkerhetsåtgärder",
+      "paragraphs": [
+        "Företagsavgränsning med Row Level Security (RLS) och rollbaserad åtkomst med företagskoppling i profiler och roller. Publika funktioner kontrollerar företagskoppling och länktoken där det krävs.",
+        "Privata buckets för skyddade dokument och leveransbevis, med åtkomstpolicyer. Visning av leveransbevis använder tidsbegränsade signerade länkar. Fortnox-anslutningstoken hanteras i Supabase Vault.",
+        "Rate limiting finns i berörda publika flöden. Webb-, Auth-, Storage- och leverantörsanrop är konfigurerade med HTTPS/TLS. Driftsmiljöns faktiska TLS och egna tjänsteadresser, inklusive VROOM_BASE_URL, ska kontrolleras före publicering.",
+        "Dessa uppgifter beskriver åtgärder som finns i implementationen. Ingen certifiering, garanterad SLA eller viss återställningstid påstås."
+      ]
+    },
+    {
+      "heading": "Bilaga IV – Externa tjänster och underbiträden",
+      "paragraphs": [
+        "Nedan redovisas externa tjänster som kan ta emot personuppgifter i aktiverade flöden. Roll och avtal ska bedömas för respektive behandling; en betalningsleverantör, kundens egen integration eller statistikleverantör är inte automatiskt underbiträde för all behandling. Region och överföringsmekanism kan inte fastställas säkert enbart ur repot och anges därför som [ATT FYLLA I]."
+      ]
+    }
+  ],
+  "subprocessors": [
+    {
+      "name": "Supabase",
+      "purpose": "Databas, autentisering, privata lagringsbuckets och edge-funktioner; konto-, företags-, uppdrags- och leveransuppgifter.",
+      "region": "[ATT FYLLA I]",
+      "transfer": "[ATT FYLLA I] – kontrollera behandling utanför EES, rättslig mekanism och eventuella kompletterande skydd."
+    },
+    {
+      "name": "Lovable",
+      "purpose": "Hosting och Lovable Cloud samt e-postgateway när gatewayläget används; webbtrafik och innehåll/adresser i e-post. AI-gateway kan behandla ordertext och dokumentutdrag när AI-tolkning används.",
+      "region": "[ATT FYLLA I]",
+      "transfer": "[ATT FYLLA I] – kontrollera behandling utanför EES, rättslig mekanism och eventuella kompletterande skydd."
+    },
+    {
+      "name": "Resend",
+      "purpose": "Utskick och inkommande ordermejl, e-postadresser, meddelandetext och bilagor; direkt eller via Lovables gateway beroende på konfiguration.",
+      "region": "[ATT FYLLA I]",
+      "transfer": "[ATT FYLLA I] – kontrollera behandling utanför EES, rättslig mekanism och eventuella kompletterande skydd."
+    },
+    {
+      "name": "Stripe",
+      "purpose": "Betalning och prenumerationer; företagsnamn, administratörens e-post, fakturaadress och momsregistreringsnummer. Stripe kan även vara självständigt personuppgiftsansvarig för vissa betalningsändamål.",
+      "region": "[ATT FYLLA I]",
+      "transfer": "[ATT FYLLA I] – kontrollera behandling utanför EES, rättslig mekanism och eventuella kompletterande skydd."
+    },
+    {
+      "name": "Microsoft Azure Document Intelligence",
+      "purpose": "OCR av uppladdade dokument och de personuppgifter som dokumenten innehåller, när tjänsten är konfigurerad.",
+      "region": "[ATT FYLLA I]",
+      "transfer": "[ATT FYLLA I] – kontrollera behandling utanför EES, rättslig mekanism och eventuella kompletterande skydd."
+    },
+    {
+      "name": "Google Maps",
+      "purpose": "Adressökning, kartor och positions-/adressuppgifter vid användning av kartfunktioner samt tekniska anropsuppgifter.",
+      "region": "[ATT FYLLA I]",
+      "transfer": "[ATT FYLLA I] – kontrollera behandling utanför EES, rättslig mekanism och eventuella kompletterande skydd."
+    },
+    {
+      "name": "Firebase Cloud Messaging (Google)",
+      "purpose": "Push-token och notisinnehåll för pushnotiser.",
+      "region": "[ATT FYLLA I]",
+      "transfer": "[ATT FYLLA I] – kontrollera behandling utanför EES, rättslig mekanism och eventuella kompletterande skydd."
+    },
+    {
+      "name": "Apple Push Notification service",
+      "purpose": "Enhetstoken och notisinnehåll för iOS-notiser.",
+      "region": "[ATT FYLLA I]",
+      "transfer": "[ATT FYLLA I] – kontrollera behandling utanför EES, rättslig mekanism och eventuella kompletterande skydd."
+    },
+    {
+      "name": "Fortnox",
+      "purpose": "Endast efter kundens anslutning: kund- och fakturaunderlag samt anslutningstoken. Fortnox kan även vara kundens egen avtalspart.",
+      "region": "[ATT FYLLA I]",
+      "transfer": "[ATT FYLLA I] – kontrollera behandling utanför EES, rättslig mekanism och eventuella kompletterande skydd."
+    },
+    {
+      "name": "Ruttoptimering bakom VROOM_BASE_URL",
+      "purpose": "Adresser/koordinater och transportunderlag för ruttoptimering. Leverantörens juridiska namn: [ATT FYLLA I].",
+      "region": "[ATT FYLLA I]",
+      "transfer": "[ATT FYLLA I] – kontrollera behandling utanför EES, rättslig mekanism och eventuella kompletterande skydd."
+    },
+    {
+      "name": "Sentry",
+      "purpose": "Fel- och prestandadiagnostik. Koden tar bort cookies, headers och request.data från felhändelser och stänger av standard-PII, men tekniska identifierare kan förekomma. Aktuell mottagare och omfattning måste kontrolleras.",
+      "region": "[ATT FYLLA I]",
+      "transfer": "[ATT FYLLA I] – kontrollera behandling utanför EES, rättslig mekanism och eventuella kompletterande skydd."
+    },
+    {
+      "name": "OpenStreetMap/karttiles",
+      "purpose": "IP-adress och efterfrågade kartutsnitt vid kartvisning. Kontrollera den aktuella tile-operatören: [ATT FYLLA I].",
+      "region": "[ATT FYLLA I]",
+      "transfer": "[ATT FYLLA I] – kontrollera behandling utanför EES, rättslig mekanism och eventuella kompletterande skydd."
+    },
+    {
+      "name": "Google Analytics 4",
+      "purpose": "Webbstatistik efter samtycke. Skriptet kan laddas även i inloggade vyer när tidigare samtycke finns. Koden filtrerar sidvisningar för /admin, /driver, /platform, /portal, /track och /onboarding, men tekniska anropsuppgifter och vissa händelser kan skickas. Kontrollera faktisk trafik och inställningar före publicering.",
+      "region": "[ATT FYLLA I]",
+      "transfer": "[ATT FYLLA I] – kontrollera behandling utanför EES, rättslig mekanism och eventuella kompletterande skydd."
+    },
+    {
+      "name": "Plausible",
+      "purpose": "Webbstatistik på publika sidor; tekniska trafikuppgifter. Inloggade arbetsvyer är undantagna i kod. Aktuell operatör/hosting: [ATT FYLLA I].",
+      "region": "[ATT FYLLA I]",
+      "transfer": "[ATT FYLLA I] – kontrollera behandling utanför EES, rättslig mekanism och eventuella kompletterande skydd."
+    },
+    {
+      "name": "Google Fonts",
+      "purpose": "Webbtypsnitt laddas från Google; IP-adress och tekniska anropsuppgifter kan behandlas även i inloggade vyer.",
+      "region": "[ATT FYLLA I]",
+      "transfer": "[ATT FYLLA I] – verifiera roll, mottagare och eventuell överföringsmekanism."
+    },
+    {
+      "name": "Apple Maps",
+      "purpose": "Vid användarens val att öppna extern navigering överförs vald adress till Apple Maps på iOS.",
+      "region": "[ATT FYLLA I]",
+      "transfer": "[ATT FYLLA I] – verifiera roll, mottagare och eventuell överföringsmekanism."
+    }
+  ]
+}

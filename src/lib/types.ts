@@ -42,6 +42,8 @@ export interface Assignment {
   status: AssignmentStatus;
   actual_start: string | null;
   actual_stop: string | null;
+  proof_photo_path?: string | null;
+  signature_path?: string | null;
   consignment_photo_url: string | null;
   signature_url: string | null;
   priority: Priority;

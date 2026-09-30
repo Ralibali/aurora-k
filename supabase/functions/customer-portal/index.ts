@@ -1,3 +1,4 @@
+import { signProofs } from '../_shared/proof-paths.ts';
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { z } from 'https://esm.sh/zod@3';
 
@@ -92,7 +93,7 @@ Deno.serve(async (req) => {
     const [assignmentsRes, ordersRes, invoicesRes, bookingsRes, settingsRes] = await Promise.all([
       supabase
         .from('assignments')
-        .select('id, title, address, pickup_address, delivery_address, service_type, status, scheduled_start, scheduled_end, actual_start, actual_stop, priority, tracking_token, consignment_photo_url, signature_url, require_photo, require_signature, driver:profiles!assignments_assigned_driver_id_fkey(full_name)')
+        .select('id, title, address, pickup_address, delivery_address, service_type, status, scheduled_start, scheduled_end, actual_start, actual_stop, priority, tracking_token, proof_photo_path, signature_path, consignment_photo_url, signature_url, require_photo, require_signature, driver:profiles!assignments_assigned_driver_id_fkey(full_name)')
         .eq('customer_id', customerId).eq('company_id', companyId)
         .order('scheduled_start', { ascending: false })
         .limit(100),
@@ -137,7 +138,18 @@ Deno.serve(async (req) => {
         org_number: customer.org_number,
       },
       settings: settingsRes.data,
-      assignments: assignmentsRes.data || [],
+      assignments: await signProofs(assignmentsRes.data || [], async (bucket, paths, seconds) => {
+        const owners = [...new Set(paths.map(path => path.split('/')[0]))].filter(id => /^[0-9a-f-]{36}$/i.test(id));
+        if (!owners.length) return [];
+        const { data: profiles, error: profileError } = await supabase.from('profiles').select('id').eq('company_id', companyId).in('id', owners);
+        if (profileError) throw profileError;
+        const allowed = new Set((profiles || []).map(profile => profile.id));
+        const tenantPaths = paths.filter(path => allowed.has(path.split('/')[0]));
+        if (!tenantPaths.length) return [];
+        const { data, error } = await supabase.storage.from(bucket).createSignedUrls(tenantPaths, seconds);
+        if (error) throw error;
+        return data || [];
+      }),
       orders: ordersRes.data || [],
       invoices: (invoicesRes.data || []).map((invoice: Record<string, unknown>) => ({ ...invoice, customer })),
       bookings: bookingsRes.data || [],

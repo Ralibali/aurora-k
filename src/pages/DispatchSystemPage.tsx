@@ -46,7 +46,7 @@ export default function DispatchSystemPage() {
             applicationCategory: 'BusinessApplication',
             operatingSystem: 'Web',
             description: 'Dispatch-system för transportföretag. Tilldela uppdrag, spåra förare och kommunicera digitalt.',
-            offers: { '@type': 'Offer', price: '449', priceCurrency: 'SEK' },
+            offers: { '@type': 'Offer', price: '449', priceCurrency: 'SEK', priceSpecification: { '@type': 'UnitPriceSpecification', price: 449, priceCurrency: 'SEK', valueAddedTaxIncluded: false } },
           }),
         }}
       />
@@ -86,7 +86,7 @@ function Hero() {
         </motion.p>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
           <Button size="lg" asChild className="rounded-xl px-8 py-6 text-base font-semibold">
-            <Link to="/kontakt">Kom igång idag — 449 kr/mån</Link>
+            <Link to="/kontakt">Kom igång idag — 449 kr/mån exkl. moms</Link>
           </Button>
         </motion.div>
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="flex justify-center flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground mt-8">
@@ -225,7 +225,7 @@ const faqs = [
   { q: 'Hur snabbt kan jag tilldela ett uppdrag?', a: 'Under 30 sekunder. Fyll i kund, adress och tid, välj förare — klart. Föraren får besked direkt.' },
   { q: 'Kan jag se var alla fordon befinner sig?', a: 'Ja. Live-kartan visar alla aktiva förare med position, hastighet och riktning i realtid.' },
   { q: 'Fungerar det med min befintliga bilflotta?', a: 'Ja. Aurora Transport kräver inga hårdvaruinstallationer. Allt fungerar via mobilens webbläsare.' },
-  { q: 'Vad kostar det?', a: '449 kr/mån fast pris. Obegränsat antal förare, fordon och uppdrag. Ingen bindningstid.' },
+  { q: 'Vad kostar det?', a: '449 kr/mån exkl. moms fast pris. Obegränsat antal förare, fordon och uppdrag. Ingen bindningstid.' },
 ];
 
 function FaqSection() {
@@ -257,7 +257,7 @@ function FinalCta() {
           Redo att ersätta whiteboarden?
         </motion.h2>
         <motion.p initial="hidden" whileInView="visible" viewport={{ once: true }} custom={1} variants={fadeUp} className="text-slate-400 mb-8">
-          449 kr/mån. Digital dispatch. Realtidsspårning. Ingen bindningstid.
+          449 kr/mån exkl. moms. Digital dispatch. Realtidsspårning. Ingen bindningstid.
         </motion.p>
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} custom={2} variants={fadeUp}>
           <Button size="lg" asChild className="rounded-xl px-10 py-6 text-base font-semibold bg-white text-[hsl(222,47%,11%)] hover:bg-white/90">

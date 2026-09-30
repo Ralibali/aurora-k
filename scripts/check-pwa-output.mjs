@@ -39,3 +39,19 @@ for (const path of ["/driver", "/admin", "/portal", "/bloggar"]) {
   assert.equal(denied(path), false, `${path} must retain its existing app fallback`);
 }
 console.log("PWA output: update activation and blog/network routing passed");
+
+// Verify the registration route predicate and its use, as well as Vite's output.
+const { default: ts } = await import('typescript');
+const policy = ts.transpileModule(readFileSync('src/lib/app-service-worker.ts', 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText;
+const exports = {};
+runInNewContext(policy, { exports });
+for (const path of ['/', '/en', '/blogg', '/blogg/artikel', '/ads/akeri', '/portal/token', '/transportledningssystem', '/login', '/administrator']) assert.equal(exports.isAppRoute(path), false, path);
+for (const path of ['/admin', '/admin/settings', '/driver', '/driver/assignments', '/platform', '/onboarding']) assert.equal(exports.isAppRoute(path), true, path);
+const registration = readFileSync('src/components/AppServiceWorker.tsx', 'utf8');
+assert.match(registration, /!isAppRoute\(pathname\)/);
+assert.match(registration, /import\('virtual:pwa-register'\)/);
+assert.ok(!readFileSync('src/main.tsx', 'utf8').includes('registerSW'));
+assert.ok(!readFileSync('dist/index.html', 'utf8').includes('registerSW.js'));
+const manifest = JSON.parse(readFileSync('dist/manifest.webmanifest', 'utf8'));
+assert.equal(manifest.start_url, '/');
+console.log('PWA registration: only operational routes; offline worker and start_url retained');

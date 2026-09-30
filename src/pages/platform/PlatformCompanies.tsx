@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import type { TablesUpdate } from '@/integrations/supabase/types';
+import type { Tables, TablesUpdate } from '@/integrations/supabase/types';
 import { PlatformLayout } from '@/components/PlatformAdminLayout';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -27,8 +27,7 @@ export default function PlatformCompanies() {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<FilterStatus>('all');
   const [expanded, setExpanded] = useState<string | null>(null);
-  const [resetDialog, setResetDialog] = useState<{ userId: string; name: string } | null>(null);
-  const [newPassword, setNewPassword] = useState('');
+  const [resetDialog, setResetDialog] = useState<{ email: string; name: string } | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [createForm, setCreateForm] = useState({ companyName: '', orgNr: '', adminName: '', adminEmail: '' });
   const [createResult, setCreateResult] = useState<{ checkout_url: string | null; temp_password: string } | null>(null);
@@ -60,13 +59,13 @@ export default function PlatformCompanies() {
   const getAdminCount = (companyId: string) =>
     getCompanyProfiles(companyId).filter((p) => p.role === 'admin').length;
 
-  const trialDaysLeft = (c) => {
+  const trialDaysLeft = (c: Tables<'companies'>) => {
     if (!c.trial_ends_at) return null;
     const diff = Math.ceil((new Date(c.trial_ends_at).getTime() - Date.now()) / 86400000);
     return diff > 0 ? diff : null;
   };
 
-  const statusLabel = (c) => {
+  const statusLabel = (c: Tables<'companies'>) => {
     const trial = trialDaysLeft(c);
     if (trial !== null) return { label: `Trial — ${trial} dagar kvar`, variant: 'outline' as const, className: 'text-blue-600 border-blue-200' };
     switch (c.subscription_status) {
@@ -102,17 +101,16 @@ export default function PlatformCompanies() {
   });
 
   const resetPassword = useMutation({
-    mutationFn: async ({ userId, password }: { userId: string; password: string }) => {
-      const { data, error } = await supabase.functions.invoke('update-password', {
-        body: { user_id: userId, password },
+    mutationFn: async ({ email }: { email: string }) => {
+      const { data, error } = await supabase.functions.invoke('auth-email', {
+        body: { type: 'recovery', email },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
     },
     onSuccess: () => {
       setResetDialog(null);
-      setNewPassword('');
-      toast.success('Lösenord återställt');
+      toast.success('Begäran om återställningslänk är skickad');
     },
     onError: (e) => toast.error(e.message || 'Kunde inte återställa lösenord'),
   });
@@ -233,7 +231,7 @@ export default function PlatformCompanies() {
                           <Users className="h-3 w-3" />
                           {getUserCount(c.id)} användare ({getAdminCount(c.id)} admins)
                         </span>
-                        <span>Reg: {new Date(c.created_at).toLocaleDateString('sv-SE')}</span>
+                        <span>Reg: {(c.created_at ? new Date(c.created_at).toLocaleDateString('sv-SE') : '—')}</span>
                       </div>
                     </div>
                   </div>
@@ -254,7 +252,7 @@ export default function PlatformCompanies() {
                     <h4 className="font-semibold text-foreground mb-2">Företagsinfo</h4>
                     <p><span className="text-muted-foreground">Namn:</span> {c.name}</p>
                     <p><span className="text-muted-foreground">Org.nr:</span> {c.org_nr || '—'}</p>
-                    <p><span className="text-muted-foreground">Registrerad:</span> {new Date(c.created_at).toLocaleDateString('sv-SE')}</p>
+                    <p><span className="text-muted-foreground">Registrerad:</span> {(c.created_at ? new Date(c.created_at).toLocaleDateString('sv-SE') : '—')}</p>
                     <p><span className="text-muted-foreground">Onboarding:</span> {c.onboarding_completed ? 'Ja' : 'Nej'}</p>
                     {c.stripe_customer_id && (
                       <p>
@@ -304,9 +302,9 @@ export default function PlatformCompanies() {
                                       variant="ghost"
                                       size="sm"
                                       className="h-6 text-xs gap-1"
-                                      onClick={(e) => { e.stopPropagation(); setResetDialog({ userId: p.id, name: p.full_name }); }}
+                                      onClick={(e) => { e.stopPropagation(); setResetDialog({ email: p.email, name: p.full_name }); }}
                                     >
-                                      <KeyRound className="h-3 w-3" /> Återställ
+                                      <KeyRound className="h-3 w-3" /> Skicka återställningslänk
                                     </Button>
                                   )}
                                 </td>
@@ -400,24 +398,19 @@ export default function PlatformCompanies() {
       </div>
 
       {/* Reset password dialog */}
-      <Dialog open={!!resetDialog} onOpenChange={(open) => { if (!open) { setResetDialog(null); setNewPassword(''); } }}>
+      <Dialog open={!!resetDialog} onOpenChange={(open) => { if (!open) { setResetDialog(null);  } }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Återställ lösenord — {resetDialog?.name}</DialogTitle>
           </DialogHeader>
-          <Input
-            type="password"
-            placeholder="Nytt lösenord"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-          />
+          <p>En återställningslänk begärs till {resetDialog?.email}.</p>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => { setResetDialog(null); setNewPassword(''); }}>Avbryt</Button>
+            <Button variant="ghost" onClick={() => { setResetDialog(null);  }}>Avbryt</Button>
             <Button
-              onClick={() => resetDialog && resetPassword.mutate({ userId: resetDialog.userId, password: newPassword })}
-              disabled={!newPassword.trim() || resetPassword.isPending}
+              onClick={() => resetDialog && resetPassword.mutate({ email: resetDialog.email })}
+              disabled={resetPassword.isPending}
             >
-              Återställ
+              Skicka återställningslänk
             </Button>
           </DialogFooter>
         </DialogContent>

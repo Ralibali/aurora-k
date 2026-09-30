@@ -20,7 +20,7 @@ export default function TransportplaneringPage() {
 
   usePageMeta({
     title: 'Transportplanering — system för planering av uppdrag & förare | Aurora Transport',
-    description: 'Planera transportuppdrag och förare i ett enkelt system. Drag-and-drop, GPS, notiser och tidrapporter. 449 kr/mån, ingen bindningstid.',
+    description: 'Planera transportuppdrag och förare i ett enkelt system. Drag-and-drop, GPS, notiser och tidrapporter. 449 kr/mån exkl. moms, ingen bindningstid.',
     canonical: 'https://auroratransport.se/transportplanering',
   });
   useBreadcrumbJsonLd(useMemo(() => [
@@ -63,7 +63,7 @@ export default function TransportplaneringPage() {
             <Button size="lg" variant="outline" asChild className="h-12 px-6"><Link to="/">Se hela produkten</Link></Button>
           </div>
           <ul className="mt-7 grid grid-cols-2 gap-y-2 gap-x-6 text-sm text-muted-foreground max-w-lg">
-            {['449 kr/mån — fast pris', 'Ingen bindningstid', 'Support på svenska', 'Igång samma dag'].map(t => (
+            {['449 kr/mån exkl. moms — fast pris', 'Ingen bindningstid', 'Support på svenska', 'Igång samma dag'].map(t => (
               <li key={t} className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" />{t}</li>
             ))}
           </ul>

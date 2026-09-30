@@ -426,7 +426,7 @@ function InvitationsList({ companyId }: { companyId: string }) {
 
   useEffect(() => { void fetchInvitations(); }, [fetchInvitations]);
 
-  const handleResend = async (inv) => {
+  const handleResend = async (inv: (typeof invitations)[number]) => {
     setResending(inv.id);
     try {
       const joinUrl = `${PUBLIC_SITE_URL}/join?token=${inv.token}`;
@@ -491,7 +491,7 @@ function InvitationsList({ companyId }: { companyId: string }) {
                   <p className="text-sm font-medium truncate">{inv.name || inv.email}</p>
                   {inv.name && <p className="text-xs text-muted-foreground truncate">{inv.email}</p>}
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Skickad {format(new Date(inv.created_at), 'd MMM yyyy, HH:mm', { locale: sv })}
+                    Skickad {(inv.created_at ? format(new Date(inv.created_at), 'd MMM yyyy, HH:mm', { locale: sv }) : '—')}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
@@ -527,7 +527,7 @@ function InvitationsList({ companyId }: { companyId: string }) {
                   <p className="text-sm font-medium truncate">{inv.name || inv.email}</p>
                   {inv.name && <p className="text-xs text-muted-foreground truncate">{inv.email}</p>}
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Accepterad {format(new Date(inv.accepted_at), 'd MMM yyyy, HH:mm', { locale: sv })}
+                    Accepterad {(inv.accepted_at ? format(new Date(inv.accepted_at), 'd MMM yyyy, HH:mm', { locale: sv }) : '—')}
                   </p>
                 </div>
                 <Badge variant="outline" className="text-xs text-green-600 border-green-300 bg-green-50 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800">

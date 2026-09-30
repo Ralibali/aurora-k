@@ -336,6 +336,8 @@ export type Database = {
           booking_request_id: string | null
           co2_kg: number | null
           company_id: string | null
+          proof_photo_path: string | null
+          signature_path: string | null
           consignment_photo_url: string | null
           cost: number | null
           created_at: string
@@ -385,6 +387,8 @@ export type Database = {
           booking_request_id?: string | null
           co2_kg?: number | null
           company_id?: string | null
+          proof_photo_path?: string | null
+          signature_path?: string | null
           consignment_photo_url?: string | null
           cost?: number | null
           created_at?: string
@@ -434,6 +438,8 @@ export type Database = {
           booking_request_id?: string | null
           co2_kg?: number | null
           company_id?: string | null
+          proof_photo_path?: string | null
+          signature_path?: string | null
           consignment_photo_url?: string | null
           cost?: number | null
           created_at?: string
@@ -651,6 +657,10 @@ export type Database = {
           onboarding_completed: boolean | null
           org_nr: string | null
           public_booking_slug: string | null
+          terms_version: string | null
+          dpa_version: string | null
+          legal_accepted_at: string | null
+          legal_accepted_by: string | null
           stripe_customer_id: string | null
           stripe_event_created: number
           stripe_last_event_id: string | null
@@ -670,6 +680,10 @@ export type Database = {
           onboarding_completed?: boolean | null
           org_nr?: string | null
           public_booking_slug?: string | null
+          terms_version?: string | null
+          dpa_version?: string | null
+          legal_accepted_at?: string | null
+          legal_accepted_by?: string | null
           stripe_customer_id?: string | null
           stripe_event_created?: number
           stripe_last_event_id?: string | null
@@ -689,6 +703,10 @@ export type Database = {
           onboarding_completed?: boolean | null
           org_nr?: string | null
           public_booking_slug?: string | null
+          terms_version?: string | null
+          dpa_version?: string | null
+          legal_accepted_at?: string | null
+          legal_accepted_by?: string | null
           stripe_customer_id?: string | null
           stripe_event_created?: number
           stripe_last_event_id?: string | null
@@ -3307,6 +3325,8 @@ export type Database = {
       }
       complete_company_registration: {
         Args: {
+          _terms_version: string
+          _dpa_version: string
           _name: string
           _org_nr?: string
           _phone?: string

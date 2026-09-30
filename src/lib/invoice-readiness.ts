@@ -5,6 +5,8 @@ export type InvoiceBasisAssignment = {
   actual_start: string | null;
   actual_stop: string | null;
   require_photo?: boolean | null;
+  proof_photo_path?: string | null;
+  signature_path?: string | null;
   consignment_photo_url?: string | null;
   require_signature?: boolean | null;
   signature_url?: string | null;
@@ -59,8 +61,8 @@ export function invoiceReadiness(a: InvoiceBasisAssignment, openDeviations = 0, 
   const pricing = assignmentInvoicePricing(a);
   const issues: string[] = [];
   if (a.status !== 'completed') issues.push('Uppdraget är inte slutfört');
-  if (a.require_photo && !a.consignment_photo_url?.trim()) issues.push('Leveransfoto saknas');
-  if (a.require_signature && !a.signature_url?.trim()) issues.push('Underskrift saknas');
+  if (a.require_photo && !(a.proof_photo_path || a.consignment_photo_url)?.trim()) issues.push('Leveransfoto saknas');
+  if (a.require_signature && !(a.signature_path || a.signature_url)?.trim()) issues.push('Underskrift saknas');
   if (!deviationsAvailable) issues.push('Avvikelser behöver kontrolleras');
   else if (openDeviations > 0) issues.push(`${openDeviations} öppen${openDeviations === 1 ? '' : 'a'} avvikelse${openDeviations === 1 ? '' : 'r'}`);
   issues.push(...pricing.issues);

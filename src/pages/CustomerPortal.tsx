@@ -148,7 +148,9 @@ export default function CustomerPortal() {
       }
     };
     void fetchData();
-    return () => controller.abort();
+    // Renew one-hour proof links while the portal remains open.
+    const refresh = window.setInterval(() => void fetchData(), 50 * 60 * 1000);
+    return () => { controller.abort(); window.clearInterval(refresh); };
   }, [token, reload]);
 
   const assignments: PortalAssignment[] = useMemo(() => data?.assignments ?? [], [data]);

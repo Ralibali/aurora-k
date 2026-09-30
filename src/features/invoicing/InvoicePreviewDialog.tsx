@@ -17,8 +17,8 @@ type PreviewInvoice = {
 
 type PreviewSettings = {
   company_name?: string;
-  address?: string;
-  zip_city?: string;
+  address?: string | null;
+  zip_city?: string | null;
 };
 
 type Props = {

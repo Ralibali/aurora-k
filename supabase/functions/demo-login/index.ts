@@ -1,3 +1,4 @@
+import { allowDemo, demoError } from './handler.ts';
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -45,6 +46,7 @@ Deno.serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  if (req.method !== 'POST') return new Response(null, { status: 405, headers: corsHeaders });
   try {
     // Validate demo secret if configured (optional gate against abuse)
     const expectedSecret = Deno.env.get("DEMO_SECRET");
@@ -64,6 +66,12 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const admin = createClient(supabaseUrl, serviceRoleKey);
+
+    if (!await allowDemo(req, async (key, limit, seconds) => {
+      const { data, error } = await admin.rpc('consume_mail_rate_limit', { p_key: key, p_limit: limit, p_window_seconds: seconds });
+      if (error) throw error;
+      return data === true;
+    })) return new Response(JSON.stringify({ error: 'För många försök. Försök igen om en timme.' }), { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
     // Ensure demo company exists
     const { data: existingCompany } = await admin
@@ -94,11 +102,11 @@ Deno.serve(async (req) => {
 
     // Helper: ensure user exists
     async function ensureUser(u: { email: string; password: string; fullName: string }, role: "admin" | "driver") {
-      const { data: existingUsers } = await admin.auth.admin.listUsers();
-      const existing = existingUsers?.users?.find((x: { email?: string }) => x.email === u.email);
+      const { data: existing, error: lookupError } = await admin.rpc('find_auth_user_for_mail', { p_email: u.email }).maybeSingle();
+      if (lookupError) throw lookupError;
 
       let userId: string;
-      if (existing) {
+      if (existing && typeof existing === 'object' && 'id' in existing && typeof existing.id === 'string') {
         userId = existing.id;
         // Reset password in case it changed
         await admin.auth.admin.updateUserById(userId, { password: u.password });
@@ -200,7 +208,7 @@ Deno.serve(async (req) => {
     );
   } catch (err) {
     return new Response(
-      JSON.stringify({ error: err instanceof Error ? err.message : "Internal server error" }),
+      JSON.stringify({ error: demoError }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

@@ -1,3 +1,4 @@
+import { useProofUrls } from '@/hooks/useProofUrls';
 import AssignmentDeviations from '@/components/AssignmentDeviations';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -76,6 +77,7 @@ export default function AdminAssignmentDetail() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { data: assignment, isLoading } = useAssignment(id);
+  const proofUrls = useProofUrls(assignment);
   const { data: drivers } = useDrivers();
   const { data: logs } = useAssignmentLogs(id);
   const updateAssignment = useUpdateAssignment();
@@ -259,7 +261,7 @@ export default function AdminAssignmentDetail() {
               <Button size="sm" variant="outline" disabled={costInput === null || updateAssignment.isPending} onClick={() => {
                 if (costInput === null) return;
                 const value = costInput.trim() ? Number(costInput) : null;
-                if (value !== null && (!Number.isFinite(value) || value < 0)) return toast.error('Ange ett giltigt belopp som är minst 0 kr.');
+                if (value !== null && (!Number.isFinite(value) || value < 0)) return toast.error('Ange ett giltigt belopp som är minst 0 kr exkl. moms.');
                 updateAssignment.mutate({ id: assignment.id, cost: value }, { onSuccess: () => setCostInput(null) });
               }}>{updateAssignment.isPending ? 'Sparar…' : 'Spara'}</Button>
             </div>
@@ -271,8 +273,8 @@ export default function AdminAssignmentDetail() {
             <div className="flex items-center justify-between"><Label htmlFor="req-photo" className="text-sm">Kräv fraktsedelsfoto</Label><Switch id="req-photo" checked={assignment.require_photo} onCheckedChange={(checked) => updateAssignment.mutate({ id: assignment.id, require_photo: checked })} /></div>
           </div>
 
-          {assignment.signature_url && <div><p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Mottagarens signatur</p><img src={assignment.signature_url} alt="Signatur" className="w-full max-w-xs rounded-lg border bg-white p-2" /></div>}
-          {assignment.consignment_photo_url && <div><p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Fraktsedel</p><img src={assignment.consignment_photo_url} alt="Fraktsedel" className="w-full max-w-xs rounded-lg border" /></div>}
+          {proofUrls.signatureUrl && <div><p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Mottagarens signatur</p><img src={proofUrls.signatureUrl} alt="Signatur" className="w-full max-w-xs rounded-lg border bg-white p-2" /></div>}
+          {proofUrls.error && <p className="text-sm text-destructive">Leveransbeviset kunde inte hämtas. Kontrollera anslutningen och försök igen.</p>}{proofUrls.photoUrl && <div><p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Fraktsedel</p><img src={proofUrls.photoUrl} alt="Fraktsedel" className="w-full max-w-xs rounded-lg border" /></div>}
 
           {assignment.driver_comment && <div className="bg-secondary rounded-lg p-3"><p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-1"><MessageSquare className="h-3 w-3" /> Förarkommentar / statuslogg</p><p className="text-sm whitespace-pre-wrap">{assignment.driver_comment}</p></div>}
 

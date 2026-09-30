@@ -50,7 +50,7 @@ export const blogPosts: BlogPost[] = [
     metaDescription: 'Vad kostar ett TMS egentligen? Vi reder ut prissättningen för transportledningssystem – från enterprise-lösningar till prisvärda alternativ för små åkerier.',
     publishDate: '2026-03-24',
     readTime: '5 min',
-    excerpt: 'Prisskillnaden mellan det dyraste och mest prisvärda systemet kan vara 50 000 kr per år. Vi reder ut vad du faktiskt behöver.',
+    excerpt: 'Prisskillnaden mellan det dyraste och mest prisvärda systemet kan vara 50 000 kr exkl. moms per år. Vi reder ut vad du faktiskt behöver.',
     tags: ['TMS', 'pris', 'transportledningssystem'],
   },
   {

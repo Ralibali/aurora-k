@@ -139,8 +139,8 @@ export default function SubscriptionTab() {
               <CreditCard className="h-5 w-5 text-muted-foreground" />
               Aurora Transport
             </h3>
-            <p className="text-2xl font-bold mt-2">449 kr<span className="text-sm font-normal text-muted-foreground">/mån</span></p>
-            <p className="text-xs text-muted-foreground mt-1">Slutligt pris och eventuell startavgift visas innan du godkänner betalningen.</p>
+            <p className="text-2xl font-bold mt-2">449 kr/mån exkl. moms (561,25 kr inkl. moms)</p>
+            <p className="text-xs text-muted-foreground mt-1">Ingen startavgift. Ingen bindningstid. Moms beräknas i betalningssteget.</p>
           </div>
           <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
         </div>

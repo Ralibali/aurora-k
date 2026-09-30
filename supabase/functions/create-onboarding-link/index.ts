@@ -141,14 +141,14 @@ Deno.serve(async (req) => {
       }).eq("id", company.id);
 
       const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
-      const setupPriceId = Deno.env.get("STRIPE_SETUP_PRICE_ID");
       const monthlyPriceId = Deno.env.get("STRIPE_MONTHLY_PRICE_ID");
-      if (setupPriceId) lineItems.push({ price: setupPriceId, quantity: 1 });
       if (monthlyPriceId) lineItems.push({ price: monthlyPriceId, quantity: 1 });
 
       if (lineItems.length > 0) {
         const origin = safeOrigin(req);
         const session = await stripe.checkout.sessions.create({
+          automatic_tax: { enabled: true }, billing_address_collection: 'required',
+          customer_update: { name: 'auto', address: 'auto' }, tax_id_collection: { enabled: true },
           customer: customer.id,
           line_items: lineItems,
           mode: "subscription",

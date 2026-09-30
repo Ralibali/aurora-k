@@ -29,7 +29,7 @@ export async function computeDrivingRoute(stops: DrivingStop[]) {
   await loadGoogleMaps();
   const { Route } = await google.maps.importLibrary('routes') as google.maps.RoutesLibrary;
   const { routes } = await Route.computeRoutes({ origin: addresses[0], destination: addresses.at(-1)!, intermediates: addresses.slice(1, -1).map(address => ({ location: address })), travelMode: 'DRIVING', routingPreference: 'TRAFFIC_UNAWARE', language: 'sv', region: 'SE', fields: ['path', 'distanceMeters', 'durationMillis'] });
-  const route = routes[0];
+  const route = routes?.[0];
   if (!route?.path?.length || route.distanceMeters == null || route.durationMillis == null) throw new Error('Google hittade ingen körväg för adresserna.');
   return { path: route.path.map(point => ({ lat: point.lat, lng: point.lng })), distanceKm: route.distanceMeters / 1000, minutes: Math.round(route.durationMillis / 60000) };
   };

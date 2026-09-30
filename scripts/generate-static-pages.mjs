@@ -31,27 +31,35 @@ const BASE_URL = "https://auroratransport.se";
 // ---------- Statiska publika sidor ------------------------------------------
 // Title/description speglar respektive sidas usePageMeta exakt (annars uppstår
 // canonical/title-mismatch mellan statisk HTML och hydrerad SPA).
+const legalDocuments = ['terms', 'dpa'].map(name => JSON.parse(readFileSync(resolve(ROOT, `src/content/legal/${name}.json`), 'utf8')));
+const legalPage = index => {
+  const doc = legalDocuments[index];
+  return { title: `${doc.title} – Aurora Transport`, description: doc.title, h1: doc.title,
+    body: [`Version ${doc.version} · Datum ${doc.date}`, ...(doc.source ? [`Fullständiga klausuler: ${doc.source}`] : []), ...doc.sections.flatMap(section => [section.heading, ...section.paragraphs]), ...(doc.subprocessors || []).flatMap(s => [s.name, s.purpose, `Region: ${s.region}. Tredjelandsöverföring: ${s.transfer}`])] };
+};
 const STATIC_PAGES = [
+  { route: "/villkor", ...legalPage(0) },
+  { route: "/pub-avtal", ...legalPage(1) },
   {
     route: "/",
     title: "Slipp Excel & WhatsApp i transportplaneringen | Aurora Transport",
     description:
-      "Aurora Transport samlar uppdrag, förare, tidrapporter och fakturering i ett enkelt svenskt system. 449 kr/mån. Ingen bindningstid. Boka 15 min demo.",
+      "Aurora Transport samlar uppdrag, förare, tidrapporter och fakturering i ett enkelt svenskt system. 449 kr/mån exkl. moms. Ingen bindningstid. Boka 15 min demo.",
     h1: "Transportledningssystem för åkerier och budfirmor",
     body: [
       "Aurora Transport är ett svenskt transportledningssystem som ersätter Excel, WhatsApp och whiteboard. Hantera uppdrag, förare, tidrapporter och fakturaunderlag i ett enda system – byggt för åkerier, budfirmor och transportbemanning.",
-      "Fast pris från 449 kr/månad. Obegränsat antal förare. Ingen bindningstid. Boka en kostnadsfri 15-minuters demo så visar vi hur du kan starta i dag.",
+      "Fast pris från 449 kr/månad exkl. moms. Obegränsat antal förare. Ingen bindningstid. Boka en kostnadsfri 15-minuters demo så visar vi hur du kan starta i dag.",
     ],
   },
   {
     route: "/en",
     title: "Transport management system for hauliers | Aurora Transport",
     description:
-      "Swedish TMS for hauliers, couriers and transport staffing. Jobs, drivers, time reporting and invoice drafts from 449 SEK/month.",
+      "Swedish TMS for hauliers, couriers and transport staffing. Jobs, drivers, time reporting and invoice drafts from 449 SEK/month exkl. moms.",
     h1: "Transport management system for hauliers and couriers",
     body: [
       "Aurora Transport is a Swedish transport management system that replaces spreadsheets, WhatsApp and whiteboards. Manage jobs, drivers, time reporting and invoice drafts in one product built for hauliers, couriers and transport staffing teams.",
-      "Flat pricing from 449 SEK per month. Unlimited drivers. No lock-in. Book a free 15-minute demo and see how you can get started today.",
+      "Flat pricing from 449 SEK per month exkl. moms. Unlimited drivers. No lock-in. Book a free 15-minute demo and see how you can get started today.",
     ],
   },
   {
@@ -69,11 +77,11 @@ const STATIC_PAGES = [
     route: "/tjanster",
     title: "Tjänster — Transportledning & GPS | Aurora Transport",
     description:
-      "Komplett transportledningssystem: uppdragshantering, förarapp, GPS-spårning, fakturering och kundportal. 449 kr/mån, obegränsat antal förare.",
+      "Komplett transportledningssystem: uppdragshantering, förarapp, GPS-spårning, fakturering och kundportal. 449 kr/mån exkl. moms, obegränsat antal förare.",
     h1: "Tjänster – allt du behöver för att leda transporter",
     body: [
       "Aurora Transport ger dig en komplett verktygslåda för modern transportledning: uppdragshantering, förarapp för iOS och Android, GPS-spårning i realtid, fakturering, statistik och kundportal.",
-      "Alla funktioner ingår i ett fast pris på 449 kr per månad – inga tillkommande licenser per förare och inget krångel med separata system.",
+      "Alla funktioner ingår i ett fast pris på 449 kr per månad exkl. moms – inga tillkommande licenser per förare och inget krångel med separata system.",
     ],
   },
   {
@@ -81,11 +89,11 @@ const STATIC_PAGES = [
     title:
       "Transportledningssystem för åkerier & transportföretag | Aurora Transport",
     description:
-      "Aurora Transport är ett enkelt transportledningssystem för åkerier, budföretag och bemanningsteam. Hantera uppdrag, förare, tidrapporter och fakturaunderlag från 449 kr/mån.",
+      "Aurora Transport är ett enkelt transportledningssystem för åkerier, budföretag och bemanningsteam. Hantera uppdrag, förare, tidrapporter och fakturaunderlag från 449 kr/mån exkl. moms.",
     h1: "Transportledningssystem för åkerier och transportföretag",
     body: [
       "Ett transportledningssystem (TMS) hjälper dig att planera uppdrag, fördela förare, följa leveranser och ta fram fakturaunderlag utan dubbeljobb. Aurora Transport är byggt för svenska åkerier och transportföretag som vill lämna Excel och WhatsApp bakom sig.",
-      "Tilldela uppdrag, följ status i realtid, samla tidrapporter direkt från förarna och exportera fakturaunderlag som CSV – från 449 kr per månad.",
+      "Tilldela uppdrag, följ status i realtid, samla tidrapporter direkt från förarna och exportera fakturaunderlag som CSV – från 449 kr per månad exkl. moms.",
     ],
   },
   {
@@ -97,7 +105,7 @@ const STATIC_PAGES = [
     h1: "Tidrapportering för transport – direkt i förarens mobil",
     body: [
       "Digital tidrapportering för åkerier, budfirmor och transportbemanning. Förarna stämplar in och ut direkt i förarappen, OB- och övertid beräknas automatiskt och du får färdiga underlag för lön och fakturering.",
-      "Slipp pappersdagrapporter och Excel-mejl. Aurora Transport samlar all tidrapportering i ett system som dina förare faktiskt vill använda – från 449 kr per månad.",
+      "Slipp pappersdagrapporter och Excel-mejl. Aurora Transport samlar all tidrapportering i ett system som dina förare faktiskt vill använda – från 449 kr per månad exkl. moms.",
     ],
   },
   {
@@ -108,30 +116,30 @@ const STATIC_PAGES = [
       "Vad kostar ett transportledningssystem för åkerier, budfirmor och transportföretag? Läs om pris, setup, tidrapportering, dispatch och vad som ingår i Aurora Transport.",
     h1: "Vad kostar ett transportledningssystem?",
     body: [
-      "Priset för ett transportledningssystem varierar kraftigt. Etablerade aktörer som Coredination, AlystraGO och Transwide tar ofta 800–2 500 kr per förare och månad plus setup-avgifter på 20 000–100 000 kr.",
-      "Aurora Transport kostar 449 kr per månad – fast pris, obegränsat antal förare, ingen bindningstid och ingen setup-avgift. Du får uppdragshantering, förarapp, GPS, tidrapportering, fakturering och kundportal i samma pris.",
+      "Priset för ett transportledningssystem varierar kraftigt. Etablerade aktörer som Coredination, AlystraGO och Transwide tar ofta 800–2 500 kr exkl. moms per förare och månad.",
+      "Aurora Transport kostar 449 kr per månad exkl. moms – fast pris, obegränsat antal förare, ingen bindningstid och ingen setup-avgift. Du får uppdragshantering, förarapp, GPS, tidrapportering, fakturering och kundportal i samma pris. Valfri uppstartshjälp: 3 500 kr exkl. moms på förfrågan via kontaktformuläret.",
     ],
   },
   {
     route: "/coredination-alternativ",
     title: "Coredination-alternativ — enklare | Aurora Transport",
     description:
-      "Letar du efter alternativ till Coredination? Fast pris 449 kr/mån, obegränsat antal användare och ingen bindningstid.",
+      "Letar du efter alternativ till Coredination? Fast pris 449 kr/mån exkl. moms, obegränsat antal användare och ingen bindningstid.",
     h1: "Alternativ till Coredination",
     body: [
       "Coredination är ett kraftfullt system, men prissättningen per användare passar inte alla. Aurora Transport är ett enklare och mer prisvärt alternativ som är byggt för små och medelstora transportföretag.",
-      "Fast pris 449 kr per månad. Obegränsat antal förare. Ingen bindningstid.",
+      "Fast pris 449 kr per månad exkl. moms. Obegränsat antal förare. Ingen bindningstid.",
     ],
   },
   {
     route: "/opter-alternativ",
     title: "Opter-alternativ för mindre transportföretag | Aurora Transport",
     description:
-      "Alternativ till Opter för mindre åkerier och budfirmor. Fast pris 449 kr/mån, obegränsat antal användare, ingen bindningstid.",
+      "Alternativ till Opter för mindre åkerier och budfirmor. Fast pris 449 kr/mån exkl. moms, obegränsat antal användare, ingen bindningstid.",
     h1: "Opter-alternativet för mindre transportföretag",
     body: [
       "Opter är ett välkänt transportledningssystem för större transportorganisationer. För mindre åkerier och budfirmor blir det ofta i tyngsta laget – både i funktioner och pris.",
-      "Aurora Transport ger dig ett enkelt dispatchflöde med förarapp, tidrapportering och fakturaunderlag för 449 kr per månad, med obegränsat antal förare och ingen bindningstid.",
+      "Aurora Transport ger dig ett enkelt dispatchflöde med förarapp, tidrapportering och fakturaunderlag för 449 kr per månad exkl. moms, med obegränsat antal förare och ingen bindningstid.",
     ],
   },
   {
@@ -142,62 +150,62 @@ const STATIC_PAGES = [
     h1: "Workify-alternativet med fast teampris",
     body: [
       "Workify är populärt bland service- och installationsteam. För transportföretag som vill ha ett tydligt uppdrags- och dispatchflöde kan Aurora Transport vara ett mer renodlat alternativ.",
-      "Fast pris 449 kr per månad för hela teamet. Uppdrag, förarapp, tidrapportering och fakturaunderlag – utan pris per användare.",
+      "Fast pris 449 kr per månad exkl. moms för hela teamet. Uppdrag, förarapp, tidrapportering och fakturaunderlag – utan pris per användare.",
     ],
   },
   {
     route: "/hogia-transport-alternativ",
     title: "Hogia Transport-alternativ för små åkerier | Aurora Transport",
     description:
-      "Enklare alternativ till Hogia Transport för mindre åkerier. Fast pris 449 kr/mån, obegränsat antal förare, ingen bindningstid.",
+      "Enklare alternativ till Hogia Transport för mindre åkerier. Fast pris 449 kr/mån exkl. moms, obegränsat antal förare, ingen bindningstid.",
     h1: "Hogia Transport-alternativet för små åkerier",
     body: [
       "Hogia Transport är byggt för större transportorganisationer med tunga integrationskrav. Aurora Transport är istället byggt för små åkerier och budfirmor som vill komma igång snabbt.",
-      "Ett fast pris på 449 kr per månad, obegränsat antal förare och ett fokuserat flöde för uppdrag, förare, tidrapporter och fakturaunderlag.",
+      "Ett fast pris på 449 kr per månad exkl. moms, obegränsat antal förare och ett fokuserat flöde för uppdrag, förare, tidrapporter och fakturaunderlag.",
     ],
   },
   {
     route: "/pindeliver-alternativ",
     title: "PinDeliver-alternativ för B2B-transport | Aurora Transport",
     description:
-      "Alternativ till PinDeliver för B2B-transport och åkerier. Fast pris 449 kr/mån, obegränsat antal användare och ingen bindningstid.",
+      "Alternativ till PinDeliver för B2B-transport och åkerier. Fast pris 449 kr/mån exkl. moms, obegränsat antal användare och ingen bindningstid.",
     h1: "PinDeliver-alternativet för B2B-transport",
     body: [
       "PinDeliver är starkt inom e-handelns sista mil. För B2B-åkerier och transportbemanning ger Aurora Transport ett tydligare dispatchflöde med uppdrag, förarapp och tidrapportering.",
-      "Fast pris 449 kr per månad, obegränsat antal förare och ingen bindningstid.",
+      "Fast pris 449 kr per månad exkl. moms, obegränsat antal förare och ingen bindningstid.",
     ],
   },
   {
     route: "/alystra-alternativ",
     title: "Alystra-alternativ för åkerier med 1–20 bilar | Aurora Transport",
     description:
-      "Enklare alternativ till Alystra för åkerier med 1–20 bilar. Fast pris 449 kr/mån, obegränsat antal förare, ingen bindningstid.",
+      "Enklare alternativ till Alystra för åkerier med 1–20 bilar. Fast pris 449 kr/mån exkl. moms, obegränsat antal förare, ingen bindningstid.",
     h1: "Alystra-alternativet för åkerier med 1–20 bilar",
     body: [
       "Alystra är etablerat hos större transportorganisationer. För åkerier med 1–20 bilar blir det ofta för tungt att implementera och för dyrt att växa i.",
-      "Aurora Transport ger dig ett fokuserat transportledningssystem för 449 kr per månad – obegränsat antal förare och utan bindningstid.",
+      "Aurora Transport ger dig ett fokuserat transportledningssystem för 449 kr per månad exkl. moms – obegränsat antal förare och utan bindningstid.",
     ],
   },
   {
     route: "/budtjanst-app",
     title: "Budtjänst-app — hantera uppdrag digitalt | Aurora Transport",
     description:
-      "Perfekt app för budbilar och budföretag. Tilldela uppdrag, spåra förare och få signerade leveranskvitton. 449 kr/mån.",
+      "Perfekt app för budbilar och budföretag. Tilldela uppdrag, spåra förare och få signerade leveranskvitton. 449 kr/mån exkl. moms.",
     h1: "Budtjänst-app för moderna budföretag",
     body: [
       "Aurora Transports budtjänst-app är byggd för budbilar, kurirföretag och småskalig distribution. Tilldela uppdrag, följ förare på karta i realtid och få digitala leveranskvitton med foto och kundsignatur.",
-      "Allt i ett system – från första bokningen till färdigt fakturaunderlag. 449 kr per månad, obegränsat antal förare.",
+      "Allt i ett system – från första bokningen till färdigt fakturaunderlag. 449 kr per månad exkl. moms, obegränsat antal förare.",
     ],
   },
   {
     route: "/akeri-system",
     title: "System för åkerier — enkelt och prisvärt | Aurora Transport",
     description:
-      "Digitalisera ditt åkeri med ett modernt system för uppdrag, förare och tidrapporter. Från 449 kr/mån, fast pris.",
+      "Digitalisera ditt åkeri med ett modernt system för uppdrag, förare och tidrapporter. Från 449 kr/mån exkl. moms, fast pris.",
     h1: "System för åkerier – enkelt, modernt och prisvärt",
     body: [
       "Aurora Transport är ett komplett åkerisystem som samlar uppdragshantering, förarapp, GPS, tidrapportering och fakturaunderlag i ett system. Byggt för svenska åkerier som vill digitalisera utan långa implementationsprojekt.",
-      "Fast pris från 449 kr per månad. Inga licenskostnader per förare, ingen bindningstid och ingen setup-avgift.",
+      "Fast pris från 449 kr per månad exkl. moms. Inga licenskostnader per förare, ingen bindningstid och ingen setup-avgift.",
     ],
   },
   {
@@ -208,18 +216,18 @@ const STATIC_PAGES = [
     h1: "Dispatch-system för transportföretag",
     body: [
       "Ett bra dispatch-system gör skillnaden mellan kaos och kontroll. Aurora Transport ger dig en visuell dispatch-vy där du tilldelar uppdrag, ser förarstatus i realtid och kommunicerar direkt med chaufförerna via förarappen.",
-      "Byggt för transportledare som vill ha en tydlig översikt utan att klicka sig igenom tjugo menyer. 449 kr per månad, ingen bindningstid.",
+      "Byggt för transportledare som vill ha en tydlig översikt utan att klicka sig igenom tjugo menyer. 449 kr per månad exkl. moms, ingen bindningstid.",
     ],
   },
   {
     route: "/transportplanering",
     title: "Transportplanering — system för planering av uppdrag & förare | Aurora Transport",
     description:
-      "Planera transportuppdrag och förare i ett enkelt system. Drag-and-drop, GPS, notiser och tidrapporter. 449 kr/mån, ingen bindningstid.",
+      "Planera transportuppdrag och förare i ett enkelt system. Drag-and-drop, GPS, notiser och tidrapporter. 449 kr/mån exkl. moms, ingen bindningstid.",
     h1: "Transportplanering som verkligen sparar tid",
     body: [
       "Aurora Transport är ett komplett verktyg för transportplanering: dra och släpp uppdrag till rätt förare, se förarstatus i realtid och få automatiska tidrapporter. Sluta jaga förare på telefon och WhatsApp.",
-      "Allt sker i samma system som hanterar fakturering, kundregister och löneunderlag. 449 kr per månad, ingen bindningstid och igång samma dag.",
+      "Allt sker i samma system som hanterar fakturering, kundregister och löneunderlag. 449 kr per månad exkl. moms, ingen bindningstid och igång samma dag.",
     ],
   },
   {
@@ -241,18 +249,18 @@ const STATIC_PAGES = [
     h1: "Digital körorder app — körordern försvinner aldrig",
     body: [
       "Med Aurora Transport får föraren hela körordern i mobilen: uppdrag, adresser, kontaktpersoner och instruktioner. Mottagaren signerar på skärmen, föraren fotar godset och tiden rapporteras automatiskt.",
-      "GPS och geofence visar var bilen är utan att du ringer. Allt fungerar offline och blir färdiga tidrapporter och fakturaunderlag. 449 kr per månad, ingen bindningstid.",
+      "GPS och geofence visar var bilen är utan att du ringer. Allt fungerar offline och blir färdiga tidrapporter och fakturaunderlag. 449 kr per månad exkl. moms, ingen bindningstid.",
     ],
   },
   {
     route: "/transportbemanning",
     title: "System för transportbemanning — förare, uppdrag & tidrapporter | Aurora Transport",
     description:
-      "Bemanningsbolag inom transport: tilldela förare på sekunder, få färdiga tidrapporter med OB och traktamente och ge kunderna egen portal. 449 kr/mån.",
+      "Bemanningsbolag inom transport: tilldela förare på sekunder, få färdiga tidrapporter med OB och traktamente och ge kunderna egen portal. 449 kr/mån exkl. moms.",
     h1: "Systemet för transportbemanning — förare, uppdrag och tid i ett flöde",
     body: [
       "Aurora Transport är byggt för bemanningsbolag: se vilka förare som är tillgängliga, tilldela uppdrag på sekunder och låt förarna rapportera tid direkt i appen.",
-      "OB-tillägg och traktamenten räknas automatiskt till färdigt löneunderlag, och era uppdragsgivare bokar och följer uppdrag i egen portal. 449 kr per månad utan bindningstid.",
+      "OB-tillägg och traktamenten räknas automatiskt till färdigt löneunderlag, och era uppdragsgivare bokar och följer uppdrag i egen portal. 449 kr per månad exkl. moms utan bindningstid.",
     ],
   },
   {
@@ -296,7 +304,9 @@ const STATIC_PAGES = [
     h1: "Integritetspolicy",
     body: [
       "Aurora Transport hanterar personuppgifter i enlighet med GDPR. Här beskriver vi vilka uppgifter vi samlar in, varför vi gör det, hur länge vi sparar dem och vilka rättigheter du har.",
-      "Personuppgiftsansvarig är Aurora Media AB (org.nr 559272-0220). Har du frågor – kontakta info@auroramedia.se.",
+      "Personuppgiftsansvarig är Aurora Media AB (org.nr 559272-0220) för egna konto- och kontaktuppgifter. För kundens verksamhetsdata är kunden ansvarig och Aurora Media AB biträde. Kontakta info@auroramedia.se.",
+      "Data raderas på begäran. Inget automatiskt raderingsjobb för avslutade konton finns.",
+      ...legalDocuments[1].subprocessors.map(service => `${service.name}: ${service.purpose} Region: ${service.region}. Tredjelandsöverföring: ${service.transfer}`),
     ],
   },
 ];
@@ -465,7 +475,7 @@ function renderPage(template, opts) {
   }
 
   if (bodyHtml) {
-    html = injectBodyContent(html, bodyHtml);
+    html = injectBodyContent(html, bodyHtml + '<footer><nav aria-label="Juridisk information"><a href="/villkor">Användarvillkor</a> · <a href="/pub-avtal">PUB-avtal</a> · <a href="/privacy">Integritetspolicy</a></nav></footer>');
   }
 
   // route → dist/<route>/index.html (root → dist/index.html som skrivs sist)

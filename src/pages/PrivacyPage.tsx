@@ -1,3 +1,4 @@
+import dpa from '@/content/legal/dpa.json';
 import { Link } from "react-router-dom";
 import { useEffect, useMemo } from "react";
 import { ArrowLeft, Shield } from "lucide-react";
@@ -29,7 +30,7 @@ const PrivacyPage = () => {
     </header>
 
     <main className="max-w-3xl mx-auto px-4 py-10 prose prose-neutral dark:prose-invert">
-      <p className="text-muted-foreground text-sm">Senast uppdaterad: 30 juli 2026</p>
+      <p className="text-muted-foreground text-sm">Senast uppdaterad: 23 september 2026</p>
 
       <h2>1. Vilka vi är</h2>
       <p>
@@ -75,19 +76,10 @@ const PrivacyPage = () => {
       <p>
         Vi säljer aldrig dina personuppgifter. Data delas enbart med:
       </p>
-      <ul>
-        <li><strong>Infrastrukturleverantörer</strong> – för hosting och datalagring (Supabase, inom EU/EES).</li>
-        <li><strong>Betalningsleverantörer</strong> – Stripe, vid hantering av prenumerationer.</li>
-        <li><strong>Notisleverantörer</strong> – Google (Firebase/FCM) och Apple (APNs) för push-notiser till förarappen; endast enhetstoken och notisens innehåll delas.</li>
-        <li><strong>Kartleverantörer</strong> – Google Maps respektive OpenStreetMap för kartvisning.</li>
-        <li><strong>Myndigheter</strong> – om det krävs enligt lag.</li>
-      </ul>
-
+      <p>När vi behandlar uppgifter för kundföretaget gäller <Link to="/pub-avtal">PUB-avtalet</Link>. För våra egna konto- och betalningsändamål kan Aurora Media AB vara personuppgiftsansvarig.</p>
+      <ul>{dpa.subprocessors.map(service => <li key={service.name}><strong>{service.name}</strong> – {service.purpose} Region: {service.region}. Tredjelandsöverföring: {service.transfer}</li>)}</ul>
       <h2>7. Lagring och säkerhet</h2>
-      <p>
-        Uppgifter lagras så länge ditt konto är aktivt. Vid radering av konto tar vi bort dina
-        personuppgifter inom 30 dagar. All data krypteras vid överföring (TLS) och i vila.
-      </p>
+      <p>Avslutad prenumeration startar inget automatiskt raderingsjobb. Data raderas på begäran. Kontakta info@auroramedia.se för instruktion om återlämnande eller radering. Lagstadgade bevarandekrav kan gälla. Se PUB-avtalet för säkerhetsåtgärder och uppgifter om lagring som behöver kompletteras.</p>
 
       <h2>8. Dina rättigheter (GDPR)</h2>
       <p>Du har rätt att:</p>

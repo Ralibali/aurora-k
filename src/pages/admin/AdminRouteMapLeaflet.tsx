@@ -84,7 +84,7 @@ export default function RouteMapLeaflet({ assignments }: RouteMapProps) {
     const positions: L.LatLngExpression[] = [];
 
     assignments.forEach((a, i) => {
-      if (!isValidMapCoordinate(a.geofence_lat, a.geofence_lng)) return;
+      if (typeof a.geofence_lat !== 'number' || typeof a.geofence_lng !== 'number' || !isValidMapCoordinate(a.geofence_lat, a.geofence_lng)) return;
 
       const pos: L.LatLngExpression = [a.geofence_lat, a.geofence_lng];
       positions.push(pos);

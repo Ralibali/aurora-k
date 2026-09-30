@@ -63,7 +63,7 @@ export default function DigitalFoljesedelPage() {
             <Button size="lg" variant="outline" asChild className="h-12 px-6"><Link to="/">Se hela produkten</Link></Button>
           </div>
           <ul className="mt-7 grid grid-cols-2 gap-y-2 gap-x-6 text-sm text-muted-foreground max-w-lg">
-            {['Signatur, foto & POD', 'Funkar offline', 'Skickas automatiskt till kund', 'Ingår i 449 kr/mån'].map(t => (
+            {['Signatur, foto & POD', 'Funkar offline', 'Skickas automatiskt till kund', 'Ingår i 449 kr/mån exkl. moms'].map(t => (
               <li key={t} className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" />{t}</li>
             ))}
           </ul>

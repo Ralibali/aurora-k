@@ -62,8 +62,8 @@ const services = [
 ];
 
 const pricing = [
-  { label: 'Månadsavgift', value: '449 kr/mån' },
-  { label: 'Startavgift', value: '3 500 kr (engångs)' },
+  { label: 'Månadsavgift', value: '449 kr/mån exkl. moms' },
+  { label: 'Startavgift', value: 'Ingen startavgift' },
   { label: 'Antal förare', value: 'Obegränsat' },
   { label: 'Antal fordon', value: 'Obegränsat' },
   { label: 'Uppdrag / månad', value: 'Obegränsat' },
@@ -75,7 +75,7 @@ const pricing = [
 
 const steps = [
   { num: '1', title: 'Registrera företaget', desc: 'Gå till auroratransport.se och klicka "Kom igång". Fyll i företagsnamn och organisationsnummer.' },
-  { num: '2', title: 'Betala startavgift', desc: 'Slutför betalningen via Stripe. Du får omedelbar tillgång till systemet.' },
+  { num: '2', title: 'Starta provperiod', desc: 'Bekräfta din e-post och slutför registreringen. Testa gratis i 14 dagar utan kort.' },
   { num: '3', title: 'Lägg till förare', desc: 'Bjud in dina chaufförer via e-post. De får en länk och kan börja direkt i mobilen.' },
   { num: '4', title: 'Skapa kunder & uppdrag', desc: 'Lägg in era kunder, skapa uppdrag och börja dispatcha.' },
   { num: '5', title: 'Fakturera', desc: 'När uppdraget är klart genererar du en faktura med ett klick.' },
@@ -92,7 +92,7 @@ const advantages = [
 export default function TjansterPage() {
   usePageMeta({
     title: 'Tjänster — Transportledning & GPS | Aurora Transport',
-    description: 'Komplett transportledningssystem: uppdragshantering, förarapp, GPS-spårning, fakturering och kundportal. 449 kr/mån, obegränsat antal förare.',
+    description: 'Komplett transportledningssystem: uppdragshantering, förarapp, GPS-spårning, fakturering och kundportal. 449 kr/mån exkl. moms, obegränsat antal förare.',
     canonical: 'https://auroratransport.se/tjanster',
     ogImage: 'https://auroratransport.se/og-image.png',
   });
@@ -128,7 +128,7 @@ export default function TjansterPage() {
             offers: {
               '@type': 'Offer',
               price: '449',
-              priceCurrency: 'SEK',
+              priceCurrency: 'SEK', priceSpecification: { '@type': 'UnitPriceSpecification', price: 449, priceCurrency: 'SEK', valueAddedTaxIncluded: false },
               billingIncrement: 'P1M',
             },
             description: 'Komplett transportledningssystem för svenska åkerier och bemanningsföretag.',
@@ -196,7 +196,7 @@ function Hero() {
         </motion.p>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="flex flex-col sm:flex-row gap-3 justify-center">
           <Button size="lg" asChild className="rounded-xl px-8 py-6 text-base font-semibold">
-            <Link to="/kontakt">Kom igång idag — 449 kr/mån</Link>
+            <Link to="/kontakt">Kom igång idag — 449 kr/mån exkl. moms</Link>
           </Button>
           <Button size="lg" variant="outline" asChild className="rounded-xl px-8 py-6 text-base font-semibold">
             <Link to="/login">Testa demo</Link>
@@ -261,8 +261,8 @@ function PricingSection() {
           {/* Header */}
           <div className="bg-primary p-6 text-center">
             <h3 className="text-xl font-bold text-primary-foreground">Aurora Transport</h3>
-            <p className="text-4xl font-bold text-primary-foreground mt-2">449 kr<span className="text-lg font-normal opacity-80">/mån</span></p>
-            <p className="text-sm text-primary-foreground/70 mt-1">+ 3 500 kr startavgift (engångs)</p>
+            <p className="text-4xl font-bold text-primary-foreground mt-2">449 kr exkl. moms<span className="text-lg font-normal opacity-80">/mån</span></p>
+            <p className="text-sm text-primary-foreground/70 mt-1">Ingen startavgift. 14 dagar gratis utan kort.</p>
           </div>
           {/* Rows */}
           <div className="divide-y divide-border">
@@ -358,7 +358,7 @@ function OnboardingSteps() {
 }
 
 const faqs = [
-  { q: 'Vad kostar Aurora Transport?', a: '449 kr/mån med en engångs startavgift på 3 500 kr. Obegränsat antal förare, fordon och uppdrag ingår. Inga dolda avgifter.' },
+  { q: 'Vad kostar Aurora Transport?', a: '449 kr/mån exkl. moms utan startavgift. Obegränsat antal förare, fordon och uppdrag ingår. Inga dolda avgifter.' },
   { q: 'Behöver förarna ladda ner en app?', a: 'Nej. Aurora Transport använder PWA-teknik (Progressive Web App). Förarna öppnar en länk i mobilen och kan lägga till den på hemskärmen — fungerar som en vanlig app utan App Store.' },
   { q: 'Hur lång tid tar det att komma igång?', a: 'Under 5 minuter. Registrera företaget, bjud in förare via e-post och börja skapa uppdrag direkt.' },
   { q: 'Finns det någon bindningstid?', a: 'Nej, ingen bindningstid. Du kan avsluta din prenumeration när som helst.' },
@@ -433,7 +433,7 @@ function FinalCta() {
           Redo att digitalisera ert åkeri?
         </motion.h2>
         <motion.p initial="hidden" whileInView="visible" viewport={{ once: true }} custom={1} variants={fadeUp} className="text-slate-400 mb-8">
-          449 kr/mån. Fast pris. Ingen bindningstid.
+          449 kr/mån exkl. moms. Fast pris. Ingen bindningstid.
         </motion.p>
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} custom={2} variants={fadeUp}>
           <Button size="lg" asChild className="rounded-xl px-10 py-6 text-base font-semibold bg-white text-[hsl(222,47%,11%)] hover:bg-white/90">
