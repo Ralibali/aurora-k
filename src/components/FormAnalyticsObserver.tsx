@@ -64,17 +64,12 @@ export function FormAnalyticsObserver() {
       }
 
       const visibleText = document.body.innerText.toLowerCase();
-      const successSignals: Array<[string, string, boolean]> = [
-        ['demo_submit_success', 'bokningen är mottagen', true],
-        ['lead_submit_success', 'din intresseanmälan har landat', true],
-        ['transport_booking_submit_success', 'vi har tagit emot din förfrågan', false],
-      ];
-
-      for (const [eventName, signal, isLead] of successSignals) {
-        if (!visibleText.includes(signal) || successful.has(eventName)) continue;
-        successful.add(eventName);
-        track(eventName, { source: 'ui_confirmation', page: window.location.pathname });
-        if (isLead) track('generate_lead', { currency: 'SEK', value: 0, lead_source: eventName });
+      // Leads are measured by the submitting component after the database
+      // confirms success. Translated or repeated thank-you text is not evidence
+      // that a new lead was saved.
+      if (visibleText.includes('vi har tagit emot din förfrågan') && !successful.has('transport_booking_submit_success')) {
+        successful.add('transport_booking_submit_success');
+        track('transport_booking_submit_success', { source: 'ui_confirmation', page: window.location.pathname });
       }
 
       if (visibleText.includes('något gick fel. försök igen') && !successful.has('form_submit_error')) {

@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { track } from '@/lib/track';
+import { trackLeadSubmitted, type EventSource } from '@/lib/analytics';
 
 type DemoFormState = { contactPerson: string; companyName: string; email: string; phone: string };
 const EMPTY_FORM: DemoFormState = { contactPerson: '', companyName: '', email: '', phone: '' };
@@ -25,7 +26,7 @@ function utmParams() {
   };
 }
 
-function DemoLeadForm({ source }: { source: string }) {
+function DemoLeadForm({ source }: { source: Extract<EventSource, 'standalone_demo' | 'mobile_demo'> }) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -67,6 +68,8 @@ function DemoLeadForm({ source }: { source: string }) {
       });
       if (error) throw error;
 
+      trackLeadSubmitted(source);
+
       void supabase.functions.invoke('send-email', {
         body: { to: 'info@auroramedia.se', templateName: 'new-lead-notification', templateData: {
           companyName: form.companyName.trim(), contactPerson: form.contactPerson.trim(),
@@ -75,7 +78,6 @@ function DemoLeadForm({ source }: { source: string }) {
       });
 
       track('demo_submit_success', { source, has_phone: Boolean(form.phone.trim()), page: window.location.pathname });
-      track('generate_lead', { currency: 'SEK', value: 0, lead_source: source });
       setSubmitted(true);
     } catch (error: unknown) {
       const messageText = error instanceof Error ? error.message : 'unknown';

@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Building2, User, Mail, Phone, CalendarClock, CircleCheck as CheckCircle2, Send, Sparkles, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
+import { trackLeadSubmitted } from '@/lib/analytics';
 import { toast } from 'sonner';
 import type { Lang } from '@/i18n/landing';
 
@@ -209,6 +210,8 @@ export function DemoBookingModal({ open, onOpenChange, lang = 'sv' }: DemoBookin
       return;
     }
 
+    trackLeadSubmitted('demo_modal');
+
     supabase.functions
       .invoke('send-email', {
         body: {
@@ -225,10 +228,6 @@ export function DemoBookingModal({ open, onOpenChange, lang = 'sv' }: DemoBookin
       })
       .catch((err) => console.warn('Failed to send demo booking notification:', err));
 
-    try {
-      const { trackEvent } = await import('@/lib/analytics');
-      trackEvent('Demo Requested', { source: 'demo_modal' });
-    } catch { /* noop */ }
     setSubmitted(true);
   };
 

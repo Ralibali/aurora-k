@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
+import { trackLeadSubmitted } from '@/lib/analytics';
 import { toast } from 'sonner';
 import { Building2, User, Mail, Phone, Hash, Truck, Send, CircleCheck as CheckCircle2, Clock, Mail as MailIcon, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -111,6 +112,8 @@ export function LeadForm({ onSuccess, compact = false }: LeadFormProps) {
       return;
     }
 
+    trackLeadSubmitted('lead_form');
+
     // Send admin notification email (fire and forget)
     supabase.functions.invoke('send-email', {
       body: {
@@ -128,10 +131,6 @@ export function LeadForm({ onSuccess, compact = false }: LeadFormProps) {
     }).catch((err) => console.warn('Failed to send lead notification:', err));
 
     setSubmitted(true);
-    try {
-      const { trackEvent } = await import('@/lib/analytics');
-      trackEvent('Demo Requested', { source: 'lead_form' });
-    } catch { /* noop */ }
     toast.success('Tack! Vi hör av oss inom kort.');
     onSuccess?.();
   };

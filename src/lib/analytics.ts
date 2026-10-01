@@ -10,12 +10,15 @@ export type EventSource =
   | 'pricing'
   | 'register'
   | 'demo_modal'
+  | 'standalone_demo'
+  | 'mobile_demo'
   | 'lead_form'
   | 'onboarding'
   | 'settings';
 export type Role = 'admin' | 'driver' | 'platform_admin';
 
 export type PropMap = {
+  'Generate Lead': { lead_source: EventSource };
   'Signup Completed': { source?: EventSource; role?: Role };
   'Trial Started': { plan?: Plan; billing_interval?: BillingInterval };
   'Demo Requested': { source?: EventSource };
@@ -94,6 +97,13 @@ export function trackEvent<E extends EventName>(
   } catch {
     // Never break the UI for analytics
   }
+}
+
+/** Call only after the lead has been saved successfully. */
+export function trackLeadSubmitted(source: EventSource): void {
+  trackEvent('Generate Lead', { lead_source: source });
+  // Keep the existing detail event for historical reporting, not as a second key event.
+  trackEvent('Demo Requested', { source });
 }
 
 // Deduplicate in memory only after consent. No customer IDs are persisted for statistics.

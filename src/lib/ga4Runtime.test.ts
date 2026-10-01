@@ -18,6 +18,20 @@ beforeEach(async () => {
 });
 afterEach(() => { history.pushState = originalPush; history.replaceState = originalReplace; });
 describe('GA4 transport', () => {
+  it('keeps the confirmed lead helper consent-gated and sends the existing key event once', async () => {
+    const { trackLeadSubmitted } = await import('./analytics');
+    trackLeadSubmitted('standalone_demo');
+    expect(events()).toEqual([]);
+
+    runtime.setAnalyticsConsent(true);
+    trackLeadSubmitted('standalone_demo');
+    const leads = events().filter(row => row[1] === 'generate_lead');
+    expect(leads).toHaveLength(1);
+    expect(leads[0]?.[2]).toMatchObject({ lead_source: 'standalone_demo', send_to: 'G-TEST123456' });
+    expect(leads[0]?.[2]).not.toHaveProperty('value');
+    expect(leads[0]?.[2]).not.toHaveProperty('currency');
+    expect(events().filter(row => row[1] === 'demo_requested')).toHaveLength(1);
+  });
   it('does not load Google or queue any events before consent', () => {
     runtime.sendAnalyticsEvent('Signup Completed', { props: { source: 'landing' } });
     expect(events()).toEqual([]);
