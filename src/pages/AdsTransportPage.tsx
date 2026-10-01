@@ -68,7 +68,7 @@ export default function AdsTransportPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050510] text-white overflow-hidden" style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
+    <div className="min-h-screen bg-[#050510] text-white overflow-hidden" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-violet-600/10 blur-[120px]" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-purple-500/8 blur-[100px]" />
