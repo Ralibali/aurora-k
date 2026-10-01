@@ -11,6 +11,7 @@ Current provider: Google Analytics 4. This replaces the previous Plausible integ
 - Private routes, query strings, fragments, personal identifiers and unsafe event properties are filtered. Download tracking sends the file extension only.
 - Google Signals and advertising personalization are disabled for GA4. Existing Ads conversion code, where present, has its own marketing consent.
 - A persistent Cookieinställningar button allows visitors to change or withdraw their choice.
+- The standalone `/boka-demo` page mounts the same CookieConsent component even though it renders outside App. New visitors remain untracked until they explicitly accept statistics there.
 - Old Plausible setup documents are historical; do not reinstall that tracker or re-enable automatic GA4 pageviews on top of this transport.
 
 ## Confirmed lead outcome

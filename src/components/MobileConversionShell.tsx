@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { track } from '@/lib/track';
 import { trackLeadSubmitted, type EventSource } from '@/lib/analytics';
+import { CookieConsent } from '@/components/CookieConsent';
 
 type DemoFormState = { contactPerson: string; companyName: string; email: string; phone: string };
 const EMPTY_FORM: DemoFormState = { contactPerson: '', companyName: '', email: '', phone: '' };
@@ -152,6 +153,7 @@ export function StandaloneDemoPage() {
           </section>
         </div>
       </div>
+      <CookieConsent />
     </main>
   );
 }
