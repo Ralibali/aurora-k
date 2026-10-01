@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "status": "draft",
+  "writtenAt": "2026-10-01T08:46:15.434899+00:00",
+  "repository": "Ralibali/aurora-k",
+  "publicationGate": "Earliest 2026-10-03, at least two Stockholm calendar days after the previous verified original. Recheck current main, full inventory, sources and product dependencies before promotion.",
+  "sourceReview": {
+    "checkedAt": "2026-10-01T08:46:15.434899+00:00",
+    "distinctIntent": "Dokumentation av en konkret väntesituation i ett transportuppdrag: tidskälla, besked och osäkerhet, utan bedömning av debitering eller kör- och vilotidsregler.",
+    "note": "Original practical template; current owned product entry verified. Fresh full source and inventory review required before publication."
+  },
+  "article": {
+    "slug": "dokumentera-vantetid-transportuppdrag",
+    "title": "Dokumentera väntetid utan att gissa orsaken",
+    "metaDescription": "Samla tider, händelser och kontaktbesked när ett transportuppdrag väntar. En arbetsmall för uppföljning som håller observationer och bedömningar åtskilda.",
+    "intro": "En uppgift om väntetid blir mer användbar när det går att se vad som hände, vilka tider som noterades och varifrån uppgifterna kommer. Ordet ”väntade” kan annars beskriva flera olika delar av ett uppdrag. Samla händelserna medan de går att reda ut och lämna bedömningar om ansvar och ersättning till rätt person.\n\nUtgå från verksamhetens befintliga rapporteringsrutiner. Mallen är ett underlag för uppföljning; den bestämmer inte vad som ska faktureras och ersätter inga regler om arbetstid, körning eller vila.",
+    "sections": [
+      {
+        "heading": "Knyt noteringen till rätt uppdrag och plats",
+        "content": "Ange uppdragsreferens och vilket moment noteringen gäller. Skilj mellan hämtning, leverans och andra tillfällen i samma uppdrag. Skriv vilket besked som fanns inför momentet och hänvisa till det ursprungliga underlaget.\n\nAnvänd uppgifter från [orderunderlaget inför transportplanering](/blogg/orderunderlag-infor-transportplanering). Om platsen eller tiden senare har ändrats behöver hänvisningen visa vilket besked som gällde vid tillfället. Kopiera inte en gammal planerad tid som om den vore en observerad händelse."
+      },
+      {
+        "heading": "Skriv händelser före slutsatser",
+        "content": "Notera vad som faktiskt observerades: exempelvis när föraren anmälde sin ankomst och när ett nytt besked togs emot. Ange hur tiden är känd. En anteckning som görs i efterhand kan ha lägre precision än ett besked som sparades vid själva händelsen.\n\nSkriv ”ungefär” eller ”tid saknas” när det behövs. Låt den som följer upp förstå osäkerheten i stället för att fylla varje ruta med en exakt klockslagssiffra. En uppskattning ska vara tydligt skild från en uppgift som har kontrollerats mot underlaget."
+      },
+      {
+        "heading": "Dela upp flera väntetillfällen",
+        "content": "Om uppdraget innehåller flera avbrott behöver de beskrivas var för sig. En totalsiffra kan dölja att olika besked och kontaktpersoner hör till olika delar av förloppet. Börja med händelsernas ordning innan någon sammanställer en varaktighet.\n\nEtt påhittat exempel: en ankomstnotering finns klockan 09.10, ett kontaktbesked 09.25 och en ny instruktion 09.40. Dessa tre uppgifter visar en tidsföljd. De bevisar inte ensamma vilken tid som enligt ett avtal ska räknas som debiterbar väntan."
+      },
+      {
+        "heading": "Använd en kort händelserad",
+        "content": "Samla uppdragsreferens, plats eller moment, observerad händelse, tid med källa, mottaget besked och vem som lämnade beskedet. Avsluta raden med en eventuell öppen fråga och vem som ska reda ut den. Håll uppgifterna i samma underlag så att de går att följa tillsammans.\n\nSkilj ”ingen kontakt nåddes” från ”kunden orsakade väntan”. Det första kan vara en observerad händelse; det andra är en bedömning som kan kräva fler uppgifter. Undvik värderande formuleringar som gör noteringen svårare att stämma av med andra inblandade."
+      },
+      {
+        "heading": "Lämna underlaget vidare med öppna frågor synliga",
+        "content": "När en ändring påverkar fortsatt planering kan den hänvisas till [ändringsloggen för transportuppdrag](/blogg/andringslogg-transportuppdrag). Den som följer upp ska kunna se vilka besked som är bekräftade och vilka delar av händelseförloppet som ännu är oklara.\n\nLäs om [Aurora Transports tjänster](/tjanster) när ni ser över hur uppdragsunderlag hålls samlade. Använd gärna ett anonymiserat exempel i den interna genomgången. AI-assisterad originalguide med en dokumentationsmall; den utlovar ingen automatisk tidmätning eller bedömning av ersättning."
+      }
+    ],
+    "editorial": {
+      "createdWith": "ChatGPT",
+      "aiAssisted": true,
+      "searchIntent": "Dokumentation av en konkret väntesituation i ett transportuppdrag: tidskälla, besked och osäkerhet, utan bedömning av debitering eller kör- och vilotidsregler.",
+      "sourceUrls": [
+        "https://auroratransport.se/tjanster"
+      ],
+      "sourceCheckedAt": "2026-10-01T08:46:15.434899+00:00"
+    },
+    "seoTitle": "Dokumentera väntetid utan att gissa orsaken",
+    "readTime": "4 min",
+    "excerpt": "Samla tider, händelser och kontaktbesked när ett transportuppdrag väntar. En arbetsmall för uppföljning som håller observationer och bedömningar åtskilda.",
+    "tags": [
+      "transportledning",
+      "arbetsrutiner"
+    ],
+    "links": [
+      {
+        "href": "/tjanster",
+        "label": "Se Aurora Transports tjänster"
+      }
+    ]
+  }
+}
