@@ -3,7 +3,12 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.100.1";
 import { z } from "https://esm.sh/zod@3";
 import { deliverOutbox } from "../_shared/notification-outbox.ts";
 
-const portalToken = z.string().trim().min(20).max(256).regex(/^[A-Za-z0-9._~-]+$/);
+const portalToken = z
+  .string()
+  .trim()
+  .min(20)
+  .max(256)
+  .regex(/^[A-Za-z0-9._~-]+$/);
 
 const RequestSchema = z.object({
   type: z.literal("new-customer-message"),
@@ -34,11 +39,9 @@ Deno.serve(async (req) => {
       return json({ error: "Invalid request", details: parsed.error.flatten().fieldErrors }, 400);
     }
 
-    const admin = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-      { auth: { persistSession: false, autoRefreshToken: false } },
-    );
+    const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
 
     const { data: tokenRow, error: tokenError } = await admin
       .from("customer_access_tokens")
@@ -58,7 +61,7 @@ Deno.serve(async (req) => {
 
     // Content and recipients come from the committed portal message trigger.
     const result = await deliverOutbox(admin, companyId);
-    if (result.failed) return json({ error: 'Meddelandet är sparat. Mejlaviseringen väntar på ett nytt försök.' }, 502);
+    if (result.failed) return json({ error: "Meddelandet är sparat. Mejlaviseringen väntar på ett nytt försök." }, 502);
     return json({ success: true });
   } catch (err) {
     console.error("[notify-admin] Error:", err);
