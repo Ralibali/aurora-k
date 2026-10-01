@@ -1,5 +1,57 @@
 [
   {
+    "slug": "orderunderlag-infor-transportplanering",
+    "title": "Samla orderunderlaget innan transportuppdraget planeras",
+    "metaDescription": "Samla orderns fakta, källor och öppna frågor innan transportuppdraget planeras. En arbetsmall för tydligt underlag mellan beställning och planering.",
+    "intro": "Ett transportuppdrag kan börja med ett kort samtal, ett mejl eller uppgifter från flera personer. Innan det går vidare till planering behöver transportledningen kunna se vad som faktiskt har beställts och vilka frågor som fortfarande är öppna. Ett samlat orderunderlag gör skillnaden mellan ett önskemål och ett bekräftat besked tydligare.\n\nBörja med verksamhetens befintliga orderrutiner. Mallen hjälper dig att ordna information inför nästa steg. Den avgör inte om en transport kan utföras och ger inga anvisningar om lastning, fordonsval, körning eller vilka avtalsvillkor som ska gälla.\n",
+    "sections": [
+      {
+        "heading": "Knyt uppgifterna till rätt förfrågan",
+        "content": "Ange vilken kundkontakt och vilken förfrågan underlaget gäller. Spara en tydlig hänvisning till den ursprungliga beställningen eller förfrågan. Om flera meddelanden hör ihop behöver det framgå så att transportledningen inte råkar planera dem som separata uppdrag.\n\nSkriv vem som sammanställde informationen och när. När kunden lämnar ett nytt besked ska det gå att skilja det från den tidigare uppgiften. Gissa inte vilken version som gäller om olika kontaktpersoner säger olika saker; markera motsägelsen som en fråga till ansvarig."
+      },
+      {
+        "heading": "Separera plats, tid och uppdragets innehåll",
+        "content": "Samla hämtnings- och leveransuppgifter var för sig och ange källan till dem. Ett återkommande platsnamn behöver inte vara tillräckligt för det aktuella uppdraget. Jämför med det befintliga [platsunderlaget för återkommande lastplatser](/blogg/platsunderlag-aterkommande-lastplatser) och kontrollera det som skiljer sig denna gång.\n\nGör samma sak med tiderna. Skriv om en tid är önskad, preliminär eller bekräftad av rätt part. Lägg beskrivningen av uppdragets innehåll i en egen del, med kundens underlag och de frågor som den ansvariga planeringen behöver reda ut."
+      },
+      {
+        "heading": "Gör en tydlig lista över luckorna",
+        "content": "Använd exempelvis följande fält:\n\n- Referens till förfrågan och kundens underlag.\n- Kontaktväg för frågor om just detta uppdrag.\n- Hämtningsplats och leveransplats enligt aktuella besked.\n- Tidsönskemål och separat status för bekräftade tider.\n- Beskrivning av uppdragets innehåll med källa.\n- Saknad eller motstridig uppgift.\n- Vem som frågar vidare och när besked behövs.\n\nSkriv ”saknas” eller ”behöver bekräftas” där informationen ännu inte finns. En tom ruta kan annars tolkas som att frågan inte är relevant. Dokumentera vilket besked som behövs för att ansvarig ska kunna ta nästa beslut."
+      },
+      {
+        "heading": "Lämna bedömningarna till rätt funktion",
+        "content": "När orderunderlaget sammanställs kan frågor uppstå om genomförande, pris eller villkor. Hänvisa dem till den person som har mandat och kunskap att lämna besked. Att en uppgift finns i listan betyder inte att verksamheten har accepterat förfrågan eller bekräftat en viss lösning.\n\nMarkera när underlaget har lämnats vidare och vad mottagaren behöver ta ställning till. Om planeringen begär en komplettering ska frågan kopplas till samma referens. Undvik att skapa en fristående anteckning som tappar sambandet med kundens ursprungliga underlag."
+      },
+      {
+        "heading": "Håll samman ändringar efter överlämningen",
+        "content": "När ett nytt besked kommer efter att planeringen har börjat kan det föras in i [ändringsloggen för transportuppdrag](/blogg/andringslogg-transportuppdrag). Beskriv vad som har ändrats och vilka tidigare uppgifter som berörs, så att nästa person kan följa sammanhanget.\n\nLäs om [Aurora Transports tjänster](/tjanster) när ni ser över stödet för uppdragshantering. Ta med ett anonymiserat orderunderlag som exempel på ert behov. AI-assisterad originalguide med en arbetsmall; texten utlovar ingen automatisk validering av kundens uppgifter."
+      }
+    ],
+    "editorial": {
+      "createdWith": "ChatGPT",
+      "aiAssisted": true,
+      "searchIntent": "Intag av beställningsuppgifter och dokumentation av luckor innan transportplanering, skilt från ruttval, lastningsregler och uppdragsändringar.",
+      "sourceUrls": [
+        "https://auroratransport.se/tjanster"
+      ],
+      "sourceCheckedAt": "2026-10-01T08:30:38.015Z",
+      "publishedAt": "2026-10-01T08:30:38.015Z"
+    },
+    "seoTitle": "Samla orderunderlaget innan transportuppdraget planeras",
+    "readTime": "4 min",
+    "excerpt": "Samla orderns fakta, källor och öppna frågor innan transportuppdraget planeras. En arbetsmall för tydligt underlag mellan beställning och planering.",
+    "tags": [
+      "transportledning",
+      "arbetsrutiner"
+    ],
+    "links": [
+      {
+        "href": "/tjanster",
+        "label": "Se Aurora Transports tjänster"
+      }
+    ],
+    "publishDate": "2026-10-01"
+  },
+  {
     "slug": "avstamning-returemballage-underlag",
     "title": "Samla underlaget när returemballage ska stämmas av",
     "metaDescription": "Samla antal, underlag och öppna frågor när returemballage ska stämmas av. En praktisk dokumentationsmall för transportledningens uppföljning.",
