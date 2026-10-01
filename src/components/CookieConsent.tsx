@@ -1,4 +1,5 @@
 import { setAnalyticsConsent } from '@/lib/ga4Runtime';
+import { parseStatisticsConsent, storeStatisticsConsent } from '@/lib/statisticsConsent';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Cookie, X } from 'lucide-react';
@@ -9,7 +10,8 @@ type ConsentStatus = 'accepted' | 'rejected' | null;
 
 function getConsent(): ConsentStatus {
   try {
-    return localStorage.getItem(COOKIE_CONSENT_KEY) as ConsentStatus;
+    const choice = parseStatisticsConsent(localStorage.getItem(COOKIE_CONSENT_KEY));
+    return choice ? (choice.analytics ? 'accepted' : 'rejected') : null;
   } catch {
     return null;
   }
@@ -17,12 +19,16 @@ function getConsent(): ConsentStatus {
 
 function updateGoogleAnalyticsConsent(status: Exclude<ConsentStatus, null>) {
   setAnalyticsConsent(status === 'accepted');
+  window.dispatchEvent(new CustomEvent('privacy:analytics-consent', { detail: status === 'accepted' }));
 }
 
 export function CookieConsent() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    try {
+      for (const key of Object.keys(localStorage)) if (key.startsWith('at_analytics_v1:')) localStorage.removeItem(key);
+    } catch { /* Unavailable browser storage. */ }
     const existingConsent = getConsent();
     if (existingConsent) updateGoogleAnalyticsConsent(existingConsent);
 
@@ -34,13 +40,13 @@ export function CookieConsent() {
   }, []);
 
   const handleAccept = () => {
-    localStorage.setItem(COOKIE_CONSENT_KEY, 'accepted');
+    storeStatisticsConsent(COOKIE_CONSENT_KEY, true);
     updateGoogleAnalyticsConsent('accepted');
     setVisible(false);
   };
 
   const handleReject = () => {
-    localStorage.setItem(COOKIE_CONSENT_KEY, 'rejected');
+    storeStatisticsConsent(COOKIE_CONSENT_KEY, false);
     updateGoogleAnalyticsConsent('rejected');
     setVisible(false);
   };
@@ -56,17 +62,17 @@ export function CookieConsent() {
           </div>
           <div className="flex-1 space-y-3">
             <p className="text-sm text-foreground leading-relaxed">
-              Vi använder nödvändiga cookies för inloggning och använder Google Analytics 4 efter ditt samtycke för att förstå hur webbplatsen används.{' '}
+              Vi använder nödvändiga cookies för inloggning och använder Google Analytics 4 efter ditt samtycke för att förstå hur webbplatsen används och Sentry för teknisk feldiagnostik.{' '}
               <a href="/privacy" className="underline text-primary hover:text-primary/80 transition-colors">
                 Läs vår integritetspolicy
               </a>
             </p>
             <div className="flex items-center gap-2">
-              <Button size="sm" onClick={handleAccept} className="rounded-lg">
-                Acceptera
+              <Button size="sm" variant="outline" onClick={handleAccept} className="rounded-lg">
+                Acceptera statistik
               </Button>
-              <Button size="sm" variant="ghost" onClick={handleReject} className="rounded-lg text-muted-foreground">
-                Avvisa
+              <Button size="sm" variant="outline" onClick={handleReject} className="rounded-lg">
+                Endast nödvändiga
               </Button>
             </div>
           </div>

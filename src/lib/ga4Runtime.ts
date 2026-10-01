@@ -1,3 +1,4 @@
+import { parseStatisticsConsent } from './statisticsConsent';
 /** GA4 transport. No Google requests or event buffering before statistics consent.
  * Enhanced measurement must be disabled in the stream: this owns SPA pageviews.
  */
@@ -23,14 +24,9 @@ function blocked(path: string): boolean {
 }
 
 function readConsent(raw: string | null): boolean {
-  try {
-    if (config?.consentFormat === 'updro') {
-      const state = raw ? JSON.parse(raw) : null;
-      return state?.analytics === true || state?.level === 'all';
-    }
-    return raw === 'accepted';
-  } catch { return false; }
+  return parseStatisticsConsent(raw)?.analytics === true;
 }
+export function isAnalyticsConsentGranted(): boolean { return allowed; }
 
 export function cleanAnalyticsUrl(raw: string): string {
   try {
@@ -168,6 +164,7 @@ export function initGa4(next: Config): void {
     } catch { /* Invalid download links are ignored. */ }
   });
   window.addEventListener('storage', event => {
-    if (event.key === next.consentKey) setAnalyticsConsent(readConsent(event.newValue));
+    if (event.key === null) setAnalyticsConsent(false);
+    else if (event.key === next.consentKey) setAnalyticsConsent(readConsent(event.newValue));
   });
 }

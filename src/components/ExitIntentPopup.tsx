@@ -13,14 +13,15 @@ export function ExitIntentPopup() {
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [shown, setShown] = useState(false);
 
   const handleMouseLeave = useCallback((e: MouseEvent) => {
     // Only a real exit: pointer leaves the window through the top edge, after the visitor has had time to read.
-    if (e.relatedTarget === null && e.clientY <= 0 && performance.now() > 8000 && !submitted && !sessionStorage.getItem('exit_popup_shown')) {
+    if (e.relatedTarget === null && e.clientY <= 0 && performance.now() > 8000 && !submitted && !shown) {
       setOpen(true);
-      sessionStorage.setItem('exit_popup_shown', '1');
+      setShown(true);
     }
-  }, [submitted]);
+  }, [submitted, shown]);
 
   useEffect(() => {
     document.addEventListener('mouseout', handleMouseLeave);
@@ -122,7 +123,7 @@ export function ExitIntentPopup() {
               {loading ? 'Skickar...' : 'Starta gratis provperiod'}
             </Button>
             <p className="text-xs text-center text-muted-foreground">
-              Ingen betalning krävs. Avsluta när du vill.
+              Vi använder e-post och eventuellt telefonnummer för att svara på din förfrågan. <a href="/privacy" className="underline">Läs integritetspolicyn</a>.
             </p>
           </form>
         )}

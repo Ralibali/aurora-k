@@ -58,6 +58,13 @@ describe('GA4 transport', () => {
     expect(events().at(-1)).toEqual(['event', 'paid_pdf_download', expect.objectContaining({ product: 'mina-forsta-hons', interaction_source: 'thank_you', send_to: 'G-TEST123456' })]);
     expect(JSON.stringify(events())).not.toContain('a@b.se');
   });
+  it('stops tracking when another tab clears saved choices', () => {
+    runtime.setAnalyticsConsent(true);
+    const previousEvents = events().length;
+    window.dispatchEvent(new StorageEvent('storage', { key: null }));
+    runtime.sendAnalyticsEvent('Signup Completed');
+    expect(events()).toHaveLength(previousEvents);
+  });
   it('keeps internal placement out of traffic attribution and preserves landing UTMs', () => {
     history.replaceState({}, '', '/?utm_source=newsletter&utm_medium=email&utm_campaign=autumn');
     runtime.setAnalyticsConsent(true);

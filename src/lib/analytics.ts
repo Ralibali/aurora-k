@@ -1,3 +1,4 @@
+import { isAnalyticsConsentGranted } from './ga4Runtime';
 // Type-safe GA4 business events, transported only after statistics consent.
 // ga4Runtime owns SPA pageviews and blocks internal route context.
 // Never pass personal data, free text, tokens or customer identifiers.
@@ -95,26 +96,15 @@ export function trackEvent<E extends EventName>(
   }
 }
 
-/**
- * Fire an event at most once per browser, keyed by a stable dedupe key.
- * Use for events that could otherwise be triggered by re-renders / re-mounts
- * (e.g. Signup Completed keyed on companyId).
- *
- * The dedupe key is stored in localStorage only — it is never sent to Plausible.
- */
+// Deduplicate in memory only after consent. No customer IDs are persisted for statistics.
+const sentOnce = new Set<string>();
 export function trackEventOnce<E extends EventName>(
-  dedupeKey: string,
-  name: E,
-  props: PropMap[E] = {} as PropMap[E],
-  options: TrackOptions = {},
+  dedupeKey: string, name: E, props: PropMap[E] = {} as PropMap[E], options: TrackOptions = {},
 ): void {
-  const storeKey = `at_analytics_v1:${name}:${dedupeKey}`;
-  try {
-    if (typeof localStorage !== 'undefined' && localStorage.getItem(storeKey)) return;
-    if (typeof localStorage !== 'undefined') localStorage.setItem(storeKey, '1');
-  } catch {
-    // storage disabled — fall through and fire anyway
-  }
+  if (!isAnalyticsConsentGranted()) return;
+  const key = `${name}:${dedupeKey}`;
+  if (sentOnce.has(key)) return;
+  sentOnce.add(key);
   trackEvent(name, props, options);
 }
 

@@ -49,7 +49,7 @@ const layout = (content: string) => {
             Aurora Transport · <a href="${siteUrl}" style="color:${BRAND.muted};text-decoration:underline">${siteHost}</a>
           </p>
           <p style="margin:6px 0 0;font-size:12px;color:${BRAND.muted}">
-            Frågor? <a href="mailto:info@auroratransport.se" style="color:${BRAND.primaryLight}">info@auroratransport.se</a>
+            Frågor? <a href="mailto:info@auroramedia.se" style="color:${BRAND.primaryLight}">info@auroramedia.se</a>
           </p>
         </td></tr>
       </table>

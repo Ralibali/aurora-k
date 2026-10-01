@@ -2,7 +2,7 @@ import './lib/initGa4';
 import { createRoot } from "react-dom/client";
 import { Capacitor } from "@capacitor/core";
 import { registerSW } from "virtual:pwa-register";
-import * as Sentry from "@sentry/react";
+import { installConsentAwareErrorReporting } from "./lib/errorReporting";
 import App from "./App.tsx";
 import { FormAnalyticsObserver } from "./components/FormAnalyticsObserver";
 import { LandingMobileNavigation } from "./components/LandingMobileNavigation";
@@ -22,22 +22,7 @@ import "@fontsource/dm-sans/700.css";
 // Must run before any route renders so the guard wraps the queued `window.analyticsEvent` from index.html.
 installPlausibleRouteGuard();
 
-Sentry.init({
-  dsn: "https://d838e2cf945e668ad9d1f63d7586ba00@o4511191910383616.ingest.de.sentry.io/4511191916675152",
-  sendDefaultPii: false,
-  enabled: import.meta.env.PROD,
-  tracesSampleRate: 0.2,
-  replaysSessionSampleRate: 0.1,
-  replaysOnErrorSampleRate: 1.0,
-  beforeSend(event) {
-    if (event.request) {
-      delete event.request.cookies;
-      delete event.request.headers;
-      delete event.request.data;
-    }
-    return event;
-  },
-});
+installConsentAwareErrorReporting();
 
 // PWA: Guard service worker registration against preview/iframe, prerender and Capacitor native contexts
 const isInIframe = (() => {

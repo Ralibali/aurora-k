@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { usePageMeta } from '@/lib/use-page-meta';
 import { useBreadcrumbJsonLd } from '@/lib/breadcrumb-jsonld';
 import { useMemo } from 'react';
-import { Truck, ArrowLeft, Phone, Mail, MapPin } from 'lucide-react';
+import { Truck, ArrowLeft, Mail, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LeadForm } from '@/components/LeadForm';
 
@@ -49,18 +49,11 @@ export default function ContactPage() {
               </h1>
               <p className="mt-3 text-muted-foreground">
                 Vill du veta mer om hur Aurora Transport kan effektivisera er transportverksamhet?
-                Fyll i formuläret så ringer vi upp dig.
+                Fyll i formuläret eller mejla info@auroramedia.se så kontaktar vi dig.
               </p>
             </div>
 
             <div className="space-y-4 text-sm">
-              <div className="flex items-start gap-3">
-                <Phone className="h-4 w-4 text-primary mt-0.5" />
-                <div>
-                  <p className="font-medium text-foreground">Telefon</p>
-                  <a href="tel:+46722254993" className="text-muted-foreground hover:text-foreground">072-225 49 93</a>
-                </div>
-              </div>
               <div className="flex items-start gap-3">
                 <Mail className="h-4 w-4 text-primary mt-0.5" />
                 <div>
