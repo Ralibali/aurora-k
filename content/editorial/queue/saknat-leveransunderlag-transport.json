@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "status": "draft",
+  "writtenAt": "2026-10-06T07:48:50.887546+00:00",
+  "repository": "Ralibali/aurora-k",
+  "publicationGate": "Earliest 2026-10-08, at least two Stockholm calendar days after the previous original is live. Require fresh current main, complete inventory, sources and previous-article checks. No publication dates while draft.",
+  "sourceReview": {
+    "checkedAt": "2026-10-06T07:48:50.887546+00:00",
+    "distinctIntent": "Efterlysa och reda ut saknat leveransunderlag utan att fylla dokumentationsluckor med antaganden; skilt från väntetidslogg och samlad fakturaavstämning.",
+    "note": "Original manual working guide. Owned product path verified live on Oct6. Recheck current offer and links before publication. No promised automation, customer results or unverified commercial terms."
+  },
+  "article": {
+    "slug": "saknat-leveransunderlag-transport",
+    "title": "Samla fakta när ett leveransunderlag saknas",
+    "metaDescription": "Hitta rätt uppdrag, kontrollera kända underlag och samla öppna frågor när leveransdokumentationen är ofullständig. En mall för transportledningen.",
+    "intro": "När ett leveransunderlag saknas behöver transportledningen först förstå vilken uppgift som faktiskt fattas. Det kan vara ett dokument, en hänvisning eller ett besked om var handlingen finns. En tydlig efterfrågan gör det lättare för rätt person att leta utan att samma fråga går runt mellan flera kontakter.\n\nUtgå från verksamhetens egna rutiner. Guiden beskriver dokumentation och samordning. Den avgör inte vilket underlag ett avtal kräver, om en leverans ska betraktas som godkänd eller hur ersättningsfrågor ska hanteras.",
+    "sections": [
+      {
+        "heading": "Identifiera uppdraget innan ni efterlyser något",
+        "content": "Skriv uppdragets referens, berörd del av transporten och datumet som underlaget förväntas avse. Skilj mellan flera leveranstillfällen eller mottagningsplatser inom samma uppdrag. En fråga om ”kvittot från i går” kan annars leda till ett riktigt dokument som hör till fel händelse.\n\nKontrollera uppgifterna mot det [samlade orderunderlaget](/blogg/orderunderlag-infor-transportplanering). Om en referens är osäker ska osäkerheten följa med efterfrågan. Be den som känner till uppdraget att bekräfta kopplingen innan dokumenten sorteras som kompletta."
+      },
+      {
+        "heading": "Beskriv vilken uppgift som saknas",
+        "content": "Skilj ett helt saknat dokument från en kopia där en del är oläsbar eller en uppgift behöver förklaras. Skriv vad som redan finns och vad nästa person behöver hjälpa till med. Det blir mer användbart än ett allmänt besked om att dokumentationen är fel.\n\nBeskriv luckan utan att dra slutsatser om själva leveransen. Att ett underlag ännu inte har hittats visar inte i sig att en händelse inte inträffade. Samtidigt är ett muntligt antagande inte en ersättning för en uppgift som ansvarig behöver kunna följa till sin källa."
+      },
+      {
+        "heading": "Leta i kända källor och håll ordning på versionerna",
+        "content": "Gå igenom de platser där verksamheten normalt sparar den här typen av underlag. Notera vem som har kontrollerat vad, så att nästa person inte behöver göra om samma sökning. Använd behöriga system och etablerade kontaktvägar när handlingar innehåller uppgifter om kunder eller förare.\n\nOm ni hittar flera kopior, behåll uppgift om varifrån de kommer. En vidarebefordrad bild med beskuren referens ska inte automatiskt ersätta originalet. Be avsändaren förklara sammanhanget när det behövs och spara den förklaringen på rätt uppdrag enligt er rutin."
+      },
+      {
+        "heading": "Gör en efterfrågan som går att besvara",
+        "content": "Ett kort meddelande kan ange uppdragsreferens, vad som redan finns, exakt vilken handling eller uppgift som söks och vem som samlar svaret. Skriv också när underlaget behövs för nästa interna steg, om verksamheten har bestämt det.\n\nOm svaret blir att handlingen saknas även hos kontakten, dokumentera det beskedet och lämna frågan till ansvarig. Skapa inte en efterhandsbekräftelse som ser ut att komma från någon annan. En eventuell komplettering behöver visa vem som lämnat uppgiften och när."
+      },
+      {
+        "heading": "Avsluta sökningen med ett tydligt besked",
+        "content": "När rätt underlag har kommit in, kontrollera kopplingen till uppdraget och meddela dem som annars skulle fortsätta leta. Om något fortfarande saknas ska det stå kvar som en öppen fråga inför nästa steg. Använd [avstämningen före fakturering](/blogg/stam-av-transportunderlag-fore-fakturering) om frågan hör till det arbetet.\n\nLäs om [Aurora Transports tjänster](/tjanster) när ni ser över hur transportunderlagen ska hållas samlade. AI-assisterad originalguide med en manuell arbetsmall. Texten utlovar ingen automatisk dokumentinhämtning eller kontroll av avtalskrav."
+      }
+    ],
+    "editorial": {
+      "createdWith": "ChatGPT",
+      "aiAssisted": true,
+      "searchIntent": "Efterlysa och reda ut saknat leveransunderlag utan att fylla dokumentationsluckor med antaganden; skilt från väntetidslogg och samlad fakturaavstämning.",
+      "sourceUrls": [
+        "https://auroratransport.se/tjanster"
+      ],
+      "sourceCheckedAt": "2026-10-06T07:48:50.887546+00:00"
+    },
+    "seoTitle": "Samla fakta när ett leveransunderlag saknas",
+    "readTime": "4 min",
+    "excerpt": "Hitta rätt uppdrag, kontrollera kända underlag och samla öppna frågor när leveransdokumentationen är ofullständig. En mall för transportledningen.",
+    "tags": [
+      "transportledning",
+      "dokumentation"
+    ],
+    "links": [
+      {
+        "href": "/tjanster",
+        "label": "Se Aurora Transports tjänster"
+      }
+    ]
+  }
+}
