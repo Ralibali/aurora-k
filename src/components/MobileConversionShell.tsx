@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { track } from '@/lib/track';
 import { trackLeadSubmitted, type EventSource } from '@/lib/analytics';
 import { CookieConsent } from '@/components/CookieConsent';
+import { usePageMeta } from '@/lib/use-page-meta';
 
 type DemoFormState = { contactPerson: string; companyName: string; email: string; phone: string };
 const EMPTY_FORM: DemoFormState = { contactPerson: '', companyName: '', email: '', phone: '' };
@@ -126,9 +127,13 @@ function DemoLeadForm({ source }: { source: Extract<EventSource, 'standalone_dem
 }
 
 export function StandaloneDemoPage() {
+  usePageMeta({
+    title: 'Boka demo | Aurora Transport',
+    description: 'Boka en kostnadsfri genomgång av Aurora Transport. Se uppdrag, förare, tidrapportering och fakturaunderlag på 15 minuter.',
+    canonical: 'https://auroratransport.se/boka-demo',
+  });
   useEffect(() => {
     document.documentElement.lang = 'sv';
-    document.title = 'Boka demo | Aurora Transport';
     track('demo_page_view', { page: window.location.pathname });
   }, []);
 

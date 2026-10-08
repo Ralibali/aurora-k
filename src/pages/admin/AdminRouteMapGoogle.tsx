@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { loadGoogleMaps } from '@/lib/google-maps';
+import { loadGoogleMaps, useGoogleMapsFailure, reportGoogleMapsFailure } from '@/lib/google-maps';
 import { isValidMapCoordinate, mapPopup, mapTimeAgo } from '@/lib/map-content';
 
 interface Assignment {
@@ -21,6 +21,7 @@ interface RouteMapProps {
 const COLORS = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316'];
 
 export default function RouteMapGoogle({ assignments, roadPath }: RouteMapProps) {
+  const failure = useGoogleMapsFailure();
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
   const overlaysRef = useRef<(google.maps.Marker | google.maps.Polyline)[]>([]);
@@ -30,7 +31,7 @@ export default function RouteMapGoogle({ assignments, roadPath }: RouteMapProps)
 
   useEffect(() => {
     let cancelled = false;
-    const timeout = window.setTimeout(() => { if (!cancelled) { cancelled = true; setLoadError(true); } }, 15_000);
+    const timeout = window.setTimeout(() => { if (!cancelled) { cancelled = true; reportGoogleMapsFailure('MapsLoadTimeout'); setLoadError(true); } }, 15_000);
     loadGoogleMaps()
       .then(() => {
         if (cancelled || !containerRef.current || mapRef.current) return;
@@ -128,10 +129,10 @@ export default function RouteMapGoogle({ assignments, roadPath }: RouteMapProps)
     };
   }, [assignments, ready, roadPath]);
 
-  if (loadError) {
+  if (loadError || failure) {
     return (
       <div role="alert" className="flex h-full w-full items-center justify-center p-4 text-center text-sm text-muted-foreground">
-        Kartan kunde inte laddas. Kontrollera anslutningen och ladda om sidan.
+        {failure || 'Kartan kunde inte laddas. Kontrollera anslutningen och ladda om sidan.'}
       </div>
     );
   }

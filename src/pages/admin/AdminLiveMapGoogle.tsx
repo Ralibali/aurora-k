@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { loadGoogleMaps } from '@/lib/google-maps';
+import { loadGoogleMaps, useGoogleMapsFailure, reportGoogleMapsFailure } from '@/lib/google-maps';
 import { isValidMapCoordinate, mapPopup, mapTimeAgo } from '@/lib/map-content';
 import type { DriverLocation } from './AdminLiveMapLeaflet';
 
@@ -9,6 +9,7 @@ interface GoogleMapProps {
 }
 
 export default function GoogleLiveMap({ locations }: GoogleMapProps) {
+  const failure = useGoogleMapsFailure();
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
   const markersRef = useRef<google.maps.Marker[]>([]);
@@ -18,7 +19,7 @@ export default function GoogleLiveMap({ locations }: GoogleMapProps) {
 
   useEffect(() => {
     let cancelled = false;
-    const timeout = window.setTimeout(() => { if (!cancelled) { cancelled = true; setLoadError(true); } }, 15_000);
+    const timeout = window.setTimeout(() => { if (!cancelled) { cancelled = true; reportGoogleMapsFailure('MapsLoadTimeout'); setLoadError(true); } }, 15_000);
     loadGoogleMaps()
       .then(() => {
         if (cancelled || !containerRef.current || mapRef.current) return;
@@ -86,10 +87,10 @@ export default function GoogleLiveMap({ locations }: GoogleMapProps) {
     };
   }, [locations, ready]);
 
-  if (loadError) {
+  if (loadError || failure) {
     return (
       <div role="alert" className="flex h-full w-full items-center justify-center p-4 text-center text-sm text-muted-foreground">
-        Kartan kunde inte laddas. Kontrollera anslutningen och ladda om sidan.
+        {failure || 'Kartan kunde inte laddas. Kontrollera anslutningen och ladda om sidan.'}
       </div>
     );
   }
