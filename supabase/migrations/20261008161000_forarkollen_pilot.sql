@@ -94,7 +94,10 @@ using (
   and public.has_role(auth.uid(), 'admin')
   and exists (
     select 1 from public.driver_documents d
-    where d.storage_path = storage.objects.name
+    where d.company_id::text = split_part(storage.objects.name, '/', 1)
+      and d.driver_id::text = split_part(storage.objects.name, '/', 2)
+      and d.id::text = split_part(storage.objects.name, '/', 3)
+      and (d.storage_path = storage.objects.name or d.storage_path is null)
       and d.company_id = public.get_my_company_id()
   )
 );
