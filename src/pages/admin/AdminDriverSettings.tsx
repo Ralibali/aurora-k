@@ -44,7 +44,7 @@ const settingsGroups: { id: string; title: string; description: string; icon: ty
   {
     id: 'app',
     title: 'Synligt i förarappen',
-    description: 'Vilka funktioner och vyer chauffören ser i sin app.',
+    description: 'Vilka funktioner och vyer föraren ser i sin app.',
     icon: LayoutDashboard,
     items: [
       { key: 'show_time_report', label: 'Visa tidrapporter', description: 'Föraren kan se sin tidrapportssida med vecko- och månadsöversikt.', icon: Clock, recommended: true },
@@ -114,7 +114,7 @@ export default function AdminDriverSettings() {
           <div>
             <p className="text-sm font-semibold">Anpassa förarappen för ert företag</p>
             <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-              Globala inställningar gäller alla förare. Du kan därefter göra undantag per chaufför längst ned.
+              Globala inställningar gäller alla förare. Du kan därefter göra undantag per förare längst ned.
               Inställningar märkta <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-success/10 text-success text-[10px] font-medium align-middle"><Sparkles className="h-2.5 w-2.5" />Rekommenderad</span> ger bäst kvalitet i fakturaunderlag och dokumentation.
             </p>
           </div>
@@ -173,17 +173,17 @@ export default function AdminDriverSettings() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               <Users className="h-5 w-5 text-muted-foreground" />
-              Per-chaufför inställningar
+              Per-förare inställningar
             </CardTitle>
             <CardDescription>
-              Välj en chaufför för att åsidosätta globala inställningar. Inställningar markerade med en badge avviker från globala.
+              Välj en förare för att åsidosätta globala inställningar. Inställningar markerade med en badge avviker från globala.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
             <div className="flex items-center gap-3">
               <Select value={selectedDriverId} onValueChange={setSelectedDriverId}>
                 <SelectTrigger className="flex-1">
-                  <SelectValue placeholder="Välj chaufför..." />
+                  <SelectValue placeholder="Välj förare..." />
                 </SelectTrigger>
                 <SelectContent>
                   {driversLoading ? (
@@ -252,7 +252,7 @@ export default function AdminDriverSettings() {
                       </div>
                       <Switch
                         id={`driver-${item.key}`}
-                        aria-label={`${item.label} för vald chaufför`}
+                        aria-label={`${item.label} för vald förare`}
                         checked={effectiveValue}
                         onCheckedChange={(v) => handleDriverToggle(item.key, v)}
                         disabled={upsertOverride.isPending}
@@ -264,7 +264,7 @@ export default function AdminDriverSettings() {
             )}
 
             {!selectedDriverId && (
-              <p className="text-sm text-muted-foreground text-center py-6">Välj en chaufför ovan för att anpassa deras inställningar</p>
+              <p className="text-sm text-muted-foreground text-center py-6">Välj en förare ovan för att anpassa deras inställningar</p>
             )}
           </CardContent>
         </Card>

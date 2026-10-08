@@ -62,23 +62,13 @@ export default function AdminOrders() {
   return (
     <AdminLayout title="Ordrar">
       <div className="space-y-5">
-        <Card className="border-border bg-white">
-          <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
-            <div><div className="flex items-center gap-2 font-semibold"><Sparkles className="h-4 w-4 text-primary" /> Gör orderunderlag till uppdrag</div><p className="mt-1 text-sm text-muted-foreground">Ta emot order automatiskt eller tolka PDF, foton, mejltext och CSV.</p></div>
-            <div className="flex flex-wrap gap-2"><SmartOrderImportDialog /><PdfOrderImportDialog /></div>
-          </CardContent>
-        </Card>
-
-        <div className="grid gap-4 lg:grid-cols-2"><OrderEmailQueue /><OrderQueuePanel /></div>
-
-        <DocumentInboxPanel />
 
         <div className="flex items-center justify-between gap-3">
-          <p className="text-sm text-muted-foreground">Beställningar grupperar flera transportuppdrag.</p>
+          <h2 className="text-lg font-semibold">Inkommande ordrar</h2>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild><Button size="sm"><Plus className="mr-1 h-4 w-4" /> Ny beställning</Button></DialogTrigger>
+            <DialogTrigger asChild><Button size="sm"><Plus className="mr-1 h-4 w-4" /> Ny order</Button></DialogTrigger>
             <DialogContent>
-              <DialogHeader><DialogTitle>Ny beställning</DialogTitle></DialogHeader>
+              <DialogHeader><DialogTitle>Ny order</DialogTitle></DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2"><Label>Titel *</Label><Input value={title} onChange={event => setTitle(event.target.value)} required placeholder="T.ex. Flytt Storgatan 5" /></div>
                 <div className="space-y-2"><Label>Kund *</Label><Select value={customerId} onValueChange={setCustomerId} required><SelectTrigger><SelectValue placeholder="Välj kund" /></SelectTrigger><SelectContent>{(customers ?? []).map(customer => <SelectItem key={customer.id} value={customer.id}>{customer.name}</SelectItem>)}</SelectContent></Select></div>
@@ -103,6 +93,19 @@ export default function AdminOrders() {
             )}
           </CardContent>
         </Card>
+        <details><summary className="min-h-11 cursor-pointer py-3 text-sm font-medium">Import och orderinkorg</summary><div className="space-y-5 pt-3">
+        <Card className="border-border bg-white">
+          <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div><div className="flex items-center gap-2 font-semibold"><Sparkles className="h-4 w-4 text-primary" /> Gör orderunderlag till uppdrag</div><p className="mt-1 text-sm text-muted-foreground">Ta emot order automatiskt eller tolka PDF, foton, mejltext och CSV.</p></div>
+            <div className="flex flex-wrap gap-2"><SmartOrderImportDialog /><PdfOrderImportDialog /></div>
+          </CardContent>
+        </Card>
+
+        <div className="grid gap-4 lg:grid-cols-2"><OrderEmailQueue /><OrderQueuePanel /></div>
+
+        <DocumentInboxPanel />
+
+        </div></details>
       </div>
     </AdminLayout>
   );

@@ -28,7 +28,7 @@ test('day proposal has honest metrics, review gate and recoverable stale approva
   await expect(page.getByText('Godkänd och skickad', { exact: true })).toBeHidden();
   await page.screenshot({ path: testInfo.outputPath('smart-route-desktop.png'), fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  expect(await page.evaluate(() => [...document.querySelectorAll('body *')].filter(el => { const r = el.getBoundingClientRect(); return r.width > 0 && r.right > innerWidth + 1 && getComputedStyle(el).position !== 'fixed'; }).map(el => ({ tag: el.tagName, text: el.textContent?.slice(0, 50), width: el.getBoundingClientRect().width, right: el.getBoundingClientRect().right })))).toEqual([]);
   await page.screenshot({ path: testInfo.outputPath('smart-route-mobile.png'), fullPage: true });
   expect(errors).toEqual([]);
 });

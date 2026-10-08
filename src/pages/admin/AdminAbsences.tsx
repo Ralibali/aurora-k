@@ -47,8 +47,8 @@ export default function AdminAbsences() {
               <DialogHeader><DialogTitle>Registrera frånvaro</DialogTitle></DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Chaufför *</Label>
-                  <Select value={driverId} onValueChange={setDriverId}><SelectTrigger><SelectValue placeholder="Välj chaufför" /></SelectTrigger>
+                  <Label>Förare *</Label>
+                  <Select value={driverId} onValueChange={setDriverId}><SelectTrigger><SelectValue placeholder="Välj förare" /></SelectTrigger>
                     <SelectContent>{(drivers ?? []).map(d => <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
@@ -71,7 +71,7 @@ export default function AdminAbsences() {
         <Card><CardContent className="p-0">
           {isLoading ? <div className="p-6 space-y-3">{[1,2,3].map(i => <Skeleton key={i} className="h-10 w-full" />)}</div> :
           !absences?.length ? <div className="text-center py-12 text-muted-foreground"><CalendarOff className="h-10 w-10 mx-auto mb-3 opacity-30" /><p>Ingen frånvaro registrerad</p></div> :
-          <Table><TableHeader><TableRow><TableHead>Chaufför</TableHead><TableHead>Typ</TableHead><TableHead>Period</TableHead><TableHead>Status</TableHead><TableHead className="w-[120px]" /></TableRow></TableHeader>
+          <Table><TableHeader><TableRow><TableHead>Förare</TableHead><TableHead>Typ</TableHead><TableHead>Period</TableHead><TableHead>Status</TableHead><TableHead className="w-[120px]" /></TableRow></TableHeader>
             <TableBody>{absences.map(a => (
               <TableRow key={a.id}>
                 <TableCell className="font-medium">{a.driver?.full_name}</TableCell>

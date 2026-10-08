@@ -34,6 +34,8 @@ const navigationItems = [
   { label: 'Kunder', href: '/admin/customers', icon: Building },
   { label: 'Ordrar', href: '/admin/orders', icon: ShoppingCart },
   { label: 'Bokningsförfrågningar', href: '/admin/booking-requests', icon: Inbox },
+  { label: 'Fakturaunderlag', href: '/admin/invoice-basis', icon: FileText },
+  { label: 'OB & traktamente', href: '/admin/compensation', icon: FileText },
   { label: 'Fakturor', href: '/admin/invoices', icon: FileText },
   { label: 'Artiklar', href: '/admin/articles', icon: Package },
   { label: 'Tidrapporter', href: '/admin/reports', icon: BarChart },

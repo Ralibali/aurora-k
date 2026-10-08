@@ -41,7 +41,7 @@ export default function AdminNotifications() {
   const visibleList = showDemo ? demoNotifications : (notifications ?? []);
 
   return (
-    <AdminLayout title="Notiser & utrop" description="Skicka meddelanden till chaufförer och administratörer">
+    <AdminLayout title="Notiser & utrop" description="Skicka meddelanden till förare och administratörer">
       <div className="space-y-4">
         <div className="rounded-xl border border-primary/10 bg-gradient-to-br from-primary/5 via-card to-card p-4 flex items-start gap-3">
           <div className="inline-flex items-center justify-center h-9 w-9 rounded-lg bg-primary/10 border border-primary/20 shrink-0">
@@ -69,7 +69,7 @@ export default function AdminNotifications() {
                   </div>
                   <div className="space-y-2"><Label>Mottagare</Label>
                     <Select value={targetRole} onValueChange={setTargetRole}><SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent><SelectItem value="all">Alla</SelectItem><SelectItem value="driver">Chaufförer</SelectItem><SelectItem value="admin">Administratörer</SelectItem></SelectContent>
+                      <SelectContent><SelectItem value="all">Alla</SelectItem><SelectItem value="driver">Förare</SelectItem><SelectItem value="admin">Administratörer</SelectItem></SelectContent>
                     </Select>
                   </div>
                 </div>
@@ -115,7 +115,7 @@ export default function AdminNotifications() {
                       <div className="flex items-center gap-2">
                         <p className="font-medium">{n.title}</p>
                         <Badge variant="outline" className="text-xs">{typeLabels[n.type] || n.type}</Badge>
-                        {n.target_role && <Badge variant="secondary" className="text-xs">{n.target_role === 'driver' ? 'Chaufförer' : 'Admins'}</Badge>}
+                        {n.target_role && <Badge variant="secondary" className="text-xs">{n.target_role === 'driver' ? 'Förare' : 'Admins'}</Badge>}
                       </div>
                       <p className="text-sm text-muted-foreground mt-1">{n.message}</p>
                       <p className="text-xs text-muted-foreground mt-2">{new Date(n.created_at).toLocaleString('sv-SE')}</p>

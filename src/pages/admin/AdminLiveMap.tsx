@@ -197,7 +197,7 @@ export default function AdminLiveMap() {
               {effectiveLocations.length === 0 ? (
                 <div className="p-6 text-center text-sm text-muted-foreground">
                   <Truck className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                  <p>Inga aktiva förare just nu</p>
+                  <p>Inga aktiva förare just nu.</p><Button className="mt-4" variant="outline" asChild><Link to="/admin/drivers">Visa förare</Link></Button>
                 </div>
               ) : (
                 effectiveLocations.map(loc => (

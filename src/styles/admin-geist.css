@@ -1,7 +1,7 @@
 @font-face{font-family:Geist;src:url('/fonts/geist-400.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
 @font-face{font-family:Geist;src:url('/fonts/geist-500.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap}
 @font-face{font-family:Geist;src:url('/fonts/geist-600.woff2') format('woff2');font-weight:600;font-style:normal;font-display:swap}
-.aurora-admin{--background:0 0% 100%;--foreground:240 3% 12%;--card:0 0% 100%;--card-foreground:240 3% 12%;--popover:0 0% 100%;--popover-foreground:240 3% 12%;--primary:225 44% 15%;--primary-foreground:0 0% 100%;--secondary:240 5% 91%;--secondary-foreground:240 3% 12%;--muted:240 5% 91%;--muted-foreground:240 2% 39%;--accent:240 5% 96%;--accent-foreground:240 3% 12%;--destructive:358 70% 52%;--success:157 100% 33%;--warning:18 100% 50%;--border:240 3% 12% / .14;--input:240 3% 12% / .14;--ring:225 44% 15%;--radius:1rem;background:#fff;color:#1d1d1f;font-family:Geist,sans-serif;font-synthesis:none}
+.aurora-admin{--background:0 0% 100%;--foreground:240.000 3.333% 11.765%;--card:0 0% 100%;--card-foreground:240.000 3.333% 11.765%;--popover:0 0% 100%;--popover-foreground:240.000 3.333% 11.765%;--primary:224.571 44.304% 15.490%;--primary-foreground:0 0% 100%;--secondary:240.000 4.545% 91.373%;--secondary-foreground:240.000 3.333% 11.765%;--muted:240.000 4.545% 91.373%;--muted-foreground:240.000 1.493% 39.412%;--accent:240 5% 96%;--accent-foreground:240.000 3.333% 11.765%;--destructive:357.895 69.796% 51.961%;--success:156.506 100.000% 32.549%;--warning:18.118 100.000% 50.000%;--border:240.000 3.333% 11.765% / .14;--input:240.000 3.333% 11.765% / .14;--ring:224.571 44.304% 15.490%;--radius:1rem;background:#fff;color:#1d1d1f;font-family:Geist,sans-serif;font-synthesis:none}
 .aurora-admin *{font-family:Geist,sans-serif}
 .aurora-admin :is(.font-bold,.font-extrabold){font-weight:600}
 .aurora-admin :is(.font-mono,.font-mono-ui,.tabular-nums,td){font-variant-numeric:tabular-nums}
@@ -74,7 +74,7 @@
  .aurora-admin .admin-kpi{padding:18px 16px}
  .aurora-admin .admin-kpi-value{font-size:30px;margin-top:14px}
  .aurora-admin .admin-kpi svg{display:none}
- .aurora-admin .admin-kpi p:last-child{font-size:12px}
+ .aurora-admin .admin-kpi p:last-child:not(.font-semibold){font-size:12px}
  .aurora-admin .admin-panel{border-radius:0!important;padding:24px 20px}
  .aurora-admin table:not([data-keep-grid]){display:block;width:100%}
  .aurora-admin table:not([data-keep-grid]) thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
@@ -96,3 +96,12 @@
 .aurora-admin .admin-main article .border-t{flex-wrap:wrap}
 .aurora-admin .admin-main article .tabular-nums{white-space:nowrap}
 .aurora-admin .admin-main article button{white-space:normal}
+.aurora-admin button:not([role=checkbox]):not([role=switch]){min-width:44px}
+.aurora-admin [data-radix-popper-content-wrapper] button{min-width:44px}
+.aurora-admin nav[aria-label=Huvudnavigation] button{border-radius:0!important}
+.aurora-admin [data-state=open].bg-black\/80{background:rgba(29,29,31,.28)}
+
+.aurora-admin :is(th,td)[data-numeric=true]{text-align:right;font-variant-numeric:tabular-nums}
+
+.aurora-admin main td a{display:inline-flex;min-height:44px;min-width:44px;align-items:center}
+.aurora-admin :is([role=menuitem],[role=option]){min-height:44px}

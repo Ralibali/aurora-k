@@ -219,7 +219,7 @@ export default function AdminCalendar() {
               const dayAssignments = assignmentsByDay.get(key) || [];
               const isToday = key === today;
               const isCurrentMonth = isSameMonth(day, currentDate);
-              const maxShow = viewMode === 'week' ? 20 : 4;
+              const maxShow = 4;
               const overflow = dayAssignments.length - maxShow;
 
               return (
@@ -227,7 +227,7 @@ export default function AdminCalendar() {
                   key={key}
                   className={cn(
                     'border-r border-b last:border-r-0 p-1.5',
-                    viewMode === 'week' ? 'min-h-[180px]' : 'min-h-[100px]',
+                    'min-h-[100px]',
                     !isCurrentMonth && viewMode === 'month' && 'bg-muted/30',
                   )}
                 >

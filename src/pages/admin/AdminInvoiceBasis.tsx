@@ -15,7 +15,7 @@ import { csvCell, invoiceReadiness } from '@/lib/invoice-readiness';
 import { useAssignmentDeviations } from '@/lib/assignment-deviations';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
-import { FileSpreadsheet, FilePlus2, Search, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import { FileSpreadsheet, FilePlus2, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { EmptyState } from '@/components/EmptyState';
 
@@ -154,52 +154,13 @@ export default function AdminInvoiceBasis() {
   return (
     <AdminLayout title="Fakturaunderlag" description="Granska slutförda uppdrag, leveransbevis och avvikelser före fakturering">
       {(deviations.isPending||deviations.isError)&&<div role="status" className="rounded-lg border border-amber-200 bg-amber-50 p-4 mb-5 text-sm text-amber-900">{deviations.isError?'Avvikelserna kunde inte kontrolleras. Fakturering från denna lista väntar tills kontrollen fungerar.':'Kontrollerar öppna avvikelser…'}{deviations.isError&&<Button variant="outline" size="sm" className="ml-3" onClick={()=>void deviations.refetch()}>Försök igen</Button>}</div>}
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-amber-500/10"><Clock className="h-5 w-5 text-amber-500" /></div>
-              <div>
-                <p className="text-xs text-muted-foreground">Färdiga att fakturera</p>
-                <p className="text-2xl font-bold">{stats.readyCount}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10"><AlertCircle className="h-5 w-5 text-primary" /></div>
-              <div>
-                <p className="text-xs text-muted-foreground">Belopp att fakturera</p>
-                <p className="text-2xl font-bold">{fmtSek(stats.readyAmount)}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-blue-500/10"><FilePlus2 className="h-5 w-5 text-blue-500" /></div>
-              <div>
-                <p className="text-xs text-muted-foreground">Kunder</p>
-                <p className="text-2xl font-bold">{stats.customerCount}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-green-500/10"><CheckCircle2 className="h-5 w-5 text-green-500" /></div>
-              <div>
-                <p className="text-xs text-muted-foreground">Fakturerade</p>
-                <p className="text-2xl font-bold">{stats.invoicedCount}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+        {[
+          ['Färdiga att fakturera', stats.readyCount],
+          ['Att fakturera', fmtSek(stats.readyAmount)],
+          ['Kunder', stats.customerCount],
+          ['Fakturerade', stats.invoicedCount],
+        ].map(([label, value]) => <div key={label} className="admin-kpi"><p className="text-muted-foreground">{label}</p><p className="mt-4 text-2xl font-semibold tabular-nums">{value}</p></div>)}
       </div>
 
       {/* Per-customer summary cards */}
@@ -291,7 +252,9 @@ export default function AdminInvoiceBasis() {
           {filtered.length === 0 ? (
             <EmptyState
               icon={FilePlus2}
-              title="Inga underlag"
+              title="Inga underlag här ännu."
+              actionLabel="Visa uppdrag"
+              actionHref="/admin/assignments"
               description={status === 'ready' ? 'Alla slutförda uppdrag är fakturerade.' : 'Inga uppdrag matchar filtret.'}
             />
           ) : (

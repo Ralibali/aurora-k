@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useEffectiveDriverSettings } from '@/hooks/useDriverSettings';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AdminLayout } from '@/components/AdminLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,7 +17,7 @@ import { useVehicles, useOrders } from '@/hooks/useNewFeatures';
 import { useUpdateBookingRequest } from '@/hooks/useAllFeatures';
 import { priorityLabels } from '@/lib/types';
 import { sendDriverAssignmentPush } from '@/lib/driver-notifications';
-import { ArrowLeft, MapPin, PackageCheck, Route, Sparkles, Truck } from 'lucide-react';
+import { MapPin, PackageCheck, Sparkles } from 'lucide-react';
 import { AssignmentServiceFields } from '@/components/AssignmentServiceFields';
 import { assignmentServiceTypes, emptyServiceDetails, buildServiceInstructions, validateServiceDetails, assignmentErrorMessage, serviceCategory } from '@/lib/assignment-services';
 import { toast } from 'sonner';
@@ -307,12 +306,9 @@ export default function AdminNewAssignment() {
   return (
     <AdminLayout title="Nytt uppdrag">
       <Sheet open onOpenChange={open => { if (!open) navigate('/admin/assignments'); }}><SheetContent className="admin-panel"><SheetHeader className="mb-6 text-left"><SheetTitle>Nytt uppdrag</SheetTitle><SheetDescription>Fyll i körningen och tilldela en förare.</SheetDescription></SheetHeader><div>
-        <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="mb-4"><ArrowLeft className="h-4 w-4 mr-1" /> Tillbaka</Button>
-        <Card>
-          <CardHeader><div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"><CardTitle>Skapa nytt uppdrag</CardTitle><div className="flex flex-wrap gap-2">{bookingRequestId && <Badge variant="outline">Skapas från bokningsförfrågan</Badge>}{importedOrder && <Badge>Smart orderimport</Badge>}</div></div></CardHeader>
-          <CardContent>
+          <div className="mb-4 flex flex-wrap gap-2">{bookingRequestId && <Badge variant="outline">Skapas från bokningsförfrågan</Badge>}{importedOrder && <Badge>Smart orderimport</Badge>}</div>
             <form onSubmit={handleSubmit} className="space-y-5">
-              <details className="rounded-xl border p-4"><summary className="min-h-11 cursor-pointer py-2 text-sm font-medium">Fyll i från en ordertext</summary><div>
+              <details><summary className="min-h-11 cursor-pointer py-2 text-sm font-medium">Fyll i från en ordertext</summary><div>
                 <div className="mb-3 flex items-center gap-2 font-semibold text-violet-950"><Sparkles className="h-4 w-4" /> Smart skapa från text</div>
                 <Textarea value={smartInput} onChange={e => setSmartInput(e.target.value)} rows={4} placeholder="Klistra in t.ex. 'Hämta 2 pallar hos Byggmax Linköping imorgon kl 08:00 och kör till Motala. Ring kunden innan.'" />
                 <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -321,16 +317,16 @@ export default function AdminNewAssignment() {
                 </div>
               </div></details>
 
-              <div className="rounded-xl border bg-blue-50/50 p-4">
-                <div className="mb-4 flex items-center gap-2 font-semibold"><Truck className="h-4 w-4" /> Transportuppdrag</div>
+              <div>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2 sm:col-span-2"><Label htmlFor="title">Titel</Label><Input id="title" value={title} onChange={e => setTitle(e.target.value)} placeholder="T.ex. Kranbil till byggarbetsplats" required /></div>
-                  <div className="space-y-2"><Label htmlFor="service-type">Uppdragstyp</Label><Select value={serviceType || 'none'} onValueChange={v => { setServiceType(v === 'none' ? '' : v); if (!title.trim() && v !== 'none') setTitle(v); }}><SelectTrigger id="service-type"><SelectValue placeholder="Välj typ" /></SelectTrigger><SelectContent><SelectItem value="none">Ej angivet</SelectItem>{serviceTypes.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select></div>
                   <div className="space-y-2"><Label htmlFor="customer">Kund</Label><Select value={customerId} onValueChange={setCustomerId} required><SelectTrigger id="customer"><SelectValue placeholder="Välj kund" /></SelectTrigger><SelectContent>{(customers ?? []).map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent></Select></div>
+                  <div className="space-y-2"><Label htmlFor="title">Titel</Label><Input id="title" value={title} onChange={e => setTitle(e.target.value)} placeholder="T.ex. Kranbil till byggarbetsplats" required /></div>
+                  <div className="space-y-2"><Label htmlFor="service-type">Uppdragstyp</Label><Select value={serviceType || 'none'} onValueChange={v => { setServiceType(v === 'none' ? '' : v); if (!title.trim() && v !== 'none') setTitle(v); }}><SelectTrigger id="service-type"><SelectValue placeholder="Välj typ" /></SelectTrigger><SelectContent><SelectItem value="none">Ej angivet</SelectItem>{serviceTypes.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select></div>
+
                 </div>
               </div>
 
-              <div className="rounded-xl border p-4"><div className="mb-4 flex items-center gap-2 font-semibold"><Route className="h-4 w-4" /> Rutt</div><div className="grid gap-4 sm:grid-cols-2"><div className="space-y-2"><Label htmlFor="pickup">{serviceCategory(serviceType) ? 'Arbetsplats / hämtningsadress' : 'Hämtningsadress'}</Label><Input id="pickup" value={pickupAddress} onChange={e => setPickupAddress(e.target.value)} placeholder="Gata, ort, platsinfo" required /><GoogleAddressSearch label="Hämtningsadress" onSelect={setPickupAddress} /></div><div className="space-y-2"><Label htmlFor="delivery">Leveransadress</Label><Input id="delivery" value={deliveryAddress} onChange={e => setDeliveryAddress(e.target.value)} placeholder="Gata, ort, platsinfo" /><GoogleAddressSearch label="Leveransadress" onSelect={setDeliveryAddress} /></div></div><p className="mt-2 flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="h-3 w-3" /> Föraren ser rutten som: {buildAddress(pickupAddress, deliveryAddress) || '—'}</p></div>
+              <div><div className="grid gap-4 sm:grid-cols-2"><div className="space-y-2"><Label htmlFor="pickup">{serviceCategory(serviceType) ? 'Arbetsplats / hämtningsadress' : 'Hämtningsadress'}</Label><Input id="pickup" value={pickupAddress} onChange={e => setPickupAddress(e.target.value)} placeholder="Gata, ort, platsinfo" required /><GoogleAddressSearch label="Hämtningsadress" onSelect={setPickupAddress} /></div><div className="space-y-2"><Label htmlFor="delivery">Leveransadress</Label><Input id="delivery" value={deliveryAddress} onChange={e => setDeliveryAddress(e.target.value)} placeholder="Gata, ort, platsinfo" /><GoogleAddressSearch label="Leveransadress" onSelect={setDeliveryAddress} /></div></div><p className="mt-2 flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="h-3 w-3" /> Föraren ser rutten som: {buildAddress(pickupAddress, deliveryAddress) || '—'}</p></div>
 
               <AssignmentServiceFields service={serviceType} value={serviceDetails} onChange={setServiceDetails} />
 
@@ -345,8 +341,6 @@ export default function AdminNewAssignment() {
               {submitError && <p role="alert" className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">{submitError}</p>}
               <div className="flex gap-2 pt-2"><Button type="submit" disabled={isSubmitting || createAssignments.isPending}>{isSubmitting ? 'Skapar...' : 'Skapa uppdrag'}</Button><Button type="button" variant="outline" onClick={() => navigate(-1)}>Avbryt</Button></div>
             </form>
-          </CardContent>
-        </Card>
       </div></SheetContent></Sheet>
     </AdminLayout>
   );
