@@ -1,3 +1,6 @@
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useVehicles } from '@/hooks/useNewFeatures';
+import { startOfWeek, endOfWeek } from 'date-fns';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { AdminLayout } from '@/components/AdminLayout';
 import { Button } from '@/components/ui/button';
@@ -552,6 +555,7 @@ export default function AdminDrivers() {
   const { companyId } = useAuth();
   const { data: drivers, isLoading } = useDrivers();
   const { data: assignments } = useAssignments();
+  const { data: vehicles } = useVehicles();
   const { data: compensations } = useDriverCompensations();
   const qc = useQueryClient();
   const { enabled: demoEnabled } = useDemoMode();
@@ -563,6 +567,14 @@ export default function AdminDrivers() {
   const showingDemo = demoEnabled && (drivers?.length ?? 0) === 0;
 
   const today = new Date().toISOString().split('T')[0];
+  const weekStart = startOfWeek(new Date(), {weekStartsOn: 1});
+  const weekEnd = endOfWeek(new Date(), {weekStartsOn: 1});
+  const weekHours = (driverId: string) => (assignments ?? []).filter(a => a.assigned_driver_id === driverId && a.actual_start && a.actual_stop && new Date(a.actual_start) >= weekStart && new Date(a.actual_start) <= weekEnd).reduce((sum,a) => sum + Math.max(0,(new Date(a.actual_stop!).getTime()-new Date(a.actual_start!).getTime())/3600000),0);
+  const vehicleLabel = (driverId: string) => {
+    const job = (assignments ?? []).find(a => a.assigned_driver_id === driverId && a.status === 'active' && a.vehicle_id);
+    const vehicle = vehicles?.find(v => v.id === job?.vehicle_id);
+    return vehicle ? `${vehicle.name}${vehicle.registration_number ? ' · '+vehicle.registration_number : ''}` : 'Ej tilldelat';
+  };
 
   const driverStats = useMemo(() => {
     const map = new Map<string, { todayHours: number; activeToday: boolean; todayCount: number }>();
@@ -595,21 +607,21 @@ export default function AdminDrivers() {
   const getCompensation = (driverId: string) => (compensations ?? []).find(c => c.driver_id === driverId);
 
   return (
-    <AdminLayout title="Chaufförer" description="Hantera chaufförer och deras tillgänglighet">
+    <AdminLayout title="Förare">
       <div className="space-y-6">
         {showingDemo && (
           <div className="rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-900/40 px-4 py-2.5 text-xs text-amber-800 dark:text-amber-300 flex items-center gap-2">
             <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
-            Demo-läge — visar exempelchaufförer. Klicka <strong>Lägg till förare</strong> eller <strong>Bjud in</strong> för att lägga upp ditt riktiga team.
+            Demo-läge — visar exempelförare. Klicka <strong>Lägg till förare</strong> eller <strong>Bjud in</strong> för att lägga upp ditt riktiga team.
           </div>
         )}
         {/* Top bar */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <h2 className="text-2xl font-bold text-foreground">Chaufförer</h2>
-          <div className="flex items-center gap-3">
-            <div className="relative">
+          <p className="text-sm text-muted-foreground">{effectiveDrivers.length} förare</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Sök chaufför..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 w-[200px]" />
+              <Input placeholder="Sök förare..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 w-[200px]" />
             </div>
             {companyId ? (
               <>
@@ -626,7 +638,7 @@ export default function AdminDrivers() {
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
             <TabsTrigger value="drivers" className="gap-1.5">
-              <Users className="h-4 w-4" /> Chaufförer
+              <Users className="h-4 w-4" /> Förare
             </TabsTrigger>
             <TabsTrigger value="invitations" className="gap-1.5">
               <Mail className="h-4 w-4" /> Inbjudningar
@@ -659,67 +671,17 @@ export default function AdminDrivers() {
         ) : filtered.length === 0 ? (
           <div className="bg-card rounded-lg border border-dashed border-border p-16 text-center">
             <Users className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
-            <p className="text-sm font-medium text-muted-foreground">Inga chaufförer hittades</p>
+            <p className="text-sm font-medium text-muted-foreground">Inga förare här ännu.</p><div className="mt-4">{companyId && <CreateDriverModal companyId={companyId} />}</div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filtered.map(driver => {
-              const stats = driverStats.get(driver.id);
-              const comp = getCompensation(driver.id);
-              const isActive = stats?.activeToday;
-              const todayH = stats?.todayHours ?? 0;
-
-              return (
-                <div
-                  key={driver.id}
-                  className="bg-card rounded-lg border border-border p-5 hover:shadow-md transition-shadow cursor-pointer"
-                  onClick={() => !showingDemo && setSelectedDriver(driver)}
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="relative">
-                      <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-sm ${avatarColor(driver.full_name)}`}>
-                        {getInitials(driver.full_name)}
-                      </div>
-                      <span className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-background ${
-                        isActive ? 'bg-green-500' : driver.is_available ? 'bg-blue-500' : 'bg-muted-foreground/30'
-                      }`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-foreground truncate">{driver.full_name}</p>
-                      <p className="text-xs text-muted-foreground truncate">{driver.email}</p>
-                    </div>
-                  </div>
-
-                  <div className="mt-3 flex items-center justify-between">
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      isActive
-                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                        : driver.is_available
-                          ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                          : 'bg-muted text-muted-foreground'
-                    }`}>
-                      <span className={`h-1.5 w-1.5 rounded-full ${
-                        isActive ? 'bg-green-500' : driver.is_available ? 'bg-blue-500' : 'bg-muted-foreground/50'
-                      }`} />
-                      {isActive ? 'Aktiv' : driver.is_available ? 'Ledig' : 'Offline'}
-                    </span>
-                    <span className="text-xs text-muted-foreground font-mono">
-                      {todayH > 0 ? `${todayH.toFixed(1)}h idag` : '–'}
-                    </span>
-                  </div>
-
-                  <div className="mt-4 flex items-center gap-2" onClick={e => e.stopPropagation()}>
-                    <Button variant="ghost" size="sm" className="flex-1 text-xs" asChild>
-                      <Link to={`/admin/assignments?driver=${driver.id}`}>
-                        <Briefcase className="h-3.5 w-3.5 mr-1" /> Se uppdrag
-                      </Link>
-                    </Button>
-                    <CompensationDialog driverId={driver.id} driverName={driver.full_name} existing={comp} />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <div className="rounded-2xl border overflow-hidden"><Table><TableHeader><TableRow><TableHead>Namn</TableHead><TableHead>Telefon</TableHead><TableHead>Fordon</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Timmar denna vecka</TableHead><TableHead>Åtgärder</TableHead></TableRow></TableHeader><TableBody>{filtered.map(driver => {
+            const stats = driverStats.get(driver.id);const comp = getCompensation(driver.id);const isActive = stats?.activeToday;
+            return <TableRow key={driver.id}><TableCell><button className="text-left" onClick={() => !showingDemo && setSelectedDriver(driver)}><span className="block font-medium">{driver.full_name}</span><span className="block text-xs text-muted-foreground">{driver.email}</span></button></TableCell>
+             <TableCell className="text-muted-foreground">Ej registrerad</TableCell><TableCell>{vehicleLabel(driver.id)}</TableCell><TableCell><span className="admin-status" data-tone={isActive ? 'green' : 'gray'}>{isActive ? 'På uppdrag' : driver.is_available ? 'Ledig' : 'Ej tillgänglig'}</span></TableCell>
+             <TableCell className="text-right">{weekHours(driver.id).toLocaleString('sv-SE',{maximumFractionDigits:1})} h</TableCell>
+             <TableCell><div className="flex flex-wrap gap-1"><Button variant="ghost" size="sm" asChild><Link to={`/admin/assignments?driver=${driver.id}`}><Briefcase className="h-4 w-4 mr-1" />Uppdrag</Link></Button><CompensationDialog driverId={driver.id} driverName={driver.full_name} existing={comp} /></div></TableCell>
+            </TableRow>;
+          })}</TableBody></Table></div>
         )}
           </TabsContent>
 
