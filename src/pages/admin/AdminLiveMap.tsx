@@ -60,6 +60,7 @@ export default function AdminLiveMap() {
   const navigate = useNavigate();
   const [locations, setLocations] = useState<DriverLocation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const { enabled: demoEnabled } = useDemoMode();
 
   const effectiveLocations: DriverLocation[] = (demoEnabled && locations.length === 0)
@@ -68,9 +69,11 @@ export default function AdminLiveMap() {
 
   const fetchLocations = async () => {
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('driver_locations')
         .select('*');
+      if (error) throw error;
+      setLoadError(false);
 
       if (data && data.length > 0) {
         const driverIds = [...new Set(data.map((d) => d.driver_id))];
@@ -101,6 +104,7 @@ export default function AdminLiveMap() {
         setLocations([]);
       }
     } catch {
+      setLoadError(true);
       setLocations([]);
     } finally {
       setLoading(false);
@@ -123,8 +127,8 @@ export default function AdminLiveMap() {
   }, []);
 
   return (
-    <AdminLayout title="Fleet live" description="Realtidsposition, hastighet och senaste GPS-signal för aktiva uppdrag">
-      <div className="space-y-4">
+    <AdminLayout title="Karta">
+      <div className="space-y-4">{loadError && <div role="alert" className="rounded-2xl border p-4 text-sm"><p>Förarnas positioner kunde inte hämtas. Kontrollera anslutningen och försök igen.</p><Button variant="outline" className="mt-3" onClick={() => void fetchLocations()}>Försök igen</Button></div>}
         <div className="flex items-center justify-between">
           <Badge variant="outline" className="gap-1.5">
             <span className="relative flex h-2 w-2">
@@ -137,7 +141,7 @@ export default function AdminLiveMap() {
             <Link to="/admin/assignments/new"><Plus className="h-3.5 w-3.5 mr-1" /> Skapa uppdrag</Link>
           </Button>
         </div>
-        <p className="text-xs text-muted-foreground">Telefon- och fordonspositioner sparas bara under aktiva uppdrag. Historik gallras enligt företagets retentionstid.</p>
+        <p className="text-xs text-muted-foreground">Positioner visas när förarna har ett aktivt uppdrag.</p>
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4">
           {/* Map */}
@@ -164,15 +168,15 @@ export default function AdminLiveMap() {
                   </MapErrorBoundary>
                 )}
 
-                {!loading && effectiveLocations.length === 0 && (
+                {!loading && !loadError && effectiveLocations.length === 0 && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-[1000] pointer-events-none">
                     <div className="bg-card/95 backdrop-blur-sm border border-border rounded-2xl px-6 py-6 shadow-lg pointer-events-auto max-w-sm">
                       <div className="inline-flex items-center justify-center h-12 w-12 rounded-2xl bg-primary/5 border border-primary/10 mb-3">
                         <MapPin className="h-6 w-6 text-primary/70" />
                       </div>
-                      <h3 className="text-base font-semibold text-foreground mb-1">Följ aktiva chaufförer i realtid</h3>
+                      <h3 className="text-base font-semibold text-foreground mb-1">Följ aktiva förare i realtid</h3>
                       <p className="text-sm text-muted-foreground mb-4">
-                        När ett uppdrag är igång visas chaufförens position här, så du slipper ringa och fråga var de är.
+                        När ett uppdrag är igång visas förarens position här, så du slipper ringa och fråga var de är.
                       </p>
                       <Button size="sm" asChild>
                         <Link to="/admin/assignments/new"><Plus className="h-4 w-4 mr-1" /> Skapa uppdrag</Link>
@@ -187,13 +191,13 @@ export default function AdminLiveMap() {
           {/* Side panel — active drivers */}
           <Card className="overflow-hidden">
             <div className="px-4 py-3 border-b border-border bg-muted/30">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Aktiva chaufförer</p>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Aktiva förare</p>
             </div>
             <div className="divide-y divide-border max-h-[calc(100vh-300px)] overflow-y-auto">
               {effectiveLocations.length === 0 ? (
                 <div className="p-6 text-center text-sm text-muted-foreground">
                   <Truck className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                  <p>Inga aktiva chaufförer just nu</p>
+                  <p>Inga aktiva förare just nu</p>
                 </div>
               ) : (
                 effectiveLocations.map(loc => (
@@ -220,9 +224,9 @@ export default function AdminLiveMap() {
                         </Badge>
                       )}
                     </div>
-                    <div className="flex items-center gap-1 text-[11px] text-muted-foreground mt-1.5">
+                    <span className="admin-status mt-2" data-tone={Date.now() - new Date(loc.updated_at).getTime() < 300000 ? 'green' : 'orange'}>{Date.now() - new Date(loc.updated_at).getTime() < 300000 ? 'På uppdrag' : 'Väntar på position'}</span><div className="flex items-center gap-1 text-[11px] text-muted-foreground mt-1.5">
                       <Clock className="h-3 w-3" />
-                      <span>{timeAgo(loc.updated_at)}</span>
+                      <span>Senast uppdaterad {timeAgo(loc.updated_at)}</span>
                     </div>
                   </button>
                 ))
