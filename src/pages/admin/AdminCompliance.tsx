@@ -311,7 +311,7 @@ export default function AdminCompliance() {
             </div>
 
             <Card>
-              <CardContent className="p-0">
+              <CardContent className="p-0 overflow-x-auto">
                 {docsLoading ? (
                   <div className="p-6 space-y-3">
                     {[1, 2, 3].map((i) => <Skeleton key={i} className="h-10 w-full" />)}
