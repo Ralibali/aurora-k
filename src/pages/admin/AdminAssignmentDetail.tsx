@@ -1,5 +1,6 @@
+import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import AssignmentDeviations from '@/components/AssignmentDeviations';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AdminLayout } from '@/components/AdminLayout';
 import { Button } from '@/components/ui/button';
@@ -14,13 +15,13 @@ import { useAssignment, useUpdateAssignment, useDeleteAssignment, useDrivers, us
 import { useAuth } from '@/hooks/useAuth';
 import { sendDriverAssignmentPush } from '@/lib/driver-notifications';
 import { formatSwedishDateTime, calculateDuration } from '@/lib/format';
-import { Trash2, Copy, History, X, MapPin, Calendar, Clock, User, FileText, AlertTriangle, CheckCircle2, MessageSquare, Navigation, Receipt } from 'lucide-react';
+import { Trash2, Copy, History, MapPin, Calendar, Clock, User, FileText, AlertTriangle, CheckCircle2, MessageSquare, Navigation, Receipt } from 'lucide-react';
 import { toast } from 'sonner';
 import { AssignmentMailActions } from '@/features/assignment-mail/AssignmentMailActions';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const ACTION_LABELS: Record<string, string> = {
-  driver_changed: 'Chaufför ändrad',
+  driver_changed: 'Förare ändrad',
   status_changed: 'Status ändrad',
   comment_updated: 'Kommentar uppdaterad',
   created: 'Uppdrag skapat',
@@ -83,16 +84,7 @@ export default function AdminAssignmentDetail() {
   const createLog = useCreateAssignmentLog();
   const [comment, setComment] = useState<string | null>(null);
   const [costInput, setCostInput] = useState<string | null>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    requestAnimationFrame(() => setVisible(true));
-  }, []);
-
-  const handleClose = () => {
-    setVisible(false);
-    setTimeout(() => navigate(-1), 300);
-  };
+  const handleClose = () => navigate('/admin/assignments');
 
   if (isLoading) {
     return (
@@ -144,29 +136,20 @@ export default function AdminAssignmentDetail() {
   };
 
   const timelineSteps = [
-    { label: 'Skapat', time: formatSwedishDateTime(assignment.created_at), completed: true },
+    { label: 'Skapad', time: formatSwedishDateTime(assignment.created_at), completed: true },
     { label: 'Tilldelad', time: assignment.assigned_driver_id ? 'Tilldelad till ' + (assignment.driver?.full_name ?? '') : undefined, completed: !!assignment.assigned_driver_id },
     { label: 'På väg', time: flags.onWay ? 'Rapporterat av förare' : undefined, completed: flags.onWay },
     { label: 'Framme', time: flags.arrived ? 'Rapporterat av förare' : undefined, completed: flags.arrived },
     { label: 'Startad', time: assignment.actual_start ? formatSwedishDateTime(assignment.actual_start) : undefined, completed: !!assignment.actual_start },
-    { label: 'Slutförd', time: assignment.actual_stop ? formatSwedishDateTime(assignment.actual_stop) : undefined, completed: !!assignment.actual_stop },
+    { label: 'Levererad', time: assignment.actual_stop ? formatSwedishDateTime(assignment.actual_stop) : undefined, completed: !!assignment.actual_stop },
   ];
 
   return (
     <AdminLayout title="Uppdragsdetaljer">
-      <div className={`fixed inset-0 z-40 transition-opacity duration-300 ${visible ? 'bg-black/30' : 'bg-transparent pointer-events-none'}`} onClick={handleClose} />
-      <div className={`fixed top-0 right-0 bottom-0 z-50 w-full max-w-2xl bg-card shadow-2xl overflow-y-auto transition-transform duration-300 ease-out ${visible ? 'translate-x-0' : 'translate-x-full'}`}>
-        <div className="sticky top-0 z-10 bg-card border-b border-border px-6 py-4 flex items-center justify-between">
-          <div className="min-w-0">
-            <h2 className="text-lg font-semibold text-foreground truncate">{assignment.title}</h2>
-            <p className="font-mono text-xs text-muted-foreground mt-0.5">{assignment.id.slice(0, 8).toUpperCase()}</p>
-          </div>
-          <button onClick={handleClose} className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-secondary transition-colors shrink-0">
-            <X className="h-5 w-5 text-muted-foreground" />
-          </button>
-        </div>
-
-        <div className="p-6 space-y-6">
+      <Sheet open onOpenChange={open => {if (!open) handleClose();}}><SheetContent className="admin-panel">
+        <SheetTitle className="pr-8">{assignment.title}</SheetTitle><SheetDescription className="mt-2">{assignment.customer?.name || 'Ingen kund'} · #{assignment.id.slice(-6).toUpperCase()}</SheetDescription>
+        <div className="mt-5 flex flex-wrap gap-2"><Button variant="outline" onClick={() => document.getElementById('change-driver')?.focus()}>Byt förare</Button>{assignment.status !== 'completed' && assignment.status !== 'cancelled' && <Button disabled={updateAssignment.isPending} onClick={() => handleStatusChange('completed')}>Markera klar</Button>}</div>
+        <div className="pt-6 space-y-6">
           <AssignmentDeviations assignmentId={assignment.id} canResolve legacyComment={assignment.driver_comment} />
           {flags.deviation && (
             <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-amber-900">
@@ -223,7 +206,7 @@ export default function AdminAssignmentDetail() {
 
           <div className="bg-secondary/30 rounded-lg px-4">
             <InfoItem label="Kund" value={assignment.customer?.name || 'Ej angiven'} icon={FileText} />
-            <InfoItem label="Adress" value={assignment.address} icon={MapPin} action={<Button size="sm" variant="ghost" onClick={() => openMaps(assignment.address)}><Navigation className="h-4 w-4" /></Button>} />
+            <InfoItem label="Från → Till" value={[assignment.pickup_address, assignment.delivery_address].filter(Boolean).join(' → ') || assignment.address} icon={MapPin} action={<Button size="sm" variant="ghost" onClick={() => openMaps(assignment.address)}><Navigation className="h-4 w-4" /></Button>} />
             <InfoItem label="Schemalagd tid" value={<span className="font-mono">{formatSwedishDateTime(assignment.scheduled_start)}{assignment.scheduled_end && ` – ${formatSwedishDateTime(assignment.scheduled_end)}`}</span>} icon={Calendar} />
             {assignment.actual_start && <InfoItem label="Faktisk start" value={<span className="font-mono">{formatSwedishDateTime(assignment.actual_start)}</span>} icon={Clock} />}
             {assignment.actual_stop && <InfoItem label="Faktiskt stopp" value={<span className="font-mono">{formatSwedishDateTime(assignment.actual_stop)}</span>} icon={Clock} />}
@@ -232,7 +215,7 @@ export default function AdminAssignmentDetail() {
           </div>
 
           <div>
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Tilldelad chaufför</p>
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Tilldelad förare</p>
             <div className="flex items-center gap-3">
               {assignment.driver ? (
                 <>
@@ -242,7 +225,7 @@ export default function AdminAssignmentDetail() {
               ) : <div className="flex items-center gap-2"><User className="h-5 w-5 text-muted-foreground" /><span className="text-sm text-muted-foreground italic">Ej tilldelad</span></div>}
             </div>
             <Select value={assignment.assigned_driver_id} onValueChange={handleDriverChange}>
-              <SelectTrigger className="mt-2 h-9"><SelectValue placeholder="Byt chaufför..." /></SelectTrigger>
+              <SelectTrigger id="change-driver" aria-label="Byt förare" className="mt-2 h-9"><SelectValue placeholder="Byt förare..." /></SelectTrigger>
               <SelectContent>{(drivers ?? []).map(d => <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>)}</SelectContent>
             </Select>
           </div>
@@ -277,8 +260,8 @@ export default function AdminAssignmentDetail() {
           {assignment.driver_comment && <div className="bg-secondary rounded-lg p-3"><p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-1"><MessageSquare className="h-3 w-3" /> Förarkommentar / statuslogg</p><p className="text-sm whitespace-pre-wrap">{assignment.driver_comment}</p></div>}
 
           <div className="space-y-2">
-            <Label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Meddelande till chaufför</Label>
-            <Textarea value={currentComment} onChange={(e) => setComment(e.target.value)} placeholder="Skriv kommentar till chauffören..." />
+            <Label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Meddelande till förare</Label>
+            <Textarea value={currentComment} onChange={(e) => setComment(e.target.value)} placeholder="Skriv kommentar till föraren..." />
             <Button size="sm" variant="outline" onClick={handleSaveComment}>Spara kommentar</Button>
           </div>
 
@@ -296,7 +279,7 @@ export default function AdminAssignmentDetail() {
             <Button variant="destructive" size="sm" onClick={() => deleteAssignment.mutate(assignment.id, { onSuccess: () => navigate('/admin/assignments') })}><Trash2 className="h-4 w-4 mr-1" /> Ta bort</Button>
           </div>
         </div>
-      </div>
+      </SheetContent></Sheet>
     </AdminLayout>
   );
 }

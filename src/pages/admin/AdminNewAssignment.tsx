@@ -1,3 +1,4 @@
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import GoogleAddressSearch from '@/components/GoogleAddressSearch';
 import { useState } from 'react';
 import { useEffectiveDriverSettings } from '@/hooks/useDriverSettings';
@@ -212,7 +213,7 @@ export default function AdminNewAssignment() {
     if (isSubmitting) return;
     setSubmitError(null);
     if (!title.trim() || !pickupAddress.trim() || !customerId || !driverId) {
-      setSubmitError('Fyll i titel, adress och välj både kund och chaufför.');
+      setSubmitError('Fyll i titel, adress och välj både kund och förare.');
       return;
     }
     if (cost && (!Number.isFinite(Number(cost)) || Number(cost) < 0)) {
@@ -305,20 +306,20 @@ export default function AdminNewAssignment() {
 
   return (
     <AdminLayout title="Nytt uppdrag">
-      <div className="max-w-3xl">
+      <Sheet open onOpenChange={open => { if (!open) navigate('/admin/assignments'); }}><SheetContent className="admin-panel"><SheetHeader className="mb-6 text-left"><SheetTitle>Nytt uppdrag</SheetTitle><SheetDescription>Fyll i körningen och tilldela en förare.</SheetDescription></SheetHeader><div>
         <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="mb-4"><ArrowLeft className="h-4 w-4 mr-1" /> Tillbaka</Button>
         <Card>
           <CardHeader><div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"><CardTitle>Skapa nytt uppdrag</CardTitle><div className="flex flex-wrap gap-2">{bookingRequestId && <Badge variant="outline">Skapas från bokningsförfrågan</Badge>}{importedOrder && <Badge>Smart orderimport</Badge>}</div></div></CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="rounded-xl border border-violet-200 bg-violet-50 p-4">
+              <details className="rounded-xl border p-4"><summary className="min-h-11 cursor-pointer py-2 text-sm font-medium">Fyll i från en ordertext</summary><div>
                 <div className="mb-3 flex items-center gap-2 font-semibold text-violet-950"><Sparkles className="h-4 w-4" /> Smart skapa från text</div>
                 <Textarea value={smartInput} onChange={e => setSmartInput(e.target.value)} rows={4} placeholder="Klistra in t.ex. 'Hämta 2 pallar hos Byggmax Linköping imorgon kl 08:00 och kör till Motala. Ring kunden innan.'" />
                 <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <p className="text-xs text-violet-900/70">Fyller i titel, uppdragstyp, adresser, tid och instruktioner som ett första förslag.</p>
                   <Button type="button" variant="secondary" onClick={applySmartInput}><Sparkles className="mr-2 h-4 w-4" /> Tolka och fyll i</Button>
                 </div>
-              </div>
+              </div></details>
 
               <div className="rounded-xl border bg-blue-50/50 p-4">
                 <div className="mb-4 flex items-center gap-2 font-semibold"><Truck className="h-4 w-4" /> Transportuppdrag</div>
@@ -333,20 +334,20 @@ export default function AdminNewAssignment() {
 
               <AssignmentServiceFields service={serviceType} value={serviceDetails} onChange={setServiceDetails} />
 
-              <div className="space-y-2"><Label htmlFor="instructions">Instruktioner</Label><Textarea id="instructions" value={instructions} onChange={e => setInstructions(e.target.value)} placeholder="Gods, vikt, hinder, portkod, kontaktperson, övrigt..." /></div>
+              <div className="space-y-2"><Label htmlFor="instructions">Anteckning</Label><Textarea id="instructions" value={instructions} onChange={e => setInstructions(e.target.value)} placeholder="Gods, vikt, hinder, portkod, kontaktperson, övrigt..." /></div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4"><div className="space-y-2"><Label htmlFor="date">Datum och starttid</Label><Input id="date" type="datetime-local" value={scheduledStart} onChange={e => setScheduledStart(e.target.value)} required /></div><div className="space-y-2"><Label htmlFor="end">Sluttid</Label><Input id="end" type="datetime-local" value={scheduledEnd} onChange={e => setScheduledEnd(e.target.value)} /></div></div>
               <div className="space-y-2"><Label>Prioritet</Label><div className="flex gap-2">{(['low', 'normal', 'urgent'] as const).map(p => <label key={p} className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer text-sm ${priority === p ? (p === 'urgent' ? 'border-destructive bg-destructive/5' : 'border-primary bg-primary/5') : 'border-border'}`}><input type="radio" name="priority" checked={priority === p} onChange={() => setPriority(p)} className="accent-primary" />{priorityLabels[p]}</label>)}</div></div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4"><div className="space-y-2"><Label htmlFor="driver">Tilldela chaufför</Label><Select value={driverId} onValueChange={setDriverId} required><SelectTrigger id="driver"><SelectValue placeholder="Välj chaufför" /></SelectTrigger><SelectContent>{(drivers ?? []).map(d => <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>)}</SelectContent></Select></div><div className="space-y-2"><Label>Fordon</Label><Select value={vehicleId || 'none'} onValueChange={v => setVehicleId(v === 'none' ? '' : v)}><SelectTrigger><SelectValue placeholder="Inget fordon" /></SelectTrigger><SelectContent><SelectItem value="none">Inget fordon</SelectItem>{(vehicles ?? []).map(v => <SelectItem key={v.id} value={v.id}>{v.name} {v.registration_number ? `(${v.registration_number})` : ''}</SelectItem>)}</SelectContent></Select></div></div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4"><div className="space-y-2"><Label>Beställning</Label><Select value={orderId || 'none'} onValueChange={v => setOrderId(v === 'none' ? '' : v)}><SelectTrigger><SelectValue placeholder="Ingen beställning" /></SelectTrigger><SelectContent><SelectItem value="none">Ingen beställning</SelectItem>{(orders ?? []).filter(o => o.status === 'active').map(o => <SelectItem key={o.id} value={o.id}>{o.title}</SelectItem>)}</SelectContent></Select></div><div className="space-y-2"><Label htmlFor="cost">Kostnad / fakturabelopp</Label><Input id="cost" type="number" step="0.01" min="0" value={cost} onChange={e => setCost(e.target.value)} placeholder="T.ex. 1500" /></div></div>
-              <div className="space-y-2"><Label htmlFor="comment">Meddelande till chauffören</Label><Textarea id="comment" value={adminComment} onChange={e => setAdminComment(e.target.value)} placeholder="Syns i förarappen..." /></div>
-              <div className="border rounded-lg p-4 space-y-3"><p className="text-sm font-medium flex items-center gap-2"><PackageCheck className="h-4 w-4" /> Krav vid slutförande</p><p className="text-xs text-muted-foreground">Förval från företagets inställningar och vald chaufför. Du kan ändra kraven för just detta uppdrag.</p>{driverDefaults.usingDefaults && <p className="text-xs text-muted-foreground">Företaget saknar sparade förval. Foto och signatur krävs som standard, med eventuella anpassningar för chauffören.</p>}<div className="flex items-center justify-between"><Label htmlFor="req-sig" className="cursor-pointer">Kräv mottagarsignatur</Label><Switch id="req-sig" checked={requireSignature} onCheckedChange={setRequireSignature} /></div><div className="flex items-center justify-between"><Label htmlFor="req-photo" className="cursor-pointer">Kräv fraktsedelsfoto</Label><Switch id="req-photo" checked={requirePhoto} onCheckedChange={setRequirePhoto} /></div><div className="flex items-center justify-between"><Label htmlFor="tracking-enabled" className="cursor-pointer">Avisera kund automatiskt</Label><Switch id="tracking-enabled" checked={trackingEnabled} onCheckedChange={setTrackingEnabled} /></div></div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4"><div className="space-y-2"><Label htmlFor="driver">Tilldela förare</Label><Select value={driverId} onValueChange={setDriverId} required><SelectTrigger id="driver"><SelectValue placeholder="Välj förare" /></SelectTrigger><SelectContent>{(drivers ?? []).map(d => <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>)}</SelectContent></Select></div><div className="space-y-2"><Label>Fordon</Label><Select value={vehicleId || 'none'} onValueChange={v => setVehicleId(v === 'none' ? '' : v)}><SelectTrigger><SelectValue placeholder="Inget fordon" /></SelectTrigger><SelectContent><SelectItem value="none">Inget fordon</SelectItem>{(vehicles ?? []).map(v => <SelectItem key={v.id} value={v.id}>{v.name} {v.registration_number ? `(${v.registration_number})` : ''}</SelectItem>)}</SelectContent></Select></div></div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4"><div className="space-y-2"><Label>Beställning</Label><Select value={orderId || 'none'} onValueChange={v => setOrderId(v === 'none' ? '' : v)}><SelectTrigger><SelectValue placeholder="Ingen beställning" /></SelectTrigger><SelectContent><SelectItem value="none">Ingen beställning</SelectItem>{(orders ?? []).filter(o => o.status === 'active').map(o => <SelectItem key={o.id} value={o.id}>{o.title}</SelectItem>)}</SelectContent></Select></div><div className="space-y-2"><Label htmlFor="cost">Pris (kr)</Label><Input id="cost" type="number" step="0.01" min="0" value={cost} onChange={e => setCost(e.target.value)} placeholder="T.ex. 1500" /></div></div>
+              <div className="space-y-2"><Label htmlFor="comment">Meddelande till föraren</Label><Textarea id="comment" value={adminComment} onChange={e => setAdminComment(e.target.value)} placeholder="Syns i förarappen..." /></div>
+              <div className="border rounded-lg p-4 space-y-3"><p className="text-sm font-medium flex items-center gap-2"><PackageCheck className="h-4 w-4" /> Krav vid slutförande</p><p className="text-xs text-muted-foreground">Förval från företagets inställningar och vald förare. Du kan ändra kraven för just detta uppdrag.</p>{driverDefaults.usingDefaults && <p className="text-xs text-muted-foreground">Företaget saknar sparade förval. Foto och signatur krävs som standard, med eventuella anpassningar för föraren.</p>}<div className="flex items-center justify-between"><Label htmlFor="req-sig" className="cursor-pointer">Kräv mottagarsignatur</Label><Switch id="req-sig" checked={requireSignature} onCheckedChange={setRequireSignature} /></div><div className="flex items-center justify-between"><Label htmlFor="req-photo" className="cursor-pointer">Kräv fraktsedelsfoto</Label><Switch id="req-photo" checked={requirePhoto} onCheckedChange={setRequirePhoto} /></div><div className="flex items-center justify-between"><Label htmlFor="tracking-enabled" className="cursor-pointer">Avisera kund automatiskt</Label><Switch id="tracking-enabled" checked={trackingEnabled} onCheckedChange={setTrackingEnabled} /></div></div>
               <div className="border rounded-lg p-4 space-y-3"><div className="flex items-center justify-between"><Label>Upprepning</Label><Switch checked={recurrenceEnabled} onCheckedChange={setRecurrenceEnabled} /></div>{recurrenceEnabled && <div className="grid gap-3 sm:grid-cols-2"><div className="space-y-2"><Label>Frekvens</Label><Select value={recurrenceFrequency} onValueChange={v => setRecurrenceFrequency(v as RecurrenceFrequency)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="weekly">Varje vecka</SelectItem><SelectItem value="biweekly">Varannan vecka</SelectItem><SelectItem value="monthly">Varje månad</SelectItem></SelectContent></Select></div><div className="space-y-2"><Label htmlFor="recurrence-end">Upprepa till och med</Label><Input id="recurrence-end" type="date" value={recurrenceEndDate} onChange={e => setRecurrenceEndDate(e.target.value)} required={recurrenceEnabled} /></div></div>}</div>
               {submitError && <p role="alert" className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">{submitError}</p>}
               <div className="flex gap-2 pt-2"><Button type="submit" disabled={isSubmitting || createAssignments.isPending}>{isSubmitting ? 'Skapar...' : 'Skapa uppdrag'}</Button><Button type="button" variant="outline" onClick={() => navigate(-1)}>Avbryt</Button></div>
             </form>
           </CardContent>
         </Card>
-      </div>
+      </div></SheetContent></Sheet>
     </AdminLayout>
   );
 }

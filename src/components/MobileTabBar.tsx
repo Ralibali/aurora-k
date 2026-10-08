@@ -1,4 +1,4 @@
-import { LayoutDashboard, Briefcase, Map, Users, Menu, Plus, ChevronRight, LogOut, Sparkles, Shield } from 'lucide-react';
+import { LayoutDashboard, Briefcase, Calendar, Users, Menu, Plus, ChevronRight, LogOut, Sparkles, Shield } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -9,10 +9,10 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 
 const tabs = [
-  { label: 'Hem', icon: LayoutDashboard, to: '/admin', exact: true },
+  { label: 'Översikt', icon: LayoutDashboard, to: '/admin', exact: true },
   { label: 'Uppdrag', icon: Briefcase, to: '/admin/assignments', exact: false },
-  { label: 'Karta', icon: Map, to: '/admin/live-map', exact: false },
-  { label: 'Personal', icon: Users, to: '/admin/drivers', exact: false },
+  { label: 'Kalender', icon: Calendar, to: '/admin/calendar', exact: false },
+  { label: 'Förare', icon: Users, to: '/admin/drivers', exact: false },
 ];
 
 export function MobileTabBar() {
@@ -24,7 +24,7 @@ export function MobileTabBar() {
   const { signOut, isPlatformAdmin } = useAuth();
   const { enabled: demoEnabled, disable: disableDemo } = useDemoMode();
   const isActive = (to: string, exact = false) => exact ? pathname === to : pathname === to || pathname.startsWith(`${to}/`);
-  const showFab = pathname === '/admin' || pathname === '/admin/assignments';
+  const showFab = false;
   const moreActive = !tabs.some(tab => isActive(tab.to, tab.exact));
   const sections = adminNavigation.map(section => ({
     ...section,
@@ -53,11 +53,11 @@ export function MobileTabBar() {
         <nav aria-label="Huvudnavigation" className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-card border-t border-border flex items-center justify-around pb-safe">
           {tabs.map(tab => <Link key={tab.to} to={tab.to} aria-current={isActive(tab.to, tab.exact) ? 'page' : undefined}
             className={`flex min-h-16 min-w-[56px] flex-col items-center justify-center gap-1 border-t-2 px-2 transition-colors ${isActive(tab.to, tab.exact) ? 'border-primary text-primary' : 'border-transparent text-muted-foreground'}`}>
-            <tab.icon className="h-5 w-5" /><span className="text-[11px] font-medium">{tab.label}</span>
+            <tab.icon className="h-5 w-5" /><span className="text-xs font-medium">{tab.label}</span>
           </Link>)}
           <SheetTrigger asChild><button aria-label="Öppna mer-meny"
             className={`flex min-h-16 min-w-[56px] flex-col items-center justify-center gap-1 border-t-2 px-2 ${moreActive ? 'border-primary text-primary' : 'border-transparent text-muted-foreground'}`}>
-            <Menu className="h-5 w-5" /><span className="text-[11px] font-medium">Mer</span>
+            <Menu className="h-5 w-5" /><span className="text-xs font-medium">Mer</span>
           </button></SheetTrigger>
         </nav>
         <SheetContent side="bottom" className="flex max-h-[85dvh] flex-col gap-0 rounded-t-2xl p-0 pb-safe">
