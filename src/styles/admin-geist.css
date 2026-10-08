@@ -105,3 +105,5 @@
 
 .aurora-admin main td a{display:inline-flex;min-height:44px;min-width:44px;align-items:center}
 .aurora-admin :is([role=menuitem],[role=option]){min-height:44px}
+.aurora-admin :is(.font-mono,.font-mono-ui){font-family:Geist,sans-serif}
+.aurora-admin summary:focus-visible{outline:2px solid #161f39;outline-offset:3px;border-radius:12px}
