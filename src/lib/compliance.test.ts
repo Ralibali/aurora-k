@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { daysUntil, expiryStatus } from '@/lib/compliance';
+import { daysUntil, expiryStatus, validateDriverDocumentFile } from '@/lib/compliance';
 
 function dateOffset(days: number) {
   const d = new Date();
@@ -9,8 +9,6 @@ function dateOffset(days: number) {
   const day = String(d.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
-
-import { validateDriverDocumentFile } from '@/hooks/useCompliance';
 
 describe('file validation', () => {
   it('accepts supported documents smaller than 10 MB', () => {
