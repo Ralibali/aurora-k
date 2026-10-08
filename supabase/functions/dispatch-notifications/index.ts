@@ -35,6 +35,12 @@ Deno.serve(async (request) => {
       if (!role?.company_id) return reply({ error: "Admin access required" }, 403);
       companyId = role.company_id;
     }
+    if (trusted) {
+      // Queue milestones through the existing idempotent outbox; failures do
+      // not block unrelated assignment and booking notifications.
+      const { error: remindersError } = await admin.rpc("queue_due_driver_document_reminders");
+      if (remindersError) console.error("[forarkollen] reminder queue failed", remindersError);
+    }
     return reply(await deliverOutbox(admin, companyId));
   } catch (error) {
     console.error("[dispatch-notifications]", error);
