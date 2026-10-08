@@ -75,14 +75,14 @@ export function RoiCalculator({ t, lang, monthlyPrice = 449, onCta }: RoiCalcula
                 onValueChange={(values) => control.set(values[0] ?? control.value)}
                 aria-label={control.label}
               />
-              <div className="mt-2 flex justify-between text-xs font-semibold text-slate-500">
+              <div className="mt-2 flex justify-between text-xs font-semibold text-slate-400">
                 <span>{formatNumber(control.min, lang)}</span>
                 <span>{formatNumber(control.max, lang)}</span>
               </div>
             </div>
           ))}
         </div>
-        <p className="mt-9 border-t border-[#1e1e5a] pt-5 text-xs leading-6 text-slate-500">{t.assumption}</p>
+        <p className="mt-9 border-t border-[#1e1e5a] pt-5 text-xs leading-6 text-slate-400">{t.assumption}</p>
       </div>
 
       <div className="relative overflow-hidden rounded-[2rem] border border-[#1e1e5a] bg-[#141432] p-7 shadow-[0_30px_90px_rgba(79,70,229,0.25)] sm:p-9">
@@ -97,7 +97,7 @@ export function RoiCalculator({ t, lang, monthlyPrice = 449, onCta }: RoiCalcula
               <p className="mt-1 text-4xl font-black tracking-tight text-white">
                 {formatNumber(result.hoursSaved, lang)} <span className="text-lg font-bold text-slate-400">h</span>
               </p>
-              <p className="text-sm font-semibold text-slate-500">{t.perMonth}</p>
+              <p className="text-sm font-semibold text-slate-400">{t.perMonth}</p>
             </div>
           </div>
 
@@ -110,7 +110,7 @@ export function RoiCalculator({ t, lang, monthlyPrice = 449, onCta }: RoiCalcula
               <p className="mt-1 text-4xl font-black tracking-tight text-white">
                 {formatNumber(result.moneySaved, lang)} <span className="text-lg font-bold text-slate-400">{lang === 'sv' ? 'kr' : 'SEK'}</span>
               </p>
-              <p className="text-sm font-semibold text-slate-500">{t.perMonth}</p>
+              <p className="text-sm font-semibold text-slate-400">{t.perMonth}</p>
             </div>
           </div>
 

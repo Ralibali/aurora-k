@@ -32,6 +32,7 @@ const KonkurrentAlternativPage = lazy(() => import("./pages/KonkurrentAlternativ
 const TjansterPage = lazy(() => import("./pages/TjansterPage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const ContactPage = lazy(() => import("./pages/ContactPage"));
+const BookDemoPage = lazy(() => import("./pages/BookDemoPage"));
 const OnboardingPage = lazy(() => import("./pages/OnboardingPage"));
 const JoinPage = lazy(() => import("./pages/JoinPage"));
 const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage"));
@@ -137,7 +138,7 @@ function PublicSiteEnhancements() {
   const location = useLocation();
   const isAppRoute = location.pathname.startsWith('/admin') || location.pathname.startsWith('/driver') || location.pathname.startsWith('/platform') || location.pathname.startsWith('/portal') || location.pathname.startsWith('/onboarding') || location.pathname.startsWith('/track/') || location.pathname.startsWith('/auth/') || ['/login', '/register', '/join', '/forgot-password', '/reset-password', '/boka'].includes(location.pathname) || location.pathname.startsWith('/boka/') || location.pathname.startsWith('/integrations/');
   if (isAppRoute) return null;
-  return <><PwaInstallPrompt /><CookieConsent /><ExitIntentPopup /><QuickContactButton /></>;
+  return <><PwaInstallPrompt /><CookieConsent language={location.pathname.startsWith('/en') ? 'en' : 'sv'} /><ExitIntentPopup /><QuickContactButton /></>;
 }
 
 const App = () => (
@@ -154,6 +155,7 @@ const App = () => (
                 <Routes>
                   <Route path="/" element={<LandingPage />} />
                   <Route path="/boka" element={<PublicBookingPage />} />
+                  <Route path="/boka-demo" element={<BookDemoPage />} />
                   <Route path="/boka/:slug" element={<PublicBookingPage />} />
                   <Route path="/track/:token" element={<PublicTrackingPage />} />
                   <Route path="/en" element={<LandingPage />} />

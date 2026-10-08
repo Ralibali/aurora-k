@@ -1,4 +1,5 @@
 import { corsHeaders } from '../_shared/cors.ts';
+import { isMapErrorCode } from '../_shared/mapsDiagnostics.ts';
 
 type MinimalClient = {
   auth: { getUser: (token: string) => Promise<{ data: { user: { id: string } | null }; error: unknown }> };
@@ -46,8 +47,20 @@ export async function handleMapsConfig(req: Request, db: MinimalClient, env: (na
   if (roles.error) return json({ error: 'Behörigheten kunde inte kontrolleras.' }, 500);
   if (!roles.data?.some(row => Boolean(row.company_id))) return json({ error: 'Företagsadministratör krävs.' }, 403);
 
+  if (req.method === 'POST') {
+    const body = await req.text();
+    if (body.length > 512) return json({ error: 'För stor förfrågan.' }, 413);
+    let payload: { action?: unknown; code?: unknown };
+    try { payload = body ? JSON.parse(body) : {}; } catch { return json({ error: 'Ogiltig förfrågan.' }, 400); }
+    if (payload?.action === 'report-error') {
+      if (!isMapErrorCode(payload.code)) return json({ error: 'Ogiltig felkod.' }, 400);
+      console.warn('[maps-config]', JSON.stringify({ code: payload.code, company_id: roles.data[0].company_id }));
+      return json({ recorded: true });
+    }
+  }
+
   const key = env('GOOGLE_MAPS_BROWSER_KEY');
-  if (!key) return json({ configured: false }, 200);
+  if (!key) { console.warn('[maps-config] MissingKeyMapError'); return json({ configured: false }, 200); }
 
   return json({ configured: true, key }, 200);
 }

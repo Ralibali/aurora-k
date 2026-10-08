@@ -142,7 +142,7 @@ export default function AdminDashboardPage() {
         <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
           <Kpi icon={Truck} value={failed ? '–' : activeCount} label="På väg just nu" detail="Dagens pågående transporter" href={`${todayHref}&filter=active`} loading={loading} />
           <Kpi icon={UserRound} value={failed ? '–' : unassignedCount} label="Saknar chaufför" detail="Tilldela bland alla datum" href="/admin/assignments?filter=unassigned&date=all" loading={loading} warning={unassignedCount > 0} />
-          <Kpi icon={AlertTriangle} value={failed ? '–' : urgentCount} label="Hög prioritet" detail="Öppna uppdrag att prioritera" href="/admin/assignments?filter=urgent&date=all" loading={loading} warning={urgentCount > 0} />
+          <Kpi icon={AlertTriangle} value={failed ? '–' : urgentCount} label="Brådskande" detail="Öppna uppdrag att prioritera" href="/admin/assignments?filter=urgent&date=all" loading={loading} warning={urgentCount > 0} />
           <Kpi icon={CheckCheck} value={failed ? '–' : completedCount} label="Slutförda idag" detail={loading || failed ? 'Dagens planerade transporter' : `Av ${dayTotal} planerade transporter`} href={`${todayHref}&filter=completed`} loading={loading} />
         </div>
 

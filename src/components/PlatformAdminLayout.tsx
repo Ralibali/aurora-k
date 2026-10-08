@@ -1,4 +1,4 @@
-import { ReactNode, Suspense } from 'react';
+import { ReactNode, Suspense, useEffect } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { PageTransition } from '@/components/PageTransition';
 import {
@@ -98,6 +98,7 @@ interface PlatformLayoutProps {
 }
 
 export function PlatformLayout({ children, title, description }: PlatformLayoutProps) {
+  useEffect(() => { document.title = `${title} | Aurora Transport`; }, [title]);
   return (
     <>
       <header className="h-14 flex items-center gap-3 border-b border-border px-4 md:px-6 bg-card shrink-0 sticky top-0 z-30">

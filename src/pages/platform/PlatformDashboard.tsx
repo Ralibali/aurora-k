@@ -11,7 +11,7 @@ const statusBadge = (status: string | null) => {
     case 'active': return <Badge className="bg-green-100 text-green-700 hover:bg-green-100">Aktiv</Badge>;
     case 'past_due': return <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100">Förfallen</Badge>;
     case 'cancelled': return <Badge className="bg-red-100 text-red-700 hover:bg-red-100">Avslutad</Badge>;
-    default: return <Badge variant="outline">Pending</Badge>;
+    default: return <Badge variant="outline">Väntar</Badge>;
   }
 };
 

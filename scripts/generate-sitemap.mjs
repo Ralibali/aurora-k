@@ -26,7 +26,6 @@ const BLOG_DATA = resolve(ROOT, "src/lib/blog-data.ts");
 const PRERENDER_SCRIPT = resolve(ROOT, "scripts/generate-static-pages.mjs");
 const BASE_URL = "https://auroratransport.se";
 
-const TODAY = new Date().toISOString().slice(0, 10);
 
 /**
  * Publika routes med prioritet och uppdateringsfrekvens.
@@ -37,6 +36,7 @@ const STATIC_ROUTES = [
   { path: "/", priority: "1.0", changefreq: "weekly" },
   { path: "/en", priority: "0.7", changefreq: "monthly" },
   { path: "/boka", priority: "0.9", changefreq: "monthly" },
+  { path: "/boka-demo", priority: "0.9", changefreq: "monthly" },
   { path: "/tjanster", priority: "0.8", changefreq: "monthly" },
   { path: "/transportledningssystem", priority: "0.9", changefreq: "monthly" },
   { path: "/tidrapportering-transport", priority: "0.8", changefreq: "monthly" },
@@ -93,7 +93,7 @@ function urlEntry({ loc, lastmod, changefreq, priority }) {
   return [
     "  <url>",
     `    <loc>${loc}</loc>`,
-    `    <lastmod>${lastmod}</lastmod>`,
+    ...(lastmod ? [`    <lastmod>${lastmod}</lastmod>`] : []),
     `    <changefreq>${changefreq}</changefreq>`,
     `    <priority>${priority}</priority>`,
     "  </url>",
@@ -113,7 +113,6 @@ function main() {
   const entries = STATIC_ROUTES.map((route) =>
     urlEntry({
       loc: `${BASE_URL}${route.path}`,
-      lastmod: TODAY,
       changefreq: route.changefreq,
       priority: route.priority,
     })

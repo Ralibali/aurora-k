@@ -9,6 +9,8 @@ import { Gift } from 'lucide-react';
 
 export function ExitIntentPopup() {
   const [open, setOpen] = useState(false);
+  const [companyName, setCompanyName] = useState('');
+  const [contactPerson, setContactPerson] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
@@ -30,15 +32,18 @@ export function ExitIntentPopup() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) return;
+    if (!companyName.trim() || !contactPerson.trim() || !email.trim()) {
+      toast.error('Fyll i företag, kontaktperson och e-post.');
+      return;
+    }
 
     setLoading(true);
     try {
       const { error } = await supabase.from('leads').insert({
-        company_name: '(exit-intent)',
-        contact_person: email.split('@')[0],
-        email,
-        phone: phone || null,
+        company_name: companyName.trim(),
+        contact_person: contactPerson.trim(),
+        email: email.trim(),
+        phone: phone.trim() || null,
         message: 'Exit-intent popup – vill testa gratis',
         utm_source: 'exit-intent',
         utm_medium: 'popup',
@@ -53,10 +58,10 @@ export function ExitIntentPopup() {
           body: {
             templateName: 'new-lead-notification',
             templateData: {
-              companyName: '(exit-intent)',
-              contactPerson: email.split('@')[0],
-              email,
-              phone: phone || null,
+              companyName: companyName.trim(),
+              contactPerson: contactPerson.trim(),
+              email: email.trim(),
+              phone: phone.trim() || null,
               message: 'Exit intent-lead',
             },
           },
@@ -98,6 +103,14 @@ export function ExitIntentPopup() {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="exit-company">Företag *</Label>
+              <Input id="exit-company" autoComplete="organization" value={companyName} onChange={e => setCompanyName(e.target.value)} maxLength={160} required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="exit-contact">Kontaktperson *</Label>
+              <Input id="exit-contact" autoComplete="name" value={contactPerson} onChange={e => setContactPerson(e.target.value)} maxLength={120} required />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="exit-email">E-post *</Label>
               <Input

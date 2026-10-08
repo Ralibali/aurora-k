@@ -57,10 +57,29 @@ describe('runtime Google Maps configuration', () => {
     expect(googleMapsAvailable()).toBe(true);
   });
 
-  it('treats an unconfigured backend as unavailable rather than an error', async () => {
+  it('explains a missing key while keeping the fallback available', async () => {
     invoke.mockResolvedValue({ data: { configured: false }, error: null });
-    const { ensureGoogleMapsKey, googleMapsAvailable } = await load();
+    const { ensureGoogleMapsKey, googleMapsAvailable, useGoogleMapsFailure } = await load();
     expect(await ensureGoogleMapsKey()).toBeNull();
     expect(googleMapsAvailable()).toBe(false);
+    const { result } = renderHook(() => useGoogleMapsFailure());
+    expect(result.current).toMatch(/nyckel/i);
+  });
+});
+
+describe('provider authentication after successful bootstrap', () => {
+  it('switches to fallback on a late rejection and sends only its code', async () => {
+    invoke.mockResolvedValue({ data: { configured: true, key: 'not-for-logs' }, error: null });
+    const maps = await load();
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {});
+    await maps.loadGoogleMaps();
+    expect(maps.googleMapsAvailable()).toBe(true);
+    console.error('Google Maps JavaScript API error: RefererNotAllowedMapError https://example.test/?key=not-for-logs');
+    (window as Window & { gm_authFailure?: () => void }).gm_authFailure?.();
+    expect(maps.googleMapsAvailable()).toBe(false);
+    const reports = invoke.mock.calls.filter(call => call[1]?.body?.action === 'report-error');
+    expect(reports).toEqual([['maps-config', { body: { action: 'report-error', code: 'RefererNotAllowedMapError' } }]]);
+    maps.resetGoogleMapsConfig();
+    log.mockRestore();
   });
 });

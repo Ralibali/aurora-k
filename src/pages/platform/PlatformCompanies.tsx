@@ -73,7 +73,7 @@ export default function PlatformCompanies() {
       case 'active': return { label: 'Aktiv', variant: 'default' as const, className: '' };
       case 'past_due': return { label: 'Förfallen', variant: 'destructive' as const, className: '' };
       case 'cancelled': return { label: 'Avslutad', variant: 'secondary' as const, className: '' };
-      default: return { label: 'Pending', variant: 'outline' as const, className: '' };
+      default: return { label: 'Väntar', variant: 'outline' as const, className: '' };
     }
   };
 

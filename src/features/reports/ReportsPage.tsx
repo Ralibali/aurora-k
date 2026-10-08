@@ -68,6 +68,7 @@ export default function ReportsPage() {
     : format(monthDate, 'MMMM yyyy', { locale: sv });
 
   const exportExcel = () => {
+    if (!periodAssignments.length) { toast.error('Inga slutförda uppdrag att exportera för det valda urvalet.'); return; }
     const workbook = XLSX.utils.book_new();
     const timeRows = periodAssignments.map(item => ({
       Chaufför: item.driver?.full_name ?? '',
@@ -92,15 +93,16 @@ export default function ReportsPage() {
     XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(timeRows), 'Tidrapport');
     XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(salaryRows), 'Löneunderlag');
     XLSX.writeFile(workbook, `rapporter-${format(periodStart, 'yyyy-MM-dd')}.xlsx`);
-    toast.success('Excel exporterad');
+    toast.success(`Excel exporterad: ${periodAssignments.length} uppdrag`);
   };
 
   const exportPdf = () => {
+    if (!periodAssignments.length) { toast.error('Inga slutförda uppdrag att exportera för det valda urvalet.'); return; }
     const document = new jsPDF({ unit: 'mm', format: 'a4' });
     document.setFontSize(16);
     document.text('Tid- och lönerapport', 20, 20);
     document.setFontSize(10);
-    document.text(periodLabel, 20, 27);
+    document.text(`${periodLabel} · ${periodAssignments.length} uppdrag`, 20, 27);
     autoTable(document, {
       startY: 34,
       head: [['Chaufför', 'Datum', 'Uppdrag', 'Start', 'Stopp', 'Timmar']],
@@ -124,7 +126,7 @@ export default function ReportsPage() {
       styles: { fontSize: 8 },
     });
     document.save(`rapporter-${format(periodStart, 'yyyy-MM-dd')}.pdf`);
-    toast.success('PDF exporterad');
+    toast.success(`PDF exporterad: ${periodAssignments.length} uppdrag`);
   };
 
   return (
@@ -135,9 +137,10 @@ export default function ReportsPage() {
           <div className="flex items-center rounded-lg border bg-card"><button className="p-2" onClick={() => viewMode === 'week' ? setWeekOffset(value => value - 1) : setMonthOffset(value => value - 1)}><ChevronLeft className="h-4 w-4" /></button><span className="min-w-[190px] px-3 text-center text-sm font-medium capitalize">{periodLabel}</span><button className="p-2" onClick={() => viewMode === 'week' ? setWeekOffset(value => value + 1) : setMonthOffset(value => value + 1)}><ChevronRight className="h-4 w-4" /></button></div>
           <Select value={driverFilter} onValueChange={setDriverFilter}><SelectTrigger className="w-[180px]"><SelectValue placeholder="Chaufför" /></SelectTrigger><SelectContent><SelectItem value="all">Alla chaufförer</SelectItem>{(drivers ?? []).map(driver => <SelectItem key={driver.id} value={driver.id}>{driver.full_name}</SelectItem>)}</SelectContent></Select>
           <Select value={customerFilter} onValueChange={setCustomerFilter}><SelectTrigger className="w-[180px]"><SelectValue placeholder="Kund" /></SelectTrigger><SelectContent><SelectItem value="all">Alla kunder</SelectItem>{(customers ?? []).map(customer => <SelectItem key={customer.id} value={customer.id}>{customer.name}</SelectItem>)}</SelectContent></Select>
-          <div className="ml-auto flex gap-2"><Button variant="outline" onClick={exportPdf}><FileText className="mr-1 h-4 w-4" /> PDF</Button><Button variant="outline" onClick={exportExcel}><FileSpreadsheet className="mr-1 h-4 w-4" /> Excel</Button></div>
+          <div className="ml-auto flex gap-2"><Button variant="outline" onClick={exportPdf} disabled={!periodAssignments.length}><FileText className="mr-1 h-4 w-4" /> PDF</Button><Button variant="outline" onClick={exportExcel} disabled={!periodAssignments.length}><FileSpreadsheet className="mr-1 h-4 w-4" /> Excel</Button></div>
         </div>
 
+        <p className="text-sm text-muted-foreground" role="status">{periodAssignments.length} slutförda uppdrag i urvalet. {!periodAssignments.length && 'Välj en annan period eller ändra filtren för att exportera.'}</p>
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
           <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Arbetstid</p><p className="mt-1 text-2xl font-bold">{totalHours.toFixed(1)} h</p></CardContent></Card>
           <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Grundlön</p><p className="mt-1 text-2xl font-bold">{Math.round(salary.totalGross).toLocaleString('sv-SE')} kr</p></CardContent></Card>

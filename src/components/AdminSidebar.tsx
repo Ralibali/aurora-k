@@ -34,12 +34,9 @@ export function AdminSidebar() {
     .toUpperCase()
     .slice(0, 2);
 
-  // Merge primary + secondary items per section label when expanded
-  const sections = primarySections.map(ps => {
-    if (!showMore) return ps;
-    const extra = secondarySections.find(ss => ss.label === ps.label);
-    return extra ? { ...ps, items: [...ps.items, ...extra.items] } : ps;
-  });
+  const primaryUrls = new Set(primarySections.flatMap(section => section.items.map(item => item.url)));
+  const extraItems = secondarySections.flatMap(section => section.items).filter((item, index, items) => !primaryUrls.has(item.url) && items.findIndex(other => other.url === item.url) === index);
+  const sections = showMore ? [...primarySections, { label: 'System / Avancerat', items: extraItems }] : primarySections;
 
   return (
     <aside className="hidden md:flex flex-col fixed inset-y-0 left-0 w-60 bg-[#0B1220] z-40 border-r border-white/5">
@@ -81,14 +78,16 @@ export function AdminSidebar() {
           </div>
         ))}
 
+        <p className="px-5 mt-4 text-xs text-slate-400">Hitta alla sidor med Ctrl+K</p>
         {/* Toggle more/less */}
         <div className="px-2 mt-4">
           <button
             onClick={toggle}
+            aria-expanded={showMore}
             className="flex items-center gap-2 px-3 py-2 rounded-md text-xs text-slate-500 hover:bg-white/5 hover:text-slate-300 transition-colors w-full"
           >
             <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showMore ? 'rotate-180' : ''}`} />
-            {showMore ? 'Visa mindre' : 'Fler funktioner'}
+            {showMore ? 'Visa mindre' : 'System / Avancerat'}
           </button>
         </div>
       </nav>

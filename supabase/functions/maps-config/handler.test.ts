@@ -43,3 +43,13 @@ describe('maps-config', () => {
     expect(response.status).toBe(500);
   });
 });
+
+it('logs only approved diagnostic codes after administrator authorization', async () => {
+  const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  const req = new Request('https://example.test/maps-config', { method: 'POST', headers: { Authorization: 'Bearer t' }, body: JSON.stringify({ action: 'report-error', code: 'BillingNotEnabledMapError', secret: 'must-not-be-logged' }) });
+  const response = await handleMapsConfig(req, client({ id: 'u1' }, [{ company_id: 'c1' }]) as never, env);
+  expect(response.status).toBe(200);
+  expect(JSON.stringify(warn.mock.calls)).not.toContain('must-not-be-logged');
+  expect(JSON.stringify(warn.mock.calls)).toContain('BillingNotEnabledMapError');
+  warn.mockRestore();
+});

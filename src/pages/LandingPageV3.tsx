@@ -211,12 +211,6 @@ export default function LandingPageV3() {
                     <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{t.hero.ctaSecondaryLoading}</>
                   ) : t.hero.ctaSecondaryIdle}
                 </Button>
-                <Button asChild size="lg" variant="ghost" className="h-auto min-h-[52px] whitespace-normal py-3 rounded-2xl px-7 text-base font-bold text-[#818cf8] hover:bg-[#4f46e5]/5">
-                  <Link to="/register">
-                    {t.hero.ctaRegister}
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
               </div>
 
               <div className="mt-8 grid gap-3 text-sm font-medium text-slate-400 sm:grid-cols-2">

@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import RouteMap from './AdminRouteMapGoogle';
 import LiveMap from './AdminLiveMapGoogle';
 const mocks = vi.hoisted(() => ({ load: vi.fn(), map: vi.fn(), marker: vi.fn(), setMap: vi.fn(), clear: vi.fn(), fit: vi.fn() }));
-vi.mock('@/lib/google-maps', () => ({ loadGoogleMaps: () => mocks.load() }));
+vi.mock('@/lib/google-maps', () => ({ loadGoogleMaps: () => mocks.load(), useGoogleMapsFailure: () => null, reportGoogleMapsFailure: vi.fn() }));
 let resolve: () => void;
 beforeEach(() => {
   Object.values(mocks).forEach(mock => mock.mockReset());

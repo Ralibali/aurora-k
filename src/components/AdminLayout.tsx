@@ -1,4 +1,4 @@
-import { ReactNode, Suspense } from 'react';
+import { ReactNode, Suspense, useEffect } from 'react';
 import { PageTransition } from '@/components/PageTransition';
 import { AdminSidebar } from '@/components/AdminSidebar';
 import { MobileTabBar } from '@/components/MobileTabBar';
@@ -73,6 +73,7 @@ function SearchTrigger() {
 }
 
 export function AdminLayout({ children, title, description, actions }: AdminLayoutProps) {
+  useEffect(() => { document.title = `${title} | Aurora Transport`; }, [title]);
   return (
     <>
       <DemoBanner />

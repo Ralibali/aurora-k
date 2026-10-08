@@ -17,7 +17,8 @@ Aurora Transport är en molnbaserad SaaS-plattform byggd av Aurora Media AB. Sys
 - [Coredination-alternativ](/coredination-alternativ): Jämförelse mot Coredination.
 - [Om oss](/om-oss): Om Aurora Media AB.
 - [Kontakt](/kontakt): Kontakta oss för demo eller frågor.
-- [Boka demo](/boka): Boka en kostnadsfri genomgång.
+- [Boka demo](/boka-demo): Boka en kostnadsfri genomgång av transportledningssystemet.
+- [Boka transport](/boka): Skicka en transportförfrågan till ett åkeri.
 
 ## Blog
 

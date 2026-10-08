@@ -10,5 +10,6 @@ Disallow: /login
 Disallow: /forgot-password
 Disallow: /reset-password
 Disallow: /ads/
+Disallow: /track/
 
 Sitemap: https://auroratransport.se/sitemap.xml

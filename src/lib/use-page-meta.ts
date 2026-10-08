@@ -1,14 +1,5 @@
-import { useLayoutEffect } from 'react';
-
-interface PageMeta {
-  title: string;
-  description: string;
-  canonical: string;
-  ogImage?: string;
-  ogImageAlt?: string;
-  ogType?: string;
-  noindex?: boolean;
-}
+import { useContext, useLayoutEffect } from 'react';
+import { PrerenderMetaContext, type PageMeta } from './page-meta-context';
 
 function ensureMeta(selector: string, attr: 'name' | 'property', key: string): HTMLMetaElement {
   let el = document.head.querySelector<HTMLMetaElement>(selector);
@@ -31,6 +22,8 @@ function ensureCanonical(): HTMLLinkElement {
 }
 
 export function usePageMeta({ title, description, canonical, ogImage, ogImageAlt, ogType = 'website', noindex = false }: PageMeta) {
+  const collector = useContext(PrerenderMetaContext);
+  if (collector) Object.assign(collector, { title, description, canonical, ogImage, ogImageAlt, ogType, noindex });
   useLayoutEffect(() => {
     document.title = title;
 

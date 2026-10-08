@@ -4,7 +4,7 @@ import { AdminLayout } from '@/components/AdminLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Clock, Navigation, AlertTriangle, Plus, Truck } from 'lucide-react';
-import { useGoogleMapsAvailable } from '@/lib/google-maps';
+import { useGoogleMapsAvailable, useGoogleMapsFailure } from '@/lib/google-maps';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useDemoMode } from '@/hooks/useDemoMode';
@@ -57,6 +57,7 @@ const GoogleMap = lazy(() => import('./AdminLiveMapGoogle'));
 
 export default function AdminLiveMap() {
   const mapsAvailable = useGoogleMapsAvailable();
+  const mapFailure = useGoogleMapsFailure();
   const navigate = useNavigate();
   const [locations, setLocations] = useState<DriverLocation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -123,8 +124,9 @@ export default function AdminLiveMap() {
   }, []);
 
   return (
-    <AdminLayout title="Fleet live" description="Realtidsposition, hastighet och senaste GPS-signal för aktiva uppdrag">
+    <AdminLayout title="Live-karta" description="Realtidsposition, hastighet och senaste GPS-signal för aktiva uppdrag">
       <div className="space-y-4">
+        {mapFailure && <p role="alert" className="rounded-lg border border-amber-500/40 bg-amber-50 p-3 text-sm text-amber-950">{mapFailure} Reservkartan visas under tiden.</p>}
         <div className="flex items-center justify-between">
           <Badge variant="outline" className="gap-1.5">
             <span className="relative flex h-2 w-2">

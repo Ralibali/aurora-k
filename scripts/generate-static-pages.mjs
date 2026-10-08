@@ -9,7 +9,7 @@
  *  - rätt twitter:title / twitter:description
  *  - crawlbar HTML i <div id="root"> (H1, intro, ev. BlogPosting JSON-LD)
  *
- * SPA:n hydrerar ovanpå den statiska markupen och tar över på klienten.
+ * SPA:n ersätter markupen och tar över på klienten.
  *
  * Detta ersätter den tidigare Puppeteer-baserade lösningen (krävde Chrome i
  * byggmiljön). Sökmotorer och sociala crawlers ser nu fullständig HTML
@@ -19,7 +19,8 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { renderEditorialArticle } from './editorial-html.mjs';
+import { writeHostingPages } from './hosting-pages.mjs';
+import { createPublicRenderer } from './prerender-react.mjs';
 import { loadBlogPosts } from "./lib/blog-posts.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -32,16 +33,13 @@ const BASE_URL = "https://auroratransport.se";
 // Title/description speglar respektive sidas usePageMeta exakt (annars uppstår
 // canonical/title-mismatch mellan statisk HTML och hydrerad SPA).
 const STATIC_PAGES = [
+  { route: "/boka-demo" },
   {
     route: "/",
     title: "Slipp Excel & WhatsApp i transportplaneringen | Aurora Transport",
     description:
       "Aurora Transport samlar uppdrag, förare, tidrapporter och fakturering i ett enkelt svenskt system. 449 kr/mån. Ingen bindningstid. Boka 15 min demo.",
     h1: "Transportledningssystem för åkerier och budfirmor",
-    body: [
-      "Aurora Transport är ett svenskt transportledningssystem som ersätter Excel, WhatsApp och whiteboard. Hantera uppdrag, förare, tidrapporter och fakturaunderlag i ett enda system – byggt för åkerier, budfirmor och transportbemanning.",
-      "Fast pris från 449 kr/månad. Obegränsat antal förare. Ingen bindningstid. Boka en kostnadsfri 15-minuters demo så visar vi hur du kan starta i dag.",
-    ],
   },
   {
     route: "/en",
@@ -49,10 +47,6 @@ const STATIC_PAGES = [
     description:
       "Swedish TMS for hauliers, couriers and transport staffing. Jobs, drivers, time reporting and invoice drafts from 449 SEK/month.",
     h1: "Transport management system for hauliers and couriers",
-    body: [
-      "Aurora Transport is a Swedish transport management system that replaces spreadsheets, WhatsApp and whiteboards. Manage jobs, drivers, time reporting and invoice drafts in one product built for hauliers, couriers and transport staffing teams.",
-      "Flat pricing from 449 SEK per month. Unlimited drivers. No lock-in. Book a free 15-minute demo and see how you can get started today.",
-    ],
   },
   {
     route: "/boka",
@@ -60,10 +54,6 @@ const STATIC_PAGES = [
     description:
       "Boka en transport hos våra åkerier direkt online. Fyll i uppdrag, adresser och önskad tid – vi återkommer med bekräftelse och pris.",
     h1: "Boka transport",
-    body: [
-      "Behöver du boka en transport? Fyll i formuläret så matchar vi ditt uppdrag med rätt åkeri och återkommer med bekräftelse och pris.",
-      "Ange upphämtnings- och leveransadress, gods och önskad tid – det tar mindre än en minut.",
-    ],
   },
   {
     route: "/tjanster",
@@ -71,10 +61,6 @@ const STATIC_PAGES = [
     description:
       "Komplett transportledningssystem: uppdragshantering, förarapp, GPS-spårning, fakturering och kundportal. 449 kr/mån, obegränsat antal förare.",
     h1: "Tjänster – allt du behöver för att leda transporter",
-    body: [
-      "Aurora Transport ger dig en komplett verktygslåda för modern transportledning: uppdragshantering, förarapp för iOS och Android, GPS-spårning i realtid, fakturering, statistik och kundportal.",
-      "Alla funktioner ingår i ett fast pris på 449 kr per månad – inga tillkommande licenser per förare och inget krångel med separata system.",
-    ],
   },
   {
     route: "/transportledningssystem",
@@ -83,10 +69,6 @@ const STATIC_PAGES = [
     description:
       "Aurora Transport är ett enkelt transportledningssystem för åkerier, budföretag och bemanningsteam. Hantera uppdrag, förare, tidrapporter och fakturaunderlag från 449 kr/mån.",
     h1: "Transportledningssystem för åkerier och transportföretag",
-    body: [
-      "Ett transportledningssystem (TMS) hjälper dig att planera uppdrag, fördela förare, följa leveranser och ta fram fakturaunderlag utan dubbeljobb. Aurora Transport är byggt för svenska åkerier och transportföretag som vill lämna Excel och WhatsApp bakom sig.",
-      "Tilldela uppdrag, följ status i realtid, samla tidrapporter direkt från förarna och exportera fakturaunderlag som CSV – från 449 kr per månad.",
-    ],
   },
   {
     route: "/tidrapportering-transport",
@@ -95,10 +77,6 @@ const STATIC_PAGES = [
     description:
       "Digital tidrapportering för transportföretag, åkerier och budfirmor. Låt förare tidrapportera i mobilen och skapa tydligare fakturaunderlag med Aurora Transport.",
     h1: "Tidrapportering för transport – direkt i förarens mobil",
-    body: [
-      "Digital tidrapportering för åkerier, budfirmor och transportbemanning. Förarna stämplar in och ut direkt i förarappen, OB- och övertid beräknas automatiskt och du får färdiga underlag för lön och fakturering.",
-      "Slipp pappersdagrapporter och Excel-mejl. Aurora Transport samlar all tidrapportering i ett system som dina förare faktiskt vill använda – från 449 kr per månad.",
-    ],
   },
   {
     route: "/vad-kostar-transportledningssystem",
@@ -107,10 +85,6 @@ const STATIC_PAGES = [
     description:
       "Vad kostar ett transportledningssystem för åkerier, budfirmor och transportföretag? Läs om pris, setup, tidrapportering, dispatch och vad som ingår i Aurora Transport.",
     h1: "Vad kostar ett transportledningssystem?",
-    body: [
-      "Priset för ett transportledningssystem varierar kraftigt. Etablerade aktörer som Coredination, AlystraGO och Transwide tar ofta 800–2 500 kr per förare och månad plus setup-avgifter på 20 000–100 000 kr.",
-      "Aurora Transport kostar 449 kr per månad – fast pris, obegränsat antal förare, ingen bindningstid och ingen setup-avgift. Du får uppdragshantering, förarapp, GPS, tidrapportering, fakturering och kundportal i samma pris.",
-    ],
   },
   {
     route: "/coredination-alternativ",
@@ -118,10 +92,6 @@ const STATIC_PAGES = [
     description:
       "Letar du efter alternativ till Coredination? Fast pris 449 kr/mån, obegränsat antal användare och ingen bindningstid.",
     h1: "Alternativ till Coredination",
-    body: [
-      "Coredination är ett kraftfullt system, men prissättningen per användare passar inte alla. Aurora Transport är ett enklare och mer prisvärt alternativ som är byggt för små och medelstora transportföretag.",
-      "Fast pris 449 kr per månad. Obegränsat antal förare. Ingen bindningstid.",
-    ],
   },
   {
     route: "/opter-alternativ",
@@ -129,10 +99,6 @@ const STATIC_PAGES = [
     description:
       "Alternativ till Opter för mindre åkerier och budfirmor. Fast pris 449 kr/mån, obegränsat antal användare, ingen bindningstid.",
     h1: "Opter-alternativet för mindre transportföretag",
-    body: [
-      "Opter är ett välkänt transportledningssystem för större transportorganisationer. För mindre åkerier och budfirmor blir det ofta i tyngsta laget – både i funktioner och pris.",
-      "Aurora Transport ger dig ett enkelt dispatchflöde med förarapp, tidrapportering och fakturaunderlag för 449 kr per månad, med obegränsat antal förare och ingen bindningstid.",
-    ],
   },
   {
     route: "/workify-alternativ",
@@ -140,10 +106,6 @@ const STATIC_PAGES = [
     description:
       "Söker du ett alternativ till Workify? Aurora Transport erbjuder uppdrag, förarapp och tidrapportering till fast teampris.",
     h1: "Workify-alternativet med fast teampris",
-    body: [
-      "Workify är populärt bland service- och installationsteam. För transportföretag som vill ha ett tydligt uppdrags- och dispatchflöde kan Aurora Transport vara ett mer renodlat alternativ.",
-      "Fast pris 449 kr per månad för hela teamet. Uppdrag, förarapp, tidrapportering och fakturaunderlag – utan pris per användare.",
-    ],
   },
   {
     route: "/hogia-transport-alternativ",
@@ -151,10 +113,6 @@ const STATIC_PAGES = [
     description:
       "Enklare alternativ till Hogia Transport för mindre åkerier. Fast pris 449 kr/mån, obegränsat antal förare, ingen bindningstid.",
     h1: "Hogia Transport-alternativet för små åkerier",
-    body: [
-      "Hogia Transport är byggt för större transportorganisationer med tunga integrationskrav. Aurora Transport är istället byggt för små åkerier och budfirmor som vill komma igång snabbt.",
-      "Ett fast pris på 449 kr per månad, obegränsat antal förare och ett fokuserat flöde för uppdrag, förare, tidrapporter och fakturaunderlag.",
-    ],
   },
   {
     route: "/pindeliver-alternativ",
@@ -162,10 +120,6 @@ const STATIC_PAGES = [
     description:
       "Alternativ till PinDeliver för B2B-transport och åkerier. Fast pris 449 kr/mån, obegränsat antal användare och ingen bindningstid.",
     h1: "PinDeliver-alternativet för B2B-transport",
-    body: [
-      "PinDeliver är starkt inom e-handelns sista mil. För B2B-åkerier och transportbemanning ger Aurora Transport ett tydligare dispatchflöde med uppdrag, förarapp och tidrapportering.",
-      "Fast pris 449 kr per månad, obegränsat antal förare och ingen bindningstid.",
-    ],
   },
   {
     route: "/alystra-alternativ",
@@ -173,10 +127,6 @@ const STATIC_PAGES = [
     description:
       "Enklare alternativ till Alystra för åkerier med 1–20 bilar. Fast pris 449 kr/mån, obegränsat antal förare, ingen bindningstid.",
     h1: "Alystra-alternativet för åkerier med 1–20 bilar",
-    body: [
-      "Alystra är etablerat hos större transportorganisationer. För åkerier med 1–20 bilar blir det ofta för tungt att implementera och för dyrt att växa i.",
-      "Aurora Transport ger dig ett fokuserat transportledningssystem för 449 kr per månad – obegränsat antal förare och utan bindningstid.",
-    ],
   },
   {
     route: "/budtjanst-app",
@@ -184,10 +134,6 @@ const STATIC_PAGES = [
     description:
       "Perfekt app för budbilar och budföretag. Tilldela uppdrag, spåra förare och få signerade leveranskvitton. 449 kr/mån.",
     h1: "Budtjänst-app för moderna budföretag",
-    body: [
-      "Aurora Transports budtjänst-app är byggd för budbilar, kurirföretag och småskalig distribution. Tilldela uppdrag, följ förare på karta i realtid och få digitala leveranskvitton med foto och kundsignatur.",
-      "Allt i ett system – från första bokningen till färdigt fakturaunderlag. 449 kr per månad, obegränsat antal förare.",
-    ],
   },
   {
     route: "/akeri-system",
@@ -195,10 +141,6 @@ const STATIC_PAGES = [
     description:
       "Digitalisera ditt åkeri med ett modernt system för uppdrag, förare och tidrapporter. Från 449 kr/mån, fast pris.",
     h1: "System för åkerier – enkelt, modernt och prisvärt",
-    body: [
-      "Aurora Transport är ett komplett åkerisystem som samlar uppdragshantering, förarapp, GPS, tidrapportering och fakturaunderlag i ett system. Byggt för svenska åkerier som vill digitalisera utan långa implementationsprojekt.",
-      "Fast pris från 449 kr per månad. Inga licenskostnader per förare, ingen bindningstid och ingen setup-avgift.",
-    ],
   },
   {
     route: "/dispatch-system",
@@ -206,10 +148,6 @@ const STATIC_PAGES = [
     description:
       "Modernt dispatch-system för att tilldela uppdrag, följa förare i realtid och kommunicera med chaufförerna. Prova gratis.",
     h1: "Dispatch-system för transportföretag",
-    body: [
-      "Ett bra dispatch-system gör skillnaden mellan kaos och kontroll. Aurora Transport ger dig en visuell dispatch-vy där du tilldelar uppdrag, ser förarstatus i realtid och kommunicerar direkt med chaufförerna via förarappen.",
-      "Byggt för transportledare som vill ha en tydlig översikt utan att klicka sig igenom tjugo menyer. 449 kr per månad, ingen bindningstid.",
-    ],
   },
   {
     route: "/transportplanering",
@@ -217,10 +155,6 @@ const STATIC_PAGES = [
     description:
       "Planera transportuppdrag och förare i ett enkelt system. Drag-and-drop, GPS, notiser och tidrapporter. 449 kr/mån, ingen bindningstid.",
     h1: "Transportplanering som verkligen sparar tid",
-    body: [
-      "Aurora Transport är ett komplett verktyg för transportplanering: dra och släpp uppdrag till rätt förare, se förarstatus i realtid och få automatiska tidrapporter. Sluta jaga förare på telefon och WhatsApp.",
-      "Allt sker i samma system som hanterar fakturering, kundregister och löneunderlag. 449 kr per månad, ingen bindningstid och igång samma dag.",
-    ],
   },
   {
     route: "/digital-foljesedel",
@@ -228,10 +162,6 @@ const STATIC_PAGES = [
     description:
       "Ersätt papperssedlar med digital följesedel: kundsignatur, foton och POD direkt i förar-appen. Skickas automatiskt till kund.",
     h1: "Slut på papperssedlar — digital följesedel i mobilen",
-    body: [
-      "Med Aurora Transport får dina förare en digital följesedel direkt i mobilen. Mottagaren signerar på skärmen, föraren fotar gods och leveransplats och en POD i PDF skickas automatiskt till kunden.",
-      "Allt fungerar offline, loggas med tid och plats och triggar fakturaunderlag direkt — så ni får betalt snabbare och slipper försvunna pappersedlar.",
-    ],
   },
   {
     route: "/kororder-app",
@@ -239,10 +169,6 @@ const STATIC_PAGES = [
     description:
       "Digital körorder app för förare: uppdrag, adresser, kundsignatur, foto och tidrapportering i mobilen. Sluta ringa — allt synkas automatiskt.",
     h1: "Digital körorder app — körordern försvinner aldrig",
-    body: [
-      "Med Aurora Transport får föraren hela körordern i mobilen: uppdrag, adresser, kontaktpersoner och instruktioner. Mottagaren signerar på skärmen, föraren fotar godset och tiden rapporteras automatiskt.",
-      "GPS och geofence visar var bilen är utan att du ringer. Allt fungerar offline och blir färdiga tidrapporter och fakturaunderlag. 449 kr per månad, ingen bindningstid.",
-    ],
   },
   {
     route: "/transportbemanning",
@@ -250,10 +176,6 @@ const STATIC_PAGES = [
     description:
       "Bemanningsbolag inom transport: tilldela förare på sekunder, få färdiga tidrapporter med OB och traktamente och ge kunderna egen portal. 449 kr/mån.",
     h1: "Systemet för transportbemanning — förare, uppdrag och tid i ett flöde",
-    body: [
-      "Aurora Transport är byggt för bemanningsbolag: se vilka förare som är tillgängliga, tilldela uppdrag på sekunder och låt förarna rapportera tid direkt i appen.",
-      "OB-tillägg och traktamenten räknas automatiskt till färdigt löneunderlag, och era uppdragsgivare bokar och följer uppdrag i egen portal. 449 kr per månad utan bindningstid.",
-    ],
   },
   {
     route: "/om-oss",
@@ -261,10 +183,6 @@ const STATIC_PAGES = [
     description:
       "Aurora Transport utvecklas av Aurora Media AB (559272-0220). Läs om företaget, vår vision och varför vi bygger Sveriges smartaste transportledningssystem.",
     h1: "Om Aurora Transport",
-    body: [
-      "Aurora Transport utvecklas av Aurora Media AB (org.nr 559272-0220). Vi bygger transportledningssystem för svenska åkerier, budfirmor och bemanningsföretag inom transport.",
-      "Vår vision är ett enkelt, prisvärt och modernt system som transportföretag faktiskt vill använda – utan långa avtal, dyra implementationer eller pris-per-användare.",
-    ],
   },
   {
     route: "/kontakt",
@@ -272,10 +190,6 @@ const STATIC_PAGES = [
     description:
       "Intresserad av Aurora Transport? Fyll i formuläret så kontaktar vi dig för en personlig demo och genomgång.",
     h1: "Kontakta oss",
-    body: [
-      "Vill du veta mer om Aurora Transport eller boka en personlig demo? Fyll i formuläret så hör vi av oss inom en arbetsdag.",
-      "Du kan också mejla info@auroramedia.se direkt om du föredrar det.",
-    ],
   },
   {
     route: "/blogg",
@@ -283,10 +197,6 @@ const STATIC_PAGES = [
     description:
       "Läs guider, jämförelser och tips om dispatchsystem, transportledning och digitalisering av budtjänst. Skrivet för svenska transportföretag.",
     h1: "Bloggen – guider för transportföretag",
-    body: [
-      "Här samlar vi guider, jämförelser och praktiska tips för svenska åkerier, budfirmor och transportbemanning. Allt skrivet för dig som driver verksamheten.",
-      "Lär dig hur du väljer rätt dispatchsystem, vad ett TMS faktiskt bör kosta och hur du digitaliserar din budtjänst steg för steg.",
-    ],
   },
   {
     route: "/privacy",
@@ -294,10 +204,6 @@ const STATIC_PAGES = [
     description:
       "Läs om hur Aurora Transport hanterar personuppgifter, cookies och datasäkerhet i enlighet med GDPR.",
     h1: "Integritetspolicy",
-    body: [
-      "Aurora Transport hanterar personuppgifter i enlighet med GDPR. Här beskriver vi vilka uppgifter vi samlar in, varför vi gör det, hur länge vi sparar dem och vilka rättigheter du har.",
-      "Personuppgiftsansvarig är Aurora Media AB (org.nr 559272-0220). Har du frågor – kontakta info@auroramedia.se.",
-    ],
   },
 ];
 
@@ -369,20 +275,6 @@ function injectJsonLd(html, jsonLd) {
 }
 
 // ---------- Sidrendering -----------------------------------------------------
-function renderStaticBody({ h1, paragraphs, breadcrumbs }) {
-  const crumbs = breadcrumbs
-    ? `<nav aria-label="Brödsmulor"><ol>${breadcrumbs
-        .map(
-          (c) =>
-            `<li><a href="${escapeAttr(c.url)}">${escapeHtml(c.name)}</a></li>`
-        )
-        .join("")}</ol></nav>`
-    : "";
-  const body = paragraphs.map((p) => `<p>${escapeHtml(p)}</p>`).join("");
-  // Sätt aria-hidden för att inte dubbeluppläsas av skärmläsare efter hydration.
-  return `<div data-prerendered="true" aria-hidden="true" style="position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden;">${crumbs}<h1>${escapeHtml(h1)}</h1>${body}</div>`;
-}
-
 function buildBreadcrumbJsonLd(items) {
   return {
     "@context": "https://schema.org",
@@ -441,6 +333,10 @@ function renderPage(template, opts) {
   } = opts;
 
   let html = template;
+  const en = route === "/en";
+  html = html.replace(/<html[^>]*>/i, `<html lang="${en ? "en" : "sv"}">`);
+  html = setOrInsertMetaByProperty(html, "og:locale", en ? "en_GB" : "sv_SE");
+  if (route === "/" || route === "/en") html = html.replace("</head>", `<link rel="alternate" hreflang="sv" href="${BASE_URL}/"><link rel="alternate" hreflang="en" href="${BASE_URL}/en"><link rel="alternate" hreflang="x-default" href="${BASE_URL}/"></head>`);
   html = setOrInsertTitle(html, title);
   html = setOrInsertMetaByName(html, "description", description);
   html = setOrInsertCanonical(html, canonical);
@@ -478,7 +374,7 @@ function renderPage(template, opts) {
 }
 
 // ---------- Main -------------------------------------------------------------
-function main() {
+async function main() {
   if (!existsSync(TEMPLATE_PATH)) {
     console.warn(
       `[generate-static-pages] Hittade ingen dist/index.html – kör vite build först. Hoppar över.`
@@ -494,28 +390,27 @@ function main() {
     "\n"
   );
 
+  writeHostingPages(template, 'Aurora Transport');
+  const renderReact = await createPublicRenderer();
   const written = [];
   const posts = loadBlogPosts(resolve(ROOT, "src/lib/blog-data.ts"));
 
   // 1) Statiska publika sidor
   for (const page of STATIC_PAGES) {
+    const rendered = renderReact(page.route);
+    if (!/<h1[ >]/.test(rendered.html)) throw new Error(`Missing visible H1 for ${page.route}`);
     const canonical = `${BASE_URL}${page.route === "/" ? "/" : page.route}`;
     const breadcrumbs = [{ name: "Hem", url: `${BASE_URL}/` }];
     if (page.route !== "/") {
       breadcrumbs.push({ name: page.h1, url: canonical });
     }
-    const bodyHtml = page.route === "/blogg" ? `<main style="max-width:70ch;margin:3rem auto;padding:1.5rem;font-family:system-ui;line-height:1.7"><a href="/">Hem</a><h1>${escapeHtml(page.h1)}</h1><p>${escapeHtml(page.description)}</p>${posts.map(post => `<article><h2><a href="/blogg/${escapeAttr(post.slug)}">${escapeHtml(post.title)}</a></h2><p>${escapeHtml(post.publishDate)} · ${escapeHtml(post.readTime)}</p><p>${escapeHtml(post.excerpt)}</p></article>`).join("")}</main>` : renderStaticBody({
-      h1: page.h1,
-      paragraphs: page.body,
-      breadcrumbs,
-    });
     const out = renderPage(template, {
       route: page.route,
-      title: page.title,
-      description: page.description,
+      title: rendered.meta.title || page.title,
+      description: rendered.meta.description || page.description,
       canonical,
       ogType: "website",
-      bodyHtml,
+      bodyHtml: rendered.html,
       extraJsonLd:
         page.route === "/" ? [] : [buildBreadcrumbJsonLd(breadcrumbs)],
     });
@@ -525,27 +420,21 @@ function main() {
   // 2) Bloggposter
   for (const post of posts) {
     const route = `/blogg/${post.slug}`;
+    const rendered = renderReact(route);
+    if (!/<h1[ >]/.test(rendered.html)) throw new Error(`Missing blog content for ${route}`);
     const canonical = `${BASE_URL}${route}`;
     const breadcrumbs = [
       { name: "Hem", url: `${BASE_URL}/` },
       { name: "Blogg", url: `${BASE_URL}/blogg` },
       { name: post.title, url: canonical },
     ];
-    const bodyHtml = post.sections ? renderEditorialArticle(post) : renderStaticBody({
-      h1: post.title,
-      paragraphs: [
-        `Publicerad ${post.publishDate} · ${post.readTime} läsning.`,
-        post.excerpt,
-      ],
-      breadcrumbs,
-    });
     const out = renderPage(template, {
       route,
-      title: post.seoTitle,
-      description: post.metaDescription,
+      title: rendered.meta.title || post.seoTitle,
+      description: rendered.meta.description || post.metaDescription,
       canonical,
       ogType: "article",
-      bodyHtml,
+      bodyHtml: rendered.html,
       extraJsonLd: [
         buildBreadcrumbJsonLd(breadcrumbs),
         buildBlogPostingJsonLd(post, canonical),
@@ -559,4 +448,4 @@ function main() {
   );
 }
 
-main();
+await main();
