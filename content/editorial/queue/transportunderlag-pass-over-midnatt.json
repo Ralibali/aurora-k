@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "status": "draft",
+  "writtenAt": "2026-10-08T07:55:27.143533+00:00",
+  "repository": "Ralibali/aurora-k",
+  "publicationGate": "Earliest 2026-10-10, at least two Stockholm calendar days after the previous original is live. Require fresh current main, inventory, sources and previous-article checks. No publication dates while draft.",
+  "sourceReview": {
+    "checkedAt": "2026-10-08T07:55:27.143533+00:00",
+    "distinctIntent": "Dokumentera en följd av transporthändelser som passerar midnatt utan att blanda ihop datum, klockslag och tidslängd; ingen rådgivning om arbetstidsregler.",
+    "note": "Original manual guide. Owned product path verified live on Oct8. Recheck offer and links before publication. No claimed product automation or customer results."
+  },
+  "article": {
+    "slug": "transportunderlag-pass-over-midnatt",
+    "title": "Skriv tydliga datum när transportpasset går över midnatt",
+    "metaDescription": "Undvik oklara dygnsskiften i transportunderlaget. En arbetsmall för händelsedatum, klockslag, källa och frågor som behöver följas upp.",
+    "intro": "När ett transportpass börjar en dag och slutar nästa räcker det inte alltid med en lista över klockslag. En anteckning om 00.20 behöver ett datum för att gå att placera rätt. Gör därför dygnsskiftet synligt i underlaget innan det lämnas vidare till transportledning eller administration.\n\nGuiden handlar om hur redan kända händelser dokumenteras. Den beräknar inte arbetstid, ersättning eller tillåtna kör- och vilotider. Verksamhetens ansvariga behöver hantera sådana bedömningar utifrån rätt underlag och regler. En tydlig händelselista är ett stöd för fortsatt kontroll, inte ett färdigt beslut.",
+    "sections": [
+      {
+        "heading": "Ge varje händelse ett eget datum",
+        "content": "Skriv datum tillsammans med klockslaget på varje rad som kan misstolkas. Undvik att låta ett datum i dokumentets rubrik underförstått gälla även händelser efter midnatt. Använd samma sätt att skriva datum genom hela underlaget så att läsaren kan följa ordningen utan att byta tolkning.\n\nEtt påhittat exempel är en händelse den 8 oktober klockan 23.40 och nästa den 9 oktober klockan 00.20. Ange båda datumen även om de hör till samma uppdrag. Uppdragets referens knyter ihop raderna; den behöver inte tvinga alla händelser att få samma kalenderdatum."
+      },
+      {
+        "heading": "Skilj tidpunkt från tidslängd",
+        "content": "En notering som 01.30 kan betyda ett klockslag eller en timme och trettio minuter. Skriv vilket slags uppgift raden innehåller. Använd exempelvis orden klockslag och varaktighet i rubrikerna, och ange enhet när du beskriver hur länge något pågick.\n\nOm du räknar en skillnad mellan två tidpunkter, behåll start och slut i underlaget så att beräkningen går att kontrollera. Att två klockslag ligger nära varandra på urtavlan betyder inte att de hör till samma dygn. Fyll inte i ett slutdatum bara för att få en förväntad tidslängd."
+      },
+      {
+        "heading": "Behåll källan när uppgifterna kommer från olika håll",
+        "content": "Ange om tidpunkten kommer från en egen anteckning, ett besked eller ett annat dokument. Skilj en dokumenterad händelsetid från den tid då meddelandet skickades eller togs emot. De kan vara olika utan att någon av uppgifterna är fel.\n\nOm underlagen använder olika tidszoner eller om tidsangivelsen är oklar behöver ansvarig reda ut det innan raderna jämförs. Ändra inte klockslagen på egen hand och dölj sedan originalet. Behåll ursprungsuppgiften och dokumentera vilken förklaring eller omräkning som faktiskt har bekräftats."
+      },
+      {
+        "heading": "Markera luckor i stället för att fylla dem",
+        "content": "Om ett datum saknas, skriv att datumet behöver bekräftas. Ange vilket uppdrag och vilken händelse frågan gäller, så att rätt person kan svara. Det blir lättare att följa upp än ett allmänt meddelande om att hela nattpasset verkar oklart.\n\nAnvänd samma princip när [väntetid dokumenteras](/blogg/dokumentera-vantetid-transportuppdrag): håll observerade tider åtskilda från antagna orsaker. En lucka mellan två anteckningar visar inte i sig vad som pågick däremellan. Beskriv bara det underlaget faktiskt stödjer och lämna resten som en öppen fråga."
+      },
+      {
+        "heading": "Läs händelseförloppet som nästa mottagare",
+        "content": "Gå igenom raderna i datumordning och kontrollera att varje rad har referens, händelse, datum, klockslag och källa där det behövs. Markera vilka frågor som återstår och vem som följer upp dem. Be en kollega läsa utan muntliga förklaringar om underlaget fortfarande känns tvetydigt.\n\nPå sidan om [Aurora Transports tjänster](/tjanster) kan ni se det aktuella erbjudandet när ni ser över era arbetsrutiner. AI-assisterad originalguide med en manuell dokumentationsmall. Texten utlovar ingen automatisk korrigering av dygnsskiften eller kontroll av arbetstidsregler."
+      }
+    ],
+    "editorial": {
+      "createdWith": "ChatGPT",
+      "aiAssisted": true,
+      "searchIntent": "Dokumentera en följd av transporthändelser som passerar midnatt utan att blanda ihop datum, klockslag och tidslängd; ingen rådgivning om arbetstidsregler.",
+      "sourceUrls": [
+        "https://auroratransport.se/tjanster"
+      ],
+      "sourceCheckedAt": "2026-10-08T07:55:27.143533+00:00"
+    },
+    "seoTitle": "Skriv tydliga datum när transportpasset går över midnatt",
+    "readTime": "4 min",
+    "excerpt": "Undvik oklara dygnsskiften i transportunderlaget. En arbetsmall för händelsedatum, klockslag, källa och frågor som behöver följas upp.",
+    "tags": [
+      "transportledning",
+      "dokumentation"
+    ],
+    "links": [
+      {
+        "href": "/tjanster",
+        "label": "Se Aurora Transports tjänster"
+      }
+    ]
+  }
+}
