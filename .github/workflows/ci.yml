@@ -9,6 +9,16 @@ permissions:
   contents: read
 
 jobs:
+  maps-config:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: deno check --node-modules-dir=none --no-lock supabase/functions/maps-config/index.ts
+
   validate:
     runs-on: ubuntu-latest
     timeout-minutes: 20
