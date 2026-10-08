@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, Fragment } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AdminLayout } from '@/components/AdminLayout';
 import { useAssignments, useDrivers } from '@/hooks/useData';
@@ -24,7 +24,7 @@ import { sv } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { useDemoMode } from '@/hooks/useDemoMode';
 import { demoCalendarAssignments, demoDrivers } from '@/lib/demo-data';
-import { CalendarDays, Info } from 'lucide-react';
+import { CalendarDays } from 'lucide-react';
 
 type ViewMode = 'week' | 'month';
 
@@ -110,23 +110,8 @@ export default function AdminCalendar() {
   };
 
   return (
-    <AdminLayout title="Transportkalender" description="Planera veckan och öppna dagens transporter i dispatch.">
+    <AdminLayout title="Kalender">
       <div className="min-w-0 space-y-4">
-        {/* Helper banner */}
-        <div className="flex items-start gap-3 rounded-lg border border-border bg-card/50 px-4 py-3 text-sm">
-          <Info className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-          <div className="flex-1">
-            <p className="text-foreground font-medium">Här ser du uppdrag per dag och chaufför.</p>
-            <p className="text-muted-foreground text-xs mt-0.5">
-              Färgerna visar status: <span className="text-orange-600 dark:text-orange-400">väntande</span>,{' '}
-              <span className="text-blue-600 dark:text-blue-400">pågående</span>,{' '}
-              <span className="text-green-600 dark:text-green-400">slutförda</span>,{' '}
-              <span className="text-amber-700 dark:text-amber-400">försenade</span>,{' '}
-              <span className="text-destructive">avbokade</span>. Alla tider visas i svensk tid.
-            </p>
-          </div>
-        </div>
-
         {!demoEnabled && isError && (
           <div role="alert" className="flex flex-wrap items-center gap-3 rounded-lg border border-destructive/30 bg-card p-4">
             <AlertTriangle className="h-4 w-4 text-destructive" />
@@ -151,12 +136,12 @@ export default function AdminCalendar() {
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <Select value={driverFilter} onValueChange={setDriverFilter}>
-              <SelectTrigger className="w-[180px] h-9" aria-label="Filtrera på chaufför">
-                <SelectValue placeholder="Alla chaufförer" />
+              <SelectTrigger className="w-[180px] h-9" aria-label="Filtrera på förare">
+                <SelectValue placeholder="Alla förare" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Alla chaufförer</SelectItem>
-                <SelectItem value="unassigned">Saknar chaufför</SelectItem>
+                <SelectItem value="all">Alla förare</SelectItem>
+                <SelectItem value="unassigned">Saknar förare</SelectItem>
                 {effectiveDrivers.map((d) => (
                   <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>
                 ))}
@@ -192,7 +177,7 @@ export default function AdminCalendar() {
             </div>
             <h3 className="text-base font-semibold text-foreground mb-1">Skapa veckans första uppdrag</h3>
             <p className="text-sm text-muted-foreground max-w-md mx-auto mb-4">
-              När du planerar uppdrag visas de här som färgade block per dag och chaufför — så hela teamet ser veckan i taget.
+              När du planerar uppdrag visas de här som färgade block per dag och förare — så hela teamet ser veckan i taget.
             </p>
             <Button size="sm" onClick={() => navigate('/admin/assignments/new')}>
               <Plus className="h-4 w-4 mr-1" /> Skapa uppdrag
@@ -200,6 +185,21 @@ export default function AdminCalendar() {
           </div>
         )}
 
+        {viewMode === 'week' && <>
+         <div className="hidden md:block overflow-x-auto rounded-2xl border" role="region" aria-label="Veckoplanering per förare" tabIndex={0}>
+          <div className="admin-calendar-grid"><div className="bg-muted/30 text-sm font-medium">Förare</div>{days.map(day => <div key={day.toISOString()} className={cn('text-sm', format(day,'yyyy-MM-dd') === today && 'bg-muted/60')}><p className="text-xs text-muted-foreground capitalize">{format(day,'EEE',{locale:sv})}</p><p className="mt-1 font-semibold">{format(day,'d MMM',{locale:sv})}</p></div>)}
+           {[{id:'unassigned',full_name:'Ej tilldelade'},...effectiveDrivers].filter(driver => driverFilter === 'all' || driver.id === driverFilter).map(driver => <Fragment key={driver.id}><div className="text-sm font-medium">{driver.full_name}</div>{days.map(day => {
+            const key=format(day,'yyyy-MM-dd');const jobs=(assignmentsByDay.get(key)||[]).filter(a=>driver.id === 'unassigned' ? !a.assigned_driver_id : a.assigned_driver_id === driver.id);
+            return <div key={key} className="min-h-28">{jobs.map(a=><button key={a.id} className="admin-calendar-job" data-status={a.status} data-unassigned={!a.assigned_driver_id} onClick={()=>navigate(a.id.startsWith('demo-') ? `/admin/assignments?date=${key}` : `/admin/assignments/${a.id}`)}><span className="block font-medium tabular-nums">{formatStockholmTime(a.scheduled_start)}</span><span className="mt-1 block">{a.title}</span></button>)}</div>;
+           })}</Fragment>)}
+          </div>
+         </div>
+         <div className="space-y-4 md:hidden">{[{id:'unassigned',full_name:'Ej tilldelade'},...effectiveDrivers].filter(driver => driverFilter === 'all' || driver.id === driverFilter).map(driver => {
+          const jobs=days.flatMap(day=>(assignmentsByDay.get(format(day,'yyyy-MM-dd'))||[])).filter(a=>driver.id==='unassigned' ? !a.assigned_driver_id : a.assigned_driver_id===driver.id);
+          return <section key={driver.id} className="rounded-2xl border p-4"><h2 className="mb-3 text-sm font-semibold">{driver.full_name}</h2>{jobs.length ? jobs.map(a=><button key={a.id} className="admin-calendar-job" data-status={a.status} data-unassigned={!a.assigned_driver_id} onClick={()=>navigate(a.id.startsWith('demo-') ? `/admin/assignments?date=${getStockholmDateKey(a.scheduled_start)}` : `/admin/assignments/${a.id}`)}><span className="block text-xs text-muted-foreground">{format(new Date(a.scheduled_start),'EEE d MMM',{locale:sv})} · {formatStockholmTime(a.scheduled_start)}</span><span className="mt-1 block font-medium">{a.title}</span></button>) : <p className="text-sm text-muted-foreground">Inga uppdrag den här veckan.</p>}</section>;
+         })}</div>
+        </>}
+        {viewMode === 'month' && <>
         {/* Calendar Grid */}
         <div className="overflow-x-auto rounded-lg border bg-card" role="region" aria-label="Transportkalender, rulla i sidled på små skärmar" tabIndex={0}>
           <div className="min-w-[760px]">
@@ -270,6 +270,7 @@ export default function AdminCalendar() {
           </div>
           </div>
         </div>
+        </>}
       </div>
     </AdminLayout>
   );
