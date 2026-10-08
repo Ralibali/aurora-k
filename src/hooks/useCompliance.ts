@@ -5,6 +5,15 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
 export type DriverDocument = Tables<'driver_documents'>;
+export type ReviewedDriverDocument = DriverDocument & {
+  storage_path: string | null;
+  file_name: string | null;
+  review_status: 'pending' | 'approved' | 'rejected';
+  reviewed_at: string | null;
+  reviewed_by: string | null;
+  review_notes: string | null;
+  driver: { full_name: string } | null;
+};
 export type VehicleMaintenance = Tables<'vehicle_maintenance'>;
 
 export const DRIVER_DOC_TYPES = [
@@ -37,7 +46,7 @@ export function useDriverDocuments() {
         .select('*, driver:profiles(full_name)')
         .order('expires_at', { ascending: true, nullsFirst: false });
       if (error) throw error;
-      return data;
+      return data as unknown as ReviewedDriverDocument[] | null;
     },
     enabled: !!companyId,
   });
@@ -156,5 +165,129 @@ export function useDeleteVehicleMaintenance() {
       toast.success('Underhåll borttaget');
     },
     onError: (error) => toast.error('Kunde inte ta bort: ' + error.message),
+  });
+}
+
+/* ── Förarkollen: private file attachments + internal review ── */
+
+const ALLOWED_DOCUMENT_MIMES: Record<string, string> = {
+  'application/pdf': 'pdf', 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp',
+};
+const MAX_DOCUMENT_SIZE = 10 * 1024 * 1024;
+const DOCUMENT_BUCKET = 'driver-compliance';
+
+export function validateDriverDocumentFile(file: Pick<File, 'size' | 'type'>): string {
+  const ext = ALLOWED_DOCUMENT_MIMES[file.type];
+  if (!ext) throw new Error('Endast PDF, JPG, PNG eller WebP stöds.');
+  if (file.size <= 0 || file.size > MAX_DOCUMENT_SIZE) throw new Error('Filen måste vara mellan 1 byte och 10 MB.');
+  return ext;
+}
+
+export function useUploadDriverDocumentAttachment() {
+  const { companyId } = useAuth();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ document, file }: { document: ReviewedDriverDocument; file: File }) => {
+      if (!companyId || document.company_id !== companyId || document.storage_path)
+        throw new Error('Bilagan kan inte laddas upp till detta dokument.');
+      const extension = validateDriverDocumentFile(file);
+      const path = companyId + '/' + document.driver_id + '/' + document.id + '/' + crypto.randomUUID() + '.' + extension;
+      const { error: uploadError } = await supabase.storage.from(DOCUMENT_BUCKET)
+        .upload(path, file, { contentType: file.type, upsert: false });
+      if (uploadError) throw uploadError;
+      const updates = {
+        storage_path: path, file_name: file.name.slice(0, 180), review_status: 'pending',
+        reviewed_by: null, reviewed_at: null, review_notes: null,
+      };
+      const { data, error } = await supabase.from('driver_documents')
+        .update(updates as unknown as TablesUpdate<'driver_documents'>)
+        .eq('id', document.id).eq('company_id', companyId).is('storage_path', null)
+        .select('id').maybeSingle();
+      if (error || !data) {
+        const { error: cleanupError } = await supabase.storage.from(DOCUMENT_BUCKET).remove([path]);
+        if (cleanupError) console.error('Bilagan kunde inte städas bort:', cleanupError);
+        throw error ?? new Error('Dokumentet ändrades av någon annan. Försök igen.');
+      }
+    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['driver_documents'] }); toast.success('Bilagan är sparad för granskning'); },
+    onError: (error) => toast.error('Uppladdning misslyckades: ' + error.message),
+  });
+}
+
+export function useRemoveDriverDocumentAttachment() {
+  const { companyId } = useAuth();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (document: ReviewedDriverDocument) => {
+      if (!companyId || document.company_id !== companyId || !document.storage_path) throw new Error('Bilaga saknas');
+      const path = document.storage_path;
+      const { error: fileError } = await supabase.storage.from(DOCUMENT_BUCKET).remove([path]);
+      if (fileError) throw fileError;
+      const { data, error } = await supabase.from('driver_documents')
+        .update({ storage_path: null, file_name: null, review_status: 'pending',
+          reviewed_at: null, reviewed_by: null, review_notes: null } as unknown as TablesUpdate<'driver_documents'>)
+        .eq('id', document.id).eq('company_id', companyId).eq('storage_path', path)
+        .select('id').maybeSingle();
+      if (error || !data) throw error ?? new Error('Bilagan är borttagen men dokumentet kunde inte uppdateras');
+    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['driver_documents'] }); toast.success('Bilagan borttagen'); },
+    onError: (error) => toast.error('Kunde inte ta bort bilagan: ' + error.message),
+  });
+}
+
+export async function openDriverDocumentAttachment(path: string) {
+  const { data, error } = await supabase.storage.from(DOCUMENT_BUCKET).createSignedUrl(path, 60);
+  if (error || !data?.signedUrl) throw error ?? new Error('Kunde inte öppna filen');
+  window.open(data.signedUrl, '_blank', 'noopener,noreferrer');
+}
+
+export function useReviewDriverDocument() {
+  const { user, companyId } = useAuth();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ document, decision }: {
+      document: ReviewedDriverDocument; decision: 'approved' | 'rejected';
+    }) => {
+      if (!user || !companyId || companyId !== document.company_id || !document.storage_path)
+        throw new Error('Bilaga eller behörighet saknas');
+      const { data, error } = await supabase.from('driver_documents')
+        .update({ review_status: decision, reviewed_at: new Date().toISOString(),
+          reviewed_by: user.id } as unknown as TablesUpdate<'driver_documents'>)
+        .eq('id', document.id).eq('company_id', companyId).eq('storage_path', document.storage_path)
+        .select('id').maybeSingle();
+      if (error || !data) throw error ?? new Error('Dokumentet ändrades, ladda om sidan.');
+    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['driver_documents'] }); toast.success('Intern granskning sparad'); },
+    onError: (error) => toast.error('Kunde inte granska: ' + error.message),
+  });
+}
+
+export function useComplianceEmailReminders() {
+  const { companyId } = useAuth();
+  return useQuery({
+    queryKey: ['driver_document_reminders', companyId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('companies')
+        .select('id, driver_document_reminders_enabled').eq('id', companyId!).maybeSingle();
+      if (error) throw error;
+      return Boolean((data as unknown as { driver_document_reminders_enabled?: boolean } | null)?.driver_document_reminders_enabled);
+    },
+    enabled: !!companyId,
+  });
+}
+
+export function useToggleComplianceEmailReminders() {
+  const { companyId } = useAuth();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (enabled: boolean) => {
+      if (!companyId) throw new Error('Företag saknas');
+      const { data, error } = await supabase.from('companies')
+        .update({ driver_document_reminders_enabled: enabled } as unknown as TablesUpdate<'companies'>)
+        .eq('id', companyId).select('id').maybeSingle();
+      if (error || !data) throw error ?? new Error('Du saknar behörighet att ändra inställningen');
+    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['driver_document_reminders'] }); toast.success('E-postpåminnelser uppdaterade'); },
+    onError: (error) => toast.error('Kunde inte spara inställningen: ' + error.message),
   });
 }
