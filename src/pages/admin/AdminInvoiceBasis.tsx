@@ -1,3 +1,4 @@
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AdminLayout } from '@/components/AdminLayout';
@@ -30,6 +31,7 @@ export default function AdminInvoiceBasis() {
   const [status, setStatus] = useState<StatusFilter>('ready');
   const [customerId, setCustomerId] = useState<string>('all');
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [invoicePanel, setInvoicePanel] = useState(false);
   const deviations=useAssignmentDeviations();
   const openCounts=useMemo(()=>{const counts=new Map<string,number>();for(const d of deviations.data??[])counts.set(d.assignment_id,(counts.get(d.assignment_id)??0)+1);return counts;},[deviations.data]);
   const readiness=useCallback((a:NonNullable<typeof assignments>[number])=>invoiceReadiness(a,openCounts.get(a.id)??0,!deviations.isPending&&!deviations.isError),[openCounts,deviations.isPending,deviations.isError]);
@@ -55,15 +57,17 @@ export default function AdminInvoiceBasis() {
 
   // Group by customer for the "skapa underlag" workflow
   const groupedByCustomer = useMemo(() => {
-    const map = new Map<string, { customer: (typeof filtered)[number]['customer']; assignments: (typeof filtered)[number][]; total: number; hours: number }>();
+    const map = new Map<string, { month: string; customer: (typeof filtered)[number]['customer']; assignments: (typeof filtered)[number][]; total: number; hours: number }>();
     filtered.forEach((a) => {
       if (!a.customer_id || !readiness(a).ready) return;
       const { hours, amount } = readiness(a);
-      const entry = map.get(a.customer_id) ?? { customer: a.customer, assignments: [], total: 0, hours: 0 };
+      const month = format(new Date(a.actual_start || a.scheduled_start), 'yyyy-MM');
+      const key = `${a.customer_id}:${month}`;
+      const entry = map.get(key) ?? { month, customer: a.customer, assignments: [], total: 0, hours: 0 };
       entry.assignments.push(a);
       entry.total += amount ?? 0;
       entry.hours += hours ?? 0;
-      map.set(a.customer_id, entry);
+      map.set(key, entry);
     });
     return Array.from(map.values()).sort((a, b) => b.total - a.total);
   }, [filtered, readiness]);
@@ -80,6 +84,7 @@ export default function AdminInvoiceBasis() {
     };
   }, [completedAssignments, readiness]);
 
+  const selectedGroups = groupedByCustomer.filter(group => group.assignments.some(a => selected.has(a.id)));
   const eligible=filtered.filter(a=>readiness(a).ready);
   const selectedVisible=filtered.filter(a=>selected.has(a.id));
   const selectedForInvoice=selectedVisible.filter(a=>readiness(a).ready);
@@ -201,20 +206,21 @@ export default function AdminInvoiceBasis() {
       {status === 'ready' && groupedByCustomer.length > 0 && (
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-base">Fakturaunderlag per kund</CardTitle>
+            <CardTitle className="text-base">Per kund och månad</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {groupedByCustomer.map((group) => (
-                <div key={group.customer?.id} className="border rounded-lg p-4 hover:bg-accent/50 transition-colors">
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
+                <div key={`${group.customer?.id}:${group.month}`} className="border rounded-lg p-4 hover:bg-accent/50 transition-colors">
+                  <div className="flex items-start justify-between gap-3 mb-2">
+                    <Checkbox aria-label={`Välj ${group.customer?.name} ${group.month}`} checked={group.assignments.every(a=>selected.has(a.id)) ? true : group.assignments.some(a=>selected.has(a.id)) ? 'indeterminate' : false} onCheckedChange={checked=>setSelected(previous=>{const next=new Set(previous);group.assignments.forEach(a=>checked ? next.add(a.id) : next.delete(a.id));return next;})} />
+                    <div className="min-w-0 flex-1">
                       <p className="font-semibold">{group.customer?.name}</p>
                       <p className="text-xs text-muted-foreground">
-                        {group.assignments.length} uppdrag · {group.hours.toFixed(1)}h
+                        {format(new Date(`${group.month}-01T12:00:00`), 'MMMM yyyy', {locale:sv})} · {group.assignments.length} uppdrag
                       </p>
                     </div>
-                    <Badge variant="secondary">{fmtSek(group.total)}</Badge>
+                    <span className="shrink-0 text-sm font-medium tabular-nums text-right">{fmtSek(group.total)}</span>
                   </div>
                   <Button asChild size="sm" className="w-full mt-2">
                     <Link to={createInvoiceUrl(group.customer?.id, group.assignments.map((a) => a.id))}>
@@ -351,6 +357,10 @@ export default function AdminInvoiceBasis() {
           )}
         </CardContent>
       </Card>
+      <div className="sticky bottom-20 md:bottom-5 z-20 mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border bg-white p-4 shadow-sm">
+       <p className="text-sm text-muted-foreground">{selectedGroups.length} kund- och månadsunderlag valda</p><Button disabled={!selectedGroups.length} onClick={()=>setInvoicePanel(true)}>Skapa fakturor ({selectedGroups.length})</Button>
+      </div>
+      <Sheet open={invoicePanel} onOpenChange={setInvoicePanel}><SheetContent className="admin-panel"><SheetHeader className="mb-6 text-left"><SheetTitle>Skapa fakturor ({selectedGroups.length})</SheetTitle><SheetDescription>Granska och skapa en faktura per kund och månad.</SheetDescription></SheetHeader><div className="space-y-4">{selectedGroups.map(group=><div className="rounded-2xl border p-4" key={`${group.customer?.id}:${group.month}`}><p className="font-medium">{group.customer?.name}</p><p className="mt-1 text-sm text-muted-foreground">{group.month} · {group.assignments.filter(a=>selected.has(a.id)).length} uppdrag</p><Button className="mt-4" asChild><Link to={createInvoiceUrl(group.customer?.id,group.assignments.filter(a=>selected.has(a.id)).map(a=>a.id))}>Granska faktura</Link></Button></div>)}</div></SheetContent></Sheet>
     </AdminLayout>
   );
 }
