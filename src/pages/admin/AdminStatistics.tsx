@@ -88,10 +88,10 @@ export default function AdminStatistics() {
 
     // Driver table
     doc.setFontSize(13);
-    doc.text('Per chaufför', 14, 40);
+    doc.text('Per förare', 14, 40);
     autoTable(doc, {
       startY: 44,
-      head: [['Chaufför', 'Leveranser', 'Timmar', 'Snittid']],
+      head: [['Förare', 'Leveranser', 'Timmar', 'Snittid']],
       body: hoursPerDriver.filter(d => d.deliveries > 0).map(d => [
         d.fullName ?? d.name,
         String(d.deliveries),
@@ -195,7 +195,7 @@ export default function AdminStatistics() {
 
           <Card>
             <CardContent className="pt-6">
-              <h3 className="text-sm font-semibold mb-4">Timmar per chaufför</h3>
+              <h3 className="text-sm font-semibold mb-4">Timmar per förare</h3>
               <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={displayPerDriver} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(214, 20%, 90%)" />
@@ -226,11 +226,11 @@ export default function AdminStatistics() {
 
         <Card>
           <CardContent className="p-0">
-            <div className="p-4 border-b"><h3 className="font-semibold">Chaufförsstatistik</h3></div>
+            <div className="p-4 border-b"><h3 className="font-semibold">Föraresstatistik</h3></div>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Chaufför</TableHead>
+                  <TableHead>Förare</TableHead>
                   <TableHead className="text-center">Leveranser</TableHead>
                   <TableHead className="text-center">Totala timmar</TableHead>
                   <TableHead className="text-center">Snitt per leverans</TableHead>

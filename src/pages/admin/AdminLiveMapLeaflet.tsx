@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import { isValidMapCoordinate, mapPopup, mapTimeAgo } from '@/lib/map-content';
 import 'leaflet/dist/leaflet.css';
@@ -28,6 +28,7 @@ interface LeafletMapProps {
 }
 
 export default function LeafletMap({ locations, navigate }: LeafletMapProps) {
+  const [tileError, setTileError] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
 
@@ -39,7 +40,7 @@ export default function LeafletMap({ locations, navigate }: LeafletMapProps) {
 
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    }).addTo(map);
+    }).on('tileerror', () => setTileError(true)).addTo(map);
 
     mapRef.current = map;
 
@@ -77,5 +78,5 @@ export default function LeafletMap({ locations, navigate }: LeafletMapProps) {
     }
   }, [locations, navigate]);
 
-  return <div ref={containerRef} className="h-full w-full" />;
+  return <div className="relative h-full"><div ref={containerRef} className="h-full w-full" />{tileError && <div role="alert" className="absolute inset-x-4 bottom-4 z-[1100] rounded-2xl border bg-white p-4 text-sm shadow-lg"><p className="font-medium">Kartbilden kunde inte hämtas.</p><p className="mt-1 text-muted-foreground">Kontrollera din anslutning. Förarnas senaste positioner finns i listan.</p><button className="mt-2 px-3 text-sm font-medium underline" onClick={() => window.location.reload()}>Försök igen</button></div>}</div>;
 }

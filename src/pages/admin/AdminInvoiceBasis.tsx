@@ -1,3 +1,4 @@
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AdminLayout } from '@/components/AdminLayout';
@@ -14,7 +15,7 @@ import { csvCell, invoiceReadiness } from '@/lib/invoice-readiness';
 import { useAssignmentDeviations } from '@/lib/assignment-deviations';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
-import { FileSpreadsheet, FilePlus2, Search, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import { FileSpreadsheet, FilePlus2, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { EmptyState } from '@/components/EmptyState';
 
@@ -30,6 +31,7 @@ export default function AdminInvoiceBasis() {
   const [status, setStatus] = useState<StatusFilter>('ready');
   const [customerId, setCustomerId] = useState<string>('all');
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [invoicePanel, setInvoicePanel] = useState(false);
   const deviations=useAssignmentDeviations();
   const openCounts=useMemo(()=>{const counts=new Map<string,number>();for(const d of deviations.data??[])counts.set(d.assignment_id,(counts.get(d.assignment_id)??0)+1);return counts;},[deviations.data]);
   const readiness=useCallback((a:NonNullable<typeof assignments>[number])=>invoiceReadiness(a,openCounts.get(a.id)??0,!deviations.isPending&&!deviations.isError),[openCounts,deviations.isPending,deviations.isError]);
@@ -55,15 +57,17 @@ export default function AdminInvoiceBasis() {
 
   // Group by customer for the "skapa underlag" workflow
   const groupedByCustomer = useMemo(() => {
-    const map = new Map<string, { customer: (typeof filtered)[number]['customer']; assignments: (typeof filtered)[number][]; total: number; hours: number }>();
+    const map = new Map<string, { month: string; customer: (typeof filtered)[number]['customer']; assignments: (typeof filtered)[number][]; total: number; hours: number }>();
     filtered.forEach((a) => {
       if (!a.customer_id || !readiness(a).ready) return;
       const { hours, amount } = readiness(a);
-      const entry = map.get(a.customer_id) ?? { customer: a.customer, assignments: [], total: 0, hours: 0 };
+      const month = format(new Date(a.actual_start || a.scheduled_start), 'yyyy-MM');
+      const key = `${a.customer_id}:${month}`;
+      const entry = map.get(key) ?? { month, customer: a.customer, assignments: [], total: 0, hours: 0 };
       entry.assignments.push(a);
       entry.total += amount ?? 0;
       entry.hours += hours ?? 0;
-      map.set(a.customer_id, entry);
+      map.set(key, entry);
     });
     return Array.from(map.values()).sort((a, b) => b.total - a.total);
   }, [filtered, readiness]);
@@ -80,6 +84,7 @@ export default function AdminInvoiceBasis() {
     };
   }, [completedAssignments, readiness]);
 
+  const selectedGroups = groupedByCustomer.filter(group => group.assignments.some(a => selected.has(a.id)));
   const eligible=filtered.filter(a=>readiness(a).ready);
   const selectedVisible=filtered.filter(a=>selected.has(a.id));
   const selectedForInvoice=selectedVisible.filter(a=>readiness(a).ready);
@@ -149,72 +154,34 @@ export default function AdminInvoiceBasis() {
   return (
     <AdminLayout title="Fakturaunderlag" description="Granska slutförda uppdrag, leveransbevis och avvikelser före fakturering">
       {(deviations.isPending||deviations.isError)&&<div role="status" className="rounded-lg border border-amber-200 bg-amber-50 p-4 mb-5 text-sm text-amber-900">{deviations.isError?'Avvikelserna kunde inte kontrolleras. Fakturering från denna lista väntar tills kontrollen fungerar.':'Kontrollerar öppna avvikelser…'}{deviations.isError&&<Button variant="outline" size="sm" className="ml-3" onClick={()=>void deviations.refetch()}>Försök igen</Button>}</div>}
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-amber-500/10"><Clock className="h-5 w-5 text-amber-500" /></div>
-              <div>
-                <p className="text-xs text-muted-foreground">Färdiga att fakturera</p>
-                <p className="text-2xl font-bold">{stats.readyCount}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10"><AlertCircle className="h-5 w-5 text-primary" /></div>
-              <div>
-                <p className="text-xs text-muted-foreground">Belopp att fakturera</p>
-                <p className="text-2xl font-bold">{fmtSek(stats.readyAmount)}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-blue-500/10"><FilePlus2 className="h-5 w-5 text-blue-500" /></div>
-              <div>
-                <p className="text-xs text-muted-foreground">Kunder</p>
-                <p className="text-2xl font-bold">{stats.customerCount}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-green-500/10"><CheckCircle2 className="h-5 w-5 text-green-500" /></div>
-              <div>
-                <p className="text-xs text-muted-foreground">Fakturerade</p>
-                <p className="text-2xl font-bold">{stats.invoicedCount}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+        {[
+          ['Färdiga att fakturera', stats.readyCount],
+          ['Att fakturera', fmtSek(stats.readyAmount)],
+          ['Kunder', stats.customerCount],
+          ['Fakturerade', stats.invoicedCount],
+        ].map(([label, value]) => <div key={label} className="admin-kpi"><p className="text-muted-foreground">{label}</p><p className="mt-4 text-2xl font-semibold tabular-nums">{value}</p></div>)}
       </div>
 
       {/* Per-customer summary cards */}
       {status === 'ready' && groupedByCustomer.length > 0 && (
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-base">Fakturaunderlag per kund</CardTitle>
+            <CardTitle className="text-base">Per kund och månad</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {groupedByCustomer.map((group) => (
-                <div key={group.customer?.id} className="border rounded-lg p-4 hover:bg-accent/50 transition-colors">
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
+                <div key={`${group.customer?.id}:${group.month}`} className="border rounded-lg p-4 hover:bg-accent/50 transition-colors">
+                  <div className="flex items-start justify-between gap-3 mb-2">
+                    <Checkbox aria-label={`Välj ${group.customer?.name} ${group.month}`} checked={group.assignments.every(a=>selected.has(a.id)) ? true : group.assignments.some(a=>selected.has(a.id)) ? 'indeterminate' : false} onCheckedChange={checked=>setSelected(previous=>{const next=new Set(previous);group.assignments.forEach(a=>checked ? next.add(a.id) : next.delete(a.id));return next;})} />
+                    <div className="min-w-0 flex-1">
                       <p className="font-semibold">{group.customer?.name}</p>
                       <p className="text-xs text-muted-foreground">
-                        {group.assignments.length} uppdrag · {group.hours.toFixed(1)}h
+                        {format(new Date(`${group.month}-01T12:00:00`), 'MMMM yyyy', {locale:sv})} · {group.assignments.length} uppdrag
                       </p>
                     </div>
-                    <Badge variant="secondary">{fmtSek(group.total)}</Badge>
+                    <span className="shrink-0 text-sm font-medium tabular-nums text-right">{fmtSek(group.total)}</span>
                   </div>
                   <Button asChild size="sm" className="w-full mt-2">
                     <Link to={createInvoiceUrl(group.customer?.id, group.assignments.map((a) => a.id))}>
@@ -285,7 +252,9 @@ export default function AdminInvoiceBasis() {
           {filtered.length === 0 ? (
             <EmptyState
               icon={FilePlus2}
-              title="Inga underlag"
+              title="Inga underlag här ännu."
+              actionLabel="Visa uppdrag"
+              actionHref="/admin/assignments"
               description={status === 'ready' ? 'Alla slutförda uppdrag är fakturerade.' : 'Inga uppdrag matchar filtret.'}
             />
           ) : (
@@ -351,6 +320,10 @@ export default function AdminInvoiceBasis() {
           )}
         </CardContent>
       </Card>
+      <div className="sticky bottom-20 md:bottom-5 z-20 mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border bg-white p-4 shadow-sm">
+       <p className="text-sm text-muted-foreground">{selectedGroups.length} kund- och månadsunderlag valda</p><Button disabled={!selectedGroups.length} onClick={()=>setInvoicePanel(true)}>Skapa fakturor ({selectedGroups.length})</Button>
+      </div>
+      <Sheet open={invoicePanel} onOpenChange={setInvoicePanel}><SheetContent className="admin-panel"><SheetHeader className="mb-6 text-left"><SheetTitle>Skapa fakturor ({selectedGroups.length})</SheetTitle><SheetDescription>Granska och skapa en faktura per kund och månad.</SheetDescription></SheetHeader><div className="space-y-4">{selectedGroups.map(group=><div className="rounded-2xl border p-4" key={`${group.customer?.id}:${group.month}`}><p className="font-medium">{group.customer?.name}</p><p className="mt-1 text-sm text-muted-foreground">{group.month} · {group.assignments.filter(a=>selected.has(a.id)).length} uppdrag</p><Button className="mt-4" asChild><Link to={createInvoiceUrl(group.customer?.id,group.assignments.filter(a=>selected.has(a.id)).map(a=>a.id))}>Granska faktura</Link></Button></div>)}</div></SheetContent></Sheet>
     </AdminLayout>
   );
 }

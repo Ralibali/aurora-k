@@ -22,7 +22,7 @@ export default function AdminApprovals() {
         <Card><CardContent className="p-0">
           {isLoading ? <div className="p-6 space-y-3">{[1,2,3].map(i => <Skeleton key={i} className="h-10 w-full" />)}</div> :
           !approvals?.length ? <div className="text-center py-12 text-muted-foreground"><ClipboardCheck className="h-10 w-10 mx-auto mb-3 opacity-30" /><p>Inga ärenden att attestera</p></div> :
-          <Table><TableHeader><TableRow><TableHead>Uppdrag</TableHead><TableHead>Kund</TableHead><TableHead>Chaufför</TableHead><TableHead>Status</TableHead><TableHead className="w-[120px]" /></TableRow></TableHeader>
+          <Table><TableHeader><TableRow><TableHead>Uppdrag</TableHead><TableHead>Kund</TableHead><TableHead>Förare</TableHead><TableHead>Status</TableHead><TableHead className="w-[120px]" /></TableRow></TableHeader>
             <TableBody>{approvals.map(a => (
               <TableRow key={a.id}>
                 <TableCell className="font-medium">{a.assignment?.title}</TableCell>

@@ -110,7 +110,7 @@ export function DayOptimizerPanel() {
       setResult({ ...result, plan: { ...result.plan, status: "approved" } });
       await queryClient.invalidateQueries({ queryKey: ["assignments"] });
       toast.success(
-        "Rutterna är godkända och skickade till chaufförernas körordning.",
+        "Rutterna är godkända och skickade till förarnas körordning.",
       );
     } catch (error) {
       toast.error(
@@ -156,7 +156,7 @@ export function DayOptimizerPanel() {
             <Sparkles className="h-5 w-5 text-primary" /> Optimera hela dagen
           </CardTitle>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Fördela ej påbörjade jobb mellan tillgängliga chaufförer utifrån
+            Fördela ej påbörjade jobb mellan tillgängliga förare utifrån
             koordinater, kapacitet, kompetens och tidsfönster. Ruttoptimeringen
             är en ordinarie del av Aurora Transport och inget ändras innan du
             godkänner förslaget.
@@ -199,7 +199,7 @@ export function DayOptimizerPanel() {
           </div>
           <div className="rounded-xl border bg-background/70 p-4">
             <p className="text-xs text-muted-foreground">
-              Tillgängliga chaufförer
+              Tillgängliga förare
             </p>
             <p className="mt-1 flex items-center gap-2 text-2xl font-bold">
               <Users className="h-5 w-5 text-primary" />{" "}
@@ -225,7 +225,7 @@ export function DayOptimizerPanel() {
                 </AlertTitle>
                 <AlertDescription>
                   Kontrollera koordinater, kapacitet, kompetenser och
-                  tillgängliga chaufförer före godkännande.
+                  tillgängliga förare före godkännande.
                 </AlertDescription>
               </Alert>
             )}
@@ -264,7 +264,7 @@ export function DayOptimizerPanel() {
               {Object.entries(groupedStops).map(([driverId, stops]) => (
                 <div key={driverId} className="rounded-xl border p-4">
                   <h3 className="font-semibold">
-                    {driverById.get(driverId)?.full_name ?? "Chaufför"}{" "}
+                    {driverById.get(driverId)?.full_name ?? "Förare"}{" "}
                     <Badge variant="secondary" className="ml-1">
                       {stops.length} stopp
                     </Badge>
@@ -292,7 +292,7 @@ export function DayOptimizerPanel() {
                                 {assignment?.address}
                               </p>
                               <p className="text-xs text-muted-foreground">
-                                ETA{" "}
+                                Ankomst{" "}
                                 {stop.arrivalAt
                                   ? new Date(stop.arrivalAt).toLocaleTimeString(
                                       "sv-SE",
@@ -326,7 +326,7 @@ export function DayOptimizerPanel() {
                         Skicka den nya körordningen?
                       </AlertDialogTitle>
                       <AlertDialogDescription>
-                        Det här byter chaufför, ordning och planerad ETA på{" "}
+                        Det här byter förare, ordning och planerad ankomsttid på{" "}
                         {result.stops.length} jobb. Tidigare godkänd plan för
                         dagen ersätts.
                       </AlertDialogDescription>

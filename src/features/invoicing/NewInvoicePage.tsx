@@ -225,7 +225,7 @@ function InvoiceForm({ initial }: { initial: InvoiceSelection }) {
 
             {customerId && assignmentsQuery.isSuccess && (
               uninvoicedAssignments.length === 0 ? <p className="py-4 text-muted-foreground">Inga slutförda och ofakturerade uppdrag.</p> : (
-                <Table><TableHeader><TableRow><TableHead className="w-10" /><TableHead>Datum</TableHead><TableHead>Uppdrag</TableHead><TableHead>Chaufför</TableHead><TableHead>Tid</TableHead></TableRow></TableHeader>
+                <Table><TableHeader><TableRow><TableHead className="w-10" /><TableHead>Datum</TableHead><TableHead>Uppdrag</TableHead><TableHead>Förare</TableHead><TableHead>Tid</TableHead></TableRow></TableHeader>
                   <TableBody>{uninvoicedAssignments.map(item => {
                     const hours = item.actual_start && item.actual_stop ? calculateDecimalHours(item.actual_start, item.actual_stop) : 0;
                     return <TableRow key={item.id}><TableCell><Checkbox aria-label={`Välj ${item.title}`} checked={selectedAssignments.includes(item.id)} onCheckedChange={() => toggleAssignment(item.id)} /></TableCell><TableCell>{item.actual_start ? formatSwedishDate(item.actual_start) : '–'}</TableCell><TableCell className="font-medium">{item.title}</TableCell><TableCell>{item.driver?.full_name}</TableCell><TableCell>{hours.toFixed(1)} h</TableCell></TableRow>;

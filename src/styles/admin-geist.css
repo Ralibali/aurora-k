@@ -1,0 +1,109 @@
+@font-face{font-family:Geist;src:url('/fonts/geist-400.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:Geist;src:url('/fonts/geist-500.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:Geist;src:url('/fonts/geist-600.woff2') format('woff2');font-weight:600;font-style:normal;font-display:swap}
+.aurora-admin{--background:0 0% 100%;--foreground:240.000 3.333% 11.765%;--card:0 0% 100%;--card-foreground:240.000 3.333% 11.765%;--popover:0 0% 100%;--popover-foreground:240.000 3.333% 11.765%;--primary:224.571 44.304% 15.490%;--primary-foreground:0 0% 100%;--secondary:240.000 4.545% 91.373%;--secondary-foreground:240.000 3.333% 11.765%;--muted:240.000 4.545% 91.373%;--muted-foreground:240.000 1.493% 39.412%;--accent:240 5% 96%;--accent-foreground:240.000 3.333% 11.765%;--destructive:357.895 69.796% 51.961%;--success:156.506 100.000% 32.549%;--warning:18.118 100.000% 50.000%;--border:240.000 3.333% 11.765% / .14;--input:240.000 3.333% 11.765% / .14;--ring:224.571 44.304% 15.490%;--radius:1rem;background:#fff;color:#1d1d1f;font-family:Geist,sans-serif;font-synthesis:none}
+.aurora-admin *{font-family:Geist,sans-serif}
+.aurora-admin :is(.font-bold,.font-extrabold){font-weight:600}
+.aurora-admin :is(.font-mono,.font-mono-ui,.tabular-nums,td){font-variant-numeric:tabular-nums}
+.aurora-admin :is(button,[role=button],input:not([type=radio]):not([type=checkbox]),select){min-height:44px}
+.aurora-admin :is(button[role=checkbox],button[role=switch]){min-width:44px}
+.aurora-admin button[role=checkbox]{position:relative;width:20px;height:20px;min-width:20px;min-height:20px;overflow:visible;border-radius:6px}
+.aurora-admin button[role=checkbox]::after{content:'';position:absolute;inset:-12px}
+.aurora-admin button[role=switch]{min-height:28px;position:relative}
+.aurora-admin button[role=switch]::after{content:'';position:absolute;inset:-8px 0}
+.aurora-admin :is(input,textarea,[role=combobox]){border-radius:12px;box-shadow:none;font-size:14px;background:#fff}
+.aurora-admin :is(button,a).rounded-md,.aurora-admin button:not([role=checkbox]):not([role=switch]){border-radius:999px}
+.aurora-admin :is(.rounded-lg,.rounded-xl,.rounded-2xl,.admin-table-card){border-radius:16px}
+.aurora-admin :is(.shadow-sm,.shadow-md,.shadow-lg){box-shadow:none}
+.aurora-admin :is([role=dialog],[role=alertdialog]){border-radius:24px;box-shadow:0 8px 40px rgba(29,29,31,.12)}
+.aurora-admin :is(h1,h2,h3){letter-spacing:-.025em;font-weight:600}
+.aurora-admin .admin-main{font-size:16px}
+.aurora-admin :is(.text-xs,.text-\[10px\],.text-\[11px\]){font-size:12px;line-height:1.5}
+.aurora-admin :is(label,th,td,.text-sm){font-size:14px;line-height:1.5}
+.aurora-admin .admin-sidebar{background:#fff}
+.aurora-admin .admin-sidebar nav{padding-top:0}
+.aurora-admin .admin-sidebar nav a{font-size:14px;min-height:44px}
+.aurora-admin .admin-sidebar nav>div>p{font-size:11px;margin-top:16px;letter-spacing:.08em}
+.aurora-admin .admin-topbar{min-height:84px}
+.aurora-admin .admin-search-trigger{background:#f7f7f8;border:1px solid transparent;box-shadow:none;font-size:14px}
+.aurora-admin .admin-new-job{gap:8px;min-height:44px;padding:0 18px;box-shadow:none}
+.aurora-admin .admin-main>div{max-width:1450px}
+.aurora-admin .admin-kpi{border:0;background:#f7f7f8;border-radius:16px;padding:24px}
+.aurora-admin .admin-kpi p:first-child{font-size:14px}
+.aurora-admin .admin-kpi-value{font-size:36px;line-height:1.2;margin-top:20px;letter-spacing:-.04em}
+.aurora-admin .admin-greeting{padding:0 0 4px;background:none;border:0}
+.aurora-admin .admin-greeting h2{font-size:clamp(26px,3vw,32px);line-height:1.25}
+.aurora-admin .admin-attention{border:1px solid rgba(29,29,31,.14);border-radius:16px;overflow:hidden}
+.aurora-admin .admin-attention-row{display:flex;align-items:center;gap:14px;padding:18px 20px;min-height:76px;border-bottom:1px solid rgba(29,29,31,.08)}
+.aurora-admin .admin-attention-row:last-child{border-bottom:0}
+.aurora-admin .admin-attention-row:hover{background:#fafafa}
+.aurora-admin .admin-attention-count{margin-left:auto;padding:4px 10px;background:#f5f5f6;border-radius:999px;font-variant-numeric:tabular-nums;font-size:14px}
+.aurora-admin table{font-size:14px}
+.aurora-admin th{font-weight:500;color:#636366;height:52px;background:#fafafa}
+.aurora-admin td{padding-top:20px;padding-bottom:20px}
+.aurora-admin td.text-right,.aurora-admin th.text-right{text-align:right;font-variant-numeric:tabular-nums}
+.aurora-admin .admin-status{display:inline-flex;align-items:center;gap:7px;border-radius:999px;font-size:12px;font-weight:500;line-height:22px;white-space:nowrap;padding:3px 11px;border:0;background:#f0f0f2;color:#636366}
+.aurora-admin .admin-status::before{content:'';width:6px;height:6px;border-radius:50%;background:#8b8b91}
+.aurora-admin .admin-status[data-tone=green]{background:#edf8f2;color:#067a4d}
+.aurora-admin .admin-status[data-tone=green]::before{background:#00a665}
+.aurora-admin .admin-status[data-tone=orange]{background:#fff3ee;color:#b53600}
+.aurora-admin .admin-status[data-tone=orange]::before{background:#ff4d00}
+.aurora-admin .admin-status[data-tone=red]{background:#fff0f1;color:#b9242a}
+.aurora-admin .admin-status[data-tone=red]::before{background:#da2f35}
+.aurora-admin .admin-status>*{display:none}
+.aurora-admin .admin-panel{width:100%;max-width:640px!important;height:100dvh;border:0;border-radius:24px 0 0 24px!important;padding:28px;overflow-y:auto;box-shadow:0 8px 40px rgba(29,29,31,.12)}
+.aurora-admin .admin-panel form>div{background:#fff;border-color:rgba(29,29,31,.14)}
+.aurora-admin .admin-panel [class*=violet]{color:#636366}
+.aurora-admin .admin-panel .bg-card{box-shadow:none}
+.aurora-admin .admin-filter-row{display:flex;flex-wrap:wrap;gap:6px}
+.aurora-admin .admin-filter-row button{background:#f5f5f6;color:#636366;border:0;padding:0 16px}
+.aurora-admin .admin-filter-row button[aria-pressed=true]{background:#161f39;color:#fff}
+.aurora-admin .admin-calendar-grid{display:grid;grid-template-columns:170px repeat(7,minmax(110px,1fr));min-width:1000px}
+.aurora-admin .admin-calendar-grid>div{padding:12px;border-right:1px solid rgba(29,29,31,.08);border-bottom:1px solid rgba(29,29,31,.08)}
+.aurora-admin .admin-calendar-job{display:block;width:100%;border-radius:12px!important;padding:10px;margin:4px 0;background:#f4f4f5;text-align:left;border-left:3px solid #a4a4a8;color:#1d1d1f;font-size:12px}
+.aurora-admin .admin-calendar-job[data-status=completed],.aurora-admin .admin-calendar-job[data-status=active]{border-left-color:#00a665;background:#f1f8f4}
+.aurora-admin .admin-calendar-job[data-status=delayed]{border-left-color:#da2f35;background:#fff4f4}
+.aurora-admin .admin-calendar-job[data-unassigned=true]{border-left-color:#ff4d00;background:#fff5f0}
+.aurora-admin .admin-toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:12px}
+@media(max-width:767px){
+ .aurora-admin .admin-topbar{min-height:78px;padding:16px 20px}
+ .aurora-admin .admin-topbar h1{font-size:18px}
+ .aurora-admin .admin-topbar p{display:none}
+ .aurora-admin .admin-search-trigger{width:44px;padding:0;justify-content:center}
+ .aurora-admin .admin-main{padding:24px 20px 110px}
+ .aurora-admin .admin-kpi{padding:18px 16px}
+ .aurora-admin .admin-kpi-value{font-size:30px;margin-top:14px}
+ .aurora-admin .admin-kpi svg{display:none}
+ .aurora-admin .admin-kpi p:last-child:not(.font-semibold){font-size:12px}
+ .aurora-admin .admin-panel{border-radius:0!important;padding:24px 20px}
+ .aurora-admin table:not([data-keep-grid]){display:block;width:100%}
+ .aurora-admin table:not([data-keep-grid]) thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+ .aurora-admin table:not([data-keep-grid]) tbody{display:block}
+ .aurora-admin table:not([data-keep-grid]) tbody tr{display:block;padding:18px 16px;border-bottom:1px solid rgba(29,29,31,.14)}
+ .aurora-admin table:not([data-keep-grid]) tbody td{display:flex!important;align-items:flex-start;justify-content:space-between;gap:16px;width:100%;padding:6px 0!important;min-height:32px;white-space:normal;text-align:right}
+ .aurora-admin table:not([data-keep-grid]) tbody td::before{content:attr(data-label);font-size:12px;color:#636366;text-align:left;flex-shrink:0;max-width:38%}
+ .aurora-admin table:not([data-keep-grid]) tbody td[colspan]{display:block!important;text-align:center}
+ .aurora-admin table:not([data-keep-grid]) tbody td[colspan]::before{display:none}
+ .aurora-admin table:not([data-keep-grid]) tbody td>div{min-width:0}
+ .aurora-admin [role=tablist]{height:auto;max-width:100%;flex-wrap:wrap;justify-content:flex-start}
+ .aurora-admin .admin-filter-row{gap:6px}
+ .aurora-admin .admin-filter-row button{font-size:13px;padding:0 13px}
+ .aurora-admin .admin-attention-row{padding:16px;gap:10px}
+ .aurora-admin .admin-attention-row .admin-attention-action{display:none}
+}
+.aurora-admin button[role=checkbox]{min-height:20px!important;min-width:20px!important;flex-shrink:0}
+.aurora-admin .admin-kpi{box-shadow:none}
+.aurora-admin .admin-main article .border-t{flex-wrap:wrap}
+.aurora-admin .admin-main article .tabular-nums{white-space:nowrap}
+.aurora-admin .admin-main article button{white-space:normal}
+.aurora-admin button:not([role=checkbox]):not([role=switch]){min-width:44px}
+.aurora-admin [data-radix-popper-content-wrapper] button{min-width:44px}
+.aurora-admin nav[aria-label=Huvudnavigation] button{border-radius:0!important}
+.aurora-admin [data-state=open].bg-black\/80{background:rgba(29,29,31,.28)}
+
+.aurora-admin :is(th,td)[data-numeric=true]{text-align:right;font-variant-numeric:tabular-nums}
+
+.aurora-admin main td a{display:inline-flex;min-height:44px;min-width:44px;align-items:center}
+.aurora-admin :is([role=menuitem],[role=option]){min-height:44px}
+.aurora-admin :is(.font-mono,.font-mono-ui){font-family:Geist,sans-serif}
+.aurora-admin summary:focus-visible{outline:2px solid #161f39;outline-offset:3px;border-radius:12px}

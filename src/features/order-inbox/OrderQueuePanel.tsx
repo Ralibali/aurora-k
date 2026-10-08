@@ -12,6 +12,8 @@ type QueueRow = {
   received_at: string;
 };
 
+const statusLabels: Record<string,string> = {received:'Ny',new:'Ny',pending:'Ny',parsed:'Ny',needs_review:'Väntar på granskning',processing:'Bearbetas',confirmed:'Bekräftad',converted:'Omvandlad',completed:'Omvandlad',failed:'Problem',error:'Problem',rejected:'Avvisad'};
+
 export function OrderQueuePanel() {
   const [rows, setRows] = useState<QueueRow[]>([]);
 
@@ -24,6 +26,6 @@ export function OrderQueuePanel() {
 
   return <div className="rounded-xl border p-4">
     <div className="flex items-center justify-between"><div><p className="font-semibold">Inkomna order</p><p className="text-sm text-muted-foreground">{rows.length} order i kön</p></div><Button size="sm" variant="outline" onClick={() => void load()}>Uppdatera</Button></div>
-    <div className="mt-4 space-y-2">{rows.length === 0 ? <p className="py-6 text-center text-sm text-muted-foreground">Kön är tom.</p> : rows.map(row => <div key={row.id} className="rounded-lg border p-3"><p className="font-medium">{row.subject || 'Order utan ämne'}</p><p className="text-xs text-muted-foreground">{row.from_address} · {new Date(row.received_at).toLocaleString('sv-SE')}</p><div className="mt-2 flex gap-2"><Badge>{row.status}</Badge><Badge variant="outline">{row.parse_confidence}%</Badge></div></div>)}</div>
+    <div className="mt-4 space-y-2">{rows.length === 0 ? <p className="py-6 text-center text-sm text-muted-foreground">Kön är tom.</p> : rows.map(row => <div key={row.id} className="rounded-lg border p-3"><p className="font-medium">{row.subject || 'Order utan ämne'}</p><p className="text-xs text-muted-foreground">{row.from_address} · {new Date(row.received_at).toLocaleString('sv-SE')}</p><div className="mt-2 flex gap-2"><Badge>{statusLabels[row.status] || 'Väntar'}</Badge><Badge variant="outline">{row.parse_confidence}%</Badge></div></div>)}</div>
   </div>;
 }

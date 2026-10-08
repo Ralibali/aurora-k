@@ -11,7 +11,7 @@ const tomorrow = 'Morgondagens leverans Uppsala';
 
 async function openDispatch(page: Page) {
   await page.goto('/admin/assignments');
-  await expect(page.getByRole('heading', { name: 'Transportdispatch', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Uppdrag', exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: express, exact: true })).toBeVisible();
   // Playwright's visible check accepts opacity: 0. Verify the page transition
   // cannot hide the entire board for users who request reduced motion.
@@ -20,12 +20,12 @@ async function openDispatch(page: Page) {
 
 async function openBulkDialog(page: Page, titles = [express, pallet]) {
   for (const title of titles) await page.getByRole('checkbox', { name: `Markera ${title}`, exact: true }).check();
-  await page.getByRole('region', { name: 'Valda uppdrag' }).getByRole('button', { name: 'Tilldela chaufför', exact: true }).click();
-  await expect(page.getByRole('dialog', { name: 'Tilldela chaufför' })).toBeVisible();
+  await page.getByRole('region', { name: 'Valda uppdrag' }).getByRole('button', { name: 'Tilldela förare', exact: true }).click();
+  await expect(page.getByRole('dialog', { name: 'Tilldela förare' })).toBeVisible();
 }
 
 async function chooseDriver(page: Page, name: string) {
-  await page.getByRole('dialog').getByLabel('Chaufför', { exact: true }).click();
+  await page.getByRole('dialog').getByLabel('Förare', { exact: true }).click();
   await page.getByRole('option', { name: new RegExp(`^${name}`) }).click();
 }
 
@@ -37,6 +37,7 @@ test('dispatch renders with scoped filters, shareable date/search and no runtime
   await expect(page.getByRole('checkbox', { name: `Markera ${completed}`, exact: true })).toBeDisabled();
   await page.screenshot({ path: testInfo.outputPath('dispatch-desktop.png'), fullPage: true });
 
+  await page.getByText('Fler filter', {exact:true}).click();
   await page.getByRole('button', { name: 'Brådskande', exact: true }).click();
   await expect(page.getByRole('button', { name: express, exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: cancelled, exact: true })).toBeHidden();
@@ -57,6 +58,7 @@ test('dispatch renders with scoped filters, shareable date/search and no runtime
   await expect(page.getByRole('button', { name: express, exact: true })).toBeHidden();
   await page.getByLabel('Välj datum', { exact: true }).fill('2026-09-08');
   await expect(page.getByRole('button', { name: express, exact: true })).toBeVisible();
+  await page.getByText('Fler filter', { exact: true }).click();
   await page.getByRole('button', { name: 'Saknar leveransbevis', exact: true }).click();
   await expect(page.getByRole('button', { name: completed, exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: active, exact: true })).toBeHidden();
@@ -72,7 +74,7 @@ test('select all includes only planned visible jobs and filter changes clear the
     await expect(page.getByRole('checkbox', { name: `Markera ${title}`, exact: true })).not.toBeChecked();
     await expect(page.getByRole('checkbox', { name: `Markera ${title}`, exact: true })).toBeDisabled();
   }
-  await page.getByRole('button', { name: 'Saknar förare', exact: true }).click();
+  await page.getByRole('button', { name: 'Ej tilldelade', exact: true }).click();
   await expect(page.getByRole('region', { name: 'Valda uppdrag' })).toBeHidden();
   await page.getByRole('checkbox', { name: 'Markera alla planerade uppdrag', exact: true }).check();
   await expect(page.getByRole('region', { name: 'Valda uppdrag' })).toContainText('2 valda uppdrag');
@@ -84,7 +86,7 @@ test('select all includes only planned visible jobs and filter changes clear the
 test('driver selection requires review and successful confirmation changes exactly the selected jobs', async ({ page, dispatchApi }) => {
   await openDispatch(page);
   await openBulkDialog(page);
-  const dialog = page.getByRole('dialog', { name: 'Tilldela chaufför' });
+  const dialog = page.getByRole('dialog', { name: 'Tilldela förare' });
   await expect(dialog).toContainText(express);
   await expect(dialog).toContainText(pallet);
   await expect(dialog.getByRole('button', { name: 'Tilldela 2 uppdrag', exact: true })).toBeDisabled();
@@ -94,7 +96,7 @@ test('driver selection requires review and successful confirmation changes exact
   await dialog.getByRole('button', { name: 'Tillbaka', exact: true }).click();
   expect(dispatchApi.writes).toHaveLength(0);
 
-  await page.getByRole('region', { name: 'Valda uppdrag' }).getByRole('button', { name: 'Tilldela chaufför', exact: true }).click();
+  await page.getByRole('region', { name: 'Valda uppdrag' }).getByRole('button', { name: 'Tilldela förare', exact: true }).click();
   await chooseDriver(page, 'Maria Lind');
   await dialog.getByRole('button', { name: 'Tilldela 2 uppdrag', exact: true }).click();
   await expect(dialog).toBeHidden();
@@ -115,7 +117,7 @@ test('a failed assignment keeps the dialog and selection available for a retry',
   await openBulkDialog(page);
   await chooseDriver(page, 'Maria Lind');
   dispatchApi.failNextMutation = true;
-  const dialog = page.getByRole('dialog', { name: 'Tilldela chaufför' });
+  const dialog = page.getByRole('dialog', { name: 'Tilldela förare' });
   await dialog.getByRole('button', { name: 'Tilldela 2 uppdrag', exact: true }).click();
   await expect(dialog).toContainText('Tilldelningen kunde inte bekräftas');
   expect(dispatchApi.assignments[0].assigned_driver_id).toBeNull();
@@ -131,7 +133,7 @@ test('known schedule conflicts and unavailable drivers require explicit acknowle
   await openDispatch(page);
   await openBulkDialog(page, [express]);
   await chooseDriver(page, 'Erik Andersson');
-  const dialog = page.getByRole('dialog', { name: 'Tilldela chaufför' });
+  const dialog = page.getByRole('dialog', { name: 'Tilldela förare' });
   const submit = dialog.getByRole('button', { name: 'Tilldela 1 uppdrag', exact: true });
   await expect(dialog).toContainText(`${express} överlappar ${active}`);
   await expect(submit).toBeDisabled();
@@ -150,7 +152,7 @@ test('a partial update refreshes the actual data and never reports complete succ
   await openBulkDialog(page);
   await chooseDriver(page, 'Maria Lind');
   dispatchApi.partialNextMutation = true;
-  const dialog = page.getByRole('dialog', { name: 'Tilldela chaufför' });
+  const dialog = page.getByRole('dialog', { name: 'Tilldela förare' });
   await dialog.getByRole('button', { name: 'Tilldela 2 uppdrag', exact: true }).click();
   await expect(dialog).toContainText('Tilldelningen kunde inte bekräftas');
   expect(dispatchApi.assignments[0].assigned_driver_id).toBe(drivers[1].id);
@@ -180,10 +182,11 @@ test('cancellation is confirmed, handles failure, and remains visible in cancell
   await dialog.getByRole('button', { name: 'Avboka uppdrag', exact: true }).click();
   await expect(dialog).toBeHidden();
   expect(dispatchApi.assignments[0].status).toBe('cancelled');
+  await page.getByText('Fler filter', { exact: true }).click();
   await page.getByRole('button', { name: 'Avbokade', exact: true }).click();
   await expect(page.getByRole('button', { name: express, exact: true })).toBeVisible();
   await expect(page.getByRole('checkbox', { name: `Markera ${express}`, exact: true })).toBeDisabled();
-  await page.getByRole('button', { name: 'Saknar förare', exact: true }).click();
+  await page.getByRole('button', { name: 'Ej tilldelade', exact: true }).click();
   await expect(page.getByRole('button', { name: express, exact: true })).toBeHidden();
   expect(dispatchApi.writes).toHaveLength(2);
 });
@@ -196,7 +199,7 @@ test('mobile dispatch exposes selection and assignment without horizontal page o
   await page.screenshot({ path: testInfo.outputPath('dispatch-mobile.png'), fullPage: true });
   await openBulkDialog(page, [pallet]);
   await chooseDriver(page, 'Maria Lind');
-  const dialog = page.getByRole('dialog', { name: 'Tilldela chaufför' });
+  const dialog = page.getByRole('dialog', { name: 'Tilldela förare' });
   const bounds = await dialog.boundingBox();
   expect(bounds).not.toBeNull();
   expect(bounds!.x).toBeGreaterThanOrEqual(0);
@@ -222,7 +225,7 @@ test('a job completed while cancellation is being reviewed cannot be overwritten
   expect(dispatchApi.writes[0].query.get('status')).toBe('in.(pending,unassigned,active,delayed)');
   await expect(page.getByText('Uppdraget avbokat', { exact: true })).toBeHidden();
   await dialog.getByRole('button', { name: 'Behåll uppdrag', exact: true }).click();
-  await page.getByRole('button', { name: 'Slutförda', exact: true }).click();
+  await page.getByRole('button', { name: 'Klara', exact: true }).click();
   await expect(page.getByRole('button', { name: express, exact: true })).toBeVisible();
   // Playwright's visible check accepts opacity: 0. Verify the page transition
   // cannot hide the entire board for users who request reduced motion.

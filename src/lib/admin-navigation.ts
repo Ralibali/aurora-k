@@ -9,22 +9,22 @@ import {
 /* Primary items — always visible */
 export const primarySections = [
   {
-    label: 'Dispatch',
+    label: 'Trafik',
     items: [
       { title: 'Översikt', url: '/admin', icon: LayoutDashboard, end: true },
       { title: 'Uppdrag', url: '/admin/assignments', icon: Briefcase },
       { title: 'Kalender', url: '/admin/calendar', icon: Calendar },
-      { title: 'Live-karta', url: '/admin/live-map', icon: Map },
+      { title: 'Karta', url: '/admin/live-map', icon: Map },
     ],
   },
   {
     label: 'Personal',
     items: [
-      { title: 'Chaufförer', url: '/admin/drivers', icon: Users },
+      { title: 'Förare', url: '/admin/drivers', icon: Users },
     ],
   },
   {
-    label: 'Kunder & Order',
+    label: 'Kunder',
     items: [
       { title: 'Kunder', url: '/admin/customers', icon: Building },
       { title: 'Ordrar', url: '/admin/orders', icon: ShoppingCart },
@@ -35,7 +35,7 @@ export const primarySections = [
     items: [
       { title: 'Fakturaunderlag', url: '/admin/invoice-basis', icon: FileText },
       { title: 'Fakturor', url: '/admin/invoices', icon: FileText },
-      { title: 'OB & Traktamente', url: '/admin/compensation', icon: Briefcase },
+      { title: 'OB & traktamente', url: '/admin/compensation', icon: Briefcase },
     ],
   },
   {
@@ -55,7 +55,7 @@ export const primarySections = [
 /* Secondary items — hidden behind "More" toggle */
 export const secondarySections = [
   {
-    label: 'Dispatch',
+    label: 'Trafik',
     items: [
       { title: 'Ruttoptimering', url: '/admin/routes', icon: Navigation },
       { title: 'Fordon', url: '/admin/vehicles', icon: Car },
@@ -72,7 +72,7 @@ export const secondarySections = [
     ],
   },
   {
-    label: 'Kunder & Order',
+    label: 'Kunder',
     items: [
       { title: 'Ordermallar', url: '/admin/order-templates', icon: ClipboardList },
       { title: 'Bokningsförfrågningar', url: '/admin/booking-requests', icon: Inbox },
@@ -96,7 +96,7 @@ export const secondarySections = [
   {
     label: 'System',
     items: [
-      { title: 'Notifieringar', url: '/admin/notifications', icon: Bell },
+      { title: 'Notiser', url: '/admin/notifications', icon: Bell },
       { title: 'Förarapp-inställningar', url: '/admin/driver-settings', icon: Smartphone },
       { title: 'Externa resurser', url: '/admin/external-resources', icon: Globe },
       { title: 'API', url: '/admin/api', icon: Code },
