@@ -25,6 +25,35 @@ alter table public.driver_documents
     (storage_path like (company_id::text || '/' || driver_id::text || '/' || id::text || '/%')
      and storage_path !~ '/\.\./'));
 
+-- Any materially changed document must be reviewed again. Reviews are audit-stamped
+-- by the database, rather than trusting client-provided reviewer timestamps.
+create or replace function public.driver_document_review_guard()
+returns trigger language plpgsql security invoker set search_path = '' as $
+begin
+  if new.driver_id is distinct from old.driver_id
+     or new.doc_type is distinct from old.doc_type
+     or new.expires_at is distinct from old.expires_at
+     or new.storage_path is distinct from old.storage_path then
+    new.review_status := 'pending';
+    new.reviewed_at := null;
+    new.reviewed_by := null;
+    new.review_notes := null;
+  elsif new.review_status is distinct from old.review_status then
+    if new.review_status <> 'pending' and new.storage_path is null then
+      raise exception 'Bilaga krävs för intern granskning';
+    end if;
+    new.reviewed_at := case when new.review_status = 'pending' then null else now() end;
+    new.reviewed_by := case when new.review_status = 'pending' then null else auth.uid() end;
+  end if;
+  return new;
+end $;
+revoke all on function public.driver_document_review_guard()
+  from public, anon, authenticated;
+drop trigger if exists driver_document_review_guard on public.driver_documents;
+create trigger driver_document_review_guard
+before update on public.driver_documents
+for each row execute function public.driver_document_review_guard();
+
 -- The driver must belong to the same company as the document, not merely exist.
 drop policy if exists "Admins full access on driver_documents" on public.driver_documents;
 create policy "Admins full access on driver_documents"
@@ -58,7 +87,8 @@ using (
   bucket_id = 'driver-compliance'
   and exists (
     select 1 from public.driver_documents d
-    where d.storage_path = storage.objects.name
+    where (d.storage_path = storage.objects.name
+           or (d.storage_path is null and public.has_role(auth.uid(), 'admin')))
       and d.company_id::text = split_part(storage.objects.name, '/', 1)
       and d.driver_id::text = split_part(storage.objects.name, '/', 2)
       and d.id::text = split_part(storage.objects.name, '/', 3)
