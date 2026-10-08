@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import IntegrationsTab from '@/features/integrations/IntegrationsTab';
 import { useState, lazy, Suspense } from 'react';
 import { AdminLayout } from '@/components/AdminLayout';
@@ -10,7 +11,7 @@ import { useSettings, useUpdateSettings, useCreateSettings } from '@/hooks/useDa
 import type { TablesUpdate } from '@/integrations/supabase/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useFeatureSettings, useToggleFeature, useResetAllFeatures } from '@/hooks/useFeatureSettings';
-import { Save, Upload, ToggleLeft, RotateCcw, Sun, Moon, Monitor, Building, Palette, CreditCard, ChevronRight, ArrowLeft, Sparkles } from 'lucide-react';
+import { Save, Upload, ToggleLeft, RotateCcw, Sun, Moon, Monitor, Building, Palette, CreditCard, ChevronRight, ArrowLeft, Sparkles, Car, Users, Bell } from 'lucide-react';
 import { DemoDataTab } from '@/components/admin/DemoDataTab';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -19,7 +20,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTheme } from 'next-themes';
 import { useAuth } from '@/hooks/useAuth';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { motion, AnimatePresence } from 'framer-motion';
 const SubscriptionTab = lazy(() => import('@/components/SubscriptionTab'));
 
 function AppearanceTab() {
@@ -51,19 +51,22 @@ function AppearanceTab() {
   );
 }
 
-type SettingsSection = 'integrations' | 'company' | 'features' | 'appearance' | 'demo' | 'subscription' | null;
+type SettingsSection = 'vehicles' | 'users' | 'notifications' | 'integrations' | 'company' | 'features' | 'appearance' | 'demo' | 'subscription' | null;
 
 const settingsMenu = [
+  { key: 'vehicles' as const, label: 'Fordon', description: 'Fordon och registreringsnummer', icon: Car },
+  { key: 'users' as const, label: 'Användare', description: 'Ditt konto och företagets förare', icon: Users },
+  { key: 'notifications' as const, label: 'Notiser', description: 'Synlighet och meddelanden', icon: Bell },
   { key: 'integrations' as const, label: 'Anslutningar', description: 'Fortnox och Google Maps', icon: Building },
   { key: 'company' as const, label: 'Företag', description: 'Namn, adress och betaluppgifter', icon: Building },
   { key: 'features' as const, label: 'Funktioner', description: 'Aktivera eller dölja moduler', icon: ToggleLeft },
   { key: 'appearance' as const, label: 'Utseende', description: 'Ljust, mörkt eller systemläge', icon: Palette },
   { key: 'demo' as const, label: 'Exempeldata', description: 'Visa eller ta bort exempeldata', icon: Sparkles },
-  { key: 'subscription' as const, label: 'Prenumeration', description: 'Hantera ditt abonnemang', icon: CreditCard },
+  { key: 'subscription' as const, label: 'Abonnemang', description: 'Hantera ditt abonnemang', icon: CreditCard },
 ];
 
 export default function AdminSettings() {
-  const { companyId, loading: authLoading } = useAuth();
+  const { companyId, user, loading: authLoading } = useAuth();
   const { data: settings, isLoading } = useSettings();
   const updateSettings = useUpdateSettings();
   const createSettings = useCreateSettings();
@@ -82,7 +85,7 @@ export default function AdminSettings() {
 
   if (!companyId) {
     return (
-      <AdminLayout title="Inställningar" description="Företagsinformation och systemkonfiguration">
+      <AdminLayout title="Inställningar" description="Företag, fordon och användare">
         <div className="max-w-2xl">
           <Card>
             <CardHeader><CardTitle>Inställningarna kunde inte visas</CardTitle></CardHeader>
@@ -242,7 +245,7 @@ export default function AdminSettings() {
                 {items.map(feat => (
                   <div key={feat.id} className="flex items-center justify-between py-3 gap-4">
                     <div className="min-w-0">
-                      <p className="text-sm font-medium">{feat.label}</p>
+                      <p className="text-sm font-medium">{feat.label.replace(/Chaufförer/g, 'Förare')}</p>
                       {feat.description && <p className="text-xs text-muted-foreground mt-0.5">{feat.description}</p>}
                     </div>
                     <Switch
@@ -264,7 +267,11 @@ export default function AdminSettings() {
     </div>
   );
 
+  const vehiclesContent = <Card><CardHeader><CardTitle>Fordon</CardTitle></CardHeader><CardContent><p className="mb-4 text-sm text-muted-foreground">Lägg till och uppdatera företagets fordon.</p><Button asChild><Link to="/admin/vehicles">Hantera fordon</Link></Button></CardContent></Card>;
+  const usersContent = <Card><CardHeader><CardTitle>Användare</CardTitle></CardHeader><CardContent className="space-y-4"><div className="rounded-xl bg-muted/30 p-4"><p className="font-medium">{user?.user_metadata?.full_name || 'Ditt konto'}</p><p className="mt-1 text-sm text-muted-foreground">{user?.email}</p><span className="admin-status mt-3">Administratör</span></div><Button asChild><Link to="/admin/drivers">Hantera förare och inbjudningar</Link></Button></CardContent></Card>;
+  const notificationsContent = <Card><CardHeader><CardTitle>Notiser</CardTitle></CardHeader><CardContent className="space-y-5">{featuresLoading ? <Skeleton className="h-16" /> : (features||[]).filter(feat=>feat.feature_key==='notifications').map(feat=><div key={feat.id} className="flex items-center justify-between gap-4"><div><Label htmlFor="settings-notifications">Visa notiser i appen</Label><p className="mt-1 text-xs text-muted-foreground">Visar funktionen för företagets meddelanden.</p></div><Switch id="settings-notifications" checked={feat.enabled} disabled={toggleFeature.isPending} onCheckedChange={checked=>toggleFeature.mutate({id:feat.id,enabled:checked,featureKey:feat.feature_key,label:feat.label,description:feat.description,category:feat.category,sortOrder:feat.sort_order})} /></div>)}<Button variant="outline" asChild><Link to="/admin/notifications">Öppna meddelanden</Link></Button></CardContent></Card>;
   const sectionContent: Record<string, React.ReactNode> = {
+    vehicles: vehiclesContent, users: usersContent, notifications: notificationsContent,
     integrations: <IntegrationsTab />,
     company: companyContent,
     features: featuresContent,
@@ -282,19 +289,15 @@ export default function AdminSettings() {
     const activeSectionMeta = settingsMenu.find(s => s.key === mobileSection);
 
     return (
-      <AdminLayout title="Inställningar" description="Företagsinformation och systemkonfiguration">
+      <AdminLayout title="Inställningar" description="Företag, fordon och användare">
         <div className="max-w-3xl">
-          <AnimatePresence mode="wait">
+          <>
             {!mobileSection ? (
-              <motion.div
+              <div
                 key="menu"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.15 }}
                 className="space-y-2"
               >
-                {settingsMenu.map((item) => (
+                {[...settingsMenu].sort((a,b) => ['company','vehicles','users','notifications','subscription','integrations','features','appearance','demo'].indexOf(a.key)-['company','vehicles','users','notifications','subscription','integrations','features','appearance','demo'].indexOf(b.key)).map((item) => (
                   <button
                     key={item.key}
                     onClick={() => setMobileSection(item.key)}
@@ -310,14 +313,10 @@ export default function AdminSettings() {
                     <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
                   </button>
                 ))}
-              </motion.div>
+              </div>
             ) : (
-              <motion.div
+              <div
                 key={mobileSection}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20 }}
-                transition={{ duration: 0.15 }}
               >
                 <button
                   onClick={() => setMobileSection(null)}
@@ -327,9 +326,9 @@ export default function AdminSettings() {
                   {activeSectionMeta?.label ?? 'Tillbaka'}
                 </button>
                 {sectionContent[mobileSection]}
-              </motion.div>
+              </div>
             )}
-          </AnimatePresence>
+          </>
         </div>
       </AdminLayout>
     );
@@ -337,21 +336,22 @@ export default function AdminSettings() {
 
   // ── Desktop: tabs as before ──
   return (
-    <AdminLayout title="Inställningar" description="Företagsinformation och systemkonfiguration">
+    <AdminLayout title="Inställningar" description="Företag, fordon och användare">
       <div className="max-w-3xl">
         <Tabs defaultValue={new URLSearchParams(window.location.search).get('section') === 'integrations' ? 'integrations' : 'company'}>
           <TabsList className="mb-6 flex h-auto flex-wrap">
-            <TabsTrigger value="integrations">Anslutningar</TabsTrigger>
             <TabsTrigger value="company">Företag</TabsTrigger>
+            <TabsTrigger value="vehicles">Fordon</TabsTrigger><TabsTrigger value="users">Användare</TabsTrigger><TabsTrigger value="notifications">Notiser</TabsTrigger><TabsTrigger value="subscription">Abonnemang</TabsTrigger>
+            <TabsTrigger value="integrations">Anslutningar</TabsTrigger>
             <TabsTrigger value="features" className="gap-1.5">
               <ToggleLeft className="h-3.5 w-3.5" /> Funktioner
             </TabsTrigger>
             <TabsTrigger value="appearance">Utseende</TabsTrigger>
             <TabsTrigger value="demo" className="gap-1.5"><Sparkles className="h-3.5 w-3.5" /> Exempeldata</TabsTrigger>
-            <TabsTrigger value="subscription">Prenumeration</TabsTrigger>
+
           </TabsList>
           <TabsContent value="integrations"><IntegrationsTab /></TabsContent>
-          <TabsContent value="company">{companyContent}</TabsContent>
+          <TabsContent value="company">{companyContent}</TabsContent><TabsContent value="vehicles">{vehiclesContent}</TabsContent><TabsContent value="users">{usersContent}</TabsContent><TabsContent value="notifications">{notificationsContent}</TabsContent>
           <TabsContent value="features">{featuresContent}</TabsContent>
           <TabsContent value="appearance"><AppearanceTab /></TabsContent>
           <TabsContent value="demo"><DemoDataTab /></TabsContent>
