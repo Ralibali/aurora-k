@@ -216,7 +216,7 @@ export function useRemoveDriverDocumentAttachment() {
       const { data, error } = await supabase.from('driver_documents')
         .update({ storage_path: null, file_name: null, review_status: 'pending',
           reviewed_at: null, reviewed_by: null, review_notes: null } as unknown as TablesUpdate<'driver_documents'>)
-        .eq('id', document.id).eq('company_id', companyId).eq('storage_path', path)
+        .eq('id', document.id).eq('company_id', companyId).filter('storage_path', 'eq', path)
         .select('id').maybeSingle();
       if (error || !data) throw error ?? new Error('Bilagan är borttagen men dokumentet kunde inte uppdateras');
     },
@@ -243,7 +243,7 @@ export function useReviewDriverDocument() {
       const { data, error } = await supabase.from('driver_documents')
         .update({ review_status: decision, reviewed_at: new Date().toISOString(),
           reviewed_by: user.id } as unknown as TablesUpdate<'driver_documents'>)
-        .eq('id', document.id).eq('company_id', companyId).eq('storage_path', document.storage_path)
+        .eq('id', document.id).eq('company_id', companyId).filter('storage_path', 'eq', document.storage_path)
         .select('id').maybeSingle();
       if (error || !data) throw error ?? new Error('Dokumentet ändrades, ladda om sidan.');
     },
