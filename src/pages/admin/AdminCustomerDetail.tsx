@@ -214,7 +214,7 @@ export default function AdminCustomerDetail() {
                     <TableRow>
                       <TableHead>Datum</TableHead>
                       <TableHead>Uppdrag</TableHead>
-                      <TableHead>Chaufför</TableHead>
+                      <TableHead>Förare</TableHead>
                       <TableHead>Tid</TableHead>
                       <TableHead className="text-right">Belopp</TableHead>
                     </TableRow>
