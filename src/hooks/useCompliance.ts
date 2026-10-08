@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { validateDriverDocumentFile } from '@/lib/compliance';
 
 export type DriverDocument = Tables<'driver_documents'>;
 export type ReviewedDriverDocument = DriverDocument & {
@@ -170,18 +171,7 @@ export function useDeleteVehicleMaintenance() {
 
 /* ── Förarkollen: private file attachments + internal review ── */
 
-const ALLOWED_DOCUMENT_MIMES: Record<string, string> = {
-  'application/pdf': 'pdf', 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp',
-};
-const MAX_DOCUMENT_SIZE = 10 * 1024 * 1024;
 const DOCUMENT_BUCKET = 'driver-compliance';
-
-export function validateDriverDocumentFile(file: Pick<File, 'size' | 'type'>): string {
-  const ext = ALLOWED_DOCUMENT_MIMES[file.type];
-  if (!ext) throw new Error('Endast PDF, JPG, PNG eller WebP stöds.');
-  if (file.size <= 0 || file.size > MAX_DOCUMENT_SIZE) throw new Error('Filen måste vara mellan 1 byte och 10 MB.');
-  return ext;
-}
 
 export function useUploadDriverDocumentAttachment() {
   const { companyId } = useAuth();
