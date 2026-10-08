@@ -10,6 +10,19 @@ function dateOffset(days: number) {
   return `${year}-${month}-${day}`;
 }
 
+import { validateDriverDocumentFile } from '@/hooks/useCompliance';
+
+describe('file validation', () => {
+  it('accepts supported documents smaller than 10 MB', () => {
+    expect(validateDriverDocumentFile({ type: 'application/pdf', size: 1024 })).toBe('pdf');
+    expect(validateDriverDocumentFile({ type: 'image/jpeg', size: 1024 })).toBe('jpg');
+  });
+  it('rejects oversized or unsafe document types', () => {
+    expect(() => validateDriverDocumentFile({ type: 'text/html', size: 200 })).toThrow('Endast PDF');
+    expect(() => validateDriverDocumentFile({ type: 'application/pdf', size: 11 * 1024 * 1024 })).toThrow('10 MB');
+  });
+});
+
 describe('expiryStatus', () => {
   it('returnerar none utan datum', () => {
     expect(expiryStatus(null)).toBe('none');
