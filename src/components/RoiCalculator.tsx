@@ -52,7 +52,7 @@ export function RoiCalculator({ t, lang, monthlyPrice = 449, onCta }: RoiCalcula
   ];
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
+    <div className="home-roi grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
       <div className="rounded-[2rem] border border-[#1e1e5a] bg-[#141432] p-7 shadow-[0_22px_70px_rgba(0,0,0,0.4)] sm:p-9">
         <div className="space-y-9">
           {controls.map((control) => (

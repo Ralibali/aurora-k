@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node scripts/generate-static-pages.mjs && node scripts/generate-sitemap.mjs && node scripts/normalize-product-copy.mjs && node scripts/check-pwa-output.mjs && node scripts/check-customer-claims-output.mjs",
+    "build": "vite build && node scripts/generate-static-pages.mjs && node scripts/generate-sitemap.mjs && node scripts/normalize-product-copy.mjs && node scripts/check-pwa-output.mjs && node scripts/check-customer-claims-output.mjs && node scripts/prerender-home-hero.mjs",
     "build:dev": "vite build --mode development && node scripts/check-customer-claims-output.mjs",
     "typecheck": "tsc -p tsconfig.app.json --noEmit",
     "lint": "eslint .",

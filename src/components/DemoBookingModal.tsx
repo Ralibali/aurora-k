@@ -264,13 +264,13 @@ export function DemoBookingModal({ open, onOpenChange, lang = 'sv' }: DemoBookin
           <motion.div
             initial={{ opacity: 0, scale: 0.96, y: 8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ duration: 0.35, ease: 'easeOut' }}
+            transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
             className="py-4 space-y-5 text-center"
           >
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              transition={{ delay: 0.1, type: 'spring', stiffness: 220, damping: 14 }}
+              transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
               className="relative mx-auto h-16 w-16"
             >
               <div className="absolute inset-0 rounded-full bg-emerald-500/15 animate-pulse" />

@@ -51,10 +51,10 @@ export function CookieConsent() {
     setVisible(false);
   };
 
-  if (!visible) return <button type="button" onClick={() => setVisible(true)} className="fixed bottom-2 left-2 z-40 rounded border bg-background px-2 py-1 text-xs">Cookieinställningar</button>;
+  if (!visible) return <button type="button" onClick={() => setVisible(true)} className="cookie-preferences fixed bottom-2 left-2 z-40 rounded border bg-background px-2 py-1 text-xs">Cookieinställningar</button>;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[100] p-4 animate-in slide-in-from-bottom-4 duration-500">
+    <div className="cookie-consent fixed bottom-0 left-0 right-0 z-[100] p-4 animate-in slide-in-from-bottom-4 duration-500">
       <div className="mx-auto max-w-xl bg-card border border-border rounded-xl shadow-lg p-5">
         <div className="flex items-start gap-3">
           <div className="shrink-0 mt-0.5">

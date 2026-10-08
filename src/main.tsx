@@ -9,6 +9,7 @@ import { LandingMobileNavigation } from "./components/LandingMobileNavigation";
 import { MobileConversionShell, StandaloneDemoPage } from "./components/MobileConversionShell";
 import { installPlausibleRouteGuard } from "./lib/analytics";
 import "./index.css";
+import "./home-design.css";
 import "@fontsource/space-grotesk/400.css";
 import "@fontsource/space-grotesk/500.css";
 import "@fontsource/space-grotesk/600.css";

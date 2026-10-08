@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { MessageCircle } from "lucide-react";
-import { LeadFormModal } from "./LeadFormModal";
+const LeadFormModal = lazy(() => import("./LeadFormModal").then(module => ({ default: module.LeadFormModal })));
 import { cn } from "@/lib/utils";
 
 export function QuickContactButton() {
@@ -23,7 +23,7 @@ export function QuickContactButton() {
         <MessageCircle className="h-5 w-5" />
         <span>Kontakta oss</span>
       </button>
-      <LeadFormModal open={open} onOpenChange={setOpen} />
+      <Suspense fallback={<p role="status" className="home-modal-loading">Öppnar formuläret…</p>}>{open && <LeadFormModal open={open} onOpenChange={setOpen} />}</Suspense>
     </>
   );
 }
