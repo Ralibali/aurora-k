@@ -191,7 +191,7 @@ export function MobileConversionShell() {
           <a href="/login" className="rounded-xl px-4 py-3 text-center text-sm font-black text-slate-600">Logga in</a>
         </nav>
       </div>}
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-[0_-12px_36px_rgba(15,23,42,0.14)] backdrop-blur md:hidden">
+      <div className="home-mobile-cta fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-[0_-12px_36px_rgba(15,23,42,0.14)] backdrop-blur md:hidden">
         <Button onClick={() => openDemo('mobile_sticky')} className="h-12 w-full rounded-xl bg-[#123b88] text-base font-black text-white hover:bg-[#0f2f6e]">Boka kostnadsfri demo <ArrowRight className="ml-2 h-4 w-4" /></Button>
       </div>
       {demoOpen && <div className="fixed inset-0 z-[200] overflow-y-auto bg-slate-950/70 p-4 backdrop-blur-sm md:hidden" role="dialog" aria-modal="true" aria-labelledby="mobile-demo-title">

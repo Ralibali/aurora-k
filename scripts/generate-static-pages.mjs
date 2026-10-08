@@ -37,10 +37,10 @@ const STATIC_PAGES = [
     title: "Slipp Excel & WhatsApp i transportplaneringen | Aurora Transport",
     description:
       "Aurora Transport samlar uppdrag, förare, tidrapporter och fakturering i ett enkelt svenskt system. 449 kr/mån. Ingen bindningstid. Boka 15 min demo.",
-    h1: "Transportledningssystem för åkerier och budfirmor",
+    h1: "Planeringen ska inte ligga i en WhatsApp-grupp.",
     body: [
-      "Aurora Transport är ett svenskt transportledningssystem som ersätter Excel, WhatsApp och whiteboard. Hantera uppdrag, förare, tidrapporter och fakturaunderlag i ett enda system – byggt för åkerier, budfirmor och transportbemanning.",
-      "Fast pris från 449 kr/månad. Obegränsat antal förare. Ingen bindningstid. Boka en kostnadsfri 15-minuters demo så visar vi hur du kan starta i dag.",
+      "Aurora Transport samlar uppdrag, förare, tidrapporter och fakturaunderlag på ett ställe. Gjort för åkerier och budfirmor som har vuxit ur Excel.",
+      "449 kr i månaden exkl. moms. Startavgift 3 500 kr exkl. moms för setup och onboarding. Alla förare ingår. Ingen bindningstid. Boka en demo på 15 minuter.",
     ],
   },
   {
@@ -48,10 +48,10 @@ const STATIC_PAGES = [
     title: "Transport management system for hauliers | Aurora Transport",
     description:
       "Swedish TMS for hauliers, couriers and transport staffing. Jobs, drivers, time reporting and invoice drafts from 449 SEK/month.",
-    h1: "Transport management system for hauliers and couriers",
+    h1: "Your schedule should not live in a WhatsApp group.",
     body: [
-      "Aurora Transport is a Swedish transport management system that replaces spreadsheets, WhatsApp and whiteboards. Manage jobs, drivers, time reporting and invoice drafts in one product built for hauliers, couriers and transport staffing teams.",
-      "Flat pricing from 449 SEK per month. Unlimited drivers. No lock-in. Book a free 15-minute demo and see how you can get started today.",
+      "Aurora Transport keeps assignments, drivers, time reports and invoice records in one place. Made for hauliers and courier companies that have outgrown Excel.",
+      "SEK 449 a month excluding VAT. One-time setup and onboarding fee: SEK 3,500 excluding VAT. Every driver included. No lock-in. Book a 15-minute demo.",
     ],
   },
   {
