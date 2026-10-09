@@ -32,3 +32,13 @@ export function daysUntil(expiresAt: string | null): number | null {
   if (!expiresAt) return null;
   return Math.round((parseLocalDate(expiresAt).getTime() - localToday().getTime()) / 86_400_000);
 }
+
+export function validateDriverDocumentFile(file: Pick<File, 'size' | 'type'>): string {
+  const extensions: Record<string, string> = {
+    'application/pdf': 'pdf', 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp',
+  };
+  const ext = extensions[file.type];
+  if (!ext) throw new Error('Endast PDF, JPG, PNG eller WebP stöds.');
+  if (file.size <= 0 || file.size > 10 * 1024 * 1024) throw new Error('Filen måste vara mellan 1 byte och 10 MB.');
+  return ext;
+}

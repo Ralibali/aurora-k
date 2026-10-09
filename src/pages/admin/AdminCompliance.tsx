@@ -10,7 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, Trash2, ShieldCheck, AlertTriangle, FileWarning, Car } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Plus, Trash2, ShieldCheck, AlertTriangle, FileWarning, Car, Upload, ExternalLink, CheckCircle2, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useDrivers } from '@/hooks/useData';
 import { useVehicles } from '@/hooks/useNewFeatures';
@@ -25,6 +26,12 @@ import {
   useDeleteVehicleMaintenance,
   useDriverDocuments,
   useVehicleMaintenance,
+  useUploadDriverDocumentAttachment,
+  useRemoveDriverDocumentAttachment,
+  useReviewDriverDocument,
+  useComplianceEmailReminders,
+  useToggleComplianceEmailReminders,
+  openDriverDocumentAttachment,
   type ExpiryStatus,
 } from '@/hooks/useCompliance';
 
@@ -38,7 +45,7 @@ const statusConfig: Record<ExpiryStatus, { label: (days: number | null) => strin
     className: 'bg-amber-500/15 text-amber-700 border-amber-500/30',
   },
   ok: {
-    label: () => 'Giltigt',
+    label: () => 'Datum längre fram',
     className: 'bg-emerald-500/15 text-emerald-700 border-emerald-500/30',
   },
   none: {
@@ -69,6 +76,16 @@ export default function AdminCompliance() {
 
   const createDocument = useCreateDriverDocument();
   const deleteDocument = useDeleteDriverDocument();
+  const uploadDocument = useUploadDriverDocumentAttachment();
+  const removeAttachment = useRemoveDriverDocumentAttachment();
+  const reviewDocument = useReviewDriverDocument();
+  const { data: remindersEnabled, isLoading: remindersLoading, error: remindersError } = useComplianceEmailReminders();
+  const toggleReminders = useToggleComplianceEmailReminders();
+
+  const openAttachment = async (path: string) => {
+    try { await openDriverDocumentAttachment(path); }
+    catch (error) { toast.error(error instanceof Error ? error.message : 'Kunde inte öppna bilagan'); }
+  };
   const createMaintenance = useCreateVehicleMaintenance();
   const deleteMaintenance = useDeleteVehicleMaintenance();
 
@@ -171,7 +188,7 @@ export default function AdminCompliance() {
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Dokument & underhåll</h1>
             <p className="text-muted-foreground text-sm">
-              Körkort, ADR-intyg, besiktningar och service — med automatiska varningar innan något går ut.
+              Förarkollen samlar förardokument, intern granskning och datumbevakning samt fordonsunderhåll.
             </p>
           </div>
           <div className="flex gap-2">
@@ -187,7 +204,7 @@ export default function AdminCompliance() {
             )}
             {stats.expired === 0 && stats.warning === 0 && (
               <Badge variant="outline" className="bg-emerald-500/15 text-emerald-700 border-emerald-500/30">
-                <ShieldCheck className="mr-1 h-3 w-3" /> Allt giltigt
+                <ShieldCheck className="mr-1 h-3 w-3" /> Inga nära utgångsdatum
               </Badge>
             )}
           </div>
@@ -207,6 +224,30 @@ export default function AdminCompliance() {
             </CardContent>
           </Card>
         )}
+
+        <Card>
+          <CardContent className="flex flex-col gap-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="space-y-1">
+              <p className="font-semibold text-sm">Förarkollen · e-postpåminnelser</p>
+              <p className="text-xs text-muted-foreground">
+                Med ditt godkännande skickas påminnelser till företagets administratör 90, 30 och 7 dagar före registrerat utgångsdatum.
+                Inga mejl skickas innan du aktiverar funktionen.
+              </p>
+              <p className="text-xs text-amber-700">
+                Intern dokumentgranskning är inte en registerkontroll och intygar inte behörighet hos Transportstyrelsen eller BKY.
+              </p>
+              {remindersError && <p className="text-xs text-destructive">Inställningen kunde inte hämtas. Databasmigreringen behöver vara installerad.</p>}
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              <Label htmlFor="forarkollen-reminders" className="text-xs">
+                {remindersEnabled ? 'Aktiverat' : 'Avstängt'}
+              </Label>
+              <Switch id="forarkollen-reminders" checked={Boolean(remindersEnabled)}
+                disabled={remindersLoading || Boolean(remindersError) || toggleReminders.isPending}
+                onCheckedChange={(enabled) => toggleReminders.mutate(enabled)} />
+            </div>
+          </CardContent>
+        </Card>
 
         <Tabs defaultValue="documents">
           <TabsList>
@@ -270,14 +311,14 @@ export default function AdminCompliance() {
             </div>
 
             <Card>
-              <CardContent className="p-0">
+              <CardContent className="p-0 overflow-x-auto">
                 {docsLoading ? (
                   <div className="p-6 space-y-3">
                     {[1, 2, 3].map((i) => <Skeleton key={i} className="h-10 w-full" />)}
                   </div>
                 ) : (documents ?? []).length === 0 ? (
                   <p className="p-8 text-center text-muted-foreground text-sm">
-                    Inga dokument ännu. Lägg till körkort, ADR-intyg eller förarbevis för att få varningar innan de går ut.
+                    Inga dokument ännu. Registrera ett förardokument och bifoga en fil för intern granskning.
                   </p>
                 ) : (
                   <Table>
@@ -287,7 +328,9 @@ export default function AdminCompliance() {
                         <TableHead>Typ</TableHead>
                         <TableHead>Beteckning</TableHead>
                         <TableHead>Utgångsdatum</TableHead>
-                        <TableHead>Status</TableHead>
+                        <TableHead>Datumstatus</TableHead>
+                        <TableHead>Bilaga</TableHead>
+                        <TableHead>Intern granskning</TableHead>
                         <TableHead className="w-10" />
                       </TableRow>
                     </TableHeader>
@@ -300,7 +343,62 @@ export default function AdminCompliance() {
                           <TableCell>{doc.expires_at ?? '—'}</TableCell>
                           <TableCell><ExpiryBadge date={doc.expires_at} /></TableCell>
                           <TableCell>
-                            <Button variant="ghost" size="icon" onClick={() => deleteDocument.mutate(doc.id)}>
+                            {doc.storage_path ? (
+                              <div className="flex flex-col items-start gap-1">
+                                <Button variant="outline" size="sm" onClick={() => void openAttachment(doc.storage_path!)}>
+                                  <ExternalLink className="mr-1 h-3.5 w-3.5" /> Visa bilaga
+                                </Button>
+                                <span className="max-w-36 truncate text-xs text-muted-foreground" title={doc.file_name ?? ''}>
+                                  {doc.file_name || 'Dokument'}
+                                </span>
+                                <Button variant="ghost" size="sm" className="text-xs" disabled={removeAttachment.isPending}
+                                  onClick={() => {
+                                    if (window.confirm('Ta bort bilagan och återställa intern granskning?')) removeAttachment.mutate(doc);
+                                  }}>Ta bort bilaga</Button>
+                              </div>
+                            ) : (
+                              <Button asChild variant="outline" size="sm">
+                                <label className="cursor-pointer">
+                                  <Upload className="mr-1 h-3.5 w-3.5" /> Bifoga
+                                  <input className="sr-only" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp"
+                                    disabled={uploadDocument.isPending} onChange={(event) => {
+                                      const file = event.target.files?.[0];
+                                      if (file) uploadDocument.mutate({ document: doc, file });
+                                      event.target.value = '';
+                                    }} />
+                                </label>
+                              </Button>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {!doc.storage_path ? (
+                              <Badge variant="secondary">Ingen fil att granska</Badge>
+                            ) : (
+                              <div className="space-y-2">
+                                <Badge variant="outline" className={
+                                  doc.review_status === 'approved' ? 'text-emerald-700 border-emerald-500/50' :
+                                  doc.review_status === 'rejected' ? 'text-red-700 border-red-500/50' : ''
+                                }>
+                                  {doc.review_status === 'approved' ? 'Internt granskad' :
+                                   doc.review_status === 'rejected' ? 'Avvisad' : 'Inväntar granskning'}
+                                </Badge>
+                                <div className="flex flex-wrap gap-1">
+                                  <Button size="sm" variant="outline" disabled={reviewDocument.isPending || doc.review_status === 'approved'}
+                                    onClick={() => reviewDocument.mutate({ document: doc, decision: 'approved' })}>
+                                    <CheckCircle2 className="mr-1 h-3 w-3" /> Godkänn
+                                  </Button>
+                                  <Button size="sm" variant="ghost" disabled={reviewDocument.isPending || doc.review_status === 'rejected'}
+                                    onClick={() => reviewDocument.mutate({ document: doc, decision: 'rejected' })}>
+                                    <XCircle className="mr-1 h-3 w-3" /> Avvisa
+                                  </Button>
+                                </div>
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <Button variant="ghost" size="icon" disabled={Boolean(doc.storage_path)}
+                              title={doc.storage_path ? 'Ta bort bilagan före dokumentet' : 'Ta bort dokument'}
+                              onClick={() => { if (window.confirm('Ta bort dokumentet?')) deleteDocument.mutate(doc.id); }}>
                               <Trash2 className="h-4 w-4 text-muted-foreground" />
                             </Button>
                           </TableCell>
