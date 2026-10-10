@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "status": "draft",
+  "writtenAt": "2026-10-10T08:50:49.988416+00:00",
+  "repository": "Ralibali/aurora-k",
+  "publicationGate": "Earliest 2026-10-12, at least two Stockholm calendar days after the previous original is live. Require fresh current main, inventory, sources and previous-article checks. No publication dates while draft.",
+  "sourceReview": {
+    "checkedAt": "2026-10-10T08:50:49.988416+00:00",
+    "distinctIntent": "Skilja uppdragets gemensamma referens från varje stopp och dess dokumentation vid flera leveransställen, utan ruttoptimering eller faktureringsråd.",
+    "note": "Original manual guide. Owned product path verified live on Oct10. Recheck offer and links before publication. No claimed product automation or customer results."
+  },
+  "article": {
+    "slug": "flera-leveransstopp-entydiga-referenser",
+    "title": "Ge varje leveransstopp en tydlig referens i transportunderlaget",
+    "metaDescription": "Håll isär uppdrag, stopp och underlag när en transport har flera leveranser. En praktisk mall för tydliga hänvisningar och öppna frågor.",
+    "intro": "Ett uppdrag kan omfatta flera stopp, medan en bild eller anteckning bara gäller ett av dem. Om allt märks med samma övergripande referens kan mottagaren behöva gissa vilken leverans ett besked avser. En enkel indelning gör underlaget lättare att läsa och följa upp.\n\nBörja med den planering och de referenser som verksamheten redan använder. Guiden beskriver en manuell dokumentationsrutin. Den beslutar inte körordning, bedömer inte leveransansvar och utlovar ingen särskild funktion för stoppnumrering i Aurora Transport. Ansvarig transportledning behöver bekräfta vad som gäller för det aktuella uppdraget.",
+    "sections": [
+      {
+        "heading": "Skilj uppdragets namn från stoppets beteckning",
+        "content": "Ange först vilken gemensam order eller vilket uppdrag stopplistan hör till. Ge sedan varje stopp en egen begriplig beteckning enligt verksamhetens arbetssätt. Behåll båda uppgifterna tillsammans när en anteckning skickas vidare, så att mottagaren både hittar helheten och rätt del.\n\nAnvänd inte enbart kundnamnet om samma kund förekommer på flera platser. Två leveranser till samma företag kan ändå behöva olika underlag. Skriv vilka uppgifter som identifierar stoppet och vem som kan reda ut en oklarhet. Om verksamheten redan har fasta stopp-ID:n ska en privat egen numrering inte ersätta dem utan beslut."
+      },
+      {
+        "heading": "Knyt varje dokument till den del det faktiskt beskriver",
+        "content": "Skriv stoppets referens nära hänvisningen till en bild, kvittens eller anteckning. Beskriv kort vad underlaget visar och när det skapades. Om ett dokument gäller hela uppdraget ska det framgå, så att det inte misstolkas som bevis för varje enskilt stopp.\n\nEtt påhittat exempel är tre planerade stopp där bara stopp B har ett kompletterande besked. Lägg beskedet vid B och skriv vad som återstår för A och C. Kopiera inte samma status till samtliga stopp för att göra listan komplett. Underlagets omfattning behöver styra vilka slutsatser som kan dras av det."
+      },
+      {
+        "heading": "Bevara referensen när ordningen ändras",
+        "content": "Om transportledningen ändrar besöksordningen behöver ni skilja stoppets identitet från dess plats i dagens ordning. Beskriv ändringen enligt den rutin ni kommit överens om. En anteckning som tidigare gällde stopp B ska fortfarande gå att förstå även om B nu besöks först.\n\nSamla beslutet i uppdragets [ändringslogg](/blogg/andringslogg-transportuppdrag) och hänvisa till berörda stopp. Skriv vem som bekräftade ändringen och vilka som behöver få samma besked. Byt inte namn på gamla filer utan att behålla sambandet med det ursprungliga underlaget; annars kan en äldre hänvisning bli svår att följa."
+      },
+      {
+        "heading": "Lämna över en lista som går att läsa utan gissningar",
+        "content": "Gå igenom varje stopp innan underlaget lämnas vidare. En användbar rad innehåller uppdragsreferens, stoppbeteckning, plats, relevant datum, tillgängliga dokument och kvarstående fråga. Använd tydliga ord som bekräftat, behöver kompletteras eller gäller hela uppdraget när det motsvarar det faktiska läget.\n\nKontrollera till sist att varje dokument går att hitta och att frågor har en mottagare. Läs om [Aurora Transports tjänster](/tjanster) när ni ser över hur informationen hålls samlad. AI-assisterad originalguide med en manuell arbetsmall. Texten påstår inte att en referens i sig bevisar genomförd leverans eller godkänner ett underlag för betalning."
+      }
+    ],
+    "editorial": {
+      "createdWith": "ChatGPT",
+      "aiAssisted": true,
+      "searchIntent": "Skilja uppdragets gemensamma referens från varje stopp och dess dokumentation vid flera leveransställen, utan ruttoptimering eller faktureringsråd.",
+      "sourceUrls": [
+        "https://auroratransport.se/tjanster"
+      ],
+      "sourceCheckedAt": "2026-10-10T08:50:49.988416+00:00"
+    },
+    "seoTitle": "Ge varje leveransstopp en tydlig referens i transportunderlaget",
+    "readTime": "4 min",
+    "excerpt": "Håll isär uppdrag, stopp och underlag när en transport har flera leveranser. En praktisk mall för tydliga hänvisningar och öppna frågor.",
+    "tags": [
+      "transportledning",
+      "dokumentation"
+    ],
+    "links": [
+      {
+        "href": "/tjanster",
+        "label": "Se Aurora Transports tjänster"
+      }
+    ]
+  }
+}
