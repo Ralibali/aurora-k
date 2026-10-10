@@ -51,7 +51,7 @@ export default function AdminEnvironment() {
         {useDemo && (
           <div className="rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-900/40 px-4 py-2.5 text-xs text-amber-800 dark:text-amber-300 flex items-center gap-2">
             <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
-            Visar exempeldata. Dina riktiga miljötal beräknas automatiskt när chaufförer registrerar körsträcka på uppdrag.
+            Visar exempeldata. Dina riktiga miljötal beräknas automatiskt när förare registrerar körsträcka på uppdrag.
           </div>
         )}
 
@@ -136,7 +136,7 @@ export default function AdminEnvironment() {
               </div>
               <p className="font-semibold">Ingen körsträcka registrerad ännu</p>
               <p className="text-sm text-muted-foreground mt-1.5 max-w-md mx-auto">
-                När chaufförer slutför uppdrag och registrerar körsträcka beräknas utsläpp och bränsleförbrukning automatiskt här.
+                När förare slutför uppdrag och registrerar körsträcka beräknas utsläpp och bränsleförbrukning automatiskt här.
               </p>
             </CardContent>
           </Card>

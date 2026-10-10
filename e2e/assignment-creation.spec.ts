@@ -9,7 +9,7 @@ async function fillAssignment(page: Page, service: string) {
   await page.getByRole('option', { name: 'Nordic Distribution' }).click();
   await page.getByLabel('Arbetsplats / hämtningsadress', { exact: true }).fill('Industrigatan 10, Linköping');
   await page.getByLabel('Datum och starttid').fill('2026-09-28T08:00');
-  await page.getByLabel('Tilldela chaufför', { exact: true }).click();
+  await page.getByLabel('Tilldela förare', { exact: true }).click();
   await page.getByRole('option', { name: 'Erik Andersson' }).click();
 }
 

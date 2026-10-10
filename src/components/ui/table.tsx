@@ -3,11 +3,20 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
-  ({ className, ...props }, ref) => (
-    <div className="relative w-full overflow-auto">
-      <table ref={ref} className={cn("w-full caption-bottom text-sm", className)} {...props} />
-    </div>
-  ),
+  ({ className, ...props }, forwardedRef) => {
+    const ref = React.useRef<HTMLTableElement>(null);
+    React.useImperativeHandle(forwardedRef, () => ref.current!);
+    React.useLayoutEffect(() => {
+      if (!ref.current?.closest('.admin-geist-shell')) return;
+      const labels = Array.from(ref.current.querySelectorAll('thead th')).map(cell => cell.textContent?.trim() || '');
+      const numeric = labels.map(label => /^(#|Datum|Tid|In|Ut|Förfaller|Vecka|OB-timmar|Traktamente|Timmar|Totalt|Pris|Belopp|Summa|Uppdrag i år|Omsättning i år)/i.test(label));
+      ref.current.querySelectorAll('thead th').forEach((cell, index) => { if (cell instanceof HTMLElement) cell.dataset.numeric = String(numeric[index]); });
+      ref.current.querySelectorAll('tbody tr').forEach(row => {
+        Array.from(row.children).forEach((cell, index) => { if (cell instanceof HTMLElement) { cell.dataset.label = labels[index] || ''; cell.dataset.numeric = String(numeric[index]); } });
+      });
+    }, [props.children]);
+    return <div className="relative w-full overflow-auto"><table ref={ref} className={cn("w-full caption-bottom text-sm", className)} {...props} /></div>;
+  },
 );
 Table.displayName = "Table";
 

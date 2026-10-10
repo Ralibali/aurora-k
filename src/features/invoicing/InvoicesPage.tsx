@@ -63,7 +63,7 @@ export default function InvoicesPage() {
   };
 
   return (
-    <AdminLayout title="Fakturering" description="Skapa och hantera fakturor">
+    <AdminLayout title="Fakturor">
       <div className="max-w-6xl space-y-5">
         {showingDemo && <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-xs text-amber-800">Demo-läge — statusändringar är avstängda.</div>}
         <div className="flex flex-wrap gap-3">
@@ -73,13 +73,13 @@ export default function InvoicesPage() {
           <Button asChild><Link to="/admin/invoices/new"><Plus className="mr-1 h-4 w-4" /> Skapa faktura</Link></Button>
         </div>
         <div className="rounded-xl border bg-card">
-          <Table><TableHeader><TableRow><TableHead>Fakturanr</TableHead><TableHead>Kund</TableHead><TableHead>Datum</TableHead><TableHead>Förfallodatum</TableHead><TableHead className="text-right">Belopp</TableHead><TableHead>Status</TableHead><TableHead className="w-[190px]">Åtgärd</TableHead></TableRow></TableHeader>
+          <Table><TableHeader><TableRow><TableHead>#</TableHead><TableHead>Kund</TableHead><TableHead>Datum</TableHead><TableHead>Förfaller</TableHead><TableHead className="text-right">Belopp</TableHead><TableHead>Status</TableHead><TableHead className="w-[190px]">Åtgärd</TableHead></TableRow></TableHeader>
             <TableBody>
               {isLoading && [1,2,3].map(item => <TableRow key={item}>{Array.from({ length: 7 }).map((_, index) => <TableCell key={index}><Skeleton className="h-4 w-20" /></TableCell>)}</TableRow>)}
-              {!isLoading && filtered.length === 0 && <TableRow><TableCell colSpan={7} className="py-10 text-center text-muted-foreground">Inga fakturor</TableCell></TableRow>}
+              {!isLoading && filtered.length === 0 && <TableRow><TableCell colSpan={7} className="py-10 text-center text-muted-foreground"><p>Inga fakturor här ännu.</p><Button className="mt-4" asChild><Link to="/admin/invoices/new">Skapa faktura</Link></Button></TableCell></TableRow>}
               {!isLoading && filtered.map(invoice => <TableRow key={invoice.id}>
-                <TableCell className="font-mono">#{invoice.invoice_number}</TableCell><TableCell>{invoice.customer?.name}</TableCell><TableCell>{invoice.invoice_date}</TableCell><TableCell>{invoice.due_date}</TableCell><TableCell className="text-right font-mono">{Number(invoice.total_inc_vat).toLocaleString('sv-SE')} kr</TableCell><TableCell><InvoiceStatusBadge status={invoice.status} /></TableCell>
-                <TableCell><div className="flex flex-wrap gap-1">{invoice.status === 'draft' && <Button variant="outline" size="sm" disabled={showingDemo} onClick={() => setExportInvoice(invoice)}>Fortnox</Button>}<Button variant="ghost" size="icon" onClick={() => setPreview(invoice)}><Eye className="h-4 w-4" /></Button><Button variant="ghost" size="icon" onClick={() => downloadPdf(invoice)}><Download className="h-4 w-4" /></Button>{invoice.status === 'draft' && <Button variant="ghost" size="sm" disabled={showingDemo} onClick={() => updateStatus.mutate({ id: invoice.id, status: 'sent' })}>Skicka</Button>}{['sent','overdue'].includes(invoice.status) && <Button variant="ghost" size="sm" disabled={showingDemo} onClick={() => updateStatus.mutate({ id: invoice.id, status: 'paid' })}>Betald</Button>}</div></TableCell>
+                <TableCell className="font-mono">#{invoice.invoice_number}</TableCell><TableCell>{invoice.customer?.name}</TableCell><TableCell>{invoice.invoice_date}</TableCell><TableCell className={invoice.status === 'overdue' ? 'text-destructive' : undefined}>{invoice.due_date}</TableCell><TableCell className="text-right font-mono">{Number(invoice.total_inc_vat).toLocaleString('sv-SE')} kr</TableCell><TableCell><InvoiceStatusBadge status={invoice.status} /></TableCell>
+                <TableCell><div className="flex flex-wrap gap-1">{invoice.status === 'draft' && <Button variant="outline" size="sm" disabled={showingDemo} onClick={() => setExportInvoice(invoice)}>Fortnox</Button>}<Button variant="ghost" size="icon" aria-label={`Förhandsvisa faktura ${invoice.invoice_number}`} onClick={() => setPreview(invoice)}><Eye className="h-4 w-4" /></Button><Button variant="ghost" size="icon" aria-label={`Ladda ned faktura ${invoice.invoice_number}`} onClick={() => downloadPdf(invoice)}><Download className="h-4 w-4" /></Button>{invoice.status === 'draft' && <Button variant="ghost" size="sm" disabled={showingDemo} onClick={() => updateStatus.mutate({ id: invoice.id, status: 'sent' })}>Skicka</Button>}{['sent','overdue'].includes(invoice.status) && <Button variant="ghost" size="sm" disabled={showingDemo} onClick={() => updateStatus.mutate({ id: invoice.id, status: 'paid' })}>Betald</Button>}</div></TableCell>
               </TableRow>)}
             </TableBody>
           </Table>

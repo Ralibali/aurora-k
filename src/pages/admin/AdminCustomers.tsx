@@ -1,16 +1,13 @@
 import { useState } from 'react';
 import { AdminLayout } from '@/components/AdminLayout';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useCustomers } from '@/hooks/useData';
-import { pricingTypeLabels } from '@/lib/types';
+import { useCustomers, useAssignments, useInvoices } from '@/hooks/useData';
 import { Plus, Search, Upload } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
-import { StaggeredTableBody, StaggeredTableRow } from '@/components/StaggeredList';
 import { useDemoMode } from '@/hooks/useDemoMode';
 import { demoCustomersFull } from '@/lib/demo-data';
 import { CustomerImportDialog } from '@/features/customers/CustomerImportDialog';
@@ -21,6 +18,12 @@ export default function AdminCustomers() {
   const [importOpen, setImportOpen] = useState(false);
   const navigate = useNavigate();
   const { data: customers, isLoading } = useCustomers();
+  const assignmentQuery = useAssignments();
+  const invoiceQuery = useInvoices();
+  const year = String(new Date().getFullYear());
+  const jobsThisYear = (id: string) => (assignmentQuery.data ?? []).filter(a => a.customer_id === id && a.scheduled_start.startsWith(year)).length;
+  const revenueThisYear = (id: string) => (invoiceQuery.data ?? []).filter(i => i.customer_id === id && i.invoice_date.startsWith(year) && ['sent','paid','overdue'].includes(i.status)).reduce((sum,i) => sum+Number(i.total_ex_vat || 0),0);
+  const city = (address?: string | null) => address?.match(/\d{3}\s?\d{2}\s+([^,\n]+)/)?.[1]?.trim() || 'Ej angiven';
   const { enabled: demoEnabled } = useDemoMode();
 
   // Overlay demo customers when demo mode is on and the account has no real ones
@@ -42,7 +45,7 @@ export default function AdminCustomers() {
   });
 
   return (
-    <AdminLayout title="Kundregister" description="Hantera kunder och prissättning">
+    <AdminLayout title="Kunder">
       <div className="space-y-5 max-w-6xl">
         {showingDemo && (
           <div className="rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-900/40 px-4 py-2.5 text-xs text-amber-800 dark:text-amber-300 flex items-center gap-2">
@@ -75,57 +78,15 @@ export default function AdminCustomers() {
 
         <div className="admin-table-card">
           <div className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Namn</TableHead>
-                  <TableHead className="hidden md:table-cell">Org.nr</TableHead>
-                  <TableHead className="hidden md:table-cell">Kontaktperson</TableHead>
-                  <TableHead className="hidden sm:table-cell">E-post</TableHead>
-                  <TableHead className="hidden sm:table-cell">Telefon</TableHead>
-                  <TableHead>Prissättning</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoading && [1, 2, 3, 4, 5].map(i => (
-                  <TableRow key={i}>
-                    <TableCell><Skeleton className="h-4 w-28 rounded" /></TableCell>
-                    <TableCell className="hidden md:table-cell"><Skeleton className="h-3 w-20 rounded" /></TableCell>
-                    <TableCell className="hidden md:table-cell"><Skeleton className="h-3 w-24 rounded" /></TableCell>
-                    <TableCell className="hidden sm:table-cell"><Skeleton className="h-3 w-32 rounded" /></TableCell>
-                    <TableCell className="hidden sm:table-cell"><Skeleton className="h-3 w-20 rounded" /></TableCell>
-                    <TableCell><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
-                  </TableRow>
-                ))}
-                {!isLoading && filtered.length > 0 && (
-                  <StaggeredTableBody>
-                    {filtered.map((c) => (
-                      <StaggeredTableRow
-                        key={c.id}
-                        className="cursor-pointer hover:bg-muted/50"
-                        onClick={() => !showingDemo && navigate(`/admin/customers/${c.id}`)}
-                      >
-                        <TableCell className="font-medium">{c.name}</TableCell>
-                        <TableCell className="hidden md:table-cell text-muted-foreground font-mono">{c.org_number || '–'}</TableCell>
-                        <TableCell className="hidden md:table-cell">{c.contact_person || '–'}</TableCell>
-                        <TableCell className="hidden sm:table-cell text-muted-foreground">{c.email || '–'}</TableCell>
-                        <TableCell className="hidden sm:table-cell text-muted-foreground">{c.phone || '–'}</TableCell>
-                        <TableCell><span className="status-badge status-pending">{pricingTypeLabels[c.pricing_type as keyof typeof pricingTypeLabels] || c.pricing_type}</span></TableCell>
-                      </StaggeredTableRow>
-                    ))}
-                  </StaggeredTableBody>
-                )}
-                {!isLoading && filtered.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground py-12">
-                      <p className="font-medium text-foreground mb-1">Inga kunder ännu</p>
-                      <p className="text-sm mb-4">Lägg till din första kund för att börja skapa uppdrag och fakturor.</p>
-                      <Button size="sm" onClick={() => navigate('/admin/customers/new')}>Skapa kund</Button>
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+            <Table><TableHeader><TableRow><TableHead>Kund</TableHead><TableHead>Kontakt</TableHead><TableHead>Ort</TableHead><TableHead className="text-right">Uppdrag i år</TableHead><TableHead className="text-right">Omsättning i år</TableHead></TableRow></TableHeader><TableBody>
+             {isLoading && [1,2,3].map(i=><TableRow key={i}><TableCell colSpan={5}><Skeleton className="h-12 w-full" /></TableCell></TableRow>)}
+             {!isLoading && filtered.map(c=><TableRow key={c.id} className="cursor-pointer" onClick={e=>{if (!(e.target as HTMLElement).closest('a,button') && !showingDemo) navigate(`/admin/customers/${c.id}`);}}>
+              <TableCell><div><Link to={showingDemo ? '/admin/customers' : `/admin/customers/${c.id}`} className="inline-flex min-h-11 items-center font-medium">{c.name}</Link><p className="text-xs text-muted-foreground">{c.org_number || 'Org.nr saknas'}</p></div></TableCell>
+              <TableCell><div><p>{c.contact_person || 'Kontakt saknas'}</p>{c.email && <a className="inline-flex min-h-11 items-center text-xs text-muted-foreground" href={`mailto:${c.email}`}>{c.email}</a>}{c.phone && <p><a className="inline-flex min-h-11 items-center text-xs" href={`tel:${c.phone}`}>{c.phone}</a></p>}</div></TableCell>
+              <TableCell>{city(c.visit_address || c.invoice_address)}</TableCell><TableCell className="text-right">{showingDemo || assignmentQuery.isLoading || assignmentQuery.isError ? '–' : jobsThisYear(c.id)}</TableCell><TableCell className="text-right"><div>{showingDemo || invoiceQuery.isLoading || invoiceQuery.isError ? '–' : `${revenueThisYear(c.id).toLocaleString('sv-SE')} kr`}<p className="text-xs text-muted-foreground">exkl. moms</p></div></TableCell>
+             </TableRow>)}
+             {!isLoading && filtered.length===0 && <TableRow><TableCell colSpan={5} className="py-12 text-center"><p>Inga kunder här. Lägg till din första.</p><Button className="mt-4" asChild><Link to="/admin/customers/new">Ny kund</Link></Button></TableCell></TableRow>}
+            </TableBody></Table>
           </div>
         </div>
       </div>

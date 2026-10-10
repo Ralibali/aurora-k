@@ -1,3 +1,4 @@
+import { useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Check, AlertTriangle } from 'lucide-react';
 
@@ -16,10 +17,13 @@ const config: Record<string, { label: string; dot?: string; dotPulse?: boolean; 
 };
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {
+  const admin = useLocation().pathname.startsWith('/admin');
+  const labels: Record<string, string> = {completed: 'Klar', active: 'Pågår', pending: 'Planerad', unassigned: 'Ej tilldelad', delayed: 'Problem', cancelled: 'Avbokad'};
+  const tone = ['active','completed'].includes(status) ? 'green' : status === 'unassigned' ? 'orange' : status === 'delayed' ? 'red' : 'gray';
   const c = config[status] ?? { label: status, bg: 'bg-muted', text: 'text-muted-foreground' };
 
   return (
-    <span className={cn(
+    <span data-tone={tone} className={cn(admin && 'admin-status',
       'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium',
       c.bg, c.text,
       c.border && 'border border-red-300 dark:border-red-500/30',
@@ -33,7 +37,7 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
       )}
       {c.icon === 'check' && <Check className="h-3 w-3" />}
       {c.icon === 'warning' && <AlertTriangle className="h-3 w-3" />}
-      {c.label}
+      {admin ? labels[status] || c.label : c.label}
     </span>
   );
 }

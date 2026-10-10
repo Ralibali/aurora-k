@@ -1,3 +1,4 @@
+import { WeeklyCompensation } from '@/features/compensation/WeeklyCompensation';
 import { useState, useEffect, useMemo } from 'react';
 import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
 import { AdminLayout } from '@/components/AdminLayout';
@@ -100,12 +101,12 @@ export default function AdminCompensation() {
   };
 
   return (
-    <AdminLayout title="Ersättningar" description="Hantera grundlön, OB-tillägg och traktamenten">
-      <div className="max-w-4xl space-y-6">
+    <AdminLayout title="OB & traktamente">
+      <div className="space-y-6"><WeeklyCompensation /><details><summary className="min-h-11 cursor-pointer py-3 text-sm font-medium">Ersättningsnivåer, grundlön och export</summary>
         <UsageInfoCard
           icon={Wallet}
           title="Dessa regler används när tidrapporter räknas samman"
-          description="OB-tillägg, traktamenten och grundlön appliceras automatiskt på chaufförernas tider — så löneunderlaget blir rätt utan manuell beräkning."
+          description="OB-tillägg, traktamenten och grundlön appliceras automatiskt på förarnas tider — så löneunderlaget blir rätt utan manuell beräkning."
           usedFor={[
             'Beräkning av OB i tidrapporter',
             'Automatiskt traktamente per dag',
@@ -168,7 +169,7 @@ export default function AdminCompensation() {
             <Card><CardContent className="p-0">{pdLoading ? <div className="p-6 space-y-3">{[1,2].map(i => <Skeleton key={i} className="h-10 w-full" />)}</div> : !perDiemRates?.length ? <div className="text-center py-12 text-muted-foreground"><Briefcase className="h-10 w-10 mx-auto mb-3 opacity-30" /><p>Inga traktamentsnivåer definierade</p><p className="text-sm">Skapa nivåer för att beräkna traktamente automatiskt.</p></div> : <Table><TableHeader><TableRow><TableHead>Namn</TableHead><TableHead className="text-right">Belopp</TableHead><TableHead className="text-right">Min timmar</TableHead><TableHead className="w-10" /></TableRow></TableHeader><TableBody>{perDiemRates.map(r => <TableRow key={r.id}><TableCell className="font-medium">{r.name}</TableCell><TableCell className="text-right font-mono">{r.amount} kr</TableCell><TableCell className="text-right font-mono">{r.min_hours}h</TableCell><TableCell><Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => deletePd.mutate(r.id)}><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button></TableCell></TableRow>)}</TableBody></Table>}</CardContent></Card>
           </TabsContent>
         </Tabs>
-      </div>
+      </details></div>
     </AdminLayout>
   );
 }
@@ -307,10 +308,10 @@ function SalaryExportTab() {
         <CardTitle className="text-base">Exportera löneunderlag</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-sm text-muted-foreground">Välj månad och chaufför. Exporten använder samma löne-, OB- och traktamentelogik som ersättningsvyn. CSV = manuell hantering, PAXml 2.2 = direktimport i lönesystem (Visma, Kontek m.fl.).</p>
+        <p className="text-sm text-muted-foreground">Välj månad och förare. Exporten använder samma löne-, OB- och traktamentelogik som ersättningsvyn. CSV = manuell hantering, PAXml 2.2 = direktimport i lönesystem (Visma, Kontek m.fl.).</p>
         <div className="grid gap-4 sm:grid-cols-[180px_1fr_auto_auto] sm:items-end">
           <div className="space-y-2"><Label>Månad</Label><Input type="month" value={month} onChange={e => setMonth(e.target.value)} /></div>
-          <div className="space-y-2"><Label>Chaufför</Label><Select value={driverFilter} onValueChange={setDriverFilter}><SelectTrigger><SelectValue placeholder="Välj chaufför" /></SelectTrigger><SelectContent><SelectItem value="all">Alla chaufförer</SelectItem>{(drivers ?? []).map((driver) => <SelectItem key={driver.id} value={driver.id}>{driver.full_name}</SelectItem>)}</SelectContent></Select></div>
+          <div className="space-y-2"><Label>Förare</Label><Select value={driverFilter} onValueChange={setDriverFilter}><SelectTrigger><SelectValue placeholder="Välj förare" /></SelectTrigger><SelectContent><SelectItem value="all">Alla förare</SelectItem>{(drivers ?? []).map((driver) => <SelectItem key={driver.id} value={driver.id}>{driver.full_name}</SelectItem>)}</SelectContent></Select></div>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -361,8 +362,8 @@ function BasePayTab() {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">Ställ in ersättningstyp och belopp per chaufför. Dessa uppgifter används för att beräkna grundlön i tidrapporter.</p>
-      <Card><CardContent className="p-0">{isLoading ? <div className="p-6 space-y-3">{[1,2,3].map(i => <Skeleton key={i} className="h-14 w-full" />)}</div> : !drivers?.length ? <div className="text-center py-12 text-muted-foreground"><Users className="h-10 w-10 mx-auto mb-3 opacity-30" /><p>Inga chaufförer tillagda ännu</p><p className="text-sm">Bjud in förare under Chaufförer-sidan.</p></div> : <Table><TableHeader><TableRow><TableHead>Chaufför</TableHead><TableHead>Ersättningstyp</TableHead><TableHead className="text-right">Belopp</TableHead><TableHead>Skattetabell</TableHead><TableHead className="w-24" /></TableRow></TableHeader><TableBody>{drivers.map(driver => { const comp = compMap[driver.id]; const isEditing = editingId === driver.id; return isEditing ? <CompensationEditRow key={driver.id} driver={driver} existing={comp} onClose={() => setEditingId(null)} /> : <TableRow key={driver.id}><TableCell><div className="flex items-center gap-3"><div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold ${avatarColor(driver.full_name)}`}>{getInitials(driver.full_name)}</div><div><p className="font-medium text-sm">{driver.full_name}</p><p className="text-xs text-muted-foreground">{driver.email}</p></div></div></TableCell><TableCell>{comp ? <Badge variant="secondary" className="text-xs">{COMP_LABELS[comp.compensation_type] ?? comp.compensation_type}</Badge> : <span className="text-xs text-muted-foreground italic">Ej angiven</span>}</TableCell><TableCell className="text-right font-mono text-sm">{comp ? formatCompAmount(comp) : '–'}</TableCell><TableCell className="text-sm text-muted-foreground">{comp?.tax_table || '–'}</TableCell><TableCell><Button variant="outline" size="sm" className="text-xs" onClick={() => setEditingId(driver.id)}><Wallet className="h-3.5 w-3.5 mr-1" /> {comp ? 'Redigera' : 'Ange'}</Button></TableCell></TableRow>; })}</TableBody></Table>}</CardContent></Card>
+      <p className="text-sm text-muted-foreground">Ställ in ersättningstyp och belopp per förare. Dessa uppgifter används för att beräkna grundlön i tidrapporter.</p>
+      <Card><CardContent className="p-0">{isLoading ? <div className="p-6 space-y-3">{[1,2,3].map(i => <Skeleton key={i} className="h-14 w-full" />)}</div> : !drivers?.length ? <div className="text-center py-12 text-muted-foreground"><Users className="h-10 w-10 mx-auto mb-3 opacity-30" /><p>Inga förare tillagda ännu</p><p className="text-sm">Bjud in förare under Förare-sidan.</p></div> : <Table><TableHeader><TableRow><TableHead>Förare</TableHead><TableHead>Ersättningstyp</TableHead><TableHead className="text-right">Belopp</TableHead><TableHead>Skattetabell</TableHead><TableHead className="w-24" /></TableRow></TableHeader><TableBody>{drivers.map(driver => { const comp = compMap[driver.id]; const isEditing = editingId === driver.id; return isEditing ? <CompensationEditRow key={driver.id} driver={driver} existing={comp} onClose={() => setEditingId(null)} /> : <TableRow key={driver.id}><TableCell><div className="flex items-center gap-3"><div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold ${avatarColor(driver.full_name)}`}>{getInitials(driver.full_name)}</div><div><p className="font-medium text-sm">{driver.full_name}</p><p className="text-xs text-muted-foreground">{driver.email}</p></div></div></TableCell><TableCell>{comp ? <Badge variant="secondary" className="text-xs">{COMP_LABELS[comp.compensation_type] ?? comp.compensation_type}</Badge> : <span className="text-xs text-muted-foreground italic">Ej angiven</span>}</TableCell><TableCell className="text-right font-mono text-sm">{comp ? formatCompAmount(comp) : '–'}</TableCell><TableCell className="text-sm text-muted-foreground">{comp?.tax_table || '–'}</TableCell><TableCell><Button variant="outline" size="sm" className="text-xs" onClick={() => setEditingId(driver.id)}><Wallet className="h-3.5 w-3.5 mr-1" /> {comp ? 'Redigera' : 'Ange'}</Button></TableCell></TableRow>; })}</TableBody></Table>}</CardContent></Card>
     </div>
   );
 }

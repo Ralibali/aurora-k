@@ -55,19 +55,19 @@ export function AssignDriverDialog({ assignments, selectedIds, drivers, initialD
       <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
           <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary"><UserRound className="h-5 w-5" /></div>
-          <DialogTitle>Tilldela chaufför</DialogTitle>
+          <DialogTitle>Tilldela förare</DialogTitle>
           <DialogDescription>Granska {selected.length} valda uppdrag och välj vem som ska köra.{demo ? ' Du provar med exempeldata.' : ''}</DialogDescription>
         </DialogHeader>
         <div className="max-h-44 divide-y overflow-y-auto rounded-lg border bg-muted/30">
-          {selected.map(item => <div key={item.id} className="flex items-start justify-between gap-4 px-3 py-2.5 text-sm"><div className="min-w-0"><p className="truncate font-medium">{item.title}</p><p className="text-xs text-muted-foreground">{item.driver?.full_name ? `Nu: ${item.driver.full_name}` : 'Saknar chaufför'}</p></div><div className="shrink-0 text-right font-mono text-xs"><p>{getStockholmDateKey(item.scheduled_start)}</p><p className="mt-1 text-muted-foreground">{formatStockholmTime(item.scheduled_start)}{item.scheduled_end ? `–${formatStockholmTime(item.scheduled_end)}` : ' · sluttid saknas'}</p></div></div>)}
+          {selected.map(item => <div key={item.id} className="flex items-start justify-between gap-4 px-3 py-2.5 text-sm"><div className="min-w-0"><p className="truncate font-medium">{item.title}</p><p className="text-xs text-muted-foreground">{item.driver?.full_name ? `Nu: ${item.driver.full_name}` : 'Saknar förare'}</p></div><div className="shrink-0 text-right font-mono text-xs"><p>{getStockholmDateKey(item.scheduled_start)}</p><p className="mt-1 text-muted-foreground">{formatStockholmTime(item.scheduled_start)}{item.scheduled_end ? `–${formatStockholmTime(item.scheduled_end)}` : ' · sluttid saknas'}</p></div></div>)}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="dispatch-driver">Chaufför</Label>
+          <Label htmlFor="dispatch-driver">Förare</Label>
           <Select value={driverId} onValueChange={value => { setDriverId(value); setAcceptedWarnings(''); setError(''); }} disabled={saving}>
-            <SelectTrigger id="dispatch-driver"><SelectValue placeholder="Välj chaufför" /></SelectTrigger>
+            <SelectTrigger id="dispatch-driver"><SelectValue placeholder="Välj förare" /></SelectTrigger>
             <SelectContent>{drivers.map(item => <SelectItem key={item.id} value={item.id}>{item.full_name}{item.is_available === false ? ' · Ej tillgänglig' : item.is_available ? ' · Tillgänglig' : ''}</SelectItem>)}</SelectContent>
           </Select>
-          {drivers.length === 0 && <p className="text-sm text-muted-foreground">Inga chaufförer finns att välja. Lägg till en chaufför under Förare.</p>}
+          {drivers.length === 0 && <p className="text-sm text-muted-foreground">Inga förare finns att välja. Lägg till en förare under Förare.</p>}
           {driver && <p className="text-xs text-muted-foreground">{plannedCount} andra öppna uppdrag på de valda datumen.</p>}
         </div>
         {driver && <div className="space-y-3">

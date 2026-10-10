@@ -14,14 +14,14 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { SubscriptionGuard } from "@/components/SubscriptionGuard";
 import { PlatformAdminGuard } from "@/components/PlatformAdminGuard";
-import { AdminShell } from "@/components/AdminLayout";
-import { DriverLayout } from "@/components/DriverLayout";
-import { PlatformAdminShell } from "@/components/PlatformAdminLayout";
+const AdminShell = lazy(() => import("@/components/AdminLayout").then(module => ({ default: module.AdminShell })));
+const DriverLayout = lazy(() => import("@/components/DriverLayout").then(module => ({ default: module.DriverLayout })));
+const PlatformAdminShell = lazy(() => import("@/components/PlatformAdminLayout").then(module => ({ default: module.PlatformAdminShell })));
 import { DriverPushNotifications } from "@/components/DriverPushNotifications";
 import FortnoxCallbackPage from "@/pages/FortnoxCallbackPage";
 import AuthConfirmationPage from "@/pages/AuthConfirmationPage";
 
-const LandingPage = lazy(() => import("./pages/LandingPageV3"));
+import LandingPage from "./pages/LandingPageV3";
 const PublicBookingPage = lazy(() => import("./pages/PublicBookingPage"));
 const PublicTrackingPage = lazy(() => import("./pages/PublicTrackingPage"));
 const TransportledningssystemPage = lazy(() => import("./pages/TransportledningssystemPage"));
