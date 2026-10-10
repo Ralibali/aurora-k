@@ -269,7 +269,7 @@ test('public hero has usable touch targets and permanent support links', async (
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   const hero = page.locator('main section').first();
-  const demoButton = hero.getByRole('button', { name: 'Boka demo', exact: true });
+  const demoButton = hero.getByRole('button', { name: 'Boka en demo på 15 minuter', exact: true });
   await expect(demoButton).toBeVisible();
   expect((await demoButton.boundingBox())?.height).toBeGreaterThanOrEqual(48);
   const footer = page.getByRole('navigation', { name: 'Sidfot' });
