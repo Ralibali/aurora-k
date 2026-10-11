@@ -52,7 +52,7 @@ export function summarizeCheckpoints(
     // Two distinct samples at least 30 seconds apart give a stronger GPS
     // indication; still no certainty the delivery or service was performed.
     const second = first && entries.find(p => Date.parse(p.recorded_at) - Date.parse(first.recorded_at) >= 30_000);
-    const evidence = !configured ? 'not_configured' : second ? 'gps_indication' : entries.length ? 'single_point' : 'no_near_point';
+    const evidence: CheckpointReport['evidence'] = !configured ? 'not_configured' : second ? 'gps_indication' : entries.length ? 'single_point' : 'no_near_point';
     return {
       id: assignment.id, title: assignment.title, status: assignment.status,
       scheduledStart: assignment.scheduled_start, radiusM: configured ? radius : null,
