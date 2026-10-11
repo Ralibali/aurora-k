@@ -13,6 +13,12 @@ describe('Checkpoint – observations, not delivery confirmation', () => {
     expect(row.evidence).toBe('gps_indication');
     expect(row.nearPoints).toBe(2);
   });
+  it('does not combine two different drivers or very inaccurate fixes', () => {
+    const twoDrivers = [point(0, { driver_id: 'a' }), point(1, { driver_id: 'b' })];
+    expect(summarizeCheckpoints(twoDrivers, [task])[0].evidence).toBe('single_point');
+    const inaccurate = [point(0, { accuracy: 180 }), point(1, { accuracy: 180 })];
+    expect(summarizeCheckpoints(inaccurate, [task])[0].evidence).toBe('no_near_point');
+  });
   it('single near sample is not enough', () => {
     expect(summarizeCheckpoints([point(0)], [task])[0].evidence).toBe('single_point');
   });
