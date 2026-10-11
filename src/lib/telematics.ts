@@ -1,4 +1,6 @@
 export type FleetPoint = {
+  driver_id?: string | null;
+  accuracy?: number | null;
   vehicle_id: string | null;
   assignment_id: string | null;
   latitude: number;
