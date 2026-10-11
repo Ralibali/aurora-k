@@ -52,7 +52,7 @@ export default function AdminTelematics() {
     const [historyResult, vehiclesResult, providerResult, companyResult, assignmentsResult] = await Promise.all([
       supabase
         .from("fleet_location_history")
-        .select("vehicle_id,assignment_id,latitude,longitude,speed,source,recorded_at")
+        .select("driver_id,vehicle_id,assignment_id,latitude,longitude,accuracy,speed,source,recorded_at")
         .eq("company_id", companyId)
         .gte("recorded_at", since)
         .order("recorded_at", { ascending: true })
