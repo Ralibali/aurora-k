@@ -55,7 +55,7 @@ export default function AdminTelematics() {
         .select("driver_id,vehicle_id,assignment_id,latitude,longitude,accuracy,speed,source,recorded_at")
         .eq("company_id", companyId)
         .gte("recorded_at", since)
-        .order("recorded_at", { ascending: true })
+        .order("recorded_at", { ascending: false })
         .limit(10000),
       supabase
         .from("vehicles")
