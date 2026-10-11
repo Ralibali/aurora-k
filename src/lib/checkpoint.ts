@@ -46,12 +46,20 @@ export function summarizeCheckpoints(
       .filter(p => Number.isFinite(p.latitude) && Number.isFinite(p.longitude)
         && Math.abs(p.latitude) <= 90 && Math.abs(p.longitude) <= 180
         && Number.isFinite(Date.parse(p.recorded_at))
+        && (p.accuracy == null || (Number.isFinite(p.accuracy) && p.accuracy <= Math.min(radius, 100)))
         && distanceKmBetween({ latitude: lat, longitude: lng }, p) * 1000 <= radius)
       .sort((a,b) => Date.parse(a.recorded_at) - Date.parse(b.recorded_at)) : [];
     const first = entries[0];
     // Two distinct samples at least 30 seconds apart give a stronger GPS
     // indication; still no certainty the delivery or service was performed.
-    const second = first && entries.find(p => Date.parse(p.recorded_at) - Date.parse(first.recorded_at) >= 30_000);
+    const second = first && entries.find(p =>
+      Date.parse(p.recorded_at) - Date.parse(first.recorded_at) >= 30_000
+      && (first.driver_id && p.driver_id
+        ? first.driver_id === p.driver_id
+        : first.vehicle_id && p.vehicle_id
+          ? first.vehicle_id === p.vehicle_id
+          : first.source === p.source)
+    );
     const evidence: CheckpointReport['evidence'] = !configured ? 'not_configured' : second ? 'gps_indication' : entries.length ? 'single_point' : 'no_near_point';
     return {
       id: assignment.id, title: assignment.title, status: assignment.status,
