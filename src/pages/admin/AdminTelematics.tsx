@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { summarizeTrips, summarizeVehicles, type FleetPoint, type VehicleLabel } from "@/lib/telematics";
+import { checkpointCsv, summarizeCheckpoints, type CheckpointAssignment } from "@/lib/checkpoint";
 import { toast } from "sonner";
 
 type ProviderConnection = {
@@ -38,6 +39,8 @@ export default function AdminTelematics() {
   const [points, setPoints] = useState<FleetPoint[]>([]);
   const [vehicles, setVehicles] = useState<VehicleLabel[]>([]);
   const [connections, setConnections] = useState<ProviderConnection[]>([]);
+  const [assignments, setAssignments] = useState<CheckpointAssignment[]>([]);
+  const [historyTruncated, setHistoryTruncated] = useState(false);
   const [settings, setSettings] = useState<CompanyFleetSettings | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -46,7 +49,7 @@ export default function AdminTelematics() {
     setLoading(true);
     const since = new Date(Date.now() - Number(days) * 86_400_000).toISOString();
 
-    const [historyResult, vehiclesResult, providerResult, companyResult] = await Promise.all([
+    const [historyResult, vehiclesResult, providerResult, companyResult, assignmentsResult] = await Promise.all([
       supabase
         .from("fleet_location_history")
         .select("vehicle_id,assignment_id,latitude,longitude,speed,source,recorded_at")
@@ -69,14 +72,20 @@ export default function AdminTelematics() {
         .select("fleet_tracking_enabled,fleet_location_retention_days")
         .eq("id", companyId)
         .single(),
+      supabase.from("assignments")
+        .select("id,title,scheduled_start,status,geofence_lat,geofence_lng,geofence_radius")
+        .eq("company_id", companyId).gte("scheduled_start", since)
+        .order("scheduled_start", { ascending: false }).limit(300),
     ]);
 
-    const error = historyResult.error || vehiclesResult.error || providerResult.error || companyResult.error;
+    const error = historyResult.error || vehiclesResult.error || providerResult.error || companyResult.error || assignmentsResult.error;
     if (error) {
       toast.error("Telematikdatan kunde inte hämtas.");
       console.error("[telematics]", error);
     } else {
       setPoints((historyResult.data ?? []) as FleetPoint[]);
+      setHistoryTruncated((historyResult.data?.length ?? 0) >= 10000);
+      setAssignments((assignmentsResult.data ?? []) as CheckpointAssignment[]);
       setVehicles((vehiclesResult.data ?? []) as VehicleLabel[]);
       setConnections((providerResult.data ?? []) as ProviderConnection[]);
       setSettings(companyResult.data as CompanyFleetSettings);
@@ -90,6 +99,16 @@ export default function AdminTelematics() {
 
   const vehicleSummary = useMemo(() => summarizeVehicles(points, vehicles), [points, vehicles]);
   const trips = useMemo(() => summarizeTrips(points, vehicles), [points, vehicles]);
+  const checkpoints = useMemo(() => summarizeCheckpoints(points, assignments), [points, assignments]);
+  const exportCheckpoints = () => {
+    const blob = new Blob([checkpointCsv(checkpoints)], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = "aurora-checkpoint-" + new Date().toISOString().slice(0,10) + ".csv";
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
   const trackedVehicleIds = new Set(vehicleSummary.map((row) => row.vehicleId));
   const totalKm = vehicleSummary.reduce((sum, vehicle) => sum + vehicle.distanceKm, 0);
   const traccar = connections.find((connection) => connection.provider === "traccar");
@@ -221,6 +240,43 @@ export default function AdminTelematics() {
             </CardContent>
           </Card>
         </div>
+
+        <Card>
+          <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3">
+            <div>
+              <CardTitle className="flex items-center gap-2 text-base"><MapPin className="h-4 w-4" /> Checkpoint · GPS-indikationer vid uppdrag</CardTitle>
+              <p className="mt-2 text-xs text-muted-foreground max-w-3xl">
+                Två GPS-punkter minst 30 sekunder isär inom uppdragets geofence krävs för en indikation.
+                Det bevisar inte att arbete utförts eller gods levererats. Leveransbevis och förarstatus är separata.
+                Rapporten bygger på sparad positionshistorik och företagets aktiverade spårning.
+              </p>
+              {historyTruncated && <p className="mt-2 text-xs text-amber-700">Positionsunderlaget är begränsat till 10 000 punkter. Rapporten kan vara ofullständig.</p>}
+              {assignments.length >= 300 && <p className="mt-2 text-xs text-amber-700">Visar högst 300 senaste uppdrag för perioden.</p>}
+            </div>
+            <Button size="sm" variant="outline" onClick={exportCheckpoints} disabled={loading || !checkpoints.length}>Exportera CSV</Button>
+          </CardHeader>
+          <CardContent className="overflow-x-auto p-0">
+            <Table>
+              <TableHeader><TableRow>
+                <TableHead>Uppdrag</TableHead><TableHead>GPS-närvaro</TableHead><TableHead>Första observation</TableHead>
+                <TableHead>Radie</TableHead><TableHead>Positionspunkter</TableHead>
+              </TableRow></TableHeader>
+              <TableBody>
+                {checkpoints.slice(0, 100).map(row => <TableRow key={row.id}>
+                  <TableCell><div className="max-w-xs truncate font-medium" title={row.title}>{row.title}</div>
+                    <span className="text-xs text-muted-foreground">{row.status} · {formatDateTime(row.scheduledStart)}</span></TableCell>
+                  <TableCell><Badge variant="outline" className={row.evidence === "gps_indication" ? "border-emerald-500 text-emerald-700" : ""}>
+                    {row.evidence === "gps_indication" ? "GPS-indikation" : row.evidence === "single_point" ? "En punkt" : row.evidence === "not_configured" ? "Saknar geofence" : "Ingen observation"}
+                  </Badge></TableCell>
+                  <TableCell>{formatDateTime(row.firstObservedAt)}</TableCell>
+                  <TableCell>{row.radiusM == null ? "—" : row.radiusM + " m"}</TableCell>
+                  <TableCell>{row.nearPoints}</TableCell>
+                </TableRow>)}
+                {!checkpoints.length && !loading && <TableRow><TableCell colSpan={5} className="p-8 text-center text-muted-foreground">Inga uppdrag under perioden.</TableCell></TableRow>}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
 
         <Card>
           <CardHeader>
