@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "status": "draft",
+  "writtenAt": "2026-10-14T14:11:00.287414+00:00",
+  "repository": "Ralibali/aurora-k",
+  "publicationGate": "Earliest 2026-10-16, at least two Stockholm calendar days after the previous original is live. Require fresh current main, inventory, sources and previous-article checks. No publication dates while draft.",
+  "sourceReview": {
+    "checkedAt": "2026-10-14T14:11:00.287414+00:00",
+    "distinctIntent": "Tolka och dokumentera olika typer av tidsuppgifter för ett transportstopp utan att blanda kundönskemål, överenskommelse, planering och faktisk händelse.",
+    "note": "Original manual guide. Owned product path verified live on Oct14. Recheck offer and links before publication. No claimed product automation or customer results."
+  },
+  "article": {
+    "slug": "tidsbegrepp-transportunderlag",
+    "title": "Skilj önskad, planerad och faktisk tid i transportunderlaget",
+    "metaDescription": "Gör tidsuppgifter i transportunderlaget tydliga. Skilj kundens önskemål, överenskommen tid, planeringsuppgift och verklig händelse åt.",
+    "intro": "En tid i ett transportunderlag kan betyda flera saker. Klockan nio kan vara kundens önskemål, en överenskommen tid, transportledningens plan eller förarens faktiska ankomst. När betydelsen saknas kan två personer läsa samma uppgift och ändå få olika bild av uppdraget.\n\nEn tydlig benämning intill tiden gör underlaget lättare att använda. Den här arbetsmallen hjälper er att strukturera uppgifterna. Den fastställer inga avtalsvillkor, ersättningsregler eller löften om leveranstid; sådant måste bedömas utifrån uppdragets verkliga överenskommelse.",
+    "sections": [
+      {
+        "heading": "Skriv vad tiden beskriver",
+        "content": "Ange först vilken händelse och vilket stopp tiden gäller. Skilj därefter mellan ett önskemål, en bekräftad överenskommelse, en aktuell planeringsuppgift och en observerad händelse. Använd ord som verksamheten själv har bestämt och som både transportledning och förare kan förstå.\n\nOm ett underlag säger mellan nio och tio ska intervallet inte automatiskt göras om till en exakt tid. Skriv också om betydelsen ännu är oklar. Det är bättre att lämna en fråga synlig än att fylla ett fält med en tolkning som nästa person kan uppfatta som bekräftad."
+      },
+      {
+        "heading": "Bevara källa och beskedets tidpunkt",
+        "content": "Skriv var uppgiften kommer ifrån och när beskedet togs emot. Ett kundmeddelande, en intern planering och en rapporterad ankomst har olika roller i underlaget. De kan behöva läsas tillsammans utan att den ena uppgiften ersätter den andra. Ange datum tillsammans med klockslag när det behövs för att undvika tvetydighet.\n\nEtt påhittat exempel är att kunden önskar mottagning klockan nio, medan en intern plan anger halv tio. Underlaget visar då en skillnad som någon måste reda ut. Det visar inte i sig att kunden har accepterat en ny tid. Lägg till vem som ska klargöra frågan och vilken uppgift som saknas."
+      },
+      {
+        "heading": "Låt en ny plan bli en daterad ändring",
+        "content": "När planeringen ändras behöver nästa person kunna förstå vad som gäller nu och vad som tidigare kommunicerats. Spara därför ändringen med datum, orsak när den är känd och vem som har bekräftat den. Behåll ursprungliga observationer; en senare plan ska inte ersätta en verklig ankomsttid.\n\nVid flera stopp behöver varje tidsuppgift kopplas till rätt stopp. Guiden om [tydliga referenser vid flera leveransstopp](/blogg/flera-leveransstopp-entydiga-referenser) hjälper er skilja stoppets underlag från uppdragets gemensamma uppgifter. Samma struktur fungerar även när enbart ett stopp får ett nytt besked."
+      },
+      {
+        "heading": "Gör en kort kontroll före överlämningen",
+        "content": "Läs varje viktig tid och fråga: vad beskriver den, vilket stopp gäller den och vem har lämnat beskedet? Kontrollera sedan vilka tider som är bekräftade och vilka som fortfarande är planering eller öppna frågor. En gemensam genomgång kan göras även när underlaget består av flera dokument.\n\nSamla frågorna hos den ansvariga som ska följa upp dem och undvik att skapa parallella versioner utan tydlig ägare. Läs om [Aurora Transports tjänster](/tjanster) för att jämföra det aktuella erbjudandet med ert arbetssätt. Mallen beskriver hur ni kan formulera underlaget; den lovar inte särskilda tidsfält, automatiska avstämningar eller funktioner som inte har verifierats."
+      }
+    ],
+    "editorial": {
+      "createdWith": "ChatGPT",
+      "aiAssisted": true,
+      "searchIntent": "Tolka och dokumentera olika typer av tidsuppgifter för ett transportstopp utan att blanda kundönskemål, överenskommelse, planering och faktisk händelse.",
+      "sourceUrls": [
+        "https://auroratransport.se/tjanster"
+      ],
+      "sourceCheckedAt": "2026-10-14T14:11:00.287414+00:00"
+    },
+    "seoTitle": "Skilj önskad, planerad och faktisk tid i transportunderlaget",
+    "readTime": "4 min",
+    "excerpt": "Gör tidsuppgifter i transportunderlaget tydliga. Skilj kundens önskemål, överenskommen tid, planeringsuppgift och verklig händelse åt.",
+    "tags": [
+      "transportledning",
+      "dokumentation"
+    ],
+    "links": [
+      {
+        "href": "/tjanster",
+        "label": "Se Aurora Transports tjänster"
+      }
+    ]
+  }
+}
