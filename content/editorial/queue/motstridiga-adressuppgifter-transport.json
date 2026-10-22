@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "status": "draft",
+  "writtenAt": "2026-10-22T19:25:24.280565+00:00",
+  "repository": "Ralibali/aurora-k",
+  "publicationGate": "Earliest 2026-10-24, at least two Stockholm calendar days after the last verified original. Recheck current main, full inventory, sources, product paths and Search Console priorities. No publication dates while draft.",
+  "sourceReview": {
+    "checkedAt": "2026-10-22T19:25:24.280565+00:00",
+    "distinctIntent": "Hantera en konkret konflikt mellan adressuppgifter från olika källor inför ett transportstopp, utan att själv anta vilken adress som gäller.",
+    "note": "Original manual guide; linked owned product path checked in this run. Recheck before publication; no customer results, prices, permissions or unsupported features asserted."
+  },
+  "article": {
+    "slug": "motstridiga-adressuppgifter-transport",
+    "title": "Red ut motstridiga adressuppgifter före transporten",
+    "metaDescription": "Samla motstridiga adressbesked, ange vilken uppgift som behöver bekräftas och dokumentera svaret innan transportunderlaget förs vidare.",
+    "intro": "Ordern anger en adress, ett senare meddelande en annan och ett äldre platsunderlag pekar på en tredje infart. Att välja den uppgift som verkar rimligast gör osäkerheten osynlig för nästa person. Samla i stället konflikten så att rätt kontakt kan ge ett tydligt besked.\n\nDen här arbetsmallen hjälper transportledningen dokumentera frågan. Den ersätter inte uppdragsgivarens instruktioner, lokal tillträdesinformation eller förarens bedömning av framkomlighet och säkerhet.",
+    "sections": [
+      {
+        "heading": "Knyt uppgifterna till samma stopp",
+        "content": "Börja med uppdragsreferensen och vilket lastnings- eller leveransstopp frågan gäller. Jämför därefter adresserna exakt som de har lämnats. Skilj gatunamn och nummer från uppgifter om entré, port, mottagare och kontaktperson. Två olika formuleringar kan avse olika delar av samma plats.\n\nAnvänd en rad per källa med adressuppgift, avsändare, tidpunkt och vad uppgiften påstås avse. Skriv okänt där något saknas. Blanda inte in andra stopp bara för att samma mottagarnamn förekommer på flera uppdrag."
+      },
+      {
+        "heading": "Formulera en fråga som går att besvara",
+        "content": "Beskriv vilken konkret uppgift som skiljer sig. Be den kontakt som ansvarar för uppdraget bekräfta leveransadressen och vilken ankomstpunkt transporten ska använda. Om ni behöver ett nytt kontaktbesked på plats, ange det som en separat fråga.\n\nEtt fiktivt exempel är att ordern anger Kundgatan 10 och ett senare meddelande anger ingång från Lastvägen. Frågan är då om Lastvägen är ankomstvägen till samma leverans eller en ny destination. Exemplet är inte en verklig adressinstruktion och ska inte användas för körning."
+      },
+      {
+        "heading": "Bevara vad som faktiskt bekräftades",
+        "content": "Spara svaret med avsändare, tidpunkt och vilket stopp beskedet gäller. Återge både den bekräftade adressen och eventuella begränsningar i beskedet. Om kontakten bara bekräftar gatunamnet återstår frågan om porten fortfarande. Markera den som öppen.\n\nBehåll en hänvisning till den tidigare uppgiften när underlaget ändras. Läs gärna mallen för [ändringar i transportuppdrag](/blogg/andringslogg-transportuppdrag). Den gör det lättare att följa vilket besked som ersatte ett annat utan att en gammal kopia misstas för den aktuella."
+      },
+      {
+        "heading": "Kontrollera underlaget före överlämning",
+        "content": "Låt nästa person läsa det uppdaterade underlaget och peka ut den bekräftade destinationen, ankomstuppgiften och kvarvarande frågor. Kontrollera att andra dokument som används i samma uppdrag inte fortfarande visar ett motstridigt besked utan förklaring.\n\nFördela ansvaret för öppna frågor och ange när de behöver följas upp. Ta del av [Aurora Transports tjänster](/tjanster) för att jämföra erbjudandet med ert arbetssätt. Mallen beskriver en manuell avstämning och påstår inte att systemet automatiskt validerar adresser, avgör färdväg eller garanterar tillträde."
+      }
+    ],
+    "editorial": {
+      "createdWith": "ChatGPT",
+      "aiAssisted": true,
+      "searchIntent": "Hantera en konkret konflikt mellan adressuppgifter från olika källor inför ett transportstopp, utan att själv anta vilken adress som gäller.",
+      "sourceUrls": [
+        "https://auroratransport.se/tjanster"
+      ],
+      "sourceCheckedAt": "2026-10-22T19:25:24.280565+00:00"
+    },
+    "seoTitle": "Red ut motstridiga adressuppgifter före transporten",
+    "readTime": "4 min",
+    "excerpt": "Samla motstridiga adressbesked, ange vilken uppgift som behöver bekräftas och dokumentera svaret innan transportunderlaget förs vidare.",
+    "tags": [
+      "transportledning",
+      "dokumentation"
+    ],
+    "links": [
+      {
+        "href": "/tjanster",
+        "label": "Se Aurora Transports tjänster"
+      }
+    ]
+  }
+}
