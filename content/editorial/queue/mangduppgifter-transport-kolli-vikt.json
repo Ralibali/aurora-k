@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "status": "draft",
+  "writtenAt": "2026-10-24T07:57:02.890182+00:00",
+  "repository": "Ralibali/aurora-k",
+  "publicationGate": "Tidigast 2026-10-26 och minst två kalenderdagar i Europe/Stockholm efter senaste verkliga originalpublicering. Kontrollera tidigare läsflöde, aktuell main, hela inventeringen, källor och produkt igen. Utkastet har inget publiceringsdatum och får inte importeras i den publika samlingen.",
+  "sourceReview": {
+    "checkedAt": "2026-10-24T07:57:02.890182+00:00",
+    "distinctIntent": "Klargöra vad angivna antal och vikter avser i transportunderlaget utan att göra egna omräkningar eller transporttekniska säkerhetsbedömningar.",
+    "note": "Egen arbetsmall. Den länkade produktvägen kontrollerad i webbläsare i denna körning; kontrollera på nytt före publicering. Inga påhittade funktioner, resultat eller boendevillkor."
+  },
+  "article": {
+    "slug": "mangduppgifter-transport-kolli-vikt",
+    "title": "Kolli, pall och vikt: gör mängduppgifterna tydliga före transport",
+    "metaDescription": "Skilj antal kolli, pallar och vikt åt i transportunderlaget. En mall för att få otydliga mängduppgifter bekräftade utan egna antaganden.",
+    "intro": "Uppgiften ”tre enheter” kan betyda tre kartonger, tre pallar eller tre delar av samma leverans. Innan transporten planeras behöver det framgå vad talet avser. Den här mallen är skriven med AI-stöd av ChatGPT och hjälper dig samla besked från den som känner till godset.",
+    "sections": [
+      {
+        "heading": "Behåll originaluppgiften",
+        "contentMarkdown": "Skriv av mängduppgiften tillsammans med avsändare och datum. Om ett mejl anger ett antal och en bilaga ett annat, spara båda. En egen sammanräkning kan dölja att underlagen beskriver olika delar av leveransen.\n\nNotera vad som behöver bli tydligt: räknas ytteremballage, innehållet i dem eller båda? Beskriv frågan med samma ord som avsändaren använde. Byt inte automatiskt ut ett obekant begrepp mot kolli eller pall."
+      },
+      {
+        "heading": "Ge varje mått en egen rad",
+        "contentMarkdown": "Be om antal och enhet var för sig. Håll exempelvis antal pallar, antal kartonger och vikt på skilda rader. Fråga om vikten gäller hela sändningen eller en viss del och om emballage ingår i uppgiften.\n\nSkriv också om beskedet är uppmätt, beräknat eller ännu obekräftat. Ett exakt formaterat tal blir inte mer tillförlitligt bara för att det står i en tydlig tabell. Behåll osäkerheten synlig tills den ansvarige har besvarat frågan."
+      },
+      {
+        "heading": "Använd ett kort exempel i frågan",
+        "contentMarkdown": "En fiktiv fråga kan lyda: ”Underlaget säger tre enheter och tolv kartonger. Är kartongerna placerade på de tre enheterna, eller är det två separata delar av sändningen? Bekräfta även vilken del den angivna vikten avser.”\n\nExemplet är en kommunikationsmall, ingen beskrivning av en verklig transport. Lägg till den uppgift som identifierar ert underlag, så att svaret inte av misstag kopplas till en annan leverans."
+      },
+      {
+        "heading": "Låt ändringen få en tydlig omfattning",
+        "contentMarkdown": "Om antalet ändras efter packning, fråga vilka andra uppgifter som fortfarande gäller. Ett nytt antal betyder inte automatiskt att tidigare vikt, mått eller hämtinformation är oförändrade. Anteckna vad som uttryckligen bekräftats och vad som återstår.\n\nFör vidare det senaste beskedet tillsammans med datum och källa. Markera den gamla mängduppgiften som ersatt i ert arbetsunderlag, så att en kollega kan förstå varför två versioner skiljer sig åt."
+      },
+      {
+        "heading": "För vidare fakta till rätt beslut",
+        "contentMarkdown": "Denna genomgång väljer inte fordon, beräknar lastkapacitet eller bedömer lastsäkring. När mängduppgifterna är tydliga behöver den ansvariga transportplaneringen fortfarande bedöma uppdraget utifrån hela underlaget.\n\nSamla bekräftade mängder, öppna frågor och kontaktvägen för komplettering i samma överlämning. Läs om [Aurora Transports tjänster](/tjanster) när ni går vidare med hur verksamhetens uppdrag ska hanteras. Gör tydligt vilka fakta ni redan har och vilka besked som saknas."
+      }
+    ],
+    "editorial": {
+      "createdWith": "ChatGPT",
+      "aiAssisted": true,
+      "searchIntent": "Klargöra vad angivna antal och vikter avser i transportunderlaget utan att göra egna omräkningar eller transporttekniska säkerhetsbedömningar.",
+      "sourceUrls": [
+        "https://auroratransport.se/tjanster"
+      ],
+      "sourceCheckedAt": "2026-10-24T07:57:02.890182+00:00"
+    },
+    "seoTitle": "Kolli, pall och vikt i transportunderlaget",
+    "readTime": "4 min",
+    "excerpt": "Gör mängduppgifterna begripliga innan de förs vidare till transportplaneringen.",
+    "tags": [
+      "transportunderlag",
+      "mängduppgifter"
+    ],
+    "links": [
+      {
+        "href": "/tjanster",
+        "label": "Se Aurora Transports tjänster"
+      }
+    ]
+  }
+}
