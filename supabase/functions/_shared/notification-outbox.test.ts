@@ -84,6 +84,18 @@ describe('durable notification delivery', () => {
   });
 });
 describe('server snapshot email templates', () => {
+  it('escapes driver names and clearly distinguishes expiry from register validation', () => {
+    const template = renderTransportNotification('driver-document-expiry', {
+      driverName: '<script>alert(1)</script>', docType: 'ykb',
+      docLabel: '<img src=x>', expiresAt: '2026-12-01', daysLeft: 30,
+    });
+    expect(template.subject).toContain('30 dagar');
+    expect(template.html).toContain('&lt;script&gt;');
+    expect(template.html).not.toContain('<script>');
+    expect(template.html).not.toContain('<img src=x>');
+    expect(template.html).toContain('inte en verifiering');
+  });
+
   it('supports nullable booking fields and treats customer content as text', () => {
     const template = renderTransportNotification('booking-request-created', { companyName: 'A & B', customerName: '<img src=x>', customerEmail: null, customerPhone: null, title: 'Paket', description: null, preferredDate: null });
     expect(template.html).toContain('&lt;img src=x&gt;');

@@ -5,6 +5,23 @@ import { sitePath } from './site-url.ts';
 
 export function renderTransportNotification(type: string, payload: Record<string, unknown>) {
   const data = Object.fromEntries(Object.entries(payload).map(([key, value]) => [key, typeof value === 'string' ? value : value == null ? '' : String(value)]));
+  if (type === 'driver-document-expiry') {
+    const info = safeTemplateData({
+      driverName: data.driverName, docType: data.docType, docLabel: data.docLabel,
+      expiresAt: data.expiresAt, daysLeft: data.daysLeft,
+    });
+    return {
+      subject: 'Förarkollen: dokument löper ut om ' + info.daysLeft + ' dagar',
+      html: '<!doctype html><html lang="sv"><body style="font-family:Arial,sans-serif;color:#172b4d;padding:24px">' +
+        '<h2>Påminnelse om förardokument</h2>' +
+        '<p><strong>Förare:</strong> ' + info.driverName + '</p>' +
+        '<p><strong>Dokument:</strong> ' + info.docType + (info.docLabel ? ' (' + info.docLabel + ')' : '') + '</p>' +
+        '<p><strong>Registrerat utgångsdatum:</strong> ' + info.expiresAt + '</p>' +
+        '<p>Kontrollera dokumentet i <a href="' + sitePath('/admin/compliance') + '">Förarkollen</a>.</p>' +
+        '<p>Detta är en datumbevakning, inte en verifiering av förarbehörighet.</p>' +
+        '</body></html>',
+    };
+  }
   if (type === 'new-customer-message') return newCustomerMessageEmail(safeTemplateData({ customerName: data.customerName, message: data.message, customerUrl: sitePath(`/admin/customers/${encodeURIComponent(data.customerId)}`) }));
   if (type === 'booking-request-created') return bookingRequestCreatedEmail({ companyName: data.companyName, orderNumber: data.orderNumber || 'Ny förfrågan', customerName: data.customerName, customerEmail: data.customerEmail, customerPhone: data.customerPhone || '', preferredDate: data.preferredDate || '', title: data.title, description: data.description, attachmentCount: 0, adminUrl: sitePath('/admin/booking-requests') });
   if (type === 'booking-request-confirmation') return bookingRequestConfirmationEmail({ contactName: data.customerName, companyName: data.companyName, orderNumber: data.orderNumber || 'Ny förfrågan', title: data.title, preferredDate: data.preferredDate || '' });
