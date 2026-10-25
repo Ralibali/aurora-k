@@ -8,6 +8,13 @@
       "when": 1792913979139,
       "tag": "0000_vehicle_pre_drive_checks",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792914123419,
+      "tag": "0001_vehicle_checks_explicit_privileges",
+      "breakpoints": true
     }
   ]
 }
