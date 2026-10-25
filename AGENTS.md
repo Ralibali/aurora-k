@@ -3,6 +3,8 @@
 Transportledningssystem på React 18, Vite, TypeScript och Tailwind, med PWA/Capacitor och Lovable Cloud (Supabase `dqjwtnziasqtveuwnalx`). Produktion: https://auroratransport.se. Läs `README.md` och `docs/launch-readiness-2026-09-08.md` för detaljer; driftuppgifter i dokumenten är daterade och måste verifieras.
 
 ## Utveckling och kontroll
+- Vehicle observations live in vehicle_checks, separate from maintenance and delivery proof; reports use tenant-scoped RPCs and immutable history, never assignment time mutations, because driver observations are not roadworthiness certificates.
+- The migration tool owns drizzle/migrations for new changes; do not copy applied SQL into supabase/migrations, because replaying the same non-idempotent DDL would duplicate schema setup.
 - Använd Node 22+ och npm med committad `package-lock.json`; installera med `npm ci`.
 - Kör `npm run validate` innan du pushar (typkontroll, lint, Vitest, PostgreSQL-tester och produktionsbygge med SEO/PWA-kontroller).
 - Vid ändrade Edge Functions: kör även `deno check --node-modules-dir=none --no-lock` på berörda `index.ts`. Dispatchflöden testas med `npm run test:dispatch`; alla externa anrop ska vara mockade.

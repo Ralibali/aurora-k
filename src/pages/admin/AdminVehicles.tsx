@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { AdminVehicleChecks } from '@/features/vehicle-checks/AdminVehicleChecks';
 import { AdminLayout } from '@/components/AdminLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -180,6 +181,7 @@ export default function AdminVehicles() {
             )}
           </CardContent>
         </Card>
+        <AdminVehicleChecks vehicles={vehicles ?? []} />
       </div>
     </AdminLayout>
   );

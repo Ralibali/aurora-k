@@ -1,4 +1,5 @@
 import AssignmentDeviations from '@/components/AssignmentDeviations';
+import { DriverVehicleCheck } from '@/features/vehicle-checks/DriverVehicleCheck';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -130,6 +131,7 @@ export default function DriverAssignmentDetail() {
       </div>
 
       <main className="space-y-5 p-5">
+        <DriverVehicleCheck key={`${assignment.id}:${a.vehicle_id ?? ''}`} assignmentId={assignment.id} vehicleId={a.vehicle_id} vehicleName={[a.vehicle?.name, a.vehicle?.registration_number].filter(Boolean).join(' · ')} canReport={!isClosed} />
         <Card className="overflow-hidden">
           <CardHeader className="bg-slate-950 text-white">
             <div className="flex items-start justify-between gap-3">
