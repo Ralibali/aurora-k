@@ -24,8 +24,9 @@ await db.exec(`
   GRANT USAGE ON SCHEMA public,auth TO authenticated,anon;
 `);
 await db.exec(await readFile('drizzle/migrations/0000_vehicle_pre_drive_checks.sql','utf8'));
+await db.exec(await readFile('drizzle/migrations/0001_vehicle_checks_explicit_privileges.sql','utf8'));
 const login = async uid => { await db.exec('RESET ROLE'); await db.query("SELECT set_config('test.uid',$1,false)",[uid ?? '']); await db.exec('SET ROLE authenticated'); };
-const report = (op, tires='no_issue', lights='no_issue', damage='no_issue', critical=false, note='') => db.query('SELECT (public.report_vehicle_check($1,$2,$3,$4,$5,$6,$7)).*',[op,assignment,tires,lights,damage,critical,note]);
+const report = (op, tires='no_issue', lights='no_issue', damage='no_issue', critical=false, note='') => db.query('SELECT * FROM public.report_vehicle_check($1,$2,$3,$4,$5,$6,$7)',[op,assignment,tires,lights,damage,critical,note]);
 await login(driver);
 await report(id(10));
 assert.equal((await db.query('SELECT * FROM vehicle_checks')).rows.length,1);
@@ -50,7 +51,7 @@ await assert.rejects(db.query('SELECT resolve_vehicle_check($1,$2)',[id(11),'Rep
 await login(admin);
 assert.equal((await db.query('SELECT * FROM vehicle_checks')).rows.length,2,'company administrator sees reports');
 await assert.rejects(db.query('SELECT resolve_vehicle_check($1,$2)',[id(11),' ']),/Beskriv/);
-const resolved = (await db.query('SELECT (resolve_vehicle_check($1,$2)).*',[id(11),'Bromsslang bytt'])).rows[0];
+const resolved = (await db.query('SELECT * FROM resolve_vehicle_check($1,$2)',[id(11),'Bromsslang bytt'])).rows[0];
 assert.equal(resolved.status,'resolved'); assert.equal(resolved.note,'Bromsskada'); assert.equal(resolved.resolved_by,admin);
 await assert.rejects(db.query('SELECT resolve_vehicle_check($1,$2)',[id(11),'Again']),/redan avslutad/);
 await db.exec('RESET ROLE');

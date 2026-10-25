@@ -6,7 +6,10 @@ vi.mock('./use-vehicle-checks', () => ({
   useVehicleChecks: () => ({ data: [], isLoading: false, isError: false }),
   useChangeVehicleCheck: () => ({ mutateAsync: mock.mutate, isPending: false }),
 }));
-beforeEach(() => mock.mutate.mockReset());
+beforeEach(() => {
+  mock.mutate.mockReset();
+  vi.stubGlobal('ResizeObserver', class { observe() {} unobserve() {} disconnect() {} });
+});
 describe('driver vehicle reports', () => {
   it('reports a critical issue without checked answers, preserves failed input and retries without another id', async () => {
     mock.mutate.mockRejectedValueOnce(new Error('offline')).mockResolvedValueOnce({});
