@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.4"
   }
   public: {
     Tables: {
@@ -3148,6 +3148,96 @@ export type Database = {
           },
         ]
       }
+      vehicle_checks: {
+        Row: {
+          assignment_id: string
+          company_id: string
+          created_at: string
+          damage: string
+          id: string
+          lights: string
+          note: string
+          reported_by: string
+          resolution: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          safety_critical: boolean
+          status: string
+          tires: string
+          vehicle_id: string
+        }
+        Insert: {
+          assignment_id: string
+          company_id: string
+          created_at?: string
+          damage: string
+          id?: string
+          lights: string
+          note?: string
+          reported_by: string
+          resolution?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          safety_critical?: boolean
+          status?: string
+          tires: string
+          vehicle_id: string
+        }
+        Update: {
+          assignment_id?: string
+          company_id?: string
+          created_at?: string
+          damage?: string
+          id?: string
+          lights?: string
+          note?: string
+          reported_by?: string
+          resolution?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          safety_critical?: boolean
+          status?: string
+          tires?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_checks_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_checks_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_checks_reported_by_fkey"
+            columns: ["reported_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_checks_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_checks_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehicle_maintenance: {
         Row: {
           company_id: string
@@ -3458,6 +3548,40 @@ export type Database = {
         Args: { p_message: string; p_operation_id: string }
         Returns: string
       }
+      report_vehicle_check: {
+        Args: {
+          p_assignment_id: string
+          p_damage: string
+          p_lights: string
+          p_note?: string
+          p_operation_id: string
+          p_safety_critical: boolean
+          p_tires: string
+        }
+        Returns: {
+          assignment_id: string
+          company_id: string
+          created_at: string
+          damage: string
+          id: string
+          lights: string
+          note: string
+          reported_by: string
+          resolution: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          safety_critical: boolean
+          status: string
+          tires: string
+          vehicle_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "vehicle_checks"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       resolve_assignment_deviation: {
         Args: { p_deviation_id: string; p_resolution: string }
         Returns: {
@@ -3475,6 +3599,32 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "assignment_deviations"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      resolve_vehicle_check: {
+        Args: { p_check_id: string; p_resolution: string }
+        Returns: {
+          assignment_id: string
+          company_id: string
+          created_at: string
+          damage: string
+          id: string
+          lights: string
+          note: string
+          reported_by: string
+          resolution: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          safety_critical: boolean
+          status: string
+          tires: string
+          vehicle_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "vehicle_checks"
           isOneToOne: true
           isSetofReturn: false
         }
