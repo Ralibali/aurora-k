@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { daysUntil, expiryStatus } from '@/lib/compliance';
+import { daysUntil, expiryStatus, validateDriverDocumentFile } from '@/lib/compliance';
 
 function dateOffset(days: number) {
   const d = new Date();
@@ -9,6 +9,17 @@ function dateOffset(days: number) {
   const day = String(d.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
+
+describe('file validation', () => {
+  it('accepts supported documents smaller than 10 MB', () => {
+    expect(validateDriverDocumentFile({ type: 'application/pdf', size: 1024 })).toBe('pdf');
+    expect(validateDriverDocumentFile({ type: 'image/jpeg', size: 1024 })).toBe('jpg');
+  });
+  it('rejects oversized or unsafe document types', () => {
+    expect(() => validateDriverDocumentFile({ type: 'text/html', size: 200 })).toThrow('Endast PDF');
+    expect(() => validateDriverDocumentFile({ type: 'application/pdf', size: 11 * 1024 * 1024 })).toThrow('10 MB');
+  });
+});
 
 describe('expiryStatus', () => {
   it('returnerar none utan datum', () => {

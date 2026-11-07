@@ -6,12 +6,13 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useData';
-import { User, Lock, Mail, Shield, CircleDot } from 'lucide-react';
+import { User, Lock, Mail, Shield, CircleDot, FileText, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useEffectiveDriverSettings } from '@/hooks/useDriverSettings';
+import { useDriverDocuments, openDriverDocumentAttachment, DRIVER_DOC_TYPES } from '@/hooks/useCompliance';
 
 export default function DriverProfile() {
   const navigate = useNavigate();
@@ -22,6 +23,13 @@ export default function DriverProfile() {
   const [changingPw, setChangingPw] = useState(false);
   const [togglingAvailability, setTogglingAvailability] = useState(false);
   const { data: driverSettings } = useEffectiveDriverSettings(user?.id);
+  const { data: driverDocuments, isLoading: documentsLoading, error: documentsError } = useDriverDocuments();
+  const ownDocuments = (driverDocuments ?? []).filter(document => document.driver_id === user?.id);
+
+  const viewDriverDocument = async (path: string) => {
+    try { await openDriverDocumentAttachment(path); }
+    catch (error) { toast.error(error instanceof Error ? error.message : 'Kunde inte öppna bilagan'); }
+  };
   const showAvailability = driverSettings?.show_availability_toggle ?? true;
 
   const isAvailable = profile?.is_available ?? true;
@@ -100,6 +108,47 @@ export default function DriverProfile() {
             </CardContent>
           </Card>
         )}
+
+        {/* My compliance documents (tenant- and user-restricted by RLS) */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <FileText className="h-4 w-4 text-muted-foreground" /> Mina dokument
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-xs text-muted-foreground">
+              Dokument och utgångsdatum som företaget har registrerat. Internt granskad betyder inte registerverifierad.
+            </p>
+            {documentsLoading ? <Skeleton className="h-12 w-full" /> : documentsError ? (
+              <p className="text-sm text-destructive">Kunde inte läsa dina dokument.</p>
+            ) : ownDocuments.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Inga dokument är registrerade för dig ännu.</p>
+            ) : ownDocuments.map(document => (
+              <div key={document.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border p-3">
+                <div>
+                  <p className="text-sm font-medium">
+                    {DRIVER_DOC_TYPES.find(item => item.value === document.doc_type)?.label ?? document.doc_type}
+                    {document.label ? ' – ' + document.label : ''}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {document.expires_at ? 'Registrerat utgångsdatum: ' + document.expires_at : 'Inget utgångsdatum'}
+                    {' · '}
+                    {document.storage_path ? (
+                      document.review_status === 'approved' ? 'Internt granskad' :
+                      document.review_status === 'rejected' ? 'Avvisad' : 'Inväntar granskning'
+                    ) : 'Ingen bilaga'}
+                  </p>
+                </div>
+                {document.storage_path && (
+                  <Button variant="outline" size="sm" onClick={() => void viewDriverDocument(document.storage_path!)}>
+                    <ExternalLink className="mr-1 h-3.5 w-3.5" /> Visa
+                  </Button>
+                )}
+              </div>
+            ))}
+          </CardContent>
+        </Card>
 
         {/* Change password */}
         <Card>
