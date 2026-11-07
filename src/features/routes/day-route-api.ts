@@ -49,3 +49,33 @@ export async function approveDayRoutePlan(planId: string) {
   if (error) throw new Error(error.message);
   return data;
 }
+
+
+export type RoutePlanHistoryItem = {
+  id: string;
+  plan_date: string;
+  optimizer_provider: string;
+  distance_before_m: number | null;
+  distance_after_m: number | null;
+  duration_before_s: number | null;
+  duration_after_s: number | null;
+  warning: string | null;
+  status: string;
+  created_at: string;
+  approved_at: string | null;
+};
+
+export async function listRecentRoutePlans(
+  limit = 30,
+): Promise<RoutePlanHistoryItem[]> {
+  const safeLimit = Math.max(1, Math.min(100, Math.trunc(limit)));
+  const { data, error } = await supabase
+    .from("route_plans")
+    .select(
+      "id,plan_date,optimizer_provider,distance_before_m,distance_after_m,duration_before_s,duration_after_s,warning,status,created_at,approved_at",
+    )
+    .order("created_at", { ascending: false })
+    .limit(safeLimit);
+  if (error) throw new Error(error.message);
+  return (data ?? []) as RoutePlanHistoryItem[];
+}
