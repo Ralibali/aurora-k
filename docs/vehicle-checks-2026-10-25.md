@@ -33,3 +33,20 @@ Migrationsverktyget regenererade automatiskt den hanterade typfilen. Den har int
 ## Deploylista
 Edge Functions: inga.
 Migrationer: `drizzle/migrations/0000_vehicle_pre_drive_checks.sql`, `drizzle/migrations/0001_vehicle_checks_explicit_privileges.sql` (redan tillämpade i Cloud).
+
+## Isolerad uppföljning 21 november 2026
+
+`VehicleCheckFlow.test.tsx` går nu genom förarens rapportbekräftelse, adminens
+åtgärdsbekräftelse, statusfiltret för avslutade avvikelser och förarens återvisade
+historik. Båda verkliga UI-komponenterna och deras query/mutation-hooks används
+med en lokal databasfixture. Originalobservationen bevaras och inga andra RPC:er
+anropas. Testet passerar lokalt. PostgreSQL-testet kontrollerar separat behörigheter,
+oföränderlighet och uppdragstider; UI-fixturen utgör inte bevis för produktions-RLS.
+
+Låsfilen har återskapats med npm från oförändrat package.json. Det isolerade
+CI-jobbet på aktuell main med den låsfilen passerade `npm ci` och hela
+`npm run validate` (393 tester före det nya flödestestet). Ordinarie PR-CI ska
+även passera på slutlig commit före publicering. Ingen riktig förarrapport har
+skapats i produktion. Lovables databasläsning gav ett åtkomstfel vid denna
+uppföljning; de daterade uppgifterna om tillämpade migrationer ovan har därför
+inte verifierats på nytt och inga migrationer har spelats om.

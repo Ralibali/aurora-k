@@ -26,6 +26,7 @@ export default function EditorialBlogPost() {
   const article = articles.find(post => post.slug === slug);
   if (!article) return <NotFound />;
   return <BlogLayout {...article}>
+    {article.editorial.aiAssisted && <p className="text-sm text-muted-foreground mb-4">AI-assisterad originalguide</p>}
     <p className="text-lg leading-8 mb-8"><InlineLinks text={article.intro} /></p>
     {article.sections.map(section => <section className="mt-10" key={section.heading}>
       <h2 className="text-2xl font-semibold mb-4">{section.heading}</h2>
