@@ -1,0 +1,23 @@
+name: Editorial lockfile repair probe
+on:
+  push:
+    branches: [codex/editorial-lock-probe-20261121]
+permissions:
+  contents: read
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Generate npm lockfile from unchanged package manifest
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Record generated lockfile patch
+        run: |
+          git diff --exit-code -- package.json
+          node -e "const cp=require('node:child_process'); const patch=cp.execFileSync('git',['diff','--','package-lock.json']); console.log('EDITORIAL_LOCK_PATCH_BEGIN'); console.log(patch.toString('base64')); console.log('EDITORIAL_LOCK_PATCH_END')"
+      - run: npm ci
+      - run: npm run validate
