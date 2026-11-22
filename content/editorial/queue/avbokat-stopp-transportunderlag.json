@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "status": "draft",
+  "writtenAt": "2026-11-21T12:57:00Z",
+  "repository": "Ralibali/aurora-k",
+  "publicationGate": "Kontrollera föregående artikel, aktuell main, inventering, primärkällor och produktväg. Publicera högst ett original per två kalenderdagar i Europe/Stockholm. Utkastet får inte importeras till den publika samlingen före publicering.",
+  "sourceReview": {
+    "status": "requires_fresh_review_before_publication",
+    "distinctIntent": "Dokumentera exakt vilket transportstopp en avbokning avser och vilka följdfrågor som återstår, utan att anta avtalsmässig rätt till avbokning."
+  },
+  "article": {
+    "slug": "avbokat-stopp-transportunderlag",
+    "title": "När ett transportstopp avbokas: skriv vad beskedet omfattar",
+    "seoTitle": "Avbokat transportstopp: tydligt underlag",
+    "metaDescription": "Knyt ett avbokningsbesked till rätt stopp och skilj bekräftade ändringar från öppna frågor. En praktisk mall för transportunderlaget.",
+    "excerpt": "Gör det tydligt vilket stopp som berörs och vilka uppgifter som behöver stämmas av efter beskedet.",
+    "readTime": "4 min",
+    "intro": "Beskedet ”ta bort leveransen” säger inte alltid vilket stopp som avses eller vad som händer med resten av uppdraget. Börja med att knyta beskedet till en tydlig referens. Den här arbetsmallen är skriven med AI-stöd av ChatGPT och handlar om dokumentation, inte om avbokningsvillkor eller ersättning.",
+    "sections": [
+      {
+        "heading": "Skilj önskemål från bekräftad ändring",
+        "contentMarkdown": "Anteckna vem som skickade beskedet, när det kom och vilken uppdragsreferens som angavs. Skriv om det är ett önskemål som behöver godkännas eller en ändring som redan har bekräftats av ansvarig kontakt. Använd inte samma status för båda.\n\nOm referensen saknas, be om den innan beskedet kopplas till ett uppdrag. Ett mottagarnamn kan förekomma i flera leveranser samma dag. Behåll den ursprungliga formuleringen så att nästa person kan förstå vad som faktiskt efterfrågades."
+      },
+      {
+        "heading": "Beskriv omfattningen med stoppets referens",
+        "contentMarkdown": "Ange vilket stopp som ska tas bort och vilka stopp som fortfarande gäller. Skriv öppet om det är oklart huruvida beskedet gäller hela leveransen, en del av godset eller en annan tidpunkt. Gör ingen egen tolkning för att få underlaget att se färdigt ut.\n\nEn fiktiv kontrollfråga är: ”Gäller beskedet stopp B i uppdragets trestoppstur, och står stopp A och C kvar enligt tidigare besked?” Anpassa frågan till det verkliga underlaget; exemplet beskriver ingen faktisk körning."
+      },
+      {
+        "heading": "Samla följdfrågorna var för sig",
+        "contentMarkdown": "Kontrollera vilka uppgifter som behöver ett nytt besked: gods som redan hämtats, kontakt med mottagaren, kvarvarande stopp och tidpunkter som kan beröras. Anteckna vem som ansvarar för varje fråga och vem som ska få svaret.\n\nAtt en leverans tas bort innebär inte automatiskt att godset ska returneras eller att ett annat stopp ska genomföras först. Sådana beslut behöver ett eget underlag. Frågor om pris, avgift eller avtalsvillkor lämnas till ansvarig person med hänvisning till det aktuella avtalet."
+      },
+      {
+        "heading": "Låt nästa person se den aktuella versionen",
+        "contentMarkdown": "Markera vilken tidigare instruktion som ersätts och spara hänvisningen till det bekräftade beskedet. Samla fortfarande öppna frågor bredvid den aktuella stoppförteckningen. Då kan en kollega se både vad som ändrats och vad som ännu inte är avgjort.\n\nLäs om [Aurora Transports tjänster](/tjanster) för nästa steg i verksamhetens transportledning. Mallen förutsätter ingen automatisk avbokningsfunktion och ändrar inga kundavtal."
+      }
+    ],
+    "tags": [
+      "transportunderlag",
+      "ändringar"
+    ],
+    "links": [
+      {
+        "href": "/tjanster",
+        "label": "Se Aurora Transports tjänster"
+      }
+    ],
+    "editorial": {
+      "createdWith": "ChatGPT",
+      "aiAssisted": true,
+      "searchIntent": "Dokumentera vilket stopp ett avbokningsbesked avser, dess bekräftelse och återstående följdfrågor.",
+      "sourceUrls": [
+        "https://auroratransport.se/tjanster"
+      ]
+    }
+  }
+}
